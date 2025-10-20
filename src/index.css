@@ -34,7 +34,15 @@
   font-weight: 400;
   font-style: normal;
 }
+.font-bebas-bold {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
 
 .clip-diagonal {
   clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%);
+}
+.clip-diagonal-righrt {
+  clip-path: polygon(60% 0, 75% 100%, 40% 100%, 0% 100%, 0 50%, 0% 0%);
 }

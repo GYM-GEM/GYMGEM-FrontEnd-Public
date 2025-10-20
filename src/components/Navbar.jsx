@@ -1,13 +1,18 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { FaGem } from "react-icons/fa";
 
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
     <nav className="bg-white text-black py-4 px-8 flex justify-between items-center w-[90%] m-auto relative">
-      <Link to="/" className="text-2xl font-bold text-blue-400">
-        Logo
+      <Link
+        to="/"
+        className="flex items-center gap-2 text-2xl font-bold text-[#FF7A00]"
+      >
+        <FaGem className="text-[#7e9c4a]" />
+        GYMGEM
       </Link>
 
       <button
@@ -56,10 +61,10 @@ function Navbar() {
           Contact
         </NavLink>
         <NavLink
-          to="/contact"
+          to="/contact2"
           onClick={() => setIsOpen(false)}
           className={({ isActive }) =>
-            isActive ? "text-blue-400 px-4 " : "hover:text-blue-300 px-4 py-2"
+            isActive ? "text-blue-400 " : "hover:text-blue-300 px-4 py-2"
           }
         >
           Contact

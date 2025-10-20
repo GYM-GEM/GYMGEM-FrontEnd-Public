@@ -19,22 +19,22 @@ function HeroSc() {
 
       <div className="absolute text-center text-white">
         <div className="flex justify-center">
-          <h1 className="text-[2rem] font-bold">
+          <h1 className="text-[48px] font-bold font-bebas-bold">
             Your Fitness Network Starts Here.
           </h1>
         </div>
         <div className="flex justify-center w-[70%] m-auto ">
-          <p className="text-[1rem] mt-[1rem] text-left ">
+          <p className="text-[1rem] mt-[1rem] text-left poppins-medium leading-[1.5rem]">
             Find certified personal trainers, book classes, and achieve your
             fitness goals — all in one place.
           </p>
         </div>
-        <div className="flex justify-center gap-4 mt-[2rem]">
-          <button className="w-[200px] h-[55px] bg-[#FF8211] text-white font-semibold rounded-[1rem]">
-            Get Started
+        <div className="flex justify-center gap-[1rem] mt-[2rem]">
+          <button className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem]">
+            Find a Trainer
           </button>
-          <button className="w-[200px] h-[55px] bg-[#FF8211] text-white font-semibold rounded-[1rem]">
-            Join Now
+          <button className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem]">
+            Join as a Trainer
           </button>
         </div>
       </div>

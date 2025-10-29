@@ -1,0 +1,111 @@
+@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Bebas+Neue:wght@400;500;600;700;800&display=swap");
+
+.poppins-regular {
+  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.poppins-medium {
+  font-family: "Poppins", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.poppins-semibold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.poppins-bold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.poppins-extrabold {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+}
+
+.font-bebas {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.font-bebas-bold {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.clip-diagonal {
+  clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%);
+}
+.clip-diagonal2 {
+  clip-path: polygon(10% 0, 100% 0, 100% 100%, 0% 100%);
+}
+.clip-diagonal-righrt {
+  clip-path: polygon(60% 0, 75% 100%, 40% 100%, 0% 100%, 0 50%, 0% 0%);
+}
+/* ...................................................................... */
+/* .offers-swiper {
+  position: relative;
+  overflow: visible;
+} */
+/* .offers-swiper .swiper-button-prev {
+  left: -40px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+}
+
+.offers-swiper .swiper-button-next {
+  right: -40px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 50px !important;
+  height: 50px !important;
+  border-radius: 50% !important;
+}
+
+.offers-swiper .swiper-pagination {
+  bottom: -25px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+} */
+/* ------------------------------------------------------------------------------ */
+.bebas-regular {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.bebas-medium {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.bebas-semibold {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.bebas-bold {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.bebas-extrabold {
+  font-family: "Bebas Neue", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+}

@@ -10,7 +10,7 @@ function Courses() {
       <Navbar />
       <section className="w-full">
         <HeroSec />
-        <div className="w-[90%] m-auto s  flex justify-center items-center gap-[11px] flex-wrap mb-[2rem]">
+        <div className="w-[80%] m-auto s  flex justify-center items-center gap-[11px] flex-wrap mb-[2rem]">
           <Button
             text="All Courses"
             color="#FFF3E6"

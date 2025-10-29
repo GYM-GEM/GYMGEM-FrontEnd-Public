@@ -1,10 +1,12 @@
 import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import useFormHandler from "./useFormHandler";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Login from "./Login";
 
+
 const SignUp = () => {
+  
   const {
     formData,
     errors,
@@ -15,7 +17,7 @@ const SignUp = () => {
     showConfirm,
     setShowConfirm,
   } = useFormHandler();
-
+const navigate = useNavigate();
   return (
     <div className="bg-white flex flex-col items-center justify-center p-2 sm:p-10 md:p-20 w-full h-auto md:h-full mx-auto">
       <div className="w-full max-w-md flex flex-col">
@@ -39,18 +41,41 @@ const SignUp = () => {
           <div>
             <div>
               <label
-                htmlFor="Full Name"
+                htmlFor="First Name"
                 className="block text-sm font-medium text-black poppins-medium"
               >
-                Full Name
+                First Name
               </label>
             </div>
             {/* ------------------------------------ */}
             <div>
               <input
-                id="Full name"
-                name="Full name"
-                type="Full name"
+                id="First name"
+                name="First name"
+                type="First name"
+                placeholder="Enter your full name"
+                // value={formData.email}
+                onChange={handleChange}
+                className="mt-[3px] block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+          </div>
+
+          <div className="mt-[1rem]">
+            <div>
+              <label
+                htmlFor="Last Name"
+                className="block text-sm font-medium text-black poppins-medium"
+              >
+                Last Name
+              </label>
+            </div>
+            {/* ------------------------------------ */}
+            <div>
+              <input
+                id="Last name"
+                name="Last name"
+                type="Last name"
                 placeholder="Enter your full name"
                 // value={formData.email}
                 onChange={handleChange}
@@ -62,10 +87,35 @@ const SignUp = () => {
 
           <div className="mt-[1rem]">
             <label
+              htmlFor="username"
+              className="block text-sm font-medium text-black poppins-medium"
+            >
+              username
+            </label>
+          </div>
+          {/* ------------------------------------ */}
+          <div>
+            <input
+              id="username"
+              name="username"
+              type="username"
+              placeholder="Enter your username"
+              value={formData.email}
+              onChange={handleChange}
+              className="mt-[3px] block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            {errors.email && (
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+            )}
+          </div>
+
+
+          <div className="mt-[1rem]">
+            <label
               htmlFor="email"
               className="block text-sm font-medium text-black poppins-medium"
             >
-              Email or username
+              Email 
             </label>
           </div>
           {/* ------------------------------------ */}
@@ -74,7 +124,7 @@ const SignUp = () => {
               id="email"
               name="email"
               type="email"
-              placeholder="Enter your email or username"
+              placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
               className="mt-[3px] block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -157,10 +207,11 @@ const SignUp = () => {
           </div>
 
           {/* ============================================================Submit ============================================================*/}
-          <div className="mt-[1rem]">
+          <div className="mt-[1rem] cursor-pointer">
             <button
               type="submit"
-              className="w-full py-2 rounded-[0.5rem] bg-[#FF8211] text-white font-bebas  transition duration-300 ease-in-out hover:bg-[#e9750f]"
+              onClick={()=> navigate("/role")}
+              className="cursor-pointer w-full py-2 rounded-[0.5rem] bg-[#FF8211] text-white font-bebas  transition duration-300 ease-in-out hover:bg-[#e9750f]"
             >
               SIGN UP
             </button>

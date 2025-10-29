@@ -9,6 +9,8 @@ import Profile from "./pages/Profile";
 import Trainers from "./pages/Trainers";
 import LogIn from "./pages/LogIn";
 import Register from "./pages/Register";
+import Selectrole from "./components/SelectRole";
+import Trainerform from "./components/trainerForm";
 function App() {
   return (
     <>
@@ -20,6 +22,8 @@ function App() {
         <Route path="/About" element={<About />} />
         <Route path="/Profile" element={<Profile />} />
         <Route path="/login" element={<LogIn />} />
+        <Route path="/role" element={<Selectrole />} />
+        <Route path="/trainerform" element={<Trainerform />} />
         <Route path="/register" element={<Register />} />
       </Routes>
     </>

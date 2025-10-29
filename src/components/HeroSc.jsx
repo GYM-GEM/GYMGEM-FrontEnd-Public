@@ -1,7 +1,9 @@
 import Hero from "../assets/hero.svg";
 import Hero1 from "../assets/hero.mp4";
+import { useNavigate } from "react-router-dom";
 
 function HeroSc() {
+  const navigate = useNavigate();
   return (
     <div className="relative w-full flex justify-center items-center">
       {/* <img src={Hero} alt="Hero image" className="w-full h-full" /> */}
@@ -30,10 +32,12 @@ function HeroSc() {
           </p>
         </div>
         <div className="flex justify-center gap-[1rem] mt-[2rem]">
-          <button className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem]">
+          <button onClick={()=> navigate("/Trainers")}
+          className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem] cursor-pointer">
             Find a Trainer
           </button>
-          <button className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem]">
+          <button onClick={()=> navigate("/register")}
+          className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem] cursor-pointer">
             Join as a Trainer
           </button>
         </div>

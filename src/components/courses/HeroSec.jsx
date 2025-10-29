@@ -1,7 +1,7 @@
 import ".././../index.css";
 function HeroSec() {
   return (
-    <section className="bg-white py-4 px-8  justify-between items-center w-[90%] m-auto mt[40px] mb-[60px] ">
+    <section className="bg-white py-4 px-8  justify-between items-center w-[80%] m-auto mt[40px] mb-[60px] ">
       <div className="">
         <h1 className="text-[#FF8211] text-[4rem] bebas-medium">
           FIND YOUR PERFECT FITNESS COURSE

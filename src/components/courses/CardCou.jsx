@@ -3,9 +3,9 @@ import CoursesData from "../../js/CardCouData";
 
 function CardCou() {
   return (
-    <section className="flex  w-[90%] mx-auto justify-center gap-[1rem] flex-wrap pb-[3.75rem]">
+    <section className="flex  w-[80%] mx-auto justify-center gap-[1rem] flex-wrap pb-[3.75rem]">
       {CoursesData.map((item) => (
-        <div className="rounded-lg bg-white shadow-md overflow-hidden dark:bg-white w-[30%] mt[1rem]">
+        <div className="rounded-[1rem] bg-white shadow-md overflow-hidden dark:bg-white w-[30%] mt[1rem]">
           <div className="p-[0.5rem]">
             <div className="relative overflow-hidden">
               <img

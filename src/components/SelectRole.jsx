@@ -1,7 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDumbbell } from "@fortawesome/free-solid-svg-icons";
-import trainer from '../assets/trainer.png'
+import trainer from '../assets/1trainer.png'
 import trainer1 from '../assets/trainer1.png'
 import weight from '../assets/weight.png'
 import store from '../assets/store.png'

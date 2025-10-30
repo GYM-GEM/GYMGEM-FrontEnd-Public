@@ -1,4 +1,4 @@
-import form from '../assets/form.svg'
+import form3 from '../assets/form3.png'
 import form2 from '../assets/form2.svg'
 import useFormHandler from "./useFormHandler";
 
@@ -19,7 +19,7 @@ const Trainerform = () => {
 
         <section
             className="w-full h-screen bg-no-repeat bg-center bg-cover flex items-center justify-center relative"
-            style={{ backgroundImage: `url(${form})` }}
+            style={{ backgroundImage: `url(${form3})` }}
         >
             <div
                 className="relative w-[45rem] h-full bg-no-repeat bg-center bg-cover rounded-lg shadow-lg p-8 flex flex-col justify-center ms-15"

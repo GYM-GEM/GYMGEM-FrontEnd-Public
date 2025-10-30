@@ -1,4 +1,4 @@
-import Button from "./courses/Button";
+import Button from "./Button";
 import CoursesData from "../js/TrainersData";
 
 function CardForTrainers() {

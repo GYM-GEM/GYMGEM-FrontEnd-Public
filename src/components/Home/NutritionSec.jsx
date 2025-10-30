@@ -1,5 +1,5 @@
 import { Check, Clock, Dumbbell } from "lucide-react";
-import Nutrition from "../assets/Nutrition & Diet Plans.png";
+import Nutrition from "../../assets/Nutrition & Diet Plans.png";
 
 function NutritionSec() {
   return (

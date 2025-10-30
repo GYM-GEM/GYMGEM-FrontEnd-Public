@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
-import Login from "./LoginForm";
 function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 

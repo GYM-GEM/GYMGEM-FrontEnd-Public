@@ -1,4 +1,4 @@
-import Button from "../components/courses/Button";
+import Button from "../components/Button";
 import CardForTrainers from "../components/CardForTrainers";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";

@@ -5,13 +5,12 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/free-mode";
-import cards from "../js/cardData";
-import "../index.css";
+import cards from "../../js/cardData";
+import "../../index.css";
 
 function WhatWeOffer() {
   return (
     <section className="w-[100%] pt-[3.75rem] pb-[3.75rem]">
-
       <div className="w-[80%] mx-auto bg-white">
         <div className="text-center">
           <h1 className="text-[2.5rem] md:text-[2.2rem] font-bold text-[#FF8211] uppercase tracking-wider font-bebas">
@@ -23,7 +22,7 @@ function WhatWeOffer() {
             Discover your perfect way to stay fit and connected.
           </p>
         </div>
-       
+
         <div className="pt-[2rem] w-full  ">
           <Swiper
             className="offers-swiper "

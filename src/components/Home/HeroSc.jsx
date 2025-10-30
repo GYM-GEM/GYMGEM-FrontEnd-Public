@@ -1,13 +1,10 @@
-import Hero from "../assets/hero.svg";
-import Hero1 from "../assets/hero.mp4";
+import Hero1 from "../../assets/hero.mp4";
 import { useNavigate } from "react-router-dom";
 
 function HeroSc() {
   const navigate = useNavigate();
   return (
     <div className="relative w-full flex justify-center items-center">
-      {/* <img src={Hero} alt="Hero image" className="w-full h-full" /> */}
-      {/* <img src={Hero} alt="Hero image" className="w-full h-full" /> */}
       <div className="w-full   bg-black ">
         <video
           autoPlay
@@ -21,7 +18,7 @@ function HeroSc() {
 
       <div className="absolute text-center text-white">
         <div className="flex justify-center">
-          <h1 className="text-[48px] font-bold font-bebas-bold">
+          <h1 className="text-[48px] font-bold font-bebas-bold animate-typing overflow-hidden whitespace-nowra ">
             Your Fitness Network Starts Here.
           </h1>
         </div>
@@ -32,12 +29,16 @@ function HeroSc() {
           </p>
         </div>
         <div className="flex justify-center gap-[1rem] mt-[2rem]">
-          <button onClick={()=> navigate("/Trainers")}
-          className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem] cursor-pointer">
+          <button
+            onClick={() => navigate("/Trainers")}
+            className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem] cursor-pointer"
+          >
             Find a Trainer
           </button>
-          <button onClick={()=> navigate("/register")}
-          className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem] cursor-pointer">
+          <button
+            onClick={() => navigate("/register")}
+            className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem] cursor-pointer"
+          >
             Join as a Trainer
           </button>
         </div>

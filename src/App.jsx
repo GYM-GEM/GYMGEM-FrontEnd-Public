@@ -8,6 +8,7 @@ import Trainers from "./pages/Trainers";
 import Register from "./pages/Register";
 import Selectrole from "./components/SelectRole";
 import Trainerform from "./components/Formes/TrainerForm";
+import Trainerform2 from "./components/Formes/TrainerForm2";
 import RootLayout from "./Layout/Rootlayout";
 import LoginPage from "./pages/LoginPage";
 
@@ -28,6 +29,7 @@ function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/role" element={<Selectrole />} />
       <Route path="/trainerform" element={<Trainerform />} />
+      <Route path="/trainerform2" element={<Trainerform2 />} />
     </Routes>
   );
 }

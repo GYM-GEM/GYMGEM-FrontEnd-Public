@@ -5,7 +5,7 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-white text-black py-4 px-8 flex justify-between items-center w-[80%] m-auto relative">
+    <nav className="bg-white text-black py-4  flex justify-between items-center w-[80%] m-auto relative">
       <Link
         to="/"
         className="flex items-center gap-2 text-2xl font-bold text-[#FF7A00]"

@@ -29,7 +29,8 @@ const Trainerform = () => {
               onSubmit={handleSubmit(onSubmit)}
               className="relative z-10 flex flex-col gap-4 w-[50%]"
             >
-              <h2 className="text-2xl font-bold text-white text-center">
+              {/* <h2 className="text-2xl font-bold text-white text-center"> */}
+              <h2 className="text-2xl font-bold text-[#FF8211] text-center">
                 Trainer Form
               </h2>
 

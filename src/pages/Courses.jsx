@@ -10,7 +10,7 @@ function Courses() {
       <Navbar />
       <section className="w-full">
         {/* <HeroSec /> */}
-        <section className="bg-white py-4 px-8  justify-between items-center w-[80%] m-auto mt[40px] mb-[60px] ">
+        <section className="bg-white py-4   justify-between items-center w-[80%] m-auto mt[40px] mb-[60px] ">
           <div className="">
             <h1 className="text-[#FF8211] text-[4rem] bebas-medium">
               FIND YOUR PERFECT FITNESS COURSE
@@ -30,6 +30,8 @@ function Courses() {
             width="15%"
             height="70px"
             to="/courses"
+            rounded="full"
+            uppercase={true}
           />
           <Button
             text="🧘 Yoga & Flexibility"
@@ -38,6 +40,7 @@ function Courses() {
             width="15%"
             height="70px"
             to="/courses"
+            rounded="full"
           />
           <Button
             text="🏃 Weight Loss & Cardio"
@@ -45,6 +48,7 @@ function Courses() {
             textColor="#000000"
             width="15%"
             height="70px"
+            rounded="full"
             to="/courses"
           />
           <Button
@@ -53,6 +57,7 @@ function Courses() {
             textColor="#fff"
             width="15%"
             height="70px"
+            rounded="full"
             to="/courses"
           />
           <Button
@@ -61,6 +66,7 @@ function Courses() {
             textColor="#000000"
             width="15%"
             height="70px"
+            rounded="full"
             to="/courses"
           />
           <Button
@@ -69,6 +75,7 @@ function Courses() {
             textColor="#fff"
             width="15%"
             height="70px"
+            rounded="full"
             to="/courses"
           />
         </div>

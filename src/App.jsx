@@ -12,6 +12,8 @@ import Trainerform2 from "./components/Formes/TrainerForm2";
 import RootLayout from "./Layout/Rootlayout";
 import LoginPage from "./pages/LoginPage";
 import RequestDetails from "./pages/DetailsTrainees";
+import AddCourse from "./components/courses/AddCourse.jsx";
+import NewLeason from "./components/courses/NewLeason.jsx";
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
         <Route path="about" element={<About />} />
         <Route path="profile" element={<Profile />} />
         <Route path="requestdetails" element={<RequestDetails />} />
+        <Route path="addcourse" element={<AddCourse />} />
+        <Route path="newleason" element={<NewLeason />} />
       </Route>
 
       {/* <Route path="/login" element={<LogIn />} /> */}

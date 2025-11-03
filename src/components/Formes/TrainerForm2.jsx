@@ -4,7 +4,7 @@ import form3 from "../../assets/form3.png";
 import form2 from "../../assets/form2.svg";
 
 const TrainerFormProfessional = () => {
-  const [step, setStep] = useState(1); 
+  const [step, setStep] = useState(1);
   const {
     register,
     handleSubmit,
@@ -14,11 +14,10 @@ const TrainerFormProfessional = () => {
   const onSubmit = (data) => {
     console.log("Trainer Form Data:", data);
     alert("Trainer form submitted successfully!");
-
   };
 
   const handleSkip = () => {
-    alert("Step skipped!"); 
+    alert("Step skipped!");
   };
 
   return (
@@ -35,7 +34,7 @@ const TrainerFormProfessional = () => {
             onSubmit={handleSubmit(onSubmit)}
             className="relative z-10 flex flex-col gap-4 w-[50%]"
           >
-            <h2 className="text-2xl font-bold text-white text-center">
+            <h2 className="text-2xl font-bold text-[#FF8211] text-center">
               Trainer Professional Info
             </h2>
 
@@ -53,7 +52,9 @@ const TrainerFormProfessional = () => {
                 className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               {errors.specialization && (
-                <p className="text-red-500 text-sm mt-1">{errors.specialization.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.specialization.message}
+                </p>
               )}
             </div>
 
@@ -73,7 +74,9 @@ const TrainerFormProfessional = () => {
                 className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               {errors.years_of_experience && (
-                <p className="text-red-500 text-sm mt-1">{errors.years_of_experience.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.years_of_experience.message}
+                </p>
               )}
             </div>
 
@@ -93,7 +96,9 @@ const TrainerFormProfessional = () => {
                 className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
               {errors.hourly_rate && (
-                <p className="text-red-500 text-sm mt-1">{errors.hourly_rate.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.hourly_rate.message}
+                </p>
               )}
             </div>
 
@@ -103,7 +108,9 @@ const TrainerFormProfessional = () => {
                 Service Location
               </label>
               <select
-                {...register("service_location", { required: "Please select a service location" })}
+                {...register("service_location", {
+                  required: "Please select a service location",
+                })}
                 className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="">Select your service location</option>
@@ -112,7 +119,9 @@ const TrainerFormProfessional = () => {
                 <option value="both">Both</option>
               </select>
               {errors.service_location && (
-                <p className="text-red-500 text-sm mt-1">{errors.service_location.message}</p>
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.service_location.message}
+                </p>
               )}
             </div>
 

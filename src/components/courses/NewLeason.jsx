@@ -16,21 +16,21 @@ const NewLeason = () => {
   return (
     <>
       <Navbar />
-      <section className="w-full flex mb-[4rem]">
+      <section className="w-full flex pt-[2rem] pb-[2rem]">
         <div className="w-[80%] m-auto   flex justify-center items-center  flex-wrap ">
-          <div className="flex flex-col justify-center max-w-md  w-[100%] pt-[2rem] pb-[3rem]">
+          <div className="flex flex-col justify-center max-w-md  w-[100%] pt-[2rem] pb-[2rem]">
             <div className="">
               <h1 className="text-[#FF8211] text-[4rem] bebas-medium">
                 New leason
               </h1>
             </div>
-            <div className="mt-[6px]">
+            <div className="">
               <p className="text-[#555555] text-[1rem] poppins-regular">
                 Fill in the details below to create a lesson for your course
               </p>
             </div>
           </div>
-          <div className="flex  justify-center w-[100%]  pb-[3rem] ">
+          <div className="flex  justify-center w-[100%] ">
             <form
               onSubmit={handleSubmit(onSubmit)}
               className="w-full max-w-md flex flex-col gap-4"
@@ -137,7 +137,7 @@ const NewLeason = () => {
               <div className="flex  w-full mt-[41px]">
                 <div className="w-full ">
                   <Link
-                    to="/requestdetails"
+                    to="/addcourse"
                     className=" text-[#FF8211] poppins-regular text-[14px] hover:text-[#FFAB63]   transition duration-300 "
                   >
                     ← Back to Course Details

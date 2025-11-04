@@ -43,9 +43,9 @@ const RequestDetails = () => {
               </div>
             </div>
 
-            <div className="border border-[#E5E7EB] rounded-2xl w-full">
-              <div className="w-[75%] m-auto items-center pt-[3.125rem]">
-                <div className="mb-[2.25rem]">
+            <div className="border border-[#E5E7EB] rounded-[1rem] w-[80%] p-[2rem]">
+              <div className="w-[80%] m-auto ">
+                <div className="pb-[2.25rem]">
                   <div>
                     <h4 className="text-[#FF8211] text-[1.5rem]  bebas-regular">
                       Apply for this request
@@ -58,7 +58,7 @@ const RequestDetails = () => {
                   </div>
                 </div>
 
-                <form className="flex flex-col gap-4 mb-[2.625rem]">
+                <form className="flex flex-col gap-4">
                   {/* <div>
                     <label className="block text-[#111] text-[1rem] mb-1 poppins-regular">
                       Your Message

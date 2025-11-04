@@ -9,7 +9,7 @@ function Courses() {
     <>
       <Navbar />
       <section className="w-full">
-        <section className="bg-white py-4   justify-between items-center w-[80%] m-auto mt[40px] mb-[60px] ">
+        <div className="bg-white py-4   justify-between items-center w-[80%] m-auto mt[40px] mb-[60px] ">
           <div className="">
             <h1 className="text-[#FF8211] text-[4rem] bebas-medium">
               FIND YOUR PERFECT FITNESS COURSE
@@ -20,7 +20,7 @@ function Courses() {
               Explore fitness courses for every level and lifestyle.
             </p>
           </div>
-        </section>
+        </div>
         <div className="w-[80%] m-auto s  flex justify-center items-center gap-[11px] flex-wrap mb-[2rem]">
           <Button
             text="All Courses"

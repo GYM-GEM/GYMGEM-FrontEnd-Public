@@ -15,9 +15,9 @@ const AddCourse = () => {
   return (
     <>
       <Navbar />
-      <section className="w-full flex items-center mt-[1.5rem] mb-[3rem]">
-        <div className="w-[80%] m-auto s  flex justify-center items-center gap-[11px] flex-wrap mb-[2rem]">
-          <div className="flex flex-col justify-start w-[100%] pt-[2rem] pb-[3rem]">
+      <section className="w-full flex items-center pt-[2rem] pb-[2rem]">
+        <div className="w-[80%] m-auto flex justify-center items-center gap-[11px] flex-wrap mb-[2rem]">
+          <div className="flex flex-col justify-center max-w-md w-[100%] pt-[2rem] pb-[3rem]">
             <div className="">
               <h1 className="text-[#FF8211] text-[4rem] bebas-medium">
                 Add course
@@ -30,14 +30,14 @@ const AddCourse = () => {
             </div>
           </div>
           {/* -------------------------------------------------------------- */}
-          <div className="flex flex-col justify-start w-[100%]  pb-[3rem] ">
+          <div className="flex flex-col justify-center items-center w-[100%]">
             <form
               onSubmit={handleSubmit(onSubmit)}
               className="w-full max-w-md flex flex-col gap-4"
             >
               <div>
-                <div>
-                  <label className="poppins-medium text-[1rem]">
+                <div className="pb-[0.25rem]">
+                  <label className="poppins-medium  text-[1rem]">
                     Course Title
                   </label>
                 </div>
@@ -56,7 +56,7 @@ const AddCourse = () => {
               </div>
 
               <div>
-                <div>
+                <div className="pb-[0.25rem]">
                   <label className="poppins-medium text-[1rem]">Category</label>
                 </div>
                 <div>
@@ -93,7 +93,7 @@ const AddCourse = () => {
               </div>
 
               <div>
-                <div>
+                <div className="pb-[0.25rem]">
                   <label className="poppins-medium text-[1rem]">Level</label>
                 </div>
                 <div>
@@ -130,7 +130,7 @@ const AddCourse = () => {
               </div>
 
               <div>
-                <div>
+                <div className="pb-[0.25rem]">
                   <label className="poppins-medium text-[1rem]">Language</label>
                 </div>
                 <div>
@@ -161,7 +161,7 @@ const AddCourse = () => {
               </div>
 
               <div>
-                <div>
+                <div className="pb-[0.25rem]">
                   <label className="poppins-medium text-[1rem]">
                     Cover URL
                   </label>
@@ -176,7 +176,7 @@ const AddCourse = () => {
               </div>
 
               <div>
-                <div>
+                <div className="pb-[0.25rem]">
                   <label className="poppins-medium text-[1rem]">
                     Preview Video URL
                   </label>
@@ -191,7 +191,7 @@ const AddCourse = () => {
               </div>
 
               <div>
-                <div>
+                <div className="pb-[0.25rem]">
                   <label className="poppins-medium text-[1rem]">
                     Description
                   </label>
@@ -208,7 +208,7 @@ const AddCourse = () => {
               </div>
 
               <div>
-                <div>
+                <div className="pb-[0.25rem]">
                   <label className="poppins-medium text-[1rem]">Status</label>
                 </div>
                 <div>
@@ -237,7 +237,7 @@ const AddCourse = () => {
                   </select>
                 </div>
               </div>
-              <div className="flex justify-start w-full mt-[41px]">
+              <div className="flex justify-start w-full pt-[1.5rem]">
                 <button
                   type="submit"
                   className="bg-[#FF8211] text-white text-[18px] items-center h-[32px] w-[121px] rounded-full  shadow-md transition duration-150 ease-in-out hover:opacity-80 focus:opacity-90 active:opacity-100 bebas-regular"

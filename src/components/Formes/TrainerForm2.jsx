@@ -30,17 +30,21 @@ const TrainerFormProfessional = () => {
         style={{ backgroundImage: `url(${form2})` }}
       >
         <div className="w-[100%] flex flex-col justify-center items-center">
+            <div className="w-full flex flex-col items-center pb-[1.5rem]">
+            <h2 className="text-[2.5rem] bebas-regular  font-bold text-[#FF8211]">
+              Trainer Professional Info
+            </h2>
+            </div>
+
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="relative z-10 flex flex-col gap-4 w-[50%]"
           >
-            <h2 className="text-2xl font-bold text-[#FF8211] text-center">
-              Trainer Professional Info
-            </h2>
+          
 
             {/* Specialization */}
             <div>
-              <label className="block text-sm font-medium text-black poppins-medium">
+              <label className="block text-md bebas-regular font-medium text-black poppins-medium">
                 Specialization
               </label>
               <input
@@ -60,7 +64,7 @@ const TrainerFormProfessional = () => {
 
             {/* Years of Experience */}
             <div>
-              <label className="block text-sm font-medium text-black poppins-medium">
+              <label className="block text-md bebas-regularfont-medium text-black poppins-medium">
                 Years of Experience
               </label>
               <input
@@ -82,7 +86,7 @@ const TrainerFormProfessional = () => {
 
             {/* Hourly Rate */}
             <div>
-              <label className="block text-sm font-medium text-black poppins-medium">
+              <label className="block text-md bebas-regular font-medium text-black poppins-medium">
                 Hourly Rate ($)
               </label>
               <input
@@ -104,7 +108,7 @@ const TrainerFormProfessional = () => {
 
             {/* Service Location */}
             <div>
-              <label className="block text-sm font-medium text-black poppins-medium">
+              <label className="block text-md bebas-regular font-medium text-black poppins-medium">
                 Service Location
               </label>
               <select

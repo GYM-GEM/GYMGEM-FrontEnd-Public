@@ -9,6 +9,8 @@ import Register from "./pages/Register";
 import Selectrole from "./components/SelectRole";
 import Trainerform from "./components/Formes/TrainerForm";
 import Trainerform2 from "./components/Formes/TrainerForm2";
+import Traineeform from "./components/Formes/TraineeForm";
+import Traineeinfo from "./components/Formes/TraineeInfoForm.jsx";
 import RootLayout from "./Layout/Rootlayout";
 import LoginPage from "./pages/LoginPage";
 import RequestDetails from "./pages/DetailsTrainees";
@@ -36,6 +38,8 @@ function App() {
       <Route path="/role" element={<Selectrole />} />
       <Route path="/trainerform" element={<Trainerform />} />
       <Route path="/trainerform2" element={<Trainerform2 />} />
+      <Route path="/traineeform" element={<Traineeform/>} />
+      <Route path="/traineeinfo" element={<Traineeinfo/>} />
     </Routes>
   );
 }

@@ -20,7 +20,9 @@ const Selectrole = () => {
           </div>
 
           <div className="flex flex-wrap justify-center items-center gap-[1rem]">
-            <div class="group bg-white rounded-[1rem] p-[2rem]  w-[30%] h-[270px]  shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer border border-transparent hover:bg-[#FF8211] hover:text-white">
+            <div 
+              onClick={() => navigate("/traineeform")}
+            class="group bg-white rounded-[1rem] p-[2rem]  w-[30%] h-[270px]  shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer border border-transparent hover:bg-[#FF8211] hover:text-white">
               <div className="pb-[0.25rem]">
                 <img src={trainer1} width="50px" height="50px" />
               </div>
@@ -34,6 +36,7 @@ const Selectrole = () => {
                 </p>
               </div>
             </div>
+
             <div
               onClick={() => navigate("/trainerform")}
               class="group bg-white rounded-[1rem] p-[2rem]  w-[30%] h-[270px] shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer border border-transparent hover:bg-[#FF8211] hover:text-white"

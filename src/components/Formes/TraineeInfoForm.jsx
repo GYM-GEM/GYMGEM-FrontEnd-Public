@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import form3 from "../../assets/form3.png";
 import form2 from "../../assets/form2.svg";
 
-const Traineeform = () => {
+const TraineeinforForm = () => {
 
     const {
         register,
@@ -30,9 +30,9 @@ const Traineeform = () => {
                             onSubmit={handleSubmit(onSubmit)}
                             className="relative z-10 flex flex-col gap-4 w-[50%]"
                         >
-                            
+                            {/* <h2 className="text-2xl font-bold text-white text-center"> */}
                             <h2 className="bebas-bold text-[2.5rem] text-[#FF8211] text-center">
-                                Trainee Form
+                                Trainer information
                             </h2>
 
                             {/* ================= Name ================= */}
@@ -178,7 +178,7 @@ const Traineeform = () => {
                                 />
                                 {errors.State && (
                                     <p className="text-red-500 text-sm mt-1">
-                                        {errors.State.message}
+                                        {errors.country.message}
                                     </p>
                                 )}
                             </div>
@@ -212,38 +212,38 @@ const Traineeform = () => {
 
                             {/* ================= Phone ================= */}
                             <div>
-                                <label
-                                    htmlFor="phone"
-                                    className="font-bebas text-md font-medium text-black poppins-medium"
-                                >
-                                    Phone Number
-                                </label>
-                                <input
-                                    id="phone"
-                                    type="tel"
-                                    placeholder="Enter your phone number"
-                                    {...register("phone", {
-                                        required: "Phone number is required",
-                                        pattern: {
-                                            value: /^[0-9]{10,15}$/,
-                                            message: "Phone must be 10–15 digits",
-                                        },
-                                    })}
-                                    className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                />
-                                {errors.phone && (
-                                    <p className="text-red-500 text-sm mt-1">
-                                        {errors.phone.message}
-                                    </p>
-                                )}
-                            </div>
+                <label
+                  htmlFor="phone"
+                  className="font-bebas text-md font-medium text-black poppins-medium"
+                >
+                  Phone Number
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  {...register("phone", {
+                    required: "Phone number is required",
+                    pattern: {
+                      value: /^[0-9]{10,15}$/,
+                      message: "Phone must be 10–15 digits",
+                    },
+                  })}
+                  className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                {errors.phone && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.phone.message}
+                  </p>
+                )}
+              </div>
 
                             {/* ================= Submit ================= */}
                             <button
                                 type="submit"
                                 className="w-full py-2 rounded-[0.5rem] bg-[#FF8211] text-white font-bebas text-[22px]  transition hover:bg-[#e9750f]"
                             >
-                                Submit
+                                Next
                             </button>
                         </form>
                     </div>
@@ -253,4 +253,4 @@ const Traineeform = () => {
     );
 };
 
-export default Traineeform;
+export default TraineeinforForm;

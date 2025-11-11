@@ -12,7 +12,7 @@ export default function FooterDash({
 
   return (
     <footer
-      className={`w-full border-t bg-[#7e9c4a] backdrop-blur supports-[backdrop-filter]:bg-base-100/40 ${className}`}
+      className={`w-full border-t bg-[#FFF8F0] backdrop-blur supports-[backdrop-filter]:bg-base-100/40 ${className}`}
       role="contentinfo"
     >
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">

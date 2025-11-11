@@ -1,5 +1,8 @@
 import NavBarDash from "./NavBarDash.jsx";
 import FooterDash from "./FooterDash.jsx";
+import { Link } from "react-router-dom";
+import CardForTrainers from "./../CardForTrainers";
+import Courses from "./../../pages/Courses";
 const DashboardTrainer = () => {
   return (
     <>
@@ -53,7 +56,7 @@ const DashboardTrainer = () => {
             {/* ------------------------------------- */}
             <section className="flex flex-col items-center pr-[3.18rem]">
               <div className="w-full ">
-                {/* --------------------الخط ----------------- */}
+                {/* --------------------line ----------------- */}
                 <div className="flex items-center ">
                   <span className="flex-1 border-t-2 border-black" />
                   <div>
@@ -63,7 +66,7 @@ const DashboardTrainer = () => {
                   </div>
                   <span className="flex-1 border-t-2 border-black" />
                 </div>
-                {/* --------------------الخط ----------------- */}
+                {/* --------------------line ----------------- */}
 
                 <div className="w-full mt-[1.5rem] mb-[3rem] ">
                   <table className="mx-auto w-[503px] h-[207px] border border-black border-collapse text-center">
@@ -191,12 +194,12 @@ const DashboardTrainer = () => {
                 >
                   <div className="">
                     <div>
-                      <a
-                        href="#"
+                      <Link
+                        to="/CoursesTrainerDash"
                         className="text-[1.75rem] bebas-regular block"
                       >
                         📚 VIEW MY COURSES
-                      </a>
+                      </Link>
                     </div>
 
                     <div className="text-[1.75rem] bebas-regular">

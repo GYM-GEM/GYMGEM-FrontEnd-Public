@@ -142,7 +142,7 @@ const NavBarDash = () => {
           </NavLink>
           {/* ------------------------------------- */}
           <NavLink
-            to="/"
+            to="/TrainerprofileDash"
             onClick={() => setIsOpen(false)}
             className={({ isActive }) =>
               isActive

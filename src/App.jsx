@@ -19,6 +19,7 @@ import NewLeason from "./components/courses/NewLeason.jsx";
 import DashboardTrainer from "./components/Dashboard/DashboardTrainer.jsx";
 import CoursesTrainerDash from "./components/Dashboard/CoursesTrainerDash.jsx";
 import ClientTrainerDash from "./components/Dashboard/ClientTrainerDash.jsx";
+import TrainerprofileDash from "./components/Dashboard/TrainerprofileDash.jsx";
 
 function App() {
   return (
@@ -36,6 +37,7 @@ function App() {
         <Route path="dashboardtrainer" element={<DashboardTrainer />} />
         <Route path="coursestrainerdash" element={<CoursesTrainerDash />} />
         <Route path="clienttrainerdash" element={<ClientTrainerDash />} />
+        <Route path="TrainerprofileDash" element={<TrainerprofileDash />} />
       </Route>
 
       {/* <Route path="/login" element={<LogIn />} /> */}

@@ -17,6 +17,9 @@ import LoginPage from "./pages/LoginPage";
 import RequestDetails from "./pages/DetailsTrainees";
 import AddCourse from "./components/courses/AddCourse.jsx";
 import NewLeason from "./components/courses/NewLeason.jsx";
+import DashboardTrainer from "./components/Dashboard/DashboardTrainer.jsx";
+import CoursesTrainerDash from "./components/Dashboard/CoursesTrainerDash.jsx";
+import ClientTrainerDash from "./components/Dashboard/ClientTrainerDash.jsx";
 
 function App() {
   return (
@@ -31,6 +34,10 @@ function App() {
         <Route path="requestdetails" element={<RequestDetails />} />
         <Route path="addcourse" element={<AddCourse />} />
         <Route path="newleason" element={<NewLeason />} />
+        <Route path="clienttrainerdash" element={<ClientTrainerDash />} />
+        <Route path="dashboardtrainer" element={<DashboardTrainer />} />
+        <Route path="coursestrainerdash" element={<CoursesTrainerDash />} />
+
       </Route>
 
       {/* <Route path="/login" element={<LogIn />} /> */}

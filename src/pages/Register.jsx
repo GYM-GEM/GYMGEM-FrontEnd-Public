@@ -4,6 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import cover_img from "../assets/cover.svg";
+import axios from "axios";
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,11 +18,27 @@ const SignUpPage = () => {
     formState: { errors },
   } = useForm({ mode: "onChange" });
 
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    alert("Sign up successful!");
-    navigate("/role");
+  // const onSubmit = (data) => {
+  //   console.log("Form Data:", data);
+  //   alert("Sign up successful!");
+  //   navigate("/role");
+  // };
+
+  const localhost = "http://127.0.0.1:8000/"
+
+  const onSubmit = async (data) => {
+    try {
+      // Send POST request to backend
+      const response = await axios.post("http://127.0.0.1:8000/api/accounts/", data);
+      console.log("Response:", response.data);
+      alert("Sign up successful!");
+      navigate("/role");
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("Registration failed. Please try again.");
+    }
   };
+
 
   return (
     <div className="w-full h-screen flex flex-col md:flex-row">

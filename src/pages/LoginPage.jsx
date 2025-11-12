@@ -1,22 +1,45 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Cover_img from "../assets/fitCartoon3.png";
+import axios from "axios";
+
+function isValidEmail(email) {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+}
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({ mode: "onChange" });
+  const onSubmit = async (e) => {
+    e.preventDefault();
 
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
-    alert("Form submitted successfully!");
+    try {
+      const IsEmail = isValidEmail(email);
+      const payload = { password };
+      IsEmail ? (payload.email = email) : (payload.username = email);
+
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/auth/login",
+        payload
+      );
+
+      localStorage.setItem("access", response.data.access);
+      localStorage.setItem("refresh", response.data.refresh);
+      localStorage.setItem("user", JSON.stringify(response.data));
+
+      console.log("Response:", response.data);
+      alert("Sign in successful!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("Login failed. Please try again.");
+    }
   };
 
   return (
@@ -35,8 +58,8 @@ const LoginPage = () => {
                 Log in to continue your fitness journey
               </p>
             </div>
-            {/* ----------------------------------------------------FORM------------------------------------------------------------- */}
-            <form onSubmit={handleSubmit(onSubmit)} className="mt-10 w-full ">
+
+            <form onSubmit={onSubmit} className="mt-10 w-full ">
               {/* ================= Email ================= */}
               <div>
                 <label
@@ -47,22 +70,13 @@ const LoginPage = () => {
                 </label>
                 <input
                   id="email"
-                  type="email"
+                  type="text"
                   placeholder="Enter your email or username"
-                  {...register("email", {
-                    required: "Email is required",
-                    pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                      message: "Invalid email address such as example@ex.com",
-                    },
-                  })}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
                   className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500 poppins-light mt-[3px]"
                 />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.email.message}
-                  </p>
-                )}
               </div>
 
               {/* ================= Password ================= */}
@@ -86,18 +100,9 @@ const LoginPage = () => {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
-                  {...register("password", {
-                    required: "Password is required",
-                    minLength: {
-                      value: 8,
-                      message: "Password must be at least 8 characters",
-                    },
-                    pattern: {
-                      value: /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d).{8,}$/,
-                      message:
-                        "Must include uppercase, lowercase, and a number",
-                    },
-                  })}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                   className="poppins-light block w-full rounded-md bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
                 />
 
@@ -108,12 +113,6 @@ const LoginPage = () => {
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
-
-                {errors.password && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.password.message}
-                  </p>
-                )}
               </div>
 
               {/* ================= Sign In ================= */}

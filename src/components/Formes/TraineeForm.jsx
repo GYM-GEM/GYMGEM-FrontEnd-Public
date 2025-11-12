@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import form3 from "../../assets/form3.png";
 import form2 from "../../assets/form2.svg";
@@ -15,6 +16,45 @@ const Traineeform = () => {
         alert("Trainee form submitted successfully!");
     };
 
+
+    const [selectedCountry, setSelectedCountry] = useState("");
+
+    const countries = {
+        Egypt: ["Cairo", "Giza", "Alexandria", "Mansoura", "Aswan", "Luxor", "Tanta"],
+        SaudiArabia: ["Riyadh", "Jeddah", "Dammam", "Mecca", "Medina", "Khobar"],
+        UAE: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Fujairah"],
+        USA: [
+            "California",
+            "Texas",
+            "Florida",
+            "New York",
+            "Illinois",
+            "Washington",
+            "Ohio",
+        ],
+        Canada: ["Ontario", "Quebec", "British Columbia", "Alberta", "Manitoba"],
+        UK: ["England", "Scotland", "Wales", "Northern Ireland"],
+        France: ["Île-de-France", "Provence-Alpes-Côte d’Azur", "Normandy", "Brittany"],
+        Germany: ["Bavaria", "Berlin", "Hamburg", "Hesse", "Saxony"],
+        Italy: ["Lombardy", "Rome", "Sicily", "Veneto", "Tuscany"],
+        Spain: ["Madrid", "Barcelona", "Valencia", "Andalusia", "Galicia"],
+        India: ["Delhi", "Mumbai", "Karnataka", "Tamil Nadu", "Gujarat"],
+        China: ["Beijing", "Shanghai", "Guangdong", "Zhejiang", "Sichuan"],
+        Japan: ["Tokyo", "Osaka", "Hokkaido", "Kyoto", "Fukuoka"],
+        Australia: ["New South Wales", "Victoria", "Queensland", "Western Australia"],
+        Brazil: ["São Paulo", "Rio de Janeiro", "Bahia", "Minas Gerais"],
+        Mexico: ["Mexico City", "Jalisco", "Nuevo León", "Yucatán"],
+        SouthAfrica: ["Gauteng", "Western Cape", "KwaZulu-Natal", "Limpopo"],
+        Nigeria: ["Lagos", "Abuja", "Kano", "Rivers", "Ogun"],
+        Turkey: ["Istanbul", "Ankara", "Izmir", "Bursa", "Antalya"],
+        Indonesia: ["Jakarta", "Bali", "Surabaya", "Bandung", "Medan"],
+        Russia: ["Moscow", "Saint Petersburg", "Novosibirsk", "Kazan"],
+        Argentina: ["Buenos Aires", "Córdoba", "Santa Fe", "Mendoza"],
+        SouthKorea: ["Seoul", "Busan", "Incheon", "Daegu"],
+        Pakistan: ["Karachi", "Lahore", "Islamabad", "Rawalpindi"],
+    };
+
+
     return (
         <>
             <section
@@ -30,7 +70,7 @@ const Traineeform = () => {
                             onSubmit={handleSubmit(onSubmit)}
                             className="relative z-10 flex flex-col gap-4 w-[50%]"
                         >
-                            
+
                             <h2 className="bebas-bold text-[2.5rem] text-[#FF8211] text-center">
                                 Trainee Form
                             </h2>
@@ -146,14 +186,21 @@ const Traineeform = () => {
                                 >
                                     Country
                                 </label>
-                                <input
+                                <select
                                     id="country"
-                                    placeholder="Enter your country"
-                                    {...register("country", {
-                                        required: "Country is required",
-                                    })}
+                                    {...register("country", { required: "Country is required" })}
+                                    onChange={(e) => setSelectedCountry(e.target.value)}
                                     className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                />
+                                >
+                                    
+
+                                    {Object.keys(countries).map((country) => (
+                                        <option key={country} value={country}>
+                                            {country}
+                                        </option>
+                                    ))}
+                                </select>
+
                                 {errors.country && (
                                     <p className="text-red-500 text-sm mt-1">
                                         {errors.country.message}
@@ -163,22 +210,32 @@ const Traineeform = () => {
                             {/* ================= State ================= */}
                             <div>
                                 <label
-                                    htmlFor="State"
+                                    htmlFor="state"
                                     className="font-bebas text-md font-medium text-black poppins-medium"
                                 >
                                     State
                                 </label>
-                                <input
-                                    id="State"
-                                    placeholder="Enter your State"
-                                    {...register("State", {
-                                        required: "State is required",
-                                    })}
+                                <select
+                                    id="state"
+                                    {...register("state", { required: "State is required" })}
+                                    disabled={!selectedCountry}
                                     className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                />
-                                {errors.State && (
+                                >
+                                    <option value="">
+                                        {selectedCountry
+                                            ? "Select your state"
+                                            : "Select a country first"}
+                                    </option>
+                                    {selectedCountry &&
+                                        countries[selectedCountry].map((state) => (
+                                            <option key={state} value={state}>
+                                                {state}
+                                            </option>
+                                        ))}
+                                </select>
+                                {errors.state && (
                                     <p className="text-red-500 text-sm mt-1">
-                                        {errors.State.message}
+                                        {errors.state.message}
                                     </p>
                                 )}
                             </div>

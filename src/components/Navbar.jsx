@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
 import axios from "axios";
+
 function Navbar() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
@@ -70,161 +71,122 @@ function Navbar() {
     return () => clearInterval(interval);
   }, []);
 
+  const linkBase =
+    "rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200";
+  const resolveLinkClass = (isActive) =>
+    `${linkBase} ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"}`;
+
   return (
-    <nav className="bg-white text-black  flex justify-between items-center w-full relative">
-      <div className="w-[80%] mx-auto flex justify-between align-middle items-center p-4 ">
-        <div className="relative flex items-center">
-          <Link
-            to="/"
-            className="relative flex items-center gap-2 text-2xl font-bold text-[#FF7A00] overflow-hidden group"
-          >
-            <FaGem
-              className={`text-[#7e9c4a] transition-transform duration-500 ${showFullName ? "rotate-12 scale-110" : ""
+    <nav className="relative z-40 border-b border-border bg-background/80 text-foreground backdrop-blur supports-[backdrop-filter]:backdrop-blur">
+      <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+        <Link
+          to="/"
+          className="flex items-center gap-2 text-lg font-semibold tracking-wide text-primary transition hover:text-primary/80"
+        >
+          <FaGem
+            className={`text-secondary transition-transform duration-500 ${showFullName ? "scale-105" : "scale-100"}`}
+          />
+          <span className="relative h-6 w-24 overflow-hidden">
+            <span
+              className={`absolute inset-0 font-bebas text-2xl transition-all duration-500 ${showGG ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
                 }`}
-            />
-
-            <div className="relative w-[8rem] h-[2rem] flex items-center">
-              {/* GG */}
-              <span
-                className={`absolute left-0 top-0 transition-all duration-500 ${showGG
-                  ? "opacity-100 translate-x-0"
-                  : "opacity-0 -translate-x-3"
-                  }`}
-              >
-                GG
-              </span>
-
-              {/* GYMGEM */}
-              <span
-                className={`absolute left-0 top-0 flex`}
-              >
-                {"GYMGEM".split("").map((char, i, arr) => {
-                  const delay = showFullName
-                    ? i * 0.15
-                    : (arr.length - i - 1) * 0.15;
-
-                  return (
-                    <span
-                      key={i}
-                      style={{
-                        transitionDelay: `${delay}s`,
-                      }}
-                      className={`transition-all duration-300 ${showFullName
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-2"
-                        }`}
-                    >
-                      {char}
-                    </span>
-                  );
-                })}
-              </span>
-            </div>
-          </Link>
-        </div>
-
-
-
-
-
+            >
+              GG
+            </span>
+            <span className="absolute inset-0 flex items-center font-bebas text-2xl tracking-tight">
+              {"GYMGEM".split("").map((char, index, arr) => {
+                const delay = showFullName ? index * 0.1 : (arr.length - index - 1) * 0.1;
+                return (
+                  <span
+                    key={char + index}
+                    style={{ transitionDelay: `${delay}s` }}
+                    className={`transition-all duration-300 ${showFullName ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0"
+                      }`}
+                  >
+                    {char}
+                  </span>
+                );
+              })}
+            </span>
+          </span>
+        </Link>
 
         <button
-          className="block md:hidden text-blue-400 text-2xl"
+          type="button"
           onClick={() => setIsOpen(!isOpen)}
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-sm font-semibold text-foreground shadow-sm transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:hidden"
+          aria-expanded={isOpen}
+          aria-controls="primary-navigation"
         >
-          ☰
+          <span className="sr-only">Toggle navigation</span>
+          <span className="text-lg">{isOpen ? "×" : "☰"}</span>
         </button>
 
         <div
-          className={`flex-col md:flex-row md:flex gap-[1rem] absolute md:static bg-white md:bg-transparent left-0 w-full md:w-auto top-[70px] md:top-auto shadow-md md:shadow-none transition-all duration-300 ease-in-out ${isOpen ? "flex" : "hidden"
+          id="primary-navigation"
+          className={`absolute left-0 top-full w-full border-b border-border bg-background px-4 pb-4 pt-2 shadow-lg transition-all duration-200 md:static md:flex md:w-auto md:items-center md:gap-4 md:border-none md:bg-transparent md:p-0 md:shadow-none ${isOpen ? "flex flex-col" : "hidden md:flex"
             }`}
         >
           <NavLink
             to="/"
             onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              isActive
-                ? "text-[#ff7906] px-4 py-2"
-                : "hover:text-[#ff7906] px-4 py-2"
-            }
+            className={({ isActive }) => resolveLinkClass(isActive)}
           >
             Home
           </NavLink>
-          {/* ------------------------------------- */}
           <NavLink
             to="/Courses"
             onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              isActive
-                ? "text-[#ff7906] px-4 py-2"
-                : "hover:text-[#ff7906] px-4 py-2"
-            }
+            className={({ isActive }) => resolveLinkClass(isActive)}
           >
             Courses
           </NavLink>
-          {/* ------------------------------------- */}
-
           <NavLink
             to="/Trainers"
             onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              isActive
-                ? "text-[#ff7906] px-4 py-2"
-                : "hover:text-[#ff7906] px-4 py-2"
-            }
+            className={({ isActive }) => resolveLinkClass(isActive)}
           >
             Trainers
           </NavLink>
-          {/* ------------------------------------- */}
-          {/* ------------------------------------- */}
-
           <NavLink
             to="/Trainees"
             onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              isActive
-                ? "text-[#ff7906] px-4 py-2"
-                : "hover:text-[#ff7906] px-4 py-2"
-            }
+            className={({ isActive }) => resolveLinkClass(isActive)}
           >
             Trainees
           </NavLink>
-          {/* ------------------------------------- */}
           <NavLink
             to="/About"
             onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              isActive
-                ? "text-[#ff7906] px-4 py-2"
-                : "hover:text-[#ff7906] px-4 py-2"
-            }
+            className={({ isActive }) => resolveLinkClass(isActive)}
           >
             About
           </NavLink>
-          {/* ------------------------------------- */}
           <NavLink
             to={user ? "#" : "/login"}
+            onClick={() => setIsOpen(false)}
             className={({ isActive }) =>
-              isActive
-                ? "text-[#ff7906] px-4 py-2 flex items-center gap-2"
-                : "hover:text-[#ff7906] px-4 py-2 flex items-center gap-2"
+              `${resolveLinkClass(isActive)} flex items-center gap-2`
             }
           >
-            <FaUserCircle className="text-2xl" />
-            {user && <span className="ml-2">{user.username}</span>}
+            <FaUserCircle className="text-lg" />
+            {user && <span className="text-sm">{user.username}</span>}
           </NavLink>
 
           {user && (
             <button
-              onClick={logout}
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition"
+              onClick={(event) => {
+                setIsOpen(false);
+                logout(event);
+              }}
+              className="mt-2 inline-flex items-center justify-center rounded-lg bg-destructive px-3 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:mt-0"
             >
               Logout
             </button>
           )}
         </div>
       </div>
-    </nav >
+    </nav>
   );
 }
 

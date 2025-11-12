@@ -43,128 +43,127 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="w-full h-screen flex flex-col md:flex-row">
-      {/* ========== Left Side (Form) ========== */}
-      <div className="w-full md:w-1/2 h-full flex items-center justify-center bg-white px-6 md:px-12">
-        <div className="bg-white flex flex-col items-center justify-center p-2 sm:p-10 md:p-20 w-full h-auto md:h-full mx-auto">
-          <div className="w-full max-w-md flex flex-col">
-            <div>
-              <h3 className="font-bebas text-2xl sm:text-3xl md:text-4xl font-bold text-center md:text-left ">
-                WELCOME BACK!
-              </h3>
-            </div>
-            <div className="pt-[6px]">
-              <p className="poppins-semibold text-sm sm:text-md text-gray-500 text-center md:text-left font-poppins">
-                Log in to continue your fitness journey
-              </p>
-            </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-4 py-12 sm:px-8 lg:px-12">
+        <div className="grid overflow-hidden rounded-[24px] border border-border bg-card shadow-sm lg:min-h-[640px] lg:grid-cols-2">
+          {/* ========== Form ========== */}
+          <div className="order-2 flex flex-col justify-center px-6 py-10 sm:px-10 lg:order-1 lg:px-12">
+            <div className="mx-auto w-full max-w-sm space-y-8">
+              <header className="space-y-3 text-center lg:text-left">
+                <h1 className="font-bebas text-3xl tracking-tight sm:text-4xl">
+                  Welcome back
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Sign in to pick up your training plan where you left off.
+                </p>
+              </header>
 
-            <form onSubmit={onSubmit} className="mt-10 w-full ">
-              {/* ================= Email ================= */}
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm poppins-medium text-black"
-                >
-                  Email or username
-                </label>
-                <input
-                  id="email"
-                  type="text"
-                  placeholder="Enter your email or username"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500 poppins-light mt-[3px]"
-                />
-              </div>
+              <form onSubmit={onSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="email"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Email or username
+                  </label>
+                  <input
+                    id="email"
+                    type="text"
+                    placeholder="Enter your email or username"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    className="h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                  />
+                </div>
 
-              {/* ================= Password ================= */}
-              <div className="flex justify-between w-full mt-[1rem]">
-                <label
-                  htmlFor="password"
-                  className="text-sm font-medium text-black poppins-medium"
-                >
-                  Password
-                </label>
-                <a
-                  href="#"
-                  className="text-sm font-semibold text-[#FF8211] hover:text-indigo-300 poppins-medium"
-                >
-                  Forgot password?
-                </a>
-              </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm font-medium text-foreground">
+                    <label htmlFor="password">Password</label>
+                    <a
+                      href="#"
+                      className="text-xs font-semibold text-primary transition hover:text-primary/80"
+                    >
+                      Forgot password?
+                    </a>
+                  </div>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-3 flex items-center text-muted-foreground transition hover:text-foreground"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </div>
 
-              <div className="mt-[3px] relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="poppins-light block w-full rounded-md bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
+                <button
+                  type="submit"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  Sign in
+                </button>
+              </form>
+
+              <div className="space-y-4">
+                <p className="text-center text-sm text-muted-foreground">
+                  Don’t have an account?{" "}
+                  <Link
+                    to="/register"
+                    className="font-semibold text-primary hover:text-primary/80"
+                  >
+                    Join GymGem
+                  </Link>
+                </p>
+
+                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                  <div className="h-px flex-1 bg-border" />
+                  or
+                  <div className="h-px flex-1 bg-border" />
+                </div>
 
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2 text-gray-600"
+                  className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border bg-background/80 px-4 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  <FcGoogle className="text-xl" />
+                  Continue with Google
                 </button>
               </div>
+            </div>
+          </div>
 
-              {/* ================= Sign In ================= */}
-              <div className="mt-[1rem]">
-                <button
-                  type="submit"
-                  className="w-full py-2 rounded-[0.5rem] bg-[#FF8211] text-white font-bebas text-[18px] transition duration-300 ease-in-out hover:bg-[#e9750f]"
-                >
-                  SIGN IN
-                </button>
+          {/* ========== Visual Panel ========== */}
+          <div className="relative hidden bg-muted lg:block">
+            <img
+              src={Cover_img}
+              alt="GymGem login"
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background/20 to-transparent" />
+            <div className="relative flex h-full items-end justify-start p-10">
+              <div className="max-w-xs space-y-2 rounded-2xl bg-background/80 p-4 text-sm text-muted-foreground shadow-lg backdrop-blur">
+                <p className="font-semibold text-foreground">
+                  Stay consistent.
+                </p>
+                <p>
+                  Your sessions, nutrition, and progress are all in one calm
+                  workspace designed to keep you moving forward.
+                </p>
               </div>
-
-              <div className="text-center mt-[0.5rem]">
-                <Link to="/register">
-                  <p className="font-[500] text-[0.875rem] text-[#666666]">
-                    Don’t have an account?
-                    <span className="font-bold hover:text-[#FF8211]">
-                      [Join the GymGem]
-                    </span>
-                  </p>
-                </Link>
-              </div>
-
-              {/* ================= Divider ================= */}
-              <div className="flex items-center justify-center gap-3 pt-[1rem] pb-[1rem]">
-                <div className="h-px w-1/4 bg-gray-300"></div>
-                <span className="text-gray-500 text-sm font-medium poppins-medium">
-                  or
-                </span>
-                <div className="h-px w-1/4 bg-gray-300"></div>
-              </div>
-
-              {/* ================= Google Login ================= */}
-              <button
-                type="button"
-                className="flex items-center justify-center gap-2 w-full py-2 rounded-md bg-white poppins-medium border border-gray-300 text-black transition duration-300 ease-in-out hover:bg-gray-100"
-              >
-                <FcGoogle className="text-xl" />
-                LOG IN WITH GOOGLE
-              </button>
-            </form>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* ========== Right Side (Image) ========== */}
-      <div className="hidden md:flex md:w-1/2 h-full bg-[#FF8211] relative overflow w-0.5">
-        <img
-          src={Cover_img}
-          alt="cover"
-          className="absolute top-0 left-0 h-full object-cover w-full"
-        />
       </div>
     </div>
   );

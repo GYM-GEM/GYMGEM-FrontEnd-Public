@@ -17,10 +17,16 @@ import LoginPage from "./pages/LoginPage";
 import RequestDetails from "./pages/DetailsTrainees";
 import AddCourse from "./components/courses/AddCourse.jsx";
 import NewLeason from "./components/courses/NewLeason.jsx";
+// import DashboardTrainer from "./components/Dashboard/DashboardTrainer.jsx";
+// import CoursesTrainerDash from "./components/Dashboard/CoursesTrainerDash.jsx";
+// import ClientTrainerDash from "./components/Dashboard/ClientTrainerDash.jsx";
+// import TrainerprofileDash from "./components/Dashboard/TrainerprofileDash.jsx";
 import DashboardTrainer from "./components/Dashboard/DashboardTrainer.jsx";
 import CoursesTrainerDash from "./components/Dashboard/CoursesTrainerDash.jsx";
 import ClientTrainerDash from "./components/Dashboard/ClientTrainerDash.jsx";
 import TrainerprofileDash from "./components/Dashboard/TrainerprofileDash.jsx";
+import Dashboard from "./pages/Dashboard";
+// import TrainerDashboard from "./pages/Dashboard";
 
 function App() {
   return (
@@ -35,10 +41,13 @@ function App() {
         <Route path="requestdetails" element={<RequestDetails />} />
         <Route path="addcourse" element={<AddCourse />} />
         <Route path="newleason" element={<NewLeason />} />
-        <Route path="trainee/dashboard" element={<ClientTrainerDash />} />
-        <Route path="trainer/dashboard" element={<DashboardTrainer />} />
+        {/* <Route path="trainee/dashboard" element={<ClientTrainerDash />} /> */}
+        {/* <Route path="trainerdashboard" element={<Dashboard />} />
         <Route path="coursestrainerdash" element={<CoursesTrainerDash />} />
-
+        <Route path="clienttrainerdash" element={<ClientTrainerDash />} />
+        <Route path="trainerprofileDash" element={<TrainerprofileDash />} /> */}
+        <Route path="dashboardtrainer" element={<DashboardTrainer />} />
+        <Route path="coursestrainerdash" element={<CoursesTrainerDash />} />
         <Route path="clienttrainerdash" element={<ClientTrainerDash />} />
         <Route path="TrainerprofileDash" element={<TrainerprofileDash />} />
       </Route>

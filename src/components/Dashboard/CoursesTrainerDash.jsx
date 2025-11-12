@@ -102,7 +102,7 @@ const CoursesTrainerDash = () => {
     <>
       <NavBarDash />
       <main className="w-full bg-white mt-[5.6875rem]">
-        <div className="mx-auto w-[60%] ">
+        <div className="mx-auto w-[80%] ">
           <section>
             <div className="flex items-start justify-between">
               <div className="w-[438px] h-[40px] relative">
@@ -326,9 +326,9 @@ const CoursesTrainerDash = () => {
                       </tr>
                     </thead>
 
-                    <tbody>
+                    <tbody className="border-b">
                       {visibleRows.map((row) => (
-                        <tr key={row.id}>
+                        <tr key={row.id} className="border-b border-gray-500">
                           <td>
                             <div className="avatar">
                               <div className=" h-[110px] w-[131px]  flex items-center justify-center  ">

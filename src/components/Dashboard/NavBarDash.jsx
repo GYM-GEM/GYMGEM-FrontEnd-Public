@@ -154,7 +154,7 @@ const NavBarDash = () => {
           </NavLink>
           {/* ------------------------------------- */}
           <NavLink
-            to="trainer/dashboard"
+            to="/dashboardtrainer"
             onClick={() => setIsOpen(false)}
             end
             className={({ isActive }) =>
@@ -172,7 +172,7 @@ const NavBarDash = () => {
           </NavLink>
           {/* ------------------------------------- */}
           <NavLink
-            to="trainer/courses"
+            to="/coursestrainerdash"
             onClick={() => setIsOpen(false)}
             end
             className={({ isActive }) =>

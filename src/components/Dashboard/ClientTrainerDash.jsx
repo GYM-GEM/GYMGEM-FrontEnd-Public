@@ -106,9 +106,13 @@ const ClientTrainerDash = () => {
 
     // status filter
     if (statusFilter === "active") {
-      result = result.filter((r) => (r.status ?? "").toLowerCase() === "active");
+      result = result.filter(
+        (r) => (r.status ?? "").toLowerCase() === "active"
+      );
     } else if (statusFilter === "inactive") {
-      result = result.filter((r) => (r.status ?? "").toLowerCase() !== "active");
+      result = result.filter(
+        (r) => (r.status ?? "").toLowerCase() !== "active"
+      );
     }
 
     // sorting
@@ -133,11 +137,11 @@ const ClientTrainerDash = () => {
         <section className="w-full block">
           <div className="mx-auto w-[60%]">
             <div className="flex items-center ">
-              <span className="flex-1 border-t-2 border-black" />
-              <div className="flex ">
+              <span className="flex-1 border-t-2 border-black " />
+              <div className="flex pl-[1rem] pr-[1rem] ">
                 <h2 className="text-[3rem] bebas-regular ">OVERVIEW </h2>
               </div>
-              <span className="flex-1 border-t-2 border-black" />
+              <span className="flex-1 border-t-2 border-black " />
             </div>
 
             <div className="flex  justify-between mt-[1.5rem] ">
@@ -240,8 +244,12 @@ const ClientTrainerDash = () => {
                     >
                       <option value="name-asc">Name (A–Z)</option>
                       <option value="name-desc">Name (Z–A)</option>
-                      <option value="enrolled-desc">Enrolled (High → Low)</option>
-                      <option value="enrolled-asc">Enrolled (Low → High)</option>
+                      <option value="enrolled-desc">
+                        Enrolled (High → Low)
+                      </option>
+                      <option value="enrolled-asc">
+                        Enrolled (Low → High)
+                      </option>
                     </select>
                   </label>
                 </div>

@@ -1,32 +1,29 @@
 import { useForm } from "react-hook-form";
-import form3 from "../../assets/form3.png";
-import form2 from "../../assets/form2.svg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Trainerform = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({ mode: "onChange" });
 
- 
-
   const onSubmit = async (data) => {
-
     const user = JSON.parse(localStorage.getItem("user"));
-    const payload = { ...data ,account_id: user.account.id };
-    console.log(payload)
-    const token = user.access
+    const payload = { ...data, account_id: user.account.id };
+    console.log(payload);
+    const token = user.access;
     try {
       // Send POST request to backend
-      const response = await axios.post("http://127.0.0.1:8000/api/trainers/create", payload, 
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/trainers/create",
+        payload,
         {
-          headers: {Authorization: `Bearer ${token}`}
+          headers: { Authorization: `Bearer ${token}` },
         }
-       ) ;
+      );
       console.log("Response:", response.data);
       alert("trainer successful!");
       navigate("/trainerform2");
@@ -36,38 +33,32 @@ const Trainerform = () => {
     }
   };
 
-
   return (
-    <>
-      <section
-        className="w-full h-screen bg-no-repeat bg-center bg-cover flex items-center justify-center relative"
-        style={{ backgroundImage: `url(${form3})` }}
-      >
-        <div
-          className="relative w-[45rem] h-full bg-no-repeat bg-center bg-cover rounded-lg shadow-lg p-8 flex flex-col justify-center ms-15"
-          style={{ backgroundImage: `url(${form2})` }}
-        >
-          <div className="w-[100%] flex flex-col justify-center items-center">
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="relative z-10 flex flex-col gap-4 w-[50%]"
-            >
-              {/* <h2 className="text-2xl font-bold text-white text-center"> */}
-              <h2 className="bebas-bold text-[2.5rem] text-[#FF8211] text-center">
-                Trainer Form
-              </h2>
+    <section className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-4xl flex-col gap-10">
+        <header className="text-center">
+          <h2 className="font-bebas text-4xl tracking-tight text-foreground">
+            Trainer profile
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+            Tell us about yourself so we can tailor GymGem to your coaching
+            style.
+          </p>
+        </header>
 
-              {/* ================= Name ================= */}
-              <div>
+        <div className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-10">
+          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
                 <label
                   htmlFor="name"
-                  className=" text-[1.1rem] text-black "
+                  className="text-sm font-medium text-foreground"
                 >
                   Name
                 </label>
                 <input
                   id="name"
-                  placeholder="Enter your name"
+                  placeholder="Enter your full name"
                   {...register("name", {
                     required: "Name is required",
                     minLength: {
@@ -75,46 +66,19 @@ const Trainerform = () => {
                       message: "Name must be at least 2 characters",
                     },
                   })}
-                  className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
                 />
                 {errors.name && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-xs text-destructive">
                     {errors.name.message}
                   </p>
                 )}
               </div>
 
-              {/* ================= Age ================= */}
-              {/* <div>
-                <label
-                  htmlFor="age"
-                  className="font-bebas text-md  font-medium text-black poppins-medium"
-                >
-                  Age
-                </label>
-                <input
-                  id="age"
-                  type="number"
-                  placeholder="Enter your age"
-                  {...register("age", {
-                    required: "Age is required",
-                    min: { value: 18, message: "Minimum age is 18" },
-                    max: { value: 70, message: "Maximum age is 70" },
-                  })}
-                  className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                {errors.age && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.age.message}
-                  </p>
-                )}
-              </div> */}
-
-              {/* ================= Gender ================= */}
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="gender"
-                  className="font-bebas text-md font-medium text-black poppins-medium"
+                  className="text-sm font-medium text-foreground"
                 >
                   Gender
                 </label>
@@ -123,27 +87,27 @@ const Trainerform = () => {
                   {...register("gender", {
                     required: "Please select your gender",
                   })}
-                  className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   <option value="">Select your gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
-                  
                 </select>
                 {errors.gender && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-xs text-destructive">
                     {errors.gender.message}
                   </p>
                 )}
               </div>
+            </div>
 
-              {/* ================= Date of Birth ================= */}
-              <div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
                 <label
                   htmlFor="dob"
-                  className="font-bebas text-md font-medium text-black poppins-medium"
+                  className="text-sm font-medium text-foreground"
                 >
-                  Date of Birth
+                  Date of birth
                 </label>
                 <input
                   id="dob"
@@ -151,72 +115,21 @@ const Trainerform = () => {
                   {...register("dob", {
                     required: "Date of birth is required",
                   })}
-                  className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 />
                 {errors.dob && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-xs text-destructive">
                     {errors.dob.message}
                   </p>
                 )}
               </div>
 
-              {/* ================= Country ================= */}
-              <div>
-                <label
-                  htmlFor="country"
-                  className="font-bebas text-md font-medium text-black poppins-medium"
-                >
-                  Country
-                </label>
-                <input
-                  id="country"
-                  placeholder="Enter your country"
-                  {...register("country", {
-                    required: "Country is required",
-                  })}
-                  className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                {errors.country && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.country.message}
-                  </p>
-                )}
-              </div>
-
-              {/* ================= ZIP Code ================= */}
-              <div>
-                <label
-                  htmlFor="zip"
-                  className="font-bebas text-md font-medium text-black poppins-medium"
-                >
-                  ZIP Code
-                </label>
-                <input
-                  id="zip"
-                  placeholder="Enter your ZIP code"
-                  {...register("zip", {
-                    required: "ZIP code is required",
-                    pattern: {
-                      value: /^[0-9]{4,6}$/,
-                      message: "Invalid ZIP code format",
-                    },
-                  })}
-                  className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
-                />
-                {errors.zip && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.zip.message}
-                  </p>
-                )}
-              </div>
-
-              {/* ================= Phone ================= */}
-              <div>
+              <div className="space-y-2">
                 <label
                   htmlFor="phone"
-                  className="font-bebas text-md font-medium text-black poppins-medium"
+                  className="text-sm font-medium text-foreground"
                 >
-                  Phone Number
+                  Phone number
                 </label>
                 <input
                   id="phone"
@@ -229,27 +142,74 @@ const Trainerform = () => {
                       message: "Phone must be 10–15 digits",
                     },
                   })}
-                  className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
                 />
                 {errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">
+                  <p className="text-xs text-destructive">
                     {errors.phone.message}
                   </p>
                 )}
               </div>
+            </div>
 
-              {/* ================= Submit ================= */}
-              <button
-                type="submit"
-                className="w-full py-2 rounded-[0.5rem] bg-[#FF8211] text-white font-bebas text-[22px]  transition hover:bg-[#e9750f]"
-              >
-                Next
-              </button>
-            </form>
-          </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label
+                  htmlFor="country"
+                  className="text-sm font-medium text-foreground"
+                >
+                  Country
+                </label>
+                <input
+                  id="country"
+                  placeholder="Where are you based?"
+                  {...register("country", { required: "Country is required" })}
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                />
+                {errors.country && (
+                  <p className="text-xs text-destructive">
+                    {errors.country.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="zip"
+                  className="text-sm font-medium text-foreground"
+                >
+                  ZIP / Postal code
+                </label>
+                <input
+                  id="zip"
+                  placeholder="Enter your ZIP code"
+                  {...register("zip", {
+                    required: "ZIP code is required",
+                    pattern: {
+                      value: /^[0-9]{4,6}$/,
+                      message: "Invalid ZIP code format",
+                    },
+                  })}
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                />
+                {errors.zip && (
+                  <p className="text-xs text-destructive">
+                    {errors.zip.message}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              Next
+            </button>
+          </form>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 };
 

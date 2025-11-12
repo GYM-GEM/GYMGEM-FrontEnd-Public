@@ -1,49 +1,71 @@
 import Hero1 from "../../assets/hero.mp4";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
 
 function HeroSc() {
   const navigate = useNavigate();
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   return (
-    <div className="relative w-full flex justify-center items-center">
-      <div className="w-full   bg-black ">
+    <section
+      ref={sectionRef}
+      className="relative isolate flex min-h-[70vh] items-center justify-center overflow-hidden bg-background text-foreground"
+    >
+      <div className="absolute inset-0">
         <video
           autoPlay
           loop
           muted
-          className="w-full h-[600px] object-cover  opacity-20"
+          className="h-full w-full object-cover opacity-80"
         >
           <source src={Hero1} type="video/mp4" />
         </video>
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background/80 to-background/60" />
       </div>
 
-      <div className="absolute text-center text-white">
-        <div className="flex justify-center">
-          <h1 className="text-[48px] font-bold font-bebas-bold animate-typing overflow-hidden whitespace-nowra ">
-            Your Fitness Network Starts Here.
-          </h1>
-        </div>
-        <div className="flex justify-center w-[70%] m-auto ">
-          <p className="text-[1rem] mt-[1rem] text-left poppins-medium leading-[1.5rem]">
-            Find certified personal trainers, book classes, and achieve your
-            fitness goals — all in one place.
-          </p>
-        </div>
-        <div className="flex justify-center gap-[1rem] mt-[2rem]">
+      <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center gap-8 px-4 py-20 text-center sm:px-6">
+        <h1
+          className={`font-bebas text-4xl tracking-tight text-foreground transition-all duration-1000 ease-out sm:text-5xl lg:text-6xl ${
+            isVisible ? "translate-y-0 opacity-100" : "-translate-y-8 opacity-0"
+          }`}
+        >
+          Your fitness network starts here
+        </h1>
+        <p
+          className={`max-w-2xl text-base text-muted-foreground transition-all duration-1000 delay-200 ease-out sm:text-lg ${
+            isVisible ? "translate-y-0 opacity-100" : "-translate-y-8 opacity-0"
+          }`}
+        >
+          Find certified personal trainers, book classes, and stay accountable
+          to your goals with a calm all-in-one experience designed for trainers,
+          gyms, stores, and trainees.
+        </p>
+
+        <div
+          className={`flex flex-col items-center gap-3 transition-all duration-1000 delay-300 ease-out sm:flex-row ${
+            isVisible ? "translate-y-0 opacity-100" : "-translate-y-8 opacity-0"
+          }`}
+        >
           <button
             onClick={() => navigate("/Trainers")}
-            className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem] cursor-pointer"
+            className="inline-flex h-12 min-w-[180px] items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-300 hover:scale-105 hover:bg-accent hover:text-accent-foreground hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background group relative"
           >
-            Find a Trainer
+            Find a trainer
           </button>
           <button
             onClick={() => navigate("/register")}
-            className="font-bebas w-[200px] h-[55px] bg-[#FF8211] text-white  rounded-[1rem] text-[1.125rem] cursor-pointer"
+            className="inline-flex h-12 min-w-[180px] items-center justify-center rounded-xl border border-border bg-background/80 px-6 text-sm font-semibold text-foreground shadow-sm transition-all duration-300 hover:scale-105 hover:bg-muted hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
           >
-            Join as a Trainer
+            Join as a trainer
           </button>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
 

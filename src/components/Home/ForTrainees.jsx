@@ -1,86 +1,149 @@
 import { Check, Clock, Dumbbell } from "lucide-react";
-import traineesImg from "../../assets/trainees.png";
+import traineesImg from "../../assets/trainees.jpg";
+import { useEffect, useRef, useState } from "react";
 
 function ForTrainees() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <section className="w-full  pt-[3.75rem] pb-[3.75rem]">
-      <div className="flex flex-col lg:flex-row  w-full overflow-hidden bg-[#FFF8F0]">
-        <div className="lg:w-[75%] flex flex-col justify-center">
-          {/* -------------------------------------------------------------------- */}
-          <div className=" w-[80%] mx-auto mt-[3.75rem]">
-            <div>
-              <h3 className="text-[2.5rem] font-bold text-[#FF8211] uppercase tracking-wider font-bebas ">
-                FOR TRAINEES
-              </h3>
-            </div>
-            <div className="mt-[0.5rem] w-[100%]">
-              <p className="lg:text-[1.5rem] md:text-xl  text-[#555555] poppins-regular leading-[2rem]  ">
-                Everything you need to reach your fitness goals — with expert
-                trainers, flexible classes, and top gyms in one place.
-              </p>
-            </div>
-          </div>
-          {/* -------------------------------------------------------------------- */}
-          <div className=" mt-[3.75rem] w-[80%] mx-auto ">
-            <div>
-              <div className="flex items-start ">
-                <Check className="w-5 h-5 text-[#6AA84F] mr-3 mt-[2px] flex-shrink-0" />
-                <h4 className="text-[1rem] font-semibold text-[#333333] poppins-medium">
-                  Personalized Training Plans
-                </h4>
-              </div>
-              <div className="pt-[0.5rem]">
-                <p className="text-gray-700 text-base ml-8 poppins-regular">
-                  Work with certified trainers who tailor workouts to your
-                  goals.
-                </p>
-              </div>
-            </div>
+    <section ref={sectionRef} className="w-full bg-background py-20">
+      <div className="mx-auto flex w-full max-w-6xl flex-col overflow-hidden rounded-[32px] border border-border bg-card shadow-sm lg:flex-row">
+        <div
+          className={`flex flex-1 flex-col justify-center gap-10 px-6 py-12 transition-all duration-700 ease-out sm:px-10 lg:px-12 ${
+            isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
+          }`}
+        >
+          <header className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              For trainees
+            </p>
+            <h3 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl">
+              Everything you need to reach your fitness goals
+            </h3>
+            <p className="text-base text-muted-foreground sm:text-lg">
+              Work with experts, join flexible sessions, and discover the best
+              gyms in one calm experience tailored to your energy and pace.
+            </p>
+          </header>
 
-            <div className="pt-[1rem]">
-              <div className="flex items-start ">
-                <Clock className="w-5 h-5 text-[#4A86E8] mr-3 mt-[2px] flex-shrink-0" />
-                <h4 className="text-lg font-semibold text-[#333333] poppins-medium">
-                  Flexible Classes
-                </h4>
+          <dl className="space-y-6">
+            <div
+              className={`flex gap-4 transition-all duration-500 delay-100 ease-out ${
+                isVisible
+                  ? "translate-x-0 opacity-100"
+                  : "translate-x-4 opacity-0"
+              }`}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 hover:scale-110">
+                <Check className="h-4 w-4" />
               </div>
-              <div className="pt-[0.5rem]">
-                <p className="text-gray-700 text-base ml-8 poppins-regular">
-                  Join live or recorded sessions anytime, anywhere.
-                </p>
+              <div>
+                <dt className="text-sm font-semibold text-foreground">
+                  Personalized training plans
+                </dt>
+                <dd className="mt-1 text-sm text-muted-foreground">
+                  Work with certified trainers who tailor each session to your
+                  goals and schedule.
+                </dd>
               </div>
             </div>
+            <div
+              className={`flex gap-4 transition-all duration-500 delay-200 ease-out ${
+                isVisible
+                  ? "translate-x-0 opacity-100"
+                  : "translate-x-4 opacity-0"
+              }`}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 text-secondary transition-transform duration-300 hover:scale-110">
+                <Clock className="h-4 w-4" />
+              </div>
+              <div>
+                <dt className="text-sm font-semibold text-foreground">
+                  Flexible classes
+                </dt>
+                <dd className="mt-1 text-sm text-muted-foreground">
+                  Join live or on-demand sessions anytime, from anywhere that
+                  feels comfortable.
+                </dd>
+              </div>
+            </div>
+            <div
+              className={`flex gap-4 transition-all duration-500 delay-300 ease-out ${
+                isVisible
+                  ? "translate-x-0 opacity-100"
+                  : "translate-x-4 opacity-0"
+              }`}
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/40 text-foreground transition-transform duration-300 hover:scale-110">
+                <Dumbbell className="h-4 w-4" />
+              </div>
+              <div>
+                <dt className="text-sm font-semibold text-foreground">
+                  Access to top gyms
+                </dt>
+                <dd className="mt-1 text-sm text-muted-foreground">
+                  Explore curated gyms and studios, compare amenities, and book
+                  in just a few taps.
+                </dd>
+              </div>
+            </div>
+          </dl>
 
-            <div className="pt-[1rem]">
-              <div className="flex items-start mb-1">
-                <Dumbbell className="w-5 h-5 text-[#134F5C] mr-3 mt-[2px] flex-shrink-0" />
-                <h4 className="text-lg font-semibold text-[#333333] poppins-medium">
-                  Access to Top Gyms
-                </h4>
-              </div>
-              <div className="pt-[0.5rem]">
-                <p className="text-gray-700 text-base ml-8 poppins-regular">
-                  Discover and compare gyms near you for the best experience.
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-col justify-end w-full items-end pb-[1rem]">
+          <div
+            className={`flex justify-start transition-all duration-500 delay-400 ease-out ${
+              isVisible
+                ? "translate-x-0 opacity-100"
+                : "translate-x-4 opacity-0"
+            }`}
+          >
             <a
               href="#"
-              className="mt-12 pe-[0.5rem] text-[#FF8211] poppins-regular text-lg hover:text-[#FFAB63]   transition duration-300 "
+              className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-all duration-300 hover:gap-3 hover:text-primary/80"
             >
-              Find Your Trainer Now
-              <span className="ml-2 text-xl">→</span>
+              Find your trainer now
+              <span
+                aria-hidden
+                className="transition-transform duration-300 group-hover:translate-x-1"
+              >
+                →
+              </span>
             </a>
           </div>
         </div>
 
-        <div className="lg:w-[50%] relative">
-          <div
-            className="w-full h-full bg-cover bg-center clip-diagonal2"
-            style={{ backgroundImage: `url(${traineesImg})` }}
-          ></div>
+        <div
+          className={`relative h-80 w-full flex-1 transition-all duration-700 delay-300 ease-out lg:h-auto ${
+            isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
+          }`}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-background/20 via-background/0 to-background/40" />
+          <img
+            src={traineesImg}
+            alt="GymGem trainees"
+            className="h-full w-full object-cover"
+          />
         </div>
       </div>
     </section>

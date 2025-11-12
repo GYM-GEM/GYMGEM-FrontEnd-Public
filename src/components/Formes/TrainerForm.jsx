@@ -1,18 +1,41 @@
 import { useForm } from "react-hook-form";
 import form3 from "../../assets/form3.png";
 import form2 from "../../assets/form2.svg";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Trainerform = () => {
+  const navigate = useNavigate()
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({ mode: "onChange" });
 
-  const onSubmit = (data) => {
-    console.log("Trainer Form Data:", data);
-    alert("Trainer form submitted successfully!");
+ 
+
+  const onSubmit = async (data) => {
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const payload = { ...data ,account_id: user.account.id };
+    console.log(payload)
+    const token = user.access
+    try {
+      // Send POST request to backend
+      const response = await axios.post("http://127.0.0.1:8000/api/trainers/create", payload, 
+        {
+          headers: {Authorization: `Bearer ${token}`}
+        }
+       ) ;
+      console.log("Response:", response.data);
+      alert("trainer successful!");
+      navigate("/trainerform2");
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("failed. Please try again.");
+    }
   };
+
 
   return (
     <>
@@ -38,7 +61,7 @@ const Trainerform = () => {
               <div>
                 <label
                   htmlFor="name"
-                  className="font-bebas text-md font-medium text-black poppins-medium"
+                  className=" text-[1.1rem] text-black "
                 >
                   Name
                 </label>
@@ -62,7 +85,7 @@ const Trainerform = () => {
               </div>
 
               {/* ================= Age ================= */}
-              <div>
+              {/* <div>
                 <label
                   htmlFor="age"
                   className="font-bebas text-md  font-medium text-black poppins-medium"
@@ -85,7 +108,7 @@ const Trainerform = () => {
                     {errors.age.message}
                   </p>
                 )}
-              </div>
+              </div> */}
 
               {/* ================= Gender ================= */}
               <div>
@@ -105,7 +128,7 @@ const Trainerform = () => {
                   <option value="">Select your gender</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
-                  <option value="other">Other</option>
+                  
                 </select>
                 {errors.gender && (
                   <p className="text-red-500 text-sm mt-1">

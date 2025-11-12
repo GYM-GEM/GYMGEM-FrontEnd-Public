@@ -2,8 +2,11 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import form3 from "../../assets/form3.png";
 import form2 from "../../assets/form2.svg";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const TrainerFormProfessional = () => {
+  const navigate = useNavigate()
   const [step, setStep] = useState(1);
   const {
     register,
@@ -11,14 +14,31 @@ const TrainerFormProfessional = () => {
     formState: { errors },
   } = useForm({ mode: "onChange" });
 
-  const onSubmit = (data) => {
-    console.log("Trainer Form Data:", data);
-    alert("Trainer form submitted successfully!");
+
+  const onSubmit = async (data) => {
+
+    const user = JSON.parse(localStorage.getItem("user"));
+    const payload = { ...data, account_id: user.account.id };
+    console.log(payload)
+    const token = user.access
+    try {
+      // Send POST request to backend
+      const response = await axios.post("http://127.0.0.1:8000/api/trainers/specializations", payload,
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      console.log("Response:", response.data);
+      alert("trainer successful!");
+      navigate("/trainerform3");
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("failed. Please try again.");
+    }
   };
 
-  const handleSkip = () => {
-    alert("Step skipped!");
-  };
+
+
 
   return (
     <section
@@ -30,31 +50,36 @@ const TrainerFormProfessional = () => {
         style={{ backgroundImage: `url(${form2})` }}
       >
         <div className="w-[100%] flex flex-col justify-center items-center">
-            <div className="w-full flex flex-col items-center pb-[1.5rem]">
+          <div className="w-full flex flex-col items-center pb-[1.5rem]">
             <h2 className="text-[2.5rem] bebas-regular  font-bold text-[#FF8211]">
               Trainer Professional Info
             </h2>
-            </div>
+          </div>
 
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="relative z-10 flex flex-col gap-4 w-[50%]"
           >
-          
+
 
             {/* Specialization */}
             <div>
               <label className="block text-md bebas-regular font-medium text-black poppins-medium">
                 Specialization
               </label>
-              <input
-                placeholder="Enter your specialization"
+              <select
                 {...register("specialization", {
                   required: "Specialization is required",
-                  maxLength: { value: 100, message: "Max 100 characters" },
                 })}
                 className="block w-full rounded-[0.5rem] bg-white border border-black px-3 py-1.5 text-black focus:outline-none focus:ring-2 focus:ring-orange-500"
-              />
+              >
+                <option value="">Select your specialization</option>
+                <option value={5}>Lifting</option>
+                <option value={4}>Cardio</option>
+                <option value={3}>Yoga</option>
+                <option value={2}>Fitness</option>
+                <option value={1}>Box</option>
+              </select>
               {errors.specialization && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.specialization.message}
@@ -133,7 +158,7 @@ const TrainerFormProfessional = () => {
             <div className="flex justify-between mt-2">
               <button
                 type="button"
-                onClick={handleSkip}
+                onClick={() => navigate("/trainerform3")}
                 className="bg-gray-500 text-white py-2 px-4 rounded transition hover:bg-gray-600"
               >
                 Skip
@@ -142,7 +167,7 @@ const TrainerFormProfessional = () => {
                 type="submit"
                 className="bg-[#FF8211] text-white py-2 px-4 rounded transition hover:bg-[#e9750f]"
               >
-                Next
+                Submit and go next
               </button>
             </div>
           </form>

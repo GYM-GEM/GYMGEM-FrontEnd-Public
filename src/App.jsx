@@ -34,8 +34,8 @@ function App() {
         <Route path="requestdetails" element={<RequestDetails />} />
         <Route path="addcourse" element={<AddCourse />} />
         <Route path="newleason" element={<NewLeason />} />
-        <Route path="clienttrainerdash" element={<ClientTrainerDash />} />
-        <Route path="dashboardtrainer" element={<DashboardTrainer />} />
+        <Route path="trainee/dashboard" element={<ClientTrainerDash />} />
+        <Route path="trainer/dashboard" element={<DashboardTrainer />} />
         <Route path="coursestrainerdash" element={<CoursesTrainerDash />} />
 
       </Route>

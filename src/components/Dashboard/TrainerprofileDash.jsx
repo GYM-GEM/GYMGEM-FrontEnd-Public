@@ -9,12 +9,12 @@ const TrainerprofileDash = () => {
 
   // State management
   const [trainerData, setTrainerData] = useState({
-    name: "Ali Kamal",
-    email: "ali@gmail.com",
+    name: "Mahmoud Gado",
+    email: "mahmoudgado@gmail.com",
     location: "Cairo, Egypt",
     phone: "+20 100 1234567",
     job: "Trainer",
-    avatar: "https://via.placeholder.com/150",
+    avatar: "https://i.pravatar.cc/150?img=3",
     bio: "I'm a full stack trainer specialized in Django & React.",
     skills: ["Django", "React", "Python", "JavaScript"],
     linkedin: "linkedin.com/in/alikamal",
@@ -120,8 +120,8 @@ const TrainerprofileDash = () => {
     <>
       <NavBarDash />
 
-      <main className="w-full bg-white min-h-screen py-12">
-        <div className="mx-auto w-[80%] max-w-6xl">
+      <main className="bg-background text-foreground min-h-screen py-12">
+        <div className="max-w-6xl mx-auto px-4">
           {/* PERSONAL INFORMATION SECTION */}
           <section className="mb-12">
             <div className="flex flex-col md:flex-row gap-8">
@@ -130,14 +130,14 @@ const TrainerprofileDash = () => {
                 <img
                   src={trainerData.avatar}
                   alt={trainerData.name}
-                  className="w-32 h-32 rounded-full object-cover border-4 border-[#FF8A1A]"
+                  className="w-42 h-42 rounded-full object-cover border-4 border-primary"
                 />
               </div>
 
               {/* Personal Info */}
               <div className="flex-1">
-                <h2 className="text-blue-600 text-sm font-bold uppercase mb-4">
-                  👤 PERSONAL INFORMATION
+                <h2 className="text-primary text-sm font-bold uppercase mb-4">
+                  👤 Personal Information
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -178,7 +178,7 @@ const TrainerprofileDash = () => {
                 {/* Edit Profile Button */}
                 <button
                   onClick={() => openModal("editProfile")}
-                  className="bg-[#FF8A1A] text-white px-6 py-2 rounded-full font-bold uppercase hover:bg-[#e6760f] transition-colors"
+                  className="bg-primary text-primary-foreground px-6 py-2 rounded-full font-bold uppercase hover:opacity-95 transition"
                 >
                   ✎ Edit Profile
                 </button>
@@ -186,12 +186,12 @@ const TrainerprofileDash = () => {
             </div>
           </section>
 
-          <hr className="border-t-2 border-gray-300 my-8" />
+          <hr className="border-t border-muted my-8" />
 
           {/* PROFESSIONAL DETAILS SECTION */}
           <section className="mb-12">
-            <h2 className="text-orange-500 text-2xl font-bold uppercase mb-6 flex items-center gap-2">
-              <span>💼</span> PROFESSIONAL DETAILS
+            <h2 className="text-primary text-2xl font-bold uppercase mb-6 flex items-center gap-2">
+              <span>💼</span> Professional Details
             </h2>
 
             <div className="space-y-4">
@@ -220,43 +220,43 @@ const TrainerprofileDash = () => {
             </div>
           </section>
 
-          <hr className="border-t-2 border-gray-300 my-8" />
+          <hr className="border-t border-muted my-8" />
 
           {/* SETTINGS SECTION */}
           <section>
-            <h2 className="text-orange-500 text-2xl font-bold uppercase mb-6 flex items-center gap-2">
-              <span>⚙️</span> SETTINGS
+            <h2 className="text-primary text-2xl font-bold uppercase mb-6 flex items-center gap-2">
+              <span>⚙️</span> Settings
             </h2>
 
             <div className="space-y-4">
               {/* Change Password */}
-              <div className="flex items-center gap-3 p-3 hover:bg-gray-100 rounded cursor-pointer transition-colors">
-                <Lock className="h-5 w-5 text-gray-600" />
+              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition">
+                <Lock className="h-5 w-5 text-muted-foreground" />
                 <button
                   onClick={() => openModal("changePassword")}
-                  className="text-gray-700 font-semibold hover:text-[#FF8A1A] transition-colors"
+                  className="text-foreground font-semibold hover:text-primary transition"
                 >
                   Change Password
                 </button>
               </div>
 
               {/* Payment Info */}
-              <div className="flex items-center gap-3 p-3 hover:bg-gray-100 rounded cursor-pointer transition-colors">
-                <CreditCard className="h-5 w-5 text-gray-600" />
+              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition">
+                <CreditCard className="h-5 w-5 text-muted-foreground" />
                 <button
                   onClick={() => openModal("paymentInfo")}
-                  className="text-gray-700 font-semibold hover:text-[#FF8A1A] transition-colors"
+                  className="text-foreground font-semibold hover:text-primary transition"
                 >
                   Payment Info
                 </button>
               </div>
 
               {/* Logout */}
-              <div className="flex items-center gap-3 p-3 hover:bg-gray-100 rounded cursor-pointer transition-colors">
+              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition">
                 <LogOut className="h-5 w-5 text-red-600" />
                 <button
                   onClick={handleLogout}
-                  className="text-red-600 font-semibold hover:text-red-800 transition-colors"
+                  className="text-red-600 font-semibold hover:text-red-800 transition"
                 >
                   Logout
                 </button>

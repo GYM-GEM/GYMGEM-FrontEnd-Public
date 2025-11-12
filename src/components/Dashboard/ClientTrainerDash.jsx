@@ -133,47 +133,44 @@ const ClientTrainerDash = () => {
   return (
     <>
       <NavBarDash />
-      <main className="w-full bg-white  flex flex-col items-center justify-center">
-        <section className="w-full block">
-          <div className="mx-auto w-[60%]">
-            <div className="flex items-center ">
-              <span className="flex-1 border-t-2 border-black " />
-              <div className="flex pl-[1rem] pr-[1rem] ">
-                <h2 className="text-[3rem] bebas-regular ">OVERVIEW </h2>
+      <main className="bg-background text-foreground min-h-screen py-12">
+        <section>
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex items-center">
+              <span className="flex-1 h-px bg-muted" />
+              <div className="px-4">
+                <h2 className="font-bebas text-4xl text-center">Overview</h2>
               </div>
-              <span className="flex-1 border-t-2 border-black " />
+              <span className="flex-1 h-px bg-muted" />
             </div>
 
-            <div className="flex  justify-between mt-[1.5rem] ">
-              <div className="">
-                <h3 className="text-[18px] poppins-semibold">
-                  👨‍🎓 Total Clients: 120
-                </h3>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-surface rounded-xl p-4 text-center shadow-sm">
+                <p className="text-sm text-primary">👨‍🎓 Total Clients</p>
+                <p className="mt-2 font-bebas text-2xl">120</p>
               </div>
-              <div className="">
-                <h3 className="text-[18px] poppins-semibold">
-                  🔥 Active Clients: 85
-                </h3>
+              <div className="bg-surface rounded-xl p-4 text-center shadow-sm">
+                <p className="text-sm text-primary">🔥 Active Clients</p>
+                <p className="mt-2 font-bebas text-2xl">85</p>
               </div>
-              <div>
-                <h3 className="text-[18px] poppins-semibold">
-                  💤 Inactive: 35
-                </h3>
+              <div className="bg-surface rounded-xl p-4 text-center shadow-sm">
+                <p className="text-sm text-primary">💤 Inactive</p>
+                <p className="mt-2 font-bebas text-2xl">35</p>
               </div>
             </div>
           </div>
         </section>
         {/* -------------------------------------------------------- */}
         <section className="w-full ">
-          <div className="mx-auto w-[80%] mt-[3rem]">
+          <div className="max-w-6xl mx-auto px-4 mt-8">
             <div>
-              <div className="mt-[1.75rem] text-[#FF8A1A] bebas-regular text-[2rem] uppercase">
+              <div className="mt-2 text-primary font-bebas text-2xl uppercase">
                 <h2>Client List</h2>
               </div>
               {/* --------------------------------------------------- */}
 
-              <div className="border-b border-t border-[#808080] mt-[1rem]">
-                <div className="flex flex-wrap items-center gap-4 md:gap-8 md:justify-between mb-[1.75rem] mt-4">
+              <div className="border-b border-muted mt-4 pb-4">
+                <div className="flex flex-wrap items-center gap-4 md:gap-8 md:justify-between mb-4">
                   <div className="inline-block">
                     {isSearching ? (
                       <input
@@ -188,33 +185,33 @@ const ClientTrainerDash = () => {
                             setIsSearching(false);
                           }
                         }}
-                        placeholder="Search..."
-                        className="text-[15px] px-3 py-2 rounded-full border outline-none focus:ring-2 focus:ring-offset-1 focus:ring-[#FF8211]"
+                        placeholder="Search clients, email or phone"
+                        className="text-sm px-4 py-2 rounded-full border bg-background/60 outline-none focus:ring-2 focus:ring-primary"
                         aria-label="Search"
                       />
                     ) : (
                       <label
                         role="button"
                         tabIndex={0}
-                        className="flex items-center gap-2 text-[15px] cursor-pointer select-none"
+                        className="flex items-center gap-2 text-sm cursor-pointer select-none"
                         onClick={() => setIsSearching(true)}
                         onKeyDown={(e) =>
                           (e.key === "Enter" || e.key === " ") &&
                           setIsSearching(true)
                         }
                       >
-                        <IoMdSearch size={25} />
+                        <IoMdSearch size={20} />
                         <span>Search</span>
                       </label>
                     )}
                   </div>
                   {/* --------------------------------------------- */}
-                  <label className="flex items-center gap-2 text-[15px]">
+                  <label className="flex items-center gap-2 text-sm">
                     <span>📂 Category:</span>
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="border-l border-r border-black rounded   text-[18px] outline-none focus:border-black"
+                      className="rounded border bg-background/60 text-sm px-2 py-1 outline-none"
                     >
                       <option value="all">All</option>
                       <option value="enrolled">Enrolled</option>
@@ -222,12 +219,12 @@ const ClientTrainerDash = () => {
                     </select>
                   </label>
 
-                  <label className="flex items-center gap-2 text-[15px]">
+                  <label className="flex items-center gap-2 text-sm">
                     <span>📈 Status:</span>
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="border-l border-r border-black rounded text-[18px] outline-none focus:border-black"
+                      className="rounded border bg-background/60 text-sm px-2 py-1 outline-none"
                     >
                       <option value="all">All</option>
                       <option value="active">Active</option>
@@ -235,12 +232,12 @@ const ClientTrainerDash = () => {
                     </select>
                   </label>
 
-                  <label className="flex items-center gap-2 text-[15px]">
+                  <label className="flex items-center gap-2 text-sm">
                     <span>📅 Sort by:</span>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="border-l border-r border-black rounded text-[18px] outline-none focus:border-black"
+                      className="rounded border bg-background/60 text-sm px-2 py-1 outline-none"
                     >
                       <option value="name-asc">Name (A–Z)</option>
                       <option value="name-desc">Name (Z–A)</option>
@@ -255,29 +252,19 @@ const ClientTrainerDash = () => {
                 </div>
               </div>
               {/* ------------------------------------------------------ */}
-              <div className="w-full mt-[31px]">
+              <div className="w-full mt-6">
                 <div className="overflow-x-auto">
-                  <table className="table w-full min-w-full border border-black border-collapse ">
-                    <thead className="border-b  hover:shadow-lg bg-white h-[50px] items-center">
-                      <tr className="bebas-bold text-[1.5rem]">
-                        <th className="text-center bebas-bold text-[1.5rem] pb-[12px] pt-[9px]">
+                  <table className="w-full min-w-full bg-surface rounded-lg shadow-sm">
+                    <thead className="bg-background/40">
+                      <tr className="text-sm text-muted-foreground">
+                        <th className="text-center px-4 py-3">
                           👤 Client Name
                         </th>
-                        <th className="text-center bebas-bold text-[1.5rem] pb-[12px] pt-[9px]">
-                          📧 Email
-                        </th>
-                        <th className="text-center bebas-bold text-[1.5rem] pb-[12px] pt-[9px]">
-                          📱 Phone
-                        </th>
-                        <th className="text-center bebas-bold text-[1.5rem] pb-[12px] pt-[9px]">
-                          Enrolled Courses
-                        </th>
-                        <th className="text-center bebas-bold text-[1.5rem] pb-[12px] pt-[9px]">
-                          ⏳ Status
-                        </th>
-                        <th className="text-center bebas-bold text-[1.5rem] pb-[12px] pt-[9px]">
-                          ⚙️ Actions
-                        </th>
+                        <th className="text-center px-4 py-3">📧 Email</th>
+                        <th className="text-center px-4 py-3">📱 Phone</th>
+                        <th className="text-center px-4 py-3">Enrolled</th>
+                        <th className="text-center px-4 py-3">⏳ Status</th>
+                        <th className="text-center px-4 py-3">⚙️ Actions</th>
                       </tr>
                     </thead>
 
@@ -285,36 +272,38 @@ const ClientTrainerDash = () => {
                       {filteredRows.map((row) => (
                         <tr
                           key={row.id}
-                          className="poppins-regular text-[1.25rem] text-center border-b hover:bg-gray-100 last:border-0 hover:shadow-lg h-[100px]"
+                          className="text-sm text-center border-b last:border-b-0 hover:bg-background/50 h-[100px]"
                         >
-                          <td className=" items-center">{row.name}</td>
+                          <td className="px-4 py-4">{row.name}</td>
 
-                          <td>{row.email}</td>
+                          <td className="px-4 py-4">{row.email}</td>
 
-                          <td>{row.phone}</td>
+                          <td className="px-4 py-4">{row.phone}</td>
 
-                          <td className="text-center  ">{row.enrolled}</td>
+                          <td className="px-4 py-4">{row.enrolled}</td>
 
-                          <td className="text-center">{row.status}</td>
+                          <td className="px-4 py-4">{row.status}</td>
 
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1 me-4 btn btn-link p-0 text-green-600 hover:text-green-800 cursor-pointer"
-                              aria-label={`View ${row.name}`}
-                              onClick={() => onView(row)}
-                            >
-                              <GrFormView />
-                              View
-                            </button>
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1 btn btn-link p-0 text-red-600 hover:text-red-800 cursor-pointer"
-                              aria-label={`Delete ${row.name}`}
-                            >
-                              <IoIosTrash />
-                              Delete
-                            </button>
+                          <td className="px-4 py-4">
+                            <div className="inline-flex items-center gap-4 justify-center">
+                              <button
+                                type="button"
+                                className="inline-flex items-center gap-2 text-sm text-green-600 hover:underline"
+                                aria-label={`View ${row.name}`}
+                                onClick={() => onView(row)}
+                              >
+                                <GrFormView />
+                                View
+                              </button>
+                              <button
+                                type="button"
+                                className="inline-flex items-center gap-2 text-sm text-red-600 hover:underline"
+                                aria-label={`Delete ${row.name}`}
+                              >
+                                <IoIosTrash />
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -355,15 +344,15 @@ function DetailsModal({ open, onClose, row }) {
     <div
       ref={backdropRef}
       onClick={(e) => e.target === backdropRef.current && onClose()}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4"
       role="dialog"
       aria-modal="true"
     >
-      <div className="w-full max-w-xl  bg-white shadow-2xl ring-1 ring-black/5 overflow-hidden">
+      <div className="w-full max-w-xl bg-white rounded-lg shadow-2xl overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b">
           <h2 className="text-lg font-semibold">Client Details</h2>
           <button
-            className=" p-1 hover:bg-gray-100"
+            className="p-1 hover:bg-background/50 rounded"
             onClick={onClose}
             aria-label="Close"
           >
@@ -405,7 +394,7 @@ function DetailsModal({ open, onClose, row }) {
         <div className="px-6 pb-6">
           <button
             onClick={onClose}
-            className="w-full  bg-orange-400 text-white py-2.5 font-medium hover:bg-green-700"
+            className="w-full bg-[#A3D9A5] text-primary-foreground py-2.5 font-medium rounded-md hover:opacity-95"
           >
             Close
           </button>

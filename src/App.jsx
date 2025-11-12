@@ -17,10 +17,7 @@ import LoginPage from "./pages/LoginPage";
 import RequestDetails from "./pages/DetailsTrainees";
 import AddCourse from "./components/courses/AddCourse.jsx";
 import NewLeason from "./components/courses/NewLeason.jsx";
-// import DashboardTrainer from "./components/Dashboard/DashboardTrainer.jsx";
-// import CoursesTrainerDash from "./components/Dashboard/CoursesTrainerDash.jsx";
-// import ClientTrainerDash from "./components/Dashboard/ClientTrainerDash.jsx";
-// import TrainerprofileDash from "./components/Dashboard/TrainerprofileDash.jsx";
+
 import DashboardTrainer from "./components/Dashboard/DashboardTrainer.jsx";
 import CoursesTrainerDash from "./components/Dashboard/CoursesTrainerDash.jsx";
 import ClientTrainerDash from "./components/Dashboard/ClientTrainerDash.jsx";

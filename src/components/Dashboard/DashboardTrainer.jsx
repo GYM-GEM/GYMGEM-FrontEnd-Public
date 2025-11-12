@@ -7,219 +7,134 @@ const DashboardTrainer = () => {
   return (
     <>
       <NavBarDash />
+      <main className="bg-background text-foreground min-h-screen">
+        <div className="max-w-6xl mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main content (left 2 columns on large screens) */}
+            <div className="lg:col-span-2">
+              <section className="mb-8">
+                <h1 className="font-bebas text-4xl text-center">Dashboard</h1>
+                <p className="mt-2 text-center text-muted-foreground">
+                  Overview of your courses, students and revenue.
+                </p>
+              </section>
 
-      <main className="bg-white  w-full">
-        <div className="w-[80%] mx-auto flex ">
-          {/* ------------------------------------- */}
-          <div className="w-[75%] float-start  ">
-            <section className="flex flex-col items-center mt-[2rem] pr-[3.18rem]  ">
-              <div className="w-full ">
-                <div className="w-full">
-                  <h1 className="text-[2.625rem] bebas-regular text-center ">
-                    Stats Cards
-                  </h1>
-                </div>
-                <div className="w-full flex justify-between items-center mt-[1rem] ">
-                  <div className="w-[30%] h-[207px] border-1 hover:shadow-lg p-[2.5rem]  rounded-lg text-center">
-                    <div>
-                      <h3 className="text-[1.5rem] bebas-regular text-[#FF8211]">
-                        👨‍🎓 Total Subs
-                      </h3>
-                    </div>
-                    <div className="pt-[1.75rem]">
-                      <h3 className="text-[2.625rem] bebas-regular">250</h3>
-                    </div>
+              <section className="mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                  <div className="bg-surface rounded-xl p-6 shadow-sm text-center">
+                    <p className="text-sm text-primary">👨‍🎓 Total Subs</p>
+                    <p className="mt-4 font-bebas text-3xl">250</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Active subscribers
+                    </p>
                   </div>
-                  <div className="w-[30%] h-[207px] border-1 hover:shadow-lg p-[2.5rem]  rounded-lg text-center">
-                    <div>
-                      <h3 className="text-[1.5rem] bebas-regular text-[#FF8211]">
-                        👨‍🎓 Total Subs
-                      </h3>
-                    </div>
-                    <div className="pt-[1.75rem]">
-                      <h3 className="text-[2.625rem] bebas-regular">250</h3>
-                    </div>
+                  <div className="bg-surface rounded-xl p-6 shadow-sm text-center">
+                    <p className="text-sm text-primary">📚 Total Courses</p>
+                    <p className="mt-4 font-bebas text-3xl">8</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Published this month
+                    </p>
                   </div>
-                  <div className="w-[30%] h-[207px] border-1 hover:shadow-lg p-[2.5rem]  rounded-lg text-center">
-                    <div>
-                      <h3 className="text-[1.5rem] bebas-regular text-[#FF8211]">
-                        👨‍🎓 Total Subs
-                      </h3>
-                    </div>
-                    <div className="pt-[1.75rem]">
-                      <h3 className="text-[2.625rem] bebas-regular">250</h3>
-                    </div>
+                  <div className="bg-surface rounded-xl p-6 shadow-sm text-center">
+                    <p className="text-sm text-primary">💰 Revenue</p>
+                    <p className="mt-4 font-bebas text-3xl">$1,240</p>
+                    <p className="text-sm text-muted-foreground mt-2">
+                      This month
+                    </p>
                   </div>
                 </div>
-              </div>
-            </section>
-            {/* ------------------------------------- */}
-            <section className="flex flex-col items-center pr-[3.18rem]">
-              <div className="w-full ">
-                {/* --------------------line ----------------- */}
-                <div className="flex items-center ">
-                  <span className="flex-1 border-t-2 border-black" />
-                  <div>
-                    <h2 className="text-[2.625rem] bebas-regular ">
-                      TOP COURSES
-                    </h2>
-                  </div>
-                  <span className="flex-1 border-t-2 border-black" />
-                </div>
-                {/* --------------------line ----------------- */}
+              </section>
 
-                <div className="w-full mt-[1.5rem] mb-[3rem] ">
-                  <table className="mx-auto w-[503px] h-[207px] border border-black border-collapse text-center">
+              <section className="mb-8">
+                <div className="flex items-center gap-4">
+                  <span className="flex-1 h-px bg-muted" />
+                  <h2 className="font-bebas text-2xl">Top Courses</h2>
+                  <span className="flex-1 h-px bg-muted" />
+                </div>
+
+                <div className="mt-6 overflow-x-auto">
+                  <table className="w-full table-auto bg-surface rounded-lg shadow-sm">
                     <thead>
-                      <tr>
-                        <th className=" bebas-regular text-[1.375rem] border-r border-black last:border-r-0">
-                          COURSES TITLE
-                        </th>
-                        <th className="bebas-regular text-[1.375rem] border-r border-black last:border-r-0">
-                          CLIENT
-                        </th>
-                        <th className="bebas-regular text-[1.375rem]">
-                          REVENUE
-                        </th>
+                      <tr className="text-left border-b">
+                        <th className="px-4 py-3">Course</th>
+                        <th className="px-4 py-3">Clients</th>
+                        <th className="px-4 py-3">Revenue</th>
                       </tr>
                     </thead>
-
                     <tbody>
-                      <tr>
-                        <td className="bebas-regular text-[1.375rem] border-r border-black last:border-r-0">
-                          BOX
-                        </td>
-                        <td className="bebas-regular text-[1.375rem] border-r border-black last:border-r-0">
-                          24
-                        </td>
-                        <td className="bebas-regular text-[1.375rem]">$24</td>
+                      <tr className="border-b">
+                        <td className="px-4 py-3">BOX</td>
+                        <td className="px-4 py-3">24</td>
+                        <td className="px-4 py-3">$240</td>
+                      </tr>
+                      <tr className="border-b">
+                        <td className="px-4 py-3">HIIT</td>
+                        <td className="px-4 py-3">18</td>
+                        <td className="px-4 py-3">$180</td>
                       </tr>
                       <tr>
-                        <td className="bebas-regular text-[1.375rem] border-r border-black last:border-r-0">
-                          BOX
-                        </td>
-                        <td className="bebas-regular text-[1.375rem] border-r border-black last:border-r-0">
-                          24
-                        </td>
-                        <td className="bebas-regular text-[1.375rem]">$24</td>
-                      </tr>
-                      <tr>
-                        <td className="bebas-regular text-[1.375rem] border-r border-black last:border-r-0">
-                          BOX
-                        </td>
-                        <td className="bebas-regular text-[1.375rem] border-r border-black last:border-r-0">
-                          24
-                        </td>
-                        <td className="bebas-regular text-[1.375rem]">$24</td>
+                        <td className="px-4 py-3">Yoga Basics</td>
+                        <td className="px-4 py-3">30</td>
+                        <td className="px-4 py-3">$320</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
-              </div>
-            </section>
-            {/* ------------------------------------- */}
-            <section className="flex flex-col items-center pr-[3.18rem]">
-              <div className="w-full ">
-                <div className="flex items-center ">
-                  <span className="flex-1 border-t-2 border-black" />
-                  <div className="">
-                    <h2 className="text-[2.625rem] bebas-regular ">
-                      Recent Courses
-                    </h2>
-                  </div>
-                  <span className="flex-1 border-t-2 border-black " />
-                </div>
-                <div className="w-full mt-[3rem] mb-[3rem] ">
-                  <div className=" mb-[2rem] ">
-                    <h2 className="text-[1.375rem] bebas-bold ">
-                      📚 Recently Added
-                    </h2>
-                  </div>
-                  <div>
-                    <ul className="list-disc list-inside *:mb-[1rem] *:text-[1.375rem] *:bebas-regular">
-                      <li>Intro to HTML (Published)</li>
-                      <li>JavaScript Crash Course (Draft)</li>
-                      <li>Django Advanced (Published)</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-          {/* ------------------------------------- */}
-          <div className="w-[25%] float-end border-l-3  h-h-[full] ">
-            <aside className="pt-[7.0625rem] pl-[1.375rem] ">
-              <div className="relative max-w-md">
-                <div
-                  className="
-      relative p-[3.125rem] pt-[4.25rem]
-      border-r-3 border-b-3 border-black
-      before:content-[''] before:absolute before:top-0 before:left-[3rem] before:right-0
-      before:h-[3px] before:bg-black
-      after:content-[''] after:absolute after:left-0 after:top-[0.3rem] after:bottom-0
-      after:w-[3px] after:bg-black
-    "
-                >
-                  <div className="">
-                    <div className="mb-[6px]">
-                      <p className="text-[1.75rem] bebas-regular">
-                        NAME: ALI KAMAL
-                      </p>
-                    </div>
-                    <div className="">
-                      <p className="text-[1.75rem] bebas-regular">
-                        TOTAL COURSES: 8
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <span className="absolute -top-5 left-[0.5rem] px-1 bg-white text-[#FF8211] bebas-regular text-[1.75rem]">
-                    PROFILE
-                  </span>
-                </div>
-              </div>
-              {/* ------------------------------------- */}
+              </section>
 
-              <div className="relative max-w-3xl ">
-                <div
-                  className="
-      relative p-10 pt-16  mt-[6.8125rem]
-    border-r-3 border-b-3 border-black
-      before:content-[''] before:absolute before:top-0 before:left-[2rem] before:right-0
-      before:h-[3px] before:bg-black
-      after:content-[''] after:absolute after:left-0 after:top-[0.4rem] after:bottom-0
-      after:w-[3px] after:bg-black
-    "
-                >
-                  <div className="">
-                    <div>
-                      <Link
-                        to="/CoursesTrainerDash"
-                        className="text-[1.75rem] bebas-regular block"
-                      >
-                        📚 VIEW MY COURSES
-                      </Link>
-                    </div>
+              <section>
+                <div className="flex items-center gap-4">
+                  <span className="flex-1 h-px bg-muted" />
+                  <h2 className="font-bebas text-2xl">Recent Courses</h2>
+                  <span className="flex-1 h-px bg-muted" />
+                </div>
 
-                    <div className="text-[1.75rem] bebas-regular">
-                      <a
-                        href="#"
-                        className="text-[1.75rem] bebas-regular block"
-                      >
-                        🧾 TRANSACTIONS
-                      </a>
-                    </div>
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold">📚 Recently Added</h3>
+                  <ul className="list-disc list-inside mt-3 space-y-2 text-sm text-muted-foreground">
+                    <li>Intro to HTML (Published)</li>
+                    <li>JavaScript Crash Course (Draft)</li>
+                    <li>Django Advanced (Published)</li>
+                  </ul>
+                </div>
+              </section>
+            </div>
+
+            {/* Sidebar (right column) */}
+            <aside className="lg:col-span-1 border-l border-muted-foreground pl-6 ">
+              <div className="space-y-6">
+                <div className="bg-surface rounded-xl p-6 shadow-sm">
+                  <h4 className="font-bebas text-xl text-primary">Profile</h4>
+                  <div className="mt-4">
+                    <p className="font-medium">Name: Ali Kamal</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Total courses: 8
+                    </p>
                   </div>
+                </div>
 
-                  <span className="absolute -top-5 left-2 px-1 bg-white text-[#FF8211] bebas-regular text-[1.75rem] ">
-                    QUICK PANEL
-                  </span>
+                <div className="bg-surface rounded-xl p-6 shadow-sm">
+                  <h4 className="font-bebas text-xl text-primary">
+                    Quick Panel
+                  </h4>
+                  <div className="mt-4 flex flex-col gap-3">
+                    <Link
+                      to="/CoursesTrainerDash"
+                      className="text-sm hover:underline"
+                    >
+                      📚 View my courses
+                    </Link>
+                    <a href="#" className="text-sm hover:underline">
+                      🧾 Transactions
+                    </a>
+                    <Link to="/Profile" className="text-sm hover:underline">
+                      ⚙️ Edit profile
+                    </Link>
+                  </div>
                 </div>
               </div>
             </aside>
           </div>
-          {/* ------------------------------------- */}
         </div>
       </main>
       <FooterDash />

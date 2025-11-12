@@ -12,11 +12,11 @@ export default function FooterDash({
 
   return (
     <footer
-      className={`w-full border-t bg-[#FFF8F0] backdrop-blur supports-[backdrop-filter]:bg-base-100/40 ${className}`}
+      className={`border-t border-border bg-muted/40 text-muted-foreground ${className}`}
       role="contentinfo"
     >
-      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-base-content/70">
+      <div className="mx-auto w-full max-w-6xl px-4 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <p className="text-sm">
           © {year} {company}. All rights reserved.
         </p>
 
@@ -28,7 +28,7 @@ export default function FooterDash({
             <a
               key={l.label}
               href={l.href}
-              className="text-base-content/80 hover:text-base-content underline-offset-4 hover:underline focus:outline-none focus-visible:ring"
+              className="transition hover:text-foreground underline-offset-4 hover:underline focus:outline-none focus-visible:ring"
             >
               {l.label}
             </a>

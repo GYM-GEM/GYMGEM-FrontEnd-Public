@@ -101,26 +101,27 @@ const CoursesTrainerDash = () => {
   return (
     <>
       <NavBarDash />
-      <main className="w-full bg-white mt-[5.6875rem]">
-        <div className="mx-auto w-[80%] ">
-          <section>
-            <div className="flex items-start justify-between">
-              <div className="w-[438px] h-[40px] relative">
+      <main className="bg-background text-foreground min-h-screen pt-24">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <section className="mb-6">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="w-full sm:w-[60%] relative">
                 <input
                   type="search"
-                  placeholder="Search"
+                  placeholder="Search courses, clients or category"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full h-full rounded-full border border-black pl-10 pr-4 outline-none focus:border-[#FF8A1A] focus:border-2   transition-colors"
+                  className="w-full h-12 rounded-full border border-muted bg-background/60 px-4 pl-12 text-sm outline-none focus:ring-2 focus:ring-primary transition"
                 />
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                   🔍
                 </span>
               </div>
-              <div className="h-[40px]">
+
+              <div className="w-full sm:w-auto">
                 <Link
                   to="/addcourse"
-                  className="inline-flex items-center w-full gap-1 rounded-full bg-[#FF8A1A]  text-[1.375rem] bebas-regular px-4 py-2 text-white hover:bg-[#e6760f] transition-colors"
+                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:scale-105 transition"
                 >
                   ➕ Add New Course
                 </Link>
@@ -128,12 +129,10 @@ const CoursesTrainerDash = () => {
             </div>
           </section>
 
-          <div className="flex items-center mt-[6.125rem] mb-[1rem] gap-4">
-            <span className="flex-1 border-t-2 border-black" />
-            <div>
-              <h2 className="text-[2.625rem] bebas-regular ">Filter</h2>
-            </div>
-            <span className="flex-1 border-t-2 border-black" />
+          <div className="flex items-center my-6">
+            <span className="flex-1 h-px bg-muted" />
+            <h2 className="font-bebas text-2xl px-4">Filter</h2>
+            <span className="flex-1 h-px bg-muted" />
           </div>
           {/* <section>
             <div className="border-b border-[#808080] py-3">
@@ -299,65 +298,59 @@ const CoursesTrainerDash = () => {
 
           <section>
             <div>
-              <div className="mt-[1.75rem] text-[#FF8A1A] bebas-regular text-[2rem] uppercase">
+              <div className="mt-6 text-primary font-bebas text-2xl uppercase">
                 <h2>Courses List</h2>
               </div>
 
-              <div className="w-full mt-[31px]">
+              <div className="w-full mt-6">
                 <div className="overflow-x-auto">
-                  <table className="table w-full min-w-full ">
-                    <thead className="border-b ">
-                      <tr className="bebas-regular text-[1.375rem]">
-                        <th className="text-start bebas-regular text-[1.375rem] pb-[12px]">
-                          Thumbnail
-                        </th>
-                        <th className="text-start bebas-regular text-[1.375rem] pb-[12px]">
-                          Course Title
-                        </th>
-                        <th className="text-start bebas-regular text-[1.375rem] pb-[12px]">
-                          Client
-                        </th>
-                        <th className="text-start bebas-regular text-[1.375rem] pb-[12px]">
-                          Status
-                        </th>
-                        <th className="text-center bebas-regular text-[1.375rem] pb-[12px]">
-                          Actions
-                        </th>
+                  <table className="w-full min-w-full bg-surface rounded-lg shadow-sm">
+                    <thead className="bg-background/40">
+                      <tr className="text-sm text-muted-foreground">
+                        <th className="px-4 py-3 text-left">Thumbnail</th>
+                        <th className="px-4 py-3 text-left">Course Title</th>
+                        <th className="px-4 py-3 text-left">Client</th>
+                        <th className="px-4 py-3 text-left">Status</th>
+                        <th className="px-4 py-3 text-center">Actions</th>
                       </tr>
                     </thead>
 
-                    <tbody className="border-b">
+                    <tbody>
                       {visibleRows.map((row) => (
-                        <tr key={row.id} className="border-b border-gray-500">
-                          <td>
-                            <div className="avatar">
-                              <div className=" h-[110px] w-[131px]  flex items-center justify-center  ">
-                                <img src={row.img} alt="dd" />
-                              </div>
+                        <tr key={row.id} className="border-b last:border-b-0">
+                          <td className="px-4 py-4">
+                            <div className="h-28 w-36 rounded-md overflow-hidden bg-muted flex items-center justify-center">
+                              <img
+                                src={row.img}
+                                alt={row.title}
+                                className="h-full w-full object-cover"
+                              />
                             </div>
                           </td>
 
-                          <td>{row.title}</td>
-                          <td>{row.client}</td>
-                          <td>{row.status}</td>
+                          <td className="px-4 py-4">{row.title}</td>
+                          <td className="px-4 py-4">{row.client}</td>
+                          <td className="px-4 py-4">{row.status}</td>
 
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1 me-4 btn btn-link p-0 text-blue-600 hover:text-blue-800 cursor-pointer"
-                              aria-label={`Edit ${row.title}`}
-                            >
-                              <MdOutlineEdit />
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1 btn btn-link p-0 text-red-600 hover:text-red-800  cursor-pointer"
-                              aria-label={`Delete ${row.title}`}
-                            >
-                              <IoIosTrash />
-                              Delete
-                            </button>
+                          <td className="px-4 py-4 text-center">
+                            <div className="inline-flex items-center gap-4">
+                              <button
+                                type="button"
+                                className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                                aria-label={`Edit ${row.title}`}
+                              >
+                                <MdOutlineEdit />
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                className="inline-flex items-center gap-2 text-sm text-red-600 hover:underline"
+                                aria-label={`Delete ${row.title}`}
+                              >
+                                <IoIosTrash />
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Courses from "./pages/Courses";
 import Trainees from "./pages/Trainees";
@@ -16,13 +16,14 @@ import RootLayout from "./Layout/Rootlayout";
 import LoginPage from "./pages/LoginPage";
 import RequestDetails from "./pages/DetailsTrainees";
 import AddCourse from "./components/courses/AddCourse.jsx";
-import NewLeason from "./components/courses/NewLeason.jsx";
+import NewLeason from "./components/courses/NewLesson.jsx";
 
 import DashboardTrainer from "./components/Dashboard/DashboardTrainer.jsx";
 import CoursesTrainerDash from "./components/Dashboard/CoursesTrainerDash.jsx";
 import ClientTrainerDash from "./components/Dashboard/ClientTrainerDash.jsx";
 import TrainerprofileDash from "./components/Dashboard/TrainerprofileDash.jsx";
 import Dashboard from "./pages/Dashboard";
+import NotFound from "./components/NotFound.jsx";
 // import TrainerDashboard from "./pages/Dashboard";
 
 function App() {
@@ -37,16 +38,25 @@ function App() {
         <Route path="profile" element={<Profile />} />
         <Route path="requestdetails" element={<RequestDetails />} />
         <Route path="addcourse" element={<AddCourse />} />
-        <Route path="newleason" element={<NewLeason />} />
+        <Route path="newlesson" element={<NewLeason />} />
         {/* <Route path="trainee/dashboard" element={<ClientTrainerDash />} /> */}
         {/* <Route path="trainerdashboard" element={<Dashboard />} />
         <Route path="coursestrainerdash" element={<CoursesTrainerDash />} />
         <Route path="clienttrainerdash" element={<ClientTrainerDash />} />
         <Route path="trainerprofileDash" element={<TrainerprofileDash />} /> */}
-        <Route path="dashboardtrainer" element={<DashboardTrainer />} />
+        {/* <Route path="dashboardtrainer" element={<DashboardTrainer />} />
         <Route path="coursestrainerdash" element={<CoursesTrainerDash />} />
         <Route path="clienttrainerdash" element={<ClientTrainerDash />} />
-        <Route path="TrainerprofileDash" element={<TrainerprofileDash />} />
+        <Route path="TrainerprofileDash" element={<TrainerprofileDash />} /> */}
+        <Route path="*" element={<NotFound />} />
+      </Route>
+
+      <Route path="trainer">
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardTrainer />} />
+        <Route path="courses" element={<CoursesTrainerDash />} />
+        <Route path="clients" element={<ClientTrainerDash />} />
+        <Route path="profile" element={<TrainerprofileDash />} />
       </Route>
 
       {/* <Route path="/login" element={<LogIn />} /> */}
@@ -59,6 +69,9 @@ function App() {
       <Route path="/traineeform" element={<Traineeform />} />
       <Route path="/traineeinfo" element={<Traineeinfo />} />
     </Routes>
+
+
+
   );
 }
 

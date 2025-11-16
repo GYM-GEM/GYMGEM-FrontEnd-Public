@@ -87,10 +87,10 @@ const Selectrole = () => {
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
             Choose your role
           </p>
-          <h1 className="font-bebas text-4xl tracking-tight sm:text-5xl">
+          <h1 className="font-bebas text-4xl tracking-tight sm:text-5xl text-[#ff8211]">
             Tell us how you want to use GymGem
           </h1>
-          <p className="mx-auto max-w-3xl text-base text-muted-foreground sm:text-lg">
+          <p className="mx-auto max-w-3xl text-base text-muted-foreground  text-[#555555] sm:text-lg">
             Select the workspace that matches your goals. You can always add
             more roles later to collaborate across training, nutrition, and
             commerce.
@@ -105,8 +105,8 @@ const Selectrole = () => {
                 key={role.id}
                 type="button"
                 onClick={() => setSelectedRole(role.id)}
-                className={`group flex h-full flex-col justify-between rounded-3xl border border-border bg-card/80 p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                  isSelected ? "ring-2 ring-primary" : ""
+                className={`cursor-pointer group flex h-full flex-col justify-between rounded-3xl border border-border bg-card/80 p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-[#ff8211] hover:text-white ${
+                  isSelected ? "bg-[#ff8211] text-white" : ""
                 }`}
               >
                 <div className="space-y-4">
@@ -144,7 +144,7 @@ const Selectrole = () => {
           <button
             onClick={onSubmit}
             disabled={!selectedRole}
-            className="inline-flex h-12 min-w-[200px] items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer inline-flex h-12 min-w-[200px] items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
           >
             Confirm role
           </button>

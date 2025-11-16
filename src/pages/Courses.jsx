@@ -71,10 +71,10 @@ function Courses() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Courses
             </p>
-            <h1 className="font-bebas text-4xl tracking-tight text-foreground sm:text-5xl">
+            <h1 className="font-bebas text-4xl tracking-tight text-[#ff8211] text-foreground sm:text-5xl">
               Find your perfect fitness course
             </h1>
-            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
+            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg text-[#555555]">
               Explore curated programs for every ambition—from mindful mobility
               to high-energy conditioning—crafted by trusted GymGem coaches.
             </p>

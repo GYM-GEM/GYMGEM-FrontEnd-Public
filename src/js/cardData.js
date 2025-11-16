@@ -6,7 +6,7 @@ import card4 from "../assets/4.svg";
 const cards = [
   {
     img: card1,
-    title: "Personal Trainers",
+    title: "Trainers",
     desc: "Work one-on-one with pro trainers who create custom plans.",
   },
   {

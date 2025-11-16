@@ -52,10 +52,10 @@ function ForTrainers() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               For trainers
             </p>
-            <h3 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl">
+            <h3 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl text-[#FF8211]">
               Grow your coaching practice
             </h3>
-            <p className="text-base text-muted-foreground sm:text-lg">
+            <p className="text-base text-muted-foreground sm:text-lg text-[#555555]">
               Connect with motivated trainees, offer classes, and manage your
               bookings in a calm, focused workspace built for your brand.
             </p>
@@ -133,7 +133,7 @@ function ForTrainers() {
           >
             <a
               href="#"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition-all duration-300 hover:gap-3 hover:text-primary/80"
+              className="inline-flex items-center text-[#FF8211] gap-2 text-sm font-semibold text-primary transition-all duration-300 hover:gap-3 hover:text-primary/80"
             >
               Become a coach today
               <span

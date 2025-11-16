@@ -37,10 +37,10 @@ const Trainerform = () => {
     <section className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-10">
         <header className="text-center">
-          <h2 className="font-bebas text-4xl tracking-tight text-foreground">
+          <h2 className="font-bebas text-4xl tracking-tight text-[#ff8211]">
             Trainer profile
           </h2>
-          <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+          <p className="mt-3 text-sm text-muted-foreground sm:text-base text-[#555555]">
             Tell us about yourself so we can tailor GymGem to your coaching
             style.
           </p>
@@ -202,7 +202,7 @@ const Trainerform = () => {
 
             <button
               type="submit"
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="inline-flex   h-11 items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Next
             </button>

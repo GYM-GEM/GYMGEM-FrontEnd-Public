@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,6 +16,37 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Load Google Identity Services script
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    // Clean up
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+
+  const handleCredentialResponse = (response) => {
+    console.log("Encoded JWT ID token:", response.credential);
+
+    // Decode JWT to get user info
+    const base64Url = response.credential.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+
+    const userObject = JSON.parse(jsonPayload);
+    console.log(userObject); // contains email, name, picture
+  };
   const onSubmit = async (e) => {
     e.preventDefault();
 
@@ -109,7 +140,7 @@ const LoginPage = () => {
 
                 <button
                   type="submit"
-                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8211] px-4 text-sm font-semibold text-white transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Sign in
                 </button>
@@ -132,13 +163,31 @@ const LoginPage = () => {
                   <div className="h-px flex-1 bg-border" />
                 </div>
 
-                <button
+                {/* <button
                   type="button"
                   className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border bg-background/80 px-4 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   <FcGoogle className="text-xl" />
                   Continue with Google
-                </button>
+                </button> */}
+                <div>
+                  <h2></h2>
+                  <div
+                  
+                    id="g_id_onload"
+                    data-client_id="YOUR_CLIENT_ID"
+                    data-callback="handleCredentialResponse"
+                    data-auto_prompt="false"
+                  ></div>
+                  <div className="g_id_signin "></div>
+
+                  {/* Expose handler globally because Google calls it */}
+                  <script>
+                    {`window.handleCredentialResponse = ${handleCredentialResponse}`}
+                  </script>
+                </div>
+                
+
               </div>
             </div>
           </div>

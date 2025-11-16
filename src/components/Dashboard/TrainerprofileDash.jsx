@@ -136,7 +136,7 @@ const TrainerprofileDash = () => {
 
               {/* Personal Info */}
               <div className="flex-1">
-                <h2 className="text-primary text-sm font-bold uppercase mb-4">
+                <h2 className="text-[#ff8211] text-sm font-bold uppercase mb-4">
                   👤 Personal Information
                 </h2>
 
@@ -178,9 +178,9 @@ const TrainerprofileDash = () => {
                 {/* Edit Profile Button */}
                 <button
                   onClick={() => openModal("editProfile")}
-                  className="bg-primary text-primary-foreground px-6 py-2 rounded-full font-bold uppercase hover:opacity-95 transition"
+                  className="bg-[#ff8211] text-white px-6 py-2 rounded-full font-bold uppercase hover:opacity-95 transition"
                 >
-                  ✎ Edit Profile
+                  <span className="text-[black]">✎</span> Edit Profile
                 </button>
               </div>
             </div>
@@ -190,7 +190,7 @@ const TrainerprofileDash = () => {
 
           {/* PROFESSIONAL DETAILS SECTION */}
           <section className="mb-12">
-            <h2 className="text-primary text-2xl font-bold uppercase mb-6 flex items-center gap-2">
+            <h2 className="text-[#ff8211] text-2xl font-bold uppercase mb-6 flex items-center gap-2">
               <span>💼</span> Professional Details
             </h2>
 
@@ -224,7 +224,7 @@ const TrainerprofileDash = () => {
 
           {/* SETTINGS SECTION */}
           <section>
-            <h2 className="text-primary text-2xl font-bold uppercase mb-6 flex items-center gap-2">
+            <h2 className="text-[#ff8211] text-2xl font-bold uppercase mb-6 flex items-center gap-2">
               <span>⚙️</span> Settings
             </h2>
 

@@ -9,10 +9,10 @@ const NavBarDash = () => {
 
   const links = [
     { to: "/", label: "Home" },
-    { to: "/TrainerprofileDash", label: "Profile" },
-    { to: "/dashboardtrainer", label: "Dashboard" },
-    { to: "/coursestrainerdash", label: "Courses" },
-    { to: "/clienttrainerdash", label: "Clients" },
+    { to: "/trainer/profile", label: "Profile" },
+    { to: "/trainer", label: "Dashboard" },
+    { to: "/trainer/courses", label: "Courses" },
+    { to: "/trainer/clients", label: "Clients" },
   ];
 
   const [showFullName, setShowFullName] = useState(false);
@@ -50,16 +50,16 @@ const NavBarDash = () => {
           <div className="flex items-center justify-between h-16">
             <Link
               to="/"
-              className="flex items-center gap-2 text-lg font-semibold tracking-wide text-primary transition hover:text-primary/80"
+              className="flex items-center gap-2 text-lg font-semibold tracking-wide  transition hover:text-primary/80"
             >
               <FaGem
-                className={`text-secondary transition-transform duration-500 ${
+                className={`text-[#86ac55] transition-transform duration-500 ${
                   showFullName ? "scale-105" : "scale-100"
                 }`}
               />
               <span className="relative h-6 w-24 overflow-hidden">
                 <span
-                  className={`absolute inset-0 font-bebas text-2xl transition-all duration-500 ${
+                  className={`absolute inset-0 font-bebas text-2xl transition-all  text-[#ff8211] duration-500 ${
                     showGG
                       ? "translate-y-0 opacity-100"
                       : "-translate-y-2 opacity-0"
@@ -67,7 +67,7 @@ const NavBarDash = () => {
                 >
                   GG
                 </span>
-                <span className="absolute inset-0 flex items-center font-bebas text-2xl tracking-tight">
+                <span className="absolute inset-0 flex items-center font-bebas text-2xl text-[#ff8211] tracking-tight">
                   {"GYMGEM".split("").map((char, index, arr) => {
                     const delay = showFullName
                       ? index * 0.1
@@ -101,11 +101,11 @@ const NavBarDash = () => {
                       [
                         "relative inline-block mx-3 px-3 py-2 transition-colors duration-200",
                         isActive
-                          ? "text-[#ff7906]"
+                          ? "text-[#ff8211]"
                           : "text-gray-900 hover:text-[#ff7906]",
                         "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
                         "after:-bottom-3 after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                        "after:bg-[#dca16d]",
+                        "after:bg-[#ff8211]",
                         isActive
                           ? "after:w-[100%] after:opacity-100"
                           : "after:w-0 after:opacity-0",
@@ -128,14 +128,14 @@ const NavBarDash = () => {
                 <MdOutlineNotificationsActive />
               </NavLink>
               <NavLink
-                to="/TrainerprofileDash"
+                to="/trainer/profile"
                 className="text-2xl text-muted-foreground hover:text-primary"
                 aria-label="Profile"
               >
                 <FaUserCircle />
               </NavLink>
 
-              {/* Mobile toggle */}
+              
               <button
                 className="md:hidden p-2 rounded-md bg-background/60 border border-muted text-foreground"
                 onClick={() => setOpen((s) => !s)}

@@ -72,10 +72,10 @@ function Trainees() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Trainee requests
             </p>
-            <h1 className="font-bebas text-4xl tracking-tight text-foreground sm:text-5xl">
+            <h1 className="font-bebas text-4xl tracking-tight text-foreground sm:text-5xl text-[#ff8211]">
               Connect with trainees who need your expertise
             </h1>
-            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
+            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg text-[#555555]">
               Browse personalized goals and reach out to clients looking for
               coaching, accountability, and structured support.
             </p>

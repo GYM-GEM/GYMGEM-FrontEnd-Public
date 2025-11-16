@@ -3,6 +3,7 @@ import FooterDash from "./FooterDash.jsx";
 import { Link } from "react-router-dom";
 import CardForTrainers from "./../CardForTrainers";
 import Courses from "./../../pages/Courses";
+import Chat from "../Chat.jsx";
 const DashboardTrainer = () => {
   return (
     <>
@@ -13,8 +14,8 @@ const DashboardTrainer = () => {
             {/* Main content (left 2 columns on large screens) */}
             <div className="lg:col-span-2">
               <section className="mb-8">
-                <h1 className="font-bebas text-4xl text-center">Dashboard</h1>
-                <p className="mt-2 text-center text-muted-foreground">
+                <h1 className="font-bebas text-4xl text-center text-[#ff8211]">Dashboard</h1>
+                <p className="mt-2 text-center text-muted-foreground text-[#555555]">
                   Overview of your courses, students and revenue.
                 </p>
               </section>
@@ -104,7 +105,7 @@ const DashboardTrainer = () => {
             <aside className="lg:col-span-1 border-l border-muted-foreground pl-6 ">
               <div className="space-y-6">
                 <div className="bg-surface rounded-xl p-6 shadow-sm">
-                  <h4 className="font-bebas text-xl text-primary">Profile</h4>
+                  <h4 className="font-bebas text-xl text-primary text-[#ff8211]">Profile</h4>
                   <div className="mt-4">
                     <p className="font-medium">Name: Ali Kamal</p>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -114,7 +115,7 @@ const DashboardTrainer = () => {
                 </div>
 
                 <div className="bg-surface rounded-xl p-6 shadow-sm">
-                  <h4 className="font-bebas text-xl text-primary">
+                  <h4 className="font-bebas text-xl text-primary text-[#ff8211]">
                     Quick Panel
                   </h4>
                   <div className="mt-4 flex flex-col gap-3">
@@ -131,6 +132,9 @@ const DashboardTrainer = () => {
                       ⚙️ Edit profile
                     </Link>
                   </div>
+                </div>
+                <div>
+                  <Chat/>
                 </div>
               </div>
             </aside>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
 import axios from "axios";
@@ -8,7 +8,10 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showFullName, setShowFullName] = useState(false);
   const [showGG, setShowGG] = useState(true);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const menuRef = useRef(null);
 
   const logout = async (e) => {
     e.preventDefault();
@@ -60,11 +63,21 @@ function Navbar() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const linkBase =
     "rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200";
   const resolveLinkClass = (isActive) =>
-    `${linkBase} ${
-      isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+    `${linkBase} ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
     }`;
 
   return (
@@ -72,24 +85,22 @@ function Navbar() {
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
         <Link
           to="/"
-          className="flex items-center gap-2 text-lg font-semibold tracking-wide text-primary transition hover:text-primary/80"
+          className="flex items-center gap-2 text-lg font-semibold tracking-wide transition hover:text-primary/80"
         >
           <FaGem
-            className={`text-secondary transition-transform duration-500 ${
-              showFullName ? "scale-105" : "scale-100"
-            }`}
+            className={`text-[#86ac55] transition-transform duration-500 ${showFullName ? "scale-105" : "scale-100"
+              }`}
           />
           <span className="relative h-6 w-24 overflow-hidden">
             <span
-              className={`absolute inset-0 font-bebas text-2xl transition-all duration-500 ${
-                showGG
+              className={` absolute inset-0 font-bebas text-2xl  text-[#ff8211] transition-all duration-500 ${showGG
                   ? "translate-y-0 opacity-100"
                   : "-translate-y-2 opacity-0"
-              }`}
+                }`}
             >
               GG
             </span>
-            <span className="absolute inset-0 flex items-center font-bebas text-2xl tracking-tight">
+            <span className="absolute inset-0 flex items-center text-[#ff8211] font-bebas text-2xl tracking-tight ">
               {"GYMGEM".split("").map((char, index, arr) => {
                 const delay = showFullName
                   ? index * 0.1
@@ -98,11 +109,10 @@ function Navbar() {
                   <span
                     key={char + index}
                     style={{ transitionDelay: `${delay}s` }}
-                    className={`transition-all duration-300 ${
-                      showFullName
+                    className={` transition-all duration-300 ${showFullName
                         ? "translate-y-0 opacity-100"
                         : "translate-y-2 opacity-0"
-                    }`}
+                      }`}
                   >
                     {char}
                   </span>
@@ -125,9 +135,8 @@ function Navbar() {
 
         <div
           id="primary-navigation"
-          className={`absolute left-0 top-full w-full border-b border-border bg-background px-4 pb-4 pt-2 shadow-lg transition-all duration-200 md:static md:flex md:w-auto md:items-center md:gap-4 md:border-none md:bg-transparent md:p-0 md:shadow-none ${
-            isOpen ? "flex flex-col" : "hidden md:flex"
-          }`}
+          className={`absolute left-0 top-full w-full border-b border-border bg-background px-4 pb-4 pt-2 shadow-lg transition-all duration-200 md:static md:flex md:w-auto md:items-center md:gap-4 md:border-none md:bg-transparent md:p-0 md:shadow-none ${isOpen ? "flex flex-col" : "hidden md:flex"
+            }`}
         >
           <NavLink
             to="/"
@@ -140,7 +149,7 @@ function Navbar() {
                   : "text-gray-900 hover:text-[#ff7906]",
                 "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
                 "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#000000]/90",
+                "after:bg-[#ff8211]/90",
                 isActive
                   ? "after:w-[100%] after:opacity-100"
                   : "after:w-0 after:opacity-0",
@@ -160,7 +169,7 @@ function Navbar() {
                   : "text-gray-900 hover:text-[#ff7906]",
                 "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
                 "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#000000]/90",
+                "after:bg-[#ff8211]/90",
                 isActive
                   ? "after:w-[100%] after:opacity-100"
                   : "after:w-0 after:opacity-0",
@@ -180,7 +189,7 @@ function Navbar() {
                   : "text-gray-900 hover:text-[#ff7906]",
                 "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
                 "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#000000]/90",
+                "after:bg-[#ff8211]/90",
                 isActive
                   ? "after:w-[100%] after:opacity-100"
                   : "after:w-0 after:opacity-0",
@@ -200,7 +209,7 @@ function Navbar() {
                   : "text-gray-900 hover:text-[#ff7906]",
                 "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
                 "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#000000]/90",
+                "after:bg-[#ff8211]/90",
                 isActive
                   ? "after:w-[100%] after:opacity-100"
                   : "after:w-0 after:opacity-0",
@@ -220,7 +229,7 @@ function Navbar() {
                   : "text-gray-900 hover:text-[#ff7906]",
                 "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
                 "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#000000]/90",
+                "after:bg-[#ff8211]/90",
                 isActive
                   ? "after:w-[100%] after:opacity-100"
                   : "after:w-0 after:opacity-0",
@@ -229,18 +238,71 @@ function Navbar() {
           >
             About
           </NavLink>
-          <NavLink
-            to={user ? "#" : "/login"}
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              `${resolveLinkClass(isActive)} flex items-center gap-2`
-            }
-          >
-            <FaUserCircle className="text-lg" />
-            {user && <span className="text-sm">{user.username}</span>}
-          </NavLink>
+          {user ? (
+            <div className="relative" ref={menuRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false);
+                  setUserMenuOpen((s) => !s);
+                }}
+                className={`${resolveLinkClass(false)} flex items-center gap-2`}
+                aria-expanded={userMenuOpen}
+                aria-haspopup="true"
+              >
+                <FaUserCircle className="text-lg" />
+                <span className="text-sm">{user.username}</span>
+              </button>
 
-          {user && (
+              {userMenuOpen && (
+                <div className="absolute right-[-1] z-50 mt-2 w-44 rounded-md border border-border bg-white/85 shadow-lg">
+                  <NavLink
+                    to="/trainer"
+                    onClick={() => {
+                      setIsOpen(false);
+                      setUserMenuOpen(false);
+                    }}
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
+                  >
+                    Dashboard
+                  </NavLink>
+                  <NavLink
+                    to="/trainer/profile"
+                    onClick={() => {
+                      setIsOpen(false);
+                      setUserMenuOpen(false);
+                    }}
+                    className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
+                  >
+                    Profile
+                  </NavLink>
+                  {user && (
+                    <button
+                      onClick={(event) => {
+                        setIsOpen(false);
+                        logout(event);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
+                    >
+                      Logout
+                    </button>
+                    )}
+                </div>
+              )}
+            </div>
+          ) : (
+            <NavLink
+              to="/login"
+              onClick={() => setIsOpen(false)}
+              className={({ isActive }) =>
+                `${resolveLinkClass(isActive)} flex items-center gap-2`
+              }
+            >
+              <FaUserCircle className="text-lg" />
+            </NavLink>
+          )}
+
+          {/* {user && (
             <button
               onClick={(event) => {
                 setIsOpen(false);
@@ -250,7 +312,7 @@ function Navbar() {
             >
               Logout
             </button>
-          )}
+          )} */}
         </div>
       </div>
     </nav>

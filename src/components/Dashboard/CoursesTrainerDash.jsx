@@ -111,7 +111,7 @@ const CoursesTrainerDash = () => {
                   placeholder="Search courses, clients or category"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full h-12 rounded-full border border-muted bg-background/60 px-4 pl-12 text-sm outline-none focus:ring-2 focus:ring-primary transition"
+                  className="w-full h-12 rounded-full border border-muted bg-background/60 px-4 pl-12 text-sm outline-none focus:ring-2 focus:ring-[#ff8211] transition"
                 />
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                   🔍
@@ -121,7 +121,7 @@ const CoursesTrainerDash = () => {
               <div className="w-full sm:w-auto">
                 <Link
                   to="/addcourse"
-                  className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:scale-105 transition"
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#ff8211] text-white px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:scale-105 transition"
                 >
                   ➕ Add New Course
                 </Link>

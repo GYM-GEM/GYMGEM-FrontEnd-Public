@@ -44,10 +44,10 @@ function WhatWeOffer() {
               : "translate-y-6 opacity-0"
           }`}
         >
-          <h2 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl">
+          <h2 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl text-[#FF8211]">
             What we offer
           </h2>
-          <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+          <p className="mt-3 text-base text-muted-foreground sm:text-lg text-[#555555]">
             Discover calm, purposeful ways to stay fit and connected to your community.
           </p>
         </div>
@@ -83,8 +83,8 @@ function WhatWeOffer() {
           >
             {cards.map((item, index) => (
               <SwiperSlide key={index}>
-                <article className="relative flex h-72 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:scale-[1.02]">
-                  <div className="absolute inset-y-4 left-4 w-32 overflow-hidden rounded-xl">
+                <article className="relative flex h-72 flex-col overflow-hidden rounded-2xl  border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:scale-[1.02]">
+                  <div className="absolute inset-y-4 left-4 w-32 overflow-hidden rounded-xl ">
                     <img
                       loading="lazy"
                       src={item.img}
@@ -94,7 +94,7 @@ function WhatWeOffer() {
                   </div>
                   <div className="ml-[9rem] flex h-full flex-col justify-between p-5">
                     <div>
-                      <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                      <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground text-[#FF8211]">
                         {item.title}
                         <HiArrowCircleRight className="text-primary" />
                       </h3>

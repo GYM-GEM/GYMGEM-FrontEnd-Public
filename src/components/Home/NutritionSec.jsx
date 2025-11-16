@@ -10,10 +10,10 @@ function NutritionSec() {
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Nutrition &amp; diet plans
             </p>
-            <h3 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl">
+            <h3 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl text-[#FF8211]">
               Eat smarter so your training lasts longer
             </h3>
-            <p className="text-base text-muted-foreground sm:text-lg">
+            <p className="text-base text-muted-foreground sm:text-lg text-[#555555]">
               Get calm, personalized nutrition coaching that aligns your meals
               with the way you train and recover.
             </p>
@@ -67,7 +67,7 @@ function NutritionSec() {
           <div className="flex justify-start">
             <a
               href="#"
-              className="inline-flex items-center gap-2 text-sm font-semibold text-primary transition hover:text-primary/80"
+              className="inline-flex items-center text-[#FF8211] gap-2 text-sm font-semibold text-primary transition hover:text-primary/80"
             >
               Explore nutrition plans
               <span aria-hidden>→</span>

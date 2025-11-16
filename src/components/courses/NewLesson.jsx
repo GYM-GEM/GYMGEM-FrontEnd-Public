@@ -21,7 +21,7 @@ const NewLeason = () => {
           <div className="flex flex-col justify-center max-w-md  w-[100%] pt-[2rem] pb-[2rem]">
             <div className="">
               <h1 className="text-[#FF8211] text-[4rem] bebas-medium">
-                New leason
+                New lesson
               </h1>
             </div>
             <div className="">

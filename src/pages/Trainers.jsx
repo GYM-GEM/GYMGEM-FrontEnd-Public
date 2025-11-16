@@ -67,13 +67,13 @@ function Trainers() {
       <section className="w-full bg-background">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
           <header className="space-y-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary ">
               Trainers
             </p>
-            <h1 className="font-bebas text-4xl tracking-tight text-foreground sm:text-5xl">
+            <h1 className="font-bebas text-4xl tracking-tight text-foreground sm:text-5xl text-[#ff8211]">
               Find your perfect coach
             </h1>
-            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
+            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg text-[#555555]">
               Connect with certified professionals who design programs around
               your pace, your goals, and your schedule.
             </p>

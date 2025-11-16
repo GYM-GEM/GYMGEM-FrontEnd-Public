@@ -1,7 +1,7 @@
 import NavBarDash from "./NavBarDash";
-import FooterDash from "./FooterDash";
+import FooterDash from "../FooterDash";
 import { Link, NavLink } from "react-router-dom";
-import testimg from "../../assets/cardCo1.png";
+import testimg from "../../../assets/cardCo1.png";
 import { IoIosTrash } from "react-icons/io";
 import { IoMdSearch } from "react-icons/io";
 import { GrFormView } from "react-icons/gr";

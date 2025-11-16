@@ -1,10 +1,10 @@
-import NavBarDash from "./NavBarDash";
-import FooterDash from "./FooterDash";
+import NavTraineDash from "./NavTraineDash";
+import FooterDash from "../FooterDash";
 import { Lock, CreditCard, LogOut, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const TrainerprofileDash = () => {
+const TraineProfileDash = () => {
   const navigate = useNavigate();
 
   // State management
@@ -13,7 +13,11 @@ const TrainerprofileDash = () => {
     email: "mahmoudgado@gmail.com",
     location: "Cairo, Egypt",
     phone: "+20 100 1234567",
-    job: "Trainer",
+    job: "Trainee Developer",
+    joined: "January 2023",
+    level: "Beginner",
+    city: "Cairo",
+    goal: "Become a full stack developer",
     avatar: "https://i.pravatar.cc/150?img=3",
     bio: "I'm a full stack trainer specialized in Django & React.",
     skills: ["Django", "React", "Python", "JavaScript"],
@@ -27,7 +31,12 @@ const TrainerprofileDash = () => {
   });
 
   const [formData, setFormData] = useState({
-    editProfile: { ...trainerData },
+    editProfile: {
+      ...trainerData,
+      skills: Array.isArray(trainerData.skills)
+        ? trainerData.skills.join(", ")
+        : trainerData.skills,
+    },
     changePassword: {
       currentPassword: "",
       newPassword: "",
@@ -38,6 +47,19 @@ const TrainerprofileDash = () => {
 
   // Modal handlers
   const openModal = (modalName) => {
+    // When opening editProfile, make sure form reflects latest trainer data
+    if (modalName === "editProfile") {
+      setFormData((prev) => ({
+        ...prev,
+        editProfile: {
+          ...trainerData,
+          skills: Array.isArray(trainerData.skills)
+            ? trainerData.skills.join(", ")
+            : trainerData.skills,
+        },
+      }));
+    }
+
     setModals((prev) => ({ ...prev, [modalName]: true }));
   };
 
@@ -54,8 +76,35 @@ const TrainerprofileDash = () => {
     }));
   };
 
+  // Avatar upload (reads file as data URL and sets preview in form)
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData((prev) => ({
+        ...prev,
+        editProfile: {
+          ...prev.editProfile,
+          avatar: reader.result,
+          avatarFile: file,
+        },
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSaveProfile = () => {
-    setTrainerData(formData.editProfile);
+    // Normalize skills input (allow comma separated string)
+    const updated = { ...formData.editProfile };
+    if (typeof updated.skills === "string") {
+      updated.skills = updated.skills
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+
+    setTrainerData(updated);
     closeModal("editProfile");
     alert("Profile updated successfully!");
   };
@@ -118,7 +167,7 @@ const TrainerprofileDash = () => {
 
   return (
     <>
-      <NavBarDash />
+      <NavTraineDash />
 
       <main className="bg-background text-foreground min-h-screen py-12">
         <div className="max-w-6xl mx-auto px-4">
@@ -130,7 +179,7 @@ const TrainerprofileDash = () => {
                 <img
                   src={trainerData.avatar}
                   alt={trainerData.name}
-                  className="w-42 h-42 rounded-full object-cover border-4 border-primary"
+                  className="w-40 h-40 rounded-full object-cover border-4 border-primary"
                 />
               </div>
 
@@ -173,6 +222,30 @@ const TrainerprofileDash = () => {
                       <span className="font-normal">{trainerData.job}</span>
                     </p>
                   </div>
+                  <div>
+                    <p className="text-gray-700 font-semibold">
+                      Joined:{" "}
+                      <span className="font-normal">{trainerData.joined}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-700 font-semibold">
+                      Level:{" "}
+                      <span className="font-normal">{trainerData.level}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-700 font-semibold">
+                      City:{" "}
+                      <span className="font-normal">{trainerData.city}</span>
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-700 font-semibold">
+                      Goal:{" "}
+                      <span className="font-normal">{trainerData.goal}</span>
+                    </p>
+                  </div>
                 </div>
 
                 {/* Edit Profile Button */}
@@ -197,8 +270,7 @@ const TrainerprofileDash = () => {
             <div className="space-y-4">
               <div>
                 <p className="text-gray-700 font-semibold">
-                  Bio:{" "}
-                  <span className="font-normal italic">{trainerData.bio}</span>
+                  Bio: <span className="font-normal ">{trainerData.bio}</span>
                 </p>
               </div>
 
@@ -230,22 +302,22 @@ const TrainerprofileDash = () => {
 
             <div className="space-y-4">
               {/* Change Password */}
-              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition">
+              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition hover:bg-[#ff8211]">
                 <Lock className="h-5 w-5 text-muted-foreground" />
                 <button
                   onClick={() => openModal("changePassword")}
-                  className="text-foreground font-semibold hover:text-primary transition"
+                  className="text-foreground font-semibold hover:text-primary transition cursor-pointer "
                 >
                   Change Password
                 </button>
               </div>
 
               {/* Payment Info */}
-              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition">
+              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition hover:bg-[#ff8211]">
                 <CreditCard className="h-5 w-5 text-muted-foreground" />
                 <button
                   onClick={() => openModal("paymentInfo")}
-                  className="text-foreground font-semibold hover:text-primary transition"
+                  className="text-foreground font-semibold hover:text-primary transition cursor-pointer"
                 >
                   Payment Info
                 </button>
@@ -269,7 +341,7 @@ const TrainerprofileDash = () => {
       {/* EDIT PROFILE MODAL */}
       {modals.editProfile && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md bg-white shadow-2xl rounded-lg overflow-hidden">
+          <div className="w-full max-w-md bg-white shadow-2xl rounded-lg overflow-hidden max-h-[80vh]">
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <h2 className="text-lg font-semibold">Edit Profile</h2>
               <button
@@ -280,7 +352,24 @@ const TrainerprofileDash = () => {
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-4">
+            {/* Avatar preview + quick info */}
+            {formData.editProfile?.avatar && (
+              <div className="px-6 pt-4 pb-2 flex items-center gap-4">
+                <img
+                  src={formData.editProfile.avatar}
+                  alt="avatar preview"
+                  className="w-16 h-16 rounded-full object-cover border border-muted"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    {formData.editProfile.name}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Preview</p>
+                </div>
+              </div>
+            )}
+
+            <div className="px-6 py-5 space-y-4 overflow-y-auto max-h-[56vh]">
               <div>
                 <label className="block text-sm font-semibold mb-1">Name</label>
                 <input
@@ -328,6 +417,59 @@ const TrainerprofileDash = () => {
                 />
               </div>
               <div>
+                <label className="block text-sm font-semibold mb-1">Job</label>
+                <input
+                  type="text"
+                  name="job"
+                  value={formData.editProfile.job}
+                  onChange={handleEditProfileChange}
+                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-1">
+                  Upload Avatar
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="w-full text-sm border border-gray-500 cursor-pointer rounded px-3 py-2 outline-none focus:border-[#FF8A1A] hover:bg-[#4fe60f]"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Select an image from your device
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-1">
+                  Skills (comma separated)
+                </label>
+                <input
+                  type="text"
+                  name="skills"
+                  value={formData.editProfile.skills}
+                  onChange={handleEditProfileChange}
+                  placeholder="React, Node, CSS"
+                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-1">
+                  LinkedIn
+                </label>
+                <input
+                  type="text"
+                  name="linkedin"
+                  value={formData.editProfile.linkedin}
+                  onChange={handleEditProfileChange}
+                  placeholder="linkedin.com/in/username"
+                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
+                />
+              </div>
+              <div>
                 <label className="block text-sm font-semibold mb-1">Bio</label>
                 <textarea
                   name="bio"
@@ -339,16 +481,16 @@ const TrainerprofileDash = () => {
               </div>
             </div>
 
-            <div className="px-6 pb-6 flex gap-3">
+            <div className="px-6 pb-6 flex gap-3 bg-white sticky bottom-0">
               <button
                 onClick={handleSaveProfile}
-                className="flex-1 bg-[#FF8A1A] text-white py-2.5 font-semibold rounded hover:bg-[#e6760f] transition-colors"
+                className="flex-1 bg-[#FF8A1A] text-white py-2.5 font-semibold rounded hover:opacity-95 transition-colors"
               >
                 Save Changes
               </button>
               <button
                 onClick={() => closeModal("editProfile")}
-                className="flex-1 bg-gray-200 text-gray-700 py-2.5 font-semibold rounded hover:bg-gray-300 transition-colors"
+                className="flex-1 bg-[#FF8A1A] text-white py-2.5 font-semibold rounded hover:bg-[#e6760f] transition-colors"
               >
                 Cancel
               </button>
@@ -521,4 +663,4 @@ const TrainerprofileDash = () => {
   );
 };
 
-export default TrainerprofileDash;
+export default TraineProfileDash;

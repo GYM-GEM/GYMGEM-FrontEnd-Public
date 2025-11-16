@@ -31,8 +31,8 @@ function ForTrainers() {
     <section ref={sectionRef} className="w-full bg-background py-20">
       <div className="mx-auto flex w-full max-w-6xl flex-col overflow-hidden rounded-[32px] border border-border bg-card shadow-sm lg:flex-row">
         <div
-          className={`relative h-80 w-full flex-1 transition-all duration-700 delay-300 ease-out lg:order-2 lg:h-auto ${
-            isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
+          className={`relative h-80 w-full flex-1 transition-all duration-700 delay-300 ease-out lg:order-1 lg:h-auto ${
+            isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
           }`}
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-background/30 via-transparent to-background/50" />
@@ -44,8 +44,8 @@ function ForTrainers() {
         </div>
 
         <div
-          className={`flex flex-1 flex-col justify-center gap-10 px-6 py-12 transition-all duration-700 ease-out sm:px-10 lg:order-1 lg:px-12 ${
-            isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
+          className={`flex flex-1 flex-col justify-center gap-10 px-6 py-12 transition-all duration-700 ease-out sm:px-10 lg:order-2 lg:px-12 ${
+            isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
           }`}
         >
           <header className="space-y-3">

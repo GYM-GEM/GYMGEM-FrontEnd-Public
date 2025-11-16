@@ -5,7 +5,10 @@ import Trainees from "./pages/Trainees";
 import About from "./pages/About";
 import Profile from "./pages/Profile";
 import Trainers from "./pages/Trainers";
+// login $ register -----------------------------------------------------------------------------
 import Register from "./pages/Register";
+import LoginPage from "./pages/LoginPage";
+// ----------------------------------forms--------------------------------------------------------
 import Selectrole from "./components/SelectRole";
 import Trainerform from "./components/Formes/TrainerForm";
 import Trainerform2 from "./components/Formes/TrainerForm2";
@@ -13,18 +16,22 @@ import Trainerform3 from "./components/Formes/TrainerForm3";
 import Traineeform from "./components/Formes/TraineeForm";
 import Traineeinfo from "./components/Formes/TraineeInfoForm.jsx";
 import RootLayout from "./Layout/Rootlayout";
-import LoginPage from "./pages/LoginPage";
+// ----------------------------------details-----------------------------------------------------
 import RequestDetails from "./pages/DetailsTrainees";
 import AddCourse from "./components/courses/AddCourse.jsx";
 import NewLeason from "./components/courses/NewLesson.jsx";
-
-import DashboardTrainer from "./components/Dashboard/DashboardTrainer.jsx";
-import CoursesTrainerDash from "./components/Dashboard/CoursesTrainerDash.jsx";
-import ClientTrainerDash from "./components/Dashboard/ClientTrainerDash.jsx";
-import TrainerprofileDash from "./components/Dashboard/TrainerprofileDash.jsx";
+// --------------------------------------dashboard trainer ---------------------------------------
+import DashboardTrainer from "./components/Dashboard/Trainer/DashboardTrainer.jsx";
+import CoursesTrainerDash from "./components/Dashboard/Trainer/CoursesTrainerDash.jsx";
+import ClientTrainerDash from "./components/Dashboard/Trainer/ClientTrainerDash.jsx";
+import TrainerprofileDash from "./components/Dashboard/Trainer/TrainerprofileDash.jsx";
 import Dashboard from "./pages/Dashboard";
+// --------------------------------------not found------------------------------------------------
 import NotFound from "./components/NotFound.jsx";
-// import TrainerDashboard from "./pages/Dashboard";
+// --------------------------------------dashboard traine -----------------------------------------
+import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
+import TraineProfileDash from "./components/Dashboard/Traine/TraineProfileDash.jsx";
+import CoursesTraineDash from "./components/Dashboard/Traine/CoursesTraineDash.jsx";
 
 function App() {
   return (
@@ -39,24 +46,22 @@ function App() {
         <Route path="requestdetails" element={<RequestDetails />} />
         <Route path="addcourse" element={<AddCourse />} />
         <Route path="newlesson" element={<NewLeason />} />
-        {/* <Route path="trainee/dashboard" element={<ClientTrainerDash />} /> */}
-        {/* <Route path="trainerdashboard" element={<Dashboard />} />
-        <Route path="coursestrainerdash" element={<CoursesTrainerDash />} />
-        <Route path="clienttrainerdash" element={<ClientTrainerDash />} />
-        <Route path="trainerprofileDash" element={<TrainerprofileDash />} /> */}
-        {/* <Route path="dashboardtrainer" element={<DashboardTrainer />} />
-        <Route path="coursestrainerdash" element={<CoursesTrainerDash />} />
-        <Route path="clienttrainerdash" element={<ClientTrainerDash />} />
-        <Route path="TrainerprofileDash" element={<TrainerprofileDash />} /> */}
         <Route path="*" element={<NotFound />} />
       </Route>
-
+      {/* --------------------------------------trainer --------------------------------------------- */}
       <Route path="trainer">
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<DashboardTrainer />} />
         <Route path="courses" element={<CoursesTrainerDash />} />
         <Route path="clients" element={<ClientTrainerDash />} />
         <Route path="profile" element={<TrainerprofileDash />} />
+      </Route>
+      {/* --------------------------------------trainee ----------------------------------------------- */}
+      <Route path="traine">
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<TraineeDash />} />
+        <Route path="courses" element={<CoursesTraineDash />} />
+        <Route path="profile" element={<TraineProfileDash />} />
       </Route>
 
       {/* <Route path="/login" element={<LogIn />} /> */}
@@ -69,9 +74,6 @@ function App() {
       <Route path="/traineeform" element={<Traineeform />} />
       <Route path="/traineeinfo" element={<Traineeinfo />} />
     </Routes>
-
-
-
   );
 }
 

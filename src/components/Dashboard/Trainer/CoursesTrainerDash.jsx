@@ -1,15 +1,15 @@
 import { Link } from "react-router-dom";
-import testimg from "../../assets/cardCo1.png";
-import testimg2 from "../../assets/Sports Nutrition for Weight Loss.jpg";
-import testimg3 from "../../assets/Fat Burning Cardio Workouts.jpg";
-import testimg4 from "../../assets/Muscle Building.jpg";
+import testimg from "../../../assets/cardCo1.png";
+import testimg2 from "../../../assets/Sports Nutrition for Weight Loss.jpg";
+import testimg3 from "../../../assets/Fat Burning Cardio Workouts.jpg";
+import testimg4 from "../../../assets/Muscle Building.jpg";
 
 import { IoIosTrash } from "react-icons/io";
 import { MdOutlineEdit } from "react-icons/md";
 import { useState, useMemo } from "react";
 
-import NavBarDash from "./NavBarDash";
-import FooterDash from "./FooterDash.jsx";
+import NavBarDash from "./NavBarDash.jsx";
+import FooterDash from "../FooterDash.jsx";
 const rows = [
   {
     id: 1,

@@ -5,6 +5,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import cover_img from "../assets/cover.svg";
 import axios from "axios";
+import GoogleLogin from "../components/GoogleLogin";
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -21,7 +22,10 @@ const SignUpPage = () => {
   const onSubmit = async (data) => {
     try {
       // Send POST request to backend
-      const response = await axios.post("http://127.0.0.1:8000/api/accounts/", data);
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/accounts/",
+        data
+      );
       console.log("Response:", response.data);
       alert("Sign up successful!");
       navigate("/role");
@@ -30,7 +34,6 @@ const SignUpPage = () => {
       alert("Registration failed. Please try again.");
     }
   };
-
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -47,7 +50,8 @@ const SignUpPage = () => {
             <div className="relative flex h-full items-end justify-start p-10">
               <div className="max-w-xs space-y-2 rounded-2xl bg-background/80 p-4 text-sm text-muted-foreground shadow-lg backdrop-blur">
                 <p className="font-semibold text-foreground">
-                  Create your GymGem account.
+                  <span className="text-[#f0e1da]">Create your </span>GymGem
+                  account.
                 </p>
                 <p>
                   Trainers, gyms, stores, and trainees all connect in one simple
@@ -273,13 +277,14 @@ const SignUpPage = () => {
                   <div className="h-px flex-1 bg-border" />
                 </div>
 
-                <button
+                {/* <button
                   type="button"
-                  className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border bg-background/80 px-4 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border bg-background/80 px-4 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
                 >
                   <FcGoogle className="text-xl" />
                   Continue with Google
-                </button>
+                </button> */}
+                <GoogleLogin />
               </div>
             </div>
           </div>

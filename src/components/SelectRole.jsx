@@ -57,8 +57,8 @@ const Selectrole = () => {
 
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const payload = { profile_type: selectedRole, account: user.account.id };
-      const token = user.access;
+      const payload = { profile_type: selectedRole, account: user.id };
+      const token = localStorage.getItem("access");
 
       const response = await axios.post(
         "http://127.0.0.1:8000/api/profiles/create",

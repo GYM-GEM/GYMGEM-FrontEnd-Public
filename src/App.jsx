@@ -32,6 +32,10 @@ import NotFound from "./components/NotFound.jsx";
 import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
 import TraineProfileDash from "./components/Dashboard/Traine/TraineProfileDash.jsx";
 import CoursesTraineDash from "./components/Dashboard/Traine/CoursesTraineDash.jsx";
+import Community from "./pages/Community.jsx";
+import Coursedetails from "./components/courses/CourseDetails.jsx";
+import Viewprofile from "./components/ViewProfile.jsx"
+
 
 function App() {
   return (
@@ -46,6 +50,9 @@ function App() {
         <Route path="requestdetails" element={<RequestDetails />} />
         <Route path="addcourse" element={<AddCourse />} />
         <Route path="newlesson" element={<NewLeason />} />
+        <Route path="community" element={<Community />} />
+        <Route path="coursedetails" element={<Coursedetails />} />
+        <Route path="viewprofile" element={<Viewprofile />} />
         <Route path="*" element={<NotFound />} />
       </Route>
       {/* --------------------------------------trainer --------------------------------------------- */}

@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 
 function CardForTrainers() {
   return (
-    <section className="bg-background pb-20">
-      <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
+    <section className="w-full bg-background pb-20">
+      <div className="mx-auto grid w-[80%] gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
         {CoursesData.map((item) => (
           <article
             key={item.id ?? item.title}
@@ -32,8 +32,8 @@ function CardForTrainers() {
               <div className="mt-auto flex items-center justify-between">
                 <span className="font-bebas text-xl text-foreground">{item.price}</span>
                 <Link
-                  to="#"
-                  className="inline-flex items-center justify-center rounded-xl border border-border bg-background/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  to="/viewprofile"
+                  className="inline-flex items-center justify-center rounded-xl border border-border bg-[#ff8211] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#e97108] hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   {item.buttonText}
                 </Link>

@@ -1,6 +1,7 @@
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 const AddCourse = () => {
   const {
@@ -9,8 +10,25 @@ const AddCourse = () => {
     formState: { errors },
   } = useForm();
 
+  const navigate = useNavigate();
+
   const onSubmit = (data) => {
-    console.log(data);
+    const course = {
+      id: Date.now(),
+      title: data.title,
+      client: data.client || "0",
+      status: data.status || "Draft",
+      category: data.category || "",
+      img: data.coverUrl || "/assets/cardCo1.png",
+      description: data.description || "",
+    };
+
+    // no backend in front-only mode — dispatch event and navigate with state
+    try {
+      window.dispatchEvent(new CustomEvent('courseCreated', { detail: course }));
+    } catch (e) {}
+
+    navigate('/trainer/courses', { state: { newCourse: course } });
   };
   return (
     <>
@@ -242,7 +260,7 @@ const AddCourse = () => {
                   type="submit"
                   className="bg-[#FF8211] text-white text-[18px] items-center h-[32px] w-[121px] rounded-full  shadow-md transition duration-150 ease-in-out hover:opacity-80 focus:opacity-90 active:opacity-100 bebas-regular"
                 >
-                  NEXT
+                  NEXT 
                 </button>
               </div>
             </form>

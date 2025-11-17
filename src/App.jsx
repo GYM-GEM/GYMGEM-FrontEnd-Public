@@ -11,6 +11,10 @@ import Trainers from "./pages/Trainers";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/NotFound.jsx";
+import Community from "./pages/Community.jsx";
+import Coursedetails from "./pages/Coursedetails.jsx";
+import Viewprofile from "./pages/Viewprofile.jsx";
 
 // forms
 import Selectrole from "./components/SelectRole";
@@ -39,9 +43,6 @@ import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
 import TraineProfileDash from "./components/Dashboard/Traine/TraineProfileDash.jsx";
 import CoursesTraineDash from "./components/Dashboard/Traine/CoursesTraineDash.jsx";
 
-// others
-import NotFound from "./components/NotFound.jsx";
-
 function App() {
   const location = useLocation();
 
@@ -59,8 +60,11 @@ function App() {
           <Route path="requestdetails" element={<RequestDetails />} />
           <Route path="addcourse" element={<AddCourse />} />
           <Route path="newlesson" element={<NewLeason />} />
+          <Route path="community" element={<Community />} />
+          <Route path="coursedetails" element={<Coursedetails />} />
+          <Route path="viewprofile" element={<Viewprofile />} />
           <Route path="dashboard" element={<Dashboard />} />
-          {/* <Route path="*" element={<NotFound />} /> */}
+          <Route path="*" element={<NotFound />} />
         </Route>
 
         {/* -------------------- TRAINER DASHBOARD -------------------- */}

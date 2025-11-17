@@ -67,7 +67,7 @@ function Trainees() {
     <div className="bg-background text-foreground">
       <Navbar />
       <section className="w-full bg-background">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-[80%] flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
           <header className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Trainee requests
@@ -109,8 +109,8 @@ function Trainees() {
         </div>
       </section>
 
-      <section className="bg-background pb-20">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 sm:px-6 lg:px-8">
+      <section className="w-full bg-background pb-20">
+        <div className="mx-auto flex w-[80%] flex-col gap-6 px-4 sm:px-6 lg:px-8">
           {TraineesCardData.map((item) => (
             <article
               key={item.id}

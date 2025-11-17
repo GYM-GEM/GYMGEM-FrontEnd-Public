@@ -6,11 +6,12 @@ import testimg4 from "../../../assets/Muscle Building.jpg";
 
 import { IoIosTrash } from "react-icons/io";
 import { MdOutlineEdit } from "react-icons/md";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 import NavBarDash from "./NavBarDash.jsx";
 import FooterDash from "../FooterDash.jsx";
-const rows = [
+const initialRows = [
   {
     id: 1,
     title: "30-Day Full Body Toning Challenge",
@@ -59,12 +60,27 @@ const CoursesTrainerDash = () => {
     sort: "Newest",
   });
   const [query, setQuery] = useState("");
-  const visibleRows = useMemo(() => {
+  // stateful rows so we can edit/delete
+  const [rows, setRows] = useState(initialRows);
+
+  // pagination
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
+  // editing state
+  const [editingId, setEditingId] = useState(null);
+  const [editValues, setEditValues] = useState({});
+
+  // effect: reset page when filters/search changes
+  useEffect(() => {
+    setPage(1);
+  }, [filters, query]);
+
+  const filteredRows = useMemo(() => {
     let list = [...rows];
 
     const q = (query || "").trim().toLowerCase();
 
-    // Search filter: title, client, category
     if (q) {
       list = list.filter((r) => {
         return (
@@ -96,7 +112,46 @@ const CoursesTrainerDash = () => {
     }
 
     return list;
-  }, [filters, query]);
+  }, [rows, filters, query]);
+
+  const totalCount = filteredRows.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const offset = (currentPage - 1) * pageSize;
+  const visibleRows = filteredRows.slice(offset, offset + pageSize);
+
+  // ensure page is in range when data changes
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [totalPages]);
+
+  
+
+  // listen for newly created courses dispatched from AddCourse page
+  useEffect(() => {
+    const handler = (e) => {
+      const item = e?.detail;
+      if (!item) return;
+      setRows((rs) => [item, ...rs]);
+      setPage(1);
+    };
+    window.addEventListener('courseCreated', handler);
+    return () => window.removeEventListener('courseCreated', handler);
+  }, []);
+
+  // pick up newCourse passed via navigation state from AddCourse form
+  const location = useLocation();
+  useEffect(() => {
+    const newCourse = location?.state?.newCourse;
+    if (newCourse) {
+      setRows((rs) => [newCourse, ...rs]);
+      setPage(1);
+      try {
+        // clear history state so refresh doesn't re-add
+        window.history.replaceState({}, document.title);
+      } catch (e) {}
+    }
+  }, [location?.state]);
 
   return (
     <>
@@ -237,8 +292,36 @@ const CoursesTrainerDash = () => {
                 </div>
               </div>
               <div className="py-6 text-center text-sm font-semibold tracking-wide">
-                &laquo;&laquo; PREV | <span className="underline">1</span> | 2 |
-                3 | NEXT &raquo;&raquo;
+                <div className="inline-flex items-center gap-3">
+                  <button
+                    className="px-3 py-1 rounded border border-border bg-background/60"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                  >
+                    PREV
+                  </button>
+
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const p = i + 1;
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`px-3 py-1 rounded ${p === page ? 'underline' : ''}`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    className="px-3 py-1 rounded border border-border bg-background/60"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                  >
+                    NEXT
+                  </button>
+                </div>
               </div>
             </div>
           </section> */}
@@ -328,28 +411,127 @@ const CoursesTrainerDash = () => {
                             </div>
                           </td>
 
-                          <td className="px-4 py-4">{row.title}</td>
-                          <td className="px-4 py-4">{row.client}</td>
-                          <td className="px-4 py-4">{row.status}</td>
+                          <td className="px-4 py-4">
+                            {editingId === row.id ? (
+                              <input
+                                className="w-full rounded border border-border px-2 py-1 bg-background text-foreground"
+                                value={editValues.title || ""}
+                                onChange={(e) => setEditValues((v) => ({ ...v, title: e.target.value }))}
+                              />
+                            ) : (
+                              row.title
+                            )}
+                          </td>
+                          <td className="px-4 py-4">
+                            {editingId === row.id ? (
+                              <input
+                                className="w-24 rounded border border-border px-2 py-1 bg-background text-foreground"
+                                value={editValues.client || ""}
+                                onChange={(e) => setEditValues((v) => ({ ...v, client: e.target.value }))}
+                              />
+                            ) : (
+                              row.client
+                            )}
+                          </td>
+                          <td className="px-4 py-4">
+                            {editingId === row.id ? (
+                              <select
+                                className="rounded border border-border px-2 py-1 bg-background text-foreground"
+                                value={editValues.status || row.status}
+                                onChange={(e) => setEditValues((v) => ({ ...v, status: e.target.value }))}
+                              >
+                                <option>Published</option>
+                                <option>Draft</option>
+                                <option>Archived</option>
+                              </select>
+                            ) : (
+                              row.status
+                            )}
+
+                          </td>
 
                           <td className="px-4 py-4 text-center">
                             <div className="inline-flex items-center gap-4">
-                              <button
-                                type="button"
-                                className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
-                                aria-label={`Edit ${row.title}`}
-                              >
-                                <MdOutlineEdit />
-                                Edit
-                              </button>
-                              <button
-                                type="button"
-                                className="inline-flex items-center gap-2 text-sm text-red-600 hover:underline"
-                                aria-label={`Delete ${row.title}`}
-                              >
-                                <IoIosTrash />
-                                Delete
-                              </button>
+                              {editingId === row.id ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="inline-flex items-center gap-2 text-sm text-green-600 hover:underline"
+                                    onClick={async () => {
+                                      // save
+                                      try {
+                                        const payload = { ...editValues };
+                                        const res = await fetch(`/api/courses/${row.id}`, {
+                                          method: 'PUT',
+                                          headers: { 'Content-Type': 'application/json' },
+                                          body: JSON.stringify(payload),
+                                        });
+                                        if (!res.ok) {
+                                          // fallback: update local state
+                                          setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...payload } : r)));
+                                        } else {
+                                          const updated = await res.json();
+                                          setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...updated } : r)));
+                                        }
+                                      } catch (e) {
+                                        setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...editValues } : r)));
+                                      }
+                                      setEditingId(null);
+                                      setEditValues({});
+                                    }}
+                                  >
+                                    Save
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:underline"
+                                    onClick={() => {
+                                      setEditingId(null);
+                                      setEditValues({});
+                                    }}
+                                  >
+                                    Cancel
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                                    aria-label={`Edit ${row.title}`}
+                                    onClick={() => {
+                                      setEditingId(row.id);
+                                      setEditValues({ title: row.title, client: row.client, status: row.status });
+                                    }}
+                                  >
+                                    <MdOutlineEdit />
+                                    Edit
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="inline-flex items-center gap-2 text-sm text-red-600 hover:underline"
+                                    aria-label={`Delete ${row.title}`}
+                                    onClick={async () => {
+                                      const ok = window.confirm(`Delete course \"${row.title}\"?`);
+                                      if (!ok) return;
+                                      try {
+                                        const res = await fetch(`/api/courses/${row.id}`, { method: 'DELETE' });
+                                        if (res.ok) {
+                                          setRows((rs) => rs.filter((r) => r.id !== row.id));
+                                        } else {
+                                          // fallback remove locally
+                                          setRows((rs) => rs.filter((r) => r.id !== row.id));
+                                        }
+                                      } catch (e) {
+                                        setRows((rs) => rs.filter((r) => r.id !== row.id));
+                                      }
+                                    }}
+                                  >
+                                    <IoIosTrash />
+                                    Delete
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -360,8 +542,36 @@ const CoursesTrainerDash = () => {
               </div>
 
               <div className="py-6 text-center text-sm font-semibold tracking-wide">
-                &laquo;&laquo; PREV | <span className="underline">1</span> | 2 |
-                3 | NEXT &raquo;&raquo;
+                <div className="inline-flex items-center gap-3">
+                  <button
+                    className="px-3 py-1 rounded border border-border bg-background/60"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                  >
+                    PREV
+                  </button>
+
+                  {Array.from({ length: totalPages }).map((_, i) => {
+                    const p = i + 1;
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setPage(p)}
+                        className={`px-3 py-1 rounded ${p === page ? 'underline' : ''}`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    className="px-3 py-1 rounded border border-border bg-background/60"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                  >
+                    NEXT
+                  </button>
+                </div>
               </div>
             </div>
           </section>

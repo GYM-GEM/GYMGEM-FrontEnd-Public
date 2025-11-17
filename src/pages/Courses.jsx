@@ -66,7 +66,7 @@ function Courses() {
     <div className="bg-background text-foreground">
       <Navbar />
       <section className="w-full bg-background">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-[80%] flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
           <header className="space-y-4 text-center sm:text-left">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               Courses
@@ -107,8 +107,8 @@ function Courses() {
           </div>
         </div>
       </section>
-      <section className="bg-background pb-20">
-        <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
+      <section className="w-full bg-background pb-20">
+        <div className="mx-auto grid w-[80%] gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
           {CoursesData.map((item) => (
             <article
               key={item.title}
@@ -140,8 +140,8 @@ function Courses() {
                     {item.price}
                   </span>
                   <Link
-                    to="#"
-                    className="inline-flex items-center justify-center rounded-xl border border-border bg-background/80 px-4 py-2 text-sm font-semibold text-foreground transition hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    to="/coursedetails"
+                    className="inline-flex items-center justify-center rounded-xl border border-border bg-[#ff8211] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#e97108] hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     {item.buttonText}
                   </Link>

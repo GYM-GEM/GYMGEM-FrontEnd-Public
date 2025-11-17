@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import Cover_img from "../assets/fitCartoon3.png";
 import axios from "axios";
+import GoogleLogin from "../components/GoogleLogin.jsx";
 
 function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,36 +18,11 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load Google Identity Services script
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    // Clean up
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
+    // Google sign-in handled by `GoogleLogin` component.
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 
-  const handleCredentialResponse = (response) => {
-    console.log("Encoded JWT ID token:", response.credential);
-
-    // Decode JWT to get user info
-    const base64Url = response.credential.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-
-    const userObject = JSON.parse(jsonPayload);
-    console.log(userObject); // contains email, name, picture
-  };
+  // Google sign-in is handled by `GoogleLogin` component which posts the id_token.
   const onSubmit = async (e) => {
     e.preventDefault();
 
@@ -170,22 +146,7 @@ const LoginPage = () => {
                   <FcGoogle className="text-xl" />
                   Continue with Google
                 </button> */}
-                <div>
-                  <h2></h2>
-                  <div
-                  
-                    id="g_id_onload"
-                    data-client_id="YOUR_CLIENT_ID"
-                    data-callback="handleCredentialResponse"
-                    data-auto_prompt="false"
-                  ></div>
-                  <div className="g_id_signin "></div>
-
-                  {/* Expose handler globally because Google calls it */}
-                  <script>
-                    {`window.handleCredentialResponse = ${handleCredentialResponse}`}
-                  </script>
-                </div>
+               <GoogleLogin />
                 
 
               </div>

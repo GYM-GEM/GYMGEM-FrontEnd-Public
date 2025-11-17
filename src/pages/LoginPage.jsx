@@ -1,9 +1,11 @@
-import { useState , useEffect } from "react";
-import { FcGoogle } from "react-icons/fc";
+// src/pages/LoginPage.jsx
+import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import Cover_img from "../assets/fitCartoon3.png";
 import axios from "axios";
+import GoogleLogin from "../components/GoogleLogin";
 
 function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -12,12 +14,12 @@ function isValidEmail(email) {
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Load Google Identity Services script
+    // Load Google Identity Services script (لو محتاجه مع GoogleLogin)
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
@@ -30,30 +32,18 @@ const LoginPage = () => {
     };
   }, []);
 
-
-  const handleCredentialResponse = (response) => {
-    console.log("Encoded JWT ID token:", response.credential);
-
-    // Decode JWT to get user info
-    const base64Url = response.credential.split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
-        .join("")
-    );
-
-    const userObject = JSON.parse(jsonPayload);
-    console.log(userObject); // contains email, name, picture
-  };
   const onSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const IsEmail = isValidEmail(email);
+      const IsEmail = isValidEmail(emailOrUsername);
       const payload = { password };
-      IsEmail ? (payload.email = email) : (payload.username = email);
+
+      if (IsEmail) {
+        payload.email = emailOrUsername;
+      } else {
+        payload.username = emailOrUsername;
+      }
 
       const response = await axios.post(
         "http://127.0.0.1:8000/api/auth/login",
@@ -74,7 +64,13 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <motion.div
+      className="min-h-screen bg-background text-foreground"
+      initial={{ opacity: 0, x: 40 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -40 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
       <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-4 py-12 sm:px-8 lg:px-12">
         <div className="grid overflow-hidden rounded-[24px] border border-border bg-card shadow-sm lg:min-h-[640px] lg:grid-cols-2">
           {/* ========== Form ========== */}
@@ -92,17 +88,17 @@ const LoginPage = () => {
               <form onSubmit={onSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <label
-                    htmlFor="email"
+                    htmlFor="emailOrUsername"
                     className="text-sm font-medium text-foreground"
                   >
                     Email or username
                   </label>
                   <input
-                    id="email"
+                    id="emailOrUsername"
                     type="text"
                     placeholder="Enter your email or username"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={emailOrUsername}
+                    onChange={(e) => setEmailOrUsername(e.target.value)}
                     required
                     className="h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
                   />
@@ -163,31 +159,7 @@ const LoginPage = () => {
                   <div className="h-px flex-1 bg-border" />
                 </div>
 
-                {/* <button
-                  type="button"
-                  className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border bg-background/80 px-4 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                >
-                  <FcGoogle className="text-xl" />
-                  Continue with Google
-                </button> */}
-                <div>
-                  <h2></h2>
-                  <div
-                  
-                    id="g_id_onload"
-                    data-client_id="YOUR_CLIENT_ID"
-                    data-callback="handleCredentialResponse"
-                    data-auto_prompt="false"
-                  ></div>
-                  <div className="g_id_signin "></div>
-
-                  {/* Expose handler globally because Google calls it */}
-                  <script>
-                    {`window.handleCredentialResponse = ${handleCredentialResponse}`}
-                  </script>
-                </div>
-                
-
+                <GoogleLogin />
               </div>
             </div>
           </div>
@@ -214,7 +186,7 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

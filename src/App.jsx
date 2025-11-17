@@ -11,10 +11,10 @@ import Trainers from "./pages/Trainers";
 import LoginPage from "./pages/LoginPage";
 import SignUpPage from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard";
-import NotFound from "./pages/NotFound.jsx";
+import NotFound from "./components/NotFound.jsx";
 import Community from "./pages/Community.jsx";
-import Coursedetails from "./pages/Coursedetails.jsx";
-import Viewprofile from "./pages/Viewprofile.jsx";
+import Coursedetails from "./components/courses/CourseDetails.jsx";
+import Viewprofile from "./components/Viewprofile.jsx";
 
 // forms
 import Selectrole from "./components/SelectRole";

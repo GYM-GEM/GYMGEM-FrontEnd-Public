@@ -1,8 +1,9 @@
+// src/pages/SignUpPage.jsx
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { FcGoogle } from "react-icons/fc";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import cover_img from "../assets/cover.svg";
 import axios from "axios";
 import GoogleLogin from "../components/GoogleLogin";
@@ -36,10 +37,16 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <motion.div
+      className="min-h-screen bg-background text-foreground"
+      initial={{ opacity: 0, x: -40 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 40 }}
+      transition={{ duration: 0.35, ease: "easeOut" }}
+    >
       <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-4 py-12 sm:px-8 lg:px-12">
         <div className="grid overflow-hidden rounded-[24px] border border-border bg-card shadow-sm lg:min-h-[720px] lg:grid-cols-2">
-          {/* ========== Illustration ========== */}
+          {/* ========== Illustration  ========== */}
           <div className="relative hidden bg-muted lg:block">
             <img
               src={cover_img}
@@ -50,8 +57,8 @@ const SignUpPage = () => {
             <div className="relative flex h-full items-end justify-start p-10">
               <div className="max-w-xs space-y-2 rounded-2xl bg-background/80 p-4 text-sm text-muted-foreground shadow-lg backdrop-blur">
                 <p className="font-semibold text-foreground">
-                  <span className="text-[#f0e1da]">Create your </span>GymGem
-                  account.
+                  <span className="text-[#f0e1da]">Create your </span>
+                  GymGem account.
                 </p>
                 <p>
                   Trainers, gyms, stores, and trainees all connect in one simple
@@ -61,7 +68,7 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          {/* ========== Form ========== */}
+          {/* ========== Form  ========== */}
           <div className="flex flex-col justify-center px-6 py-10 sm:px-10 lg:px-12">
             <div className="mx-auto w-full max-w-md space-y-8">
               <header className="space-y-3 text-center lg:text-left">
@@ -264,7 +271,7 @@ const SignUpPage = () => {
                 <p className="text-center text-sm text-muted-foreground">
                   Already have an account?{" "}
                   <Link
-                    to="/Login"
+                    to="/login"
                     className="font-semibold text-primary hover:text-primary/80"
                   >
                     Sign in
@@ -277,20 +284,13 @@ const SignUpPage = () => {
                   <div className="h-px flex-1 bg-border" />
                 </div>
 
-                {/* <button
-                  type="button"
-                  className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-border bg-background/80 px-4 text-sm font-semibold text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
-                >
-                  <FcGoogle className="text-xl" />
-                  Continue with Google
-                </button> */}
                 <GoogleLogin />
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

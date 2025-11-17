@@ -65,7 +65,7 @@ function Trainers() {
     <div className="bg-background text-foreground">
       <Navbar />
       <section className="w-full bg-background">
-        <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-[80%] flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
           <header className="space-y-4">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary ">
               Trainers

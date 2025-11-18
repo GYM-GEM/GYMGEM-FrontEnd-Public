@@ -15,8 +15,8 @@ import { FaGem } from "react-icons/fa";
 
 function Footer() {
   return (
-    <footer className="border-t border-border bg-muted/40 text-muted-foreground">
-      <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+    <footer className="border-t border-border bg-muted/40 text-muted-foreground w-full">
+      <div className="mx-auto w-[80%]  px-4 py-12 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-6 border-b border-border/60 pb-8 text-center sm:flex-row sm:text-left">
           <div className="flex items-center gap-3 text-foreground">
             <FaGem className="text-xl text-secondary" />
@@ -25,21 +25,24 @@ function Footer() {
                 Stay in sync with GymGem
               </p>
               <p className="text-xs text-muted-foreground">
-                Follow along for new programs, community highlights, and product updates.
+                Follow along for new programs, community highlights, and product
+                updates.
               </p>
             </div>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-foreground">
-            {[Facebook, Twitter, Instagram, Youtube, Github, Linkedin].map((Icon, index) => (
-              <a
-                key={`social-${index}`}
-                href="#!"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-muted-foreground transition hover:-translate-y-0.5 hover:border-ring hover:text-foreground"
-              >
-                <Icon className="h-4 w-4" />
-              </a>
-            ))}
+            {[Facebook, Twitter, Instagram, Youtube, Github, Linkedin].map(
+              (Icon, index) => (
+                <a
+                  key={`social-${index}`}
+                  href="#!"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-muted-foreground transition hover:-translate-y-0.5 hover:border-ring hover:text-foreground"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              )
+            )}
           </div>
         </div>
 
@@ -50,8 +53,8 @@ function Footer() {
               GYMGEM
             </div>
             <p>
-              We bring trainers, gyms, stores, and trainees together through calm, purposeful
-              experiences that keep the focus on progress.
+              We bring trainers, gyms, stores, and trainees together through
+              calm, purposeful experiences that keep the focus on progress.
             </p>
           </div>
 

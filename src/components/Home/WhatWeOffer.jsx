@@ -1,4 +1,8 @@
-import { HiArrowCircleRight } from "react-icons/hi";
+import {
+  HiArrowCircleRight,
+  HiChevronLeft,
+  HiChevronRight,
+} from "react-icons/hi";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, FreeMode } from "swiper/modules";
 import "swiper/css";
@@ -12,6 +16,7 @@ import { useEffect, useRef, useState } from "react";
 function WhatWeOffer() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
+  const swiperRef = useRef(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -36,27 +41,24 @@ function WhatWeOffer() {
 
   return (
     <section ref={sectionRef} className="w-full bg-background py-16">
-      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-[80%]  ">
         <div
           className={`text-center transition-all duration-700 ease-out ${
-            isVisible
-              ? "translate-y-0 opacity-100"
-              : "translate-y-6 opacity-0"
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
           }`}
         >
           <h2 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl text-[#FF8211]">
             What we offer
           </h2>
           <p className="mt-3 text-base text-muted-foreground sm:text-lg text-[#555555]">
-            Discover calm, purposeful ways to stay fit and connected to your community.
+            Discover calm, purposeful ways to stay fit and connected to your
+            community.
           </p>
         </div>
 
         <div
           className={`mt-12 w-full transition-all duration-700 delay-200 ease-out ${
-            isVisible
-              ? "translate-y-0 opacity-100"
-              : "translate-y-6 opacity-0"
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
           }`}
         >
           <Swiper

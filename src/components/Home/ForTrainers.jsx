@@ -29,7 +29,7 @@ function ForTrainers() {
 
   return (
     <section ref={sectionRef} className="w-full bg-background py-20">
-      <div className="mx-auto flex w-full max-w-6xl flex-col overflow-hidden rounded-[32px] border border-border bg-card shadow-sm lg:flex-row">
+      <div className="mx-auto flex w-[80%]  flex-col overflow-hidden rounded-[32px] border border-border bg-card shadow-sm lg:flex-row">
         <div
           className={`relative h-80 w-full flex-1 transition-all duration-700 delay-300 ease-out lg:order-1 lg:h-auto ${
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"

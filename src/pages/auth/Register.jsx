@@ -4,9 +4,9 @@ import { useForm } from "react-hook-form";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import cover_img from "../assets/cover.svg";
+import cover_img from "../../assets/cover.svg";
 import axios from "axios";
-import GoogleLogin from "../components/GoogleLogin";
+import GoogleLogin from "../../components/GoogleLogin";
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);

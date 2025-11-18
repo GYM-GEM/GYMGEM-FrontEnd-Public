@@ -4,7 +4,7 @@ import Nutrition from "../../assets/Nutrition & Diet Plans.jpg";
 function NutritionSec() {
   return (
     <section className="w-full bg-background py-20">
-      <div className="mx-auto flex w-full max-w-6xl flex-col overflow-hidden rounded-[32px] border border-border bg-card shadow-sm lg:flex-row">
+      <div className="mx-auto flex w-[80%] flex-col overflow-hidden rounded-[32px] border border-border bg-card shadow-sm lg:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-10 px-6 py-12 sm:px-10 lg:px-12">
           <header className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
@@ -19,7 +19,7 @@ function NutritionSec() {
             </p>
           </header>
 
-          <dl className="space-y-6">
+          <div className="space-y-6">
             <div className="flex gap-4">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Check className="h-4 w-4" />
@@ -62,7 +62,7 @@ function NutritionSec() {
                 </dd>
               </div>
             </div>
-          </dl>
+          </div>
 
           <div className="flex justify-start">
             <a

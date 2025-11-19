@@ -1,18 +1,36 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Navbar from "../Navbar";
 import yogoForNoha from "../../assets/yogoForNoha.jpg";
 const CourseDetails = () => {
-  const course = {
-    title: "Strength Training for Beginners",
-    description:
-      "Boost endurance and burn calories fast with high-energy interval workouts.",
-    category: "Fitness",
-    level: "Beginner",
-    language: "English",
-    price: "$29",
-    status: "Published",
-    hero: yogoForNoha,
-  };
+  const { id } = useParams();
+  const courses = JSON.parse(localStorage.getItem("courses")) || [];
+  const course = courses.find((c) => String(c.id) === id);
+
+  if (!course) {
+    
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen flex items-center justify-center">
+          <p>Course not found</p>
+        </main>
+      </>
+    );
+  }
+
+
+
+  // const course = {
+  //   title: "Strength Training for Beginners",
+  //   description:
+  //     "Boost endurance and burn calories fast with high-energy interval workouts.",
+  //   category: "Fitness",
+  //   level: "Beginner",
+  //   language: "English",
+  //   price: "$29",
+  //   status: "Published",
+  //   hero: yogoForNoha,
+  // };
 
   return (
     <>
@@ -36,14 +54,14 @@ const CourseDetails = () => {
             <div className="mt-6">
               <div className="w-full h-48 md:h-64 lg:h-80 rounded-lg overflow-hidden shadow-sm border border-border bg-muted">
                 <img
-                  src={course.hero}
+                  src={course.img}
                   alt={course.title}
                   className="w-full h-full object-cover"
                 />
               </div>
 
               <p className="mt-4 text-muted-foreground max-w-3xl">
-                {course.description}
+                {course.description || "No description provided"}
               </p>
             </div>
 
@@ -88,6 +106,24 @@ const CourseDetails = () => {
                 </div>
 
                 <div className="mt-8">
+                  <h3 className="text-xl font-semibold mb-4 text-foreground">
+                    Lessons
+                  </h3>
+                  {course.lessons && course.lessons.length > 0 ? (
+                    <ul className="list-disc list-inside text-muted-foreground space-y-2">
+                      {course.lessons.map((lesson, index) => (
+                        <li key={index} className="text-foreground">
+                          {lesson.title || `Lesson ${index + 1}`}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No lessons added yet.
+                    </p>
+                  )}
+                </div>
+                <div className="mt-8">
                   <h4 className="text-lg font-bold mb-4 text-foreground">
                     Title: "Preview Video"
                   </h4>
@@ -101,7 +137,9 @@ const CourseDetails = () => {
                   <h5 className="font-semibold text-foreground mb-2">
                     Instructor
                   </h5>
-                  <p className="text-sm text-muted-foreground">Ali Khaled</p>
+                  <p className="text-sm text-muted-foreground">
+                    {course.instructor || "Unknown"}
+                  </p>
                   <div className="mt-4">
                     <button className="inline-flex w-full items-center justify-center rounded-xl bg-[#ff8211] px-6 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:scale-105 hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background">
                       Enroll Now

@@ -5,6 +5,23 @@ import CardForTrainers from "../../CardForTrainers.jsx";
 import Courses from "../../../pages/Courses.jsx";
 import Chat from "../../Chat.jsx";
 const DashboardTrainer = () => {
+  const courses = JSON.parse(localStorage.getItem("courses")) || [];
+  const totalCourses = courses.length;
+
+  const coursesWithRevenue = courses.map((course) => ({
+    title: course.title,
+    clients: course.client || 0,
+    revenue: (course.client || 0) * (parseFloat(course.price) || 0),
+  }));
+
+  // Sort by clients or revenue descending
+  const topCourses = coursesWithRevenue
+    .sort((a, b) => b.clients - a.clients) 
+    .slice(0, 3); 
+
+  const recentCourses = [...courses]
+    .sort((a, b) => b.id - a.id) 
+    .slice(0, 3); 
   return (
     <>
       <NavBarDash />
@@ -33,10 +50,10 @@ const DashboardTrainer = () => {
                   </div>
                   <div className="bg-surface rounded-xl p-6 shadow-sm text-center">
                     <p className="text-sm text-primary">📚 Total Courses</p>
-                    <p className="mt-4 font-bebas text-3xl">8</p>
-                    <p className="text-sm text-muted-foreground mt-2">
+                    <p className="mt-4 font-bebas text-3xl">{totalCourses}</p>
+                    {/* <p className="text-sm text-muted-foreground mt-2">
                       Published this month
-                    </p>
+                    </p> */}
                   </div>
                   <div className="bg-surface rounded-xl p-6 shadow-sm text-center">
                     <p className="text-sm text-primary">💰 Revenue</p>
@@ -65,21 +82,13 @@ const DashboardTrainer = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="border-b">
-                        <td className="px-4 py-3">BOX</td>
-                        <td className="px-4 py-3">24</td>
-                        <td className="px-4 py-3">$240</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="px-4 py-3">HIIT</td>
-                        <td className="px-4 py-3">18</td>
-                        <td className="px-4 py-3">$180</td>
-                      </tr>
-                      <tr>
-                        <td className="px-4 py-3">Yoga Basics</td>
-                        <td className="px-4 py-3">30</td>
-                        <td className="px-4 py-3">$320</td>
-                      </tr>
+                      {topCourses.map((c, index) => (
+                        <tr key={index} className="border-b">
+                          <td className="px-4 py-3">{c.title}</td>
+                          <td className="px-4 py-3">{c.clients}</td>
+                          <td className="px-4 py-3">${c.revenue}</td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -95,9 +104,11 @@ const DashboardTrainer = () => {
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold">📚 Recently Added</h3>
                   <ul className="list-disc list-inside mt-3 space-y-2 text-sm text-muted-foreground">
-                    <li>Intro to HTML (Published)</li>
-                    <li>JavaScript Crash Course (Draft)</li>
-                    <li>Django Advanced (Published)</li>
+                    {recentCourses.map((course, index) => (
+                      <li key={index}>
+                        {course.title} ({course.status || "Published"})
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </section>
@@ -113,7 +124,7 @@ const DashboardTrainer = () => {
                   <div className="mt-4">
                     <p className="font-medium">Name: Ali Kamal</p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Total courses: 8
+                      Total courses: {totalCourses}
                     </p>
                   </div>
                 </div>
@@ -124,12 +135,12 @@ const DashboardTrainer = () => {
                   </h4>
                   <div className="mt-4 flex flex-col gap-3">
                     <Link
-                      to="/CoursesTrainerDash"
+                      to="/trainer/courses"
                       className="text-sm hover:underline"
                     >
                       📚 View my courses
                     </Link>
-                    <a href="#" className="text-sm hover:underline">
+                    <a href="" className="text-sm hover:underline">
                       🧾 Transactions
                     </a>
                     <Link to="/Profile" className="text-sm hover:underline">

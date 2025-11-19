@@ -2,11 +2,25 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import CoursesData from "../js/CardCouData";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 function Courses() {
   const [selectedFilter, setSelectedFilter] = useState("All Courses");
+  const [publishedCourses, setPublishedCourses] = useState([]);
 
+  // compute filtered courses based on selected filter
+  const filteredCourses = useMemo(() => {
+    if (selectedFilter === "All Courses") return publishedCourses;
+    return publishedCourses.filter((c) => c.category === selectedFilter);
+  }, [selectedFilter, publishedCourses]);
+
+  useEffect(() => {
+    // جلب الكورسات من localStorage
+    const storedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    // فلترة فقط المنشورة
+    const published = storedCourses.filter((c) => c.status === "Published");
+    setPublishedCourses(published);
+  }, []);
   const filterOptions = [
     {
       label: "All Courses",
@@ -109,15 +123,15 @@ function Courses() {
       </section>
       <section className="w-full bg-background pb-20">
         <div className="mx-auto grid w-[80%] gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
-          {CoursesData.map((item) => (
+          {filteredCourses.map((item) => (
             <article
-              key={item.title}
+              key={item.id || item.title}
               className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md"
             >
               <div className="relative h-48 w-full overflow-hidden">
                 <img
                   className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                  src={item.image}
+                  src={item.img}
                   alt={item.title}
                 />
               </div>
@@ -131,19 +145,20 @@ function Courses() {
                     {item.description}
                   </p>
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    {item.ByCoach}
+                    By Coach Sarah Ahmed · 4 Weeks
                   </p>
                 </div>
 
                 <div className="mt-auto flex items-center justify-between">
                   <span className="font-bebas text-xl text-foreground">
-                    {item.price}
+                    {`$${item.price || 0}`}
                   </span>
+
                   <Link
-                    to="/coursedetails"
+                    to={`/courses/${item.id}`}
                     className="inline-flex items-center justify-center rounded-xl border border-border bg-[#ff8211] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#e97108] hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    {item.buttonText}
+                    View details
                   </Link>
                 </div>
               </div>

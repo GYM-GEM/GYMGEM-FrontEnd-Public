@@ -3,7 +3,7 @@ import testimg from "../../../assets/cardCo1.png";
 import testimg2 from "../../../assets/Sports Nutrition for Weight Loss.jpg";
 import testimg3 from "../../../assets/Fat Burning Cardio Workouts.jpg";
 import testimg4 from "../../../assets/Muscle Building.jpg";
-
+import { v4 as uuidv4 } from "uuid";
 import { IoIosTrash } from "react-icons/io";
 import { MdOutlineEdit } from "react-icons/md";
 import { useState, useMemo, useEffect } from "react";
@@ -61,7 +61,8 @@ const CoursesTrainerDash = () => {
   });
   const [query, setQuery] = useState("");
   // stateful rows so we can edit/delete
-  const [rows, setRows] = useState(initialRows);
+  const savedRows = JSON.parse(localStorage.getItem("courses")) || initialRows;
+  const [rows, setRows] = useState(savedRows);
 
   // pagination
   const [page, setPage] = useState(1);
@@ -70,6 +71,7 @@ const CoursesTrainerDash = () => {
   // editing state
   const [editingId, setEditingId] = useState(null);
   const [editValues, setEditValues] = useState({});
+  const location = useLocation();
 
   // effect: reset page when filters/search changes
   useEffect(() => {
@@ -125,31 +127,45 @@ const CoursesTrainerDash = () => {
     if (page > totalPages) setPage(totalPages);
   }, [totalPages]);
 
-  
-
   // listen for newly created courses dispatched from AddCourse page
-  useEffect(() => {
-    const handler = (e) => {
-      const item = e?.detail;
-      if (!item) return;
-      setRows((rs) => [item, ...rs]);
-      setPage(1);
-    };
-    window.addEventListener('courseCreated', handler);
-    return () => window.removeEventListener('courseCreated', handler);
-  }, []);
+  // useEffect(() => {
+  //   const handler = (e) => {
+  //     const item = e?.detail;
+  //     if (!item) return;
+  //     setRows((rs) => [item, ...rs]);
+  //     setPage(1);
+  //   };
+  //   window.addEventListener("courseCreated", handler);
+  //   return () => window.removeEventListener("courseCreated", handler);
+  // }, []);
 
   // pick up newCourse passed via navigation state from AddCourse form
-  const location = useLocation();
   useEffect(() => {
     const newCourse = location?.state?.newCourse;
+
     if (newCourse) {
-      setRows((rs) => [newCourse, ...rs]);
+      const courseWithId = {
+        ...newCourse,
+        id: uuidv4(),
+        lessons: newCourse.lessons || [],
+      };
+
+      setRows((prev) => {
+        // منع التكرار
+        const exists = prev.some(
+          (r) =>
+            r.title === newCourse.title && r.category === newCourse.category
+        );
+        if (exists) return prev;
+
+        const updated = [courseWithId, ...prev];
+        localStorage.setItem("courses", JSON.stringify(updated));
+        return updated;
+      });
       setPage(1);
-      try {
-        // clear history state so refresh doesn't re-add
-        window.history.replaceState({}, document.title);
-      } catch (e) {}
+
+      // امسح state بعد الاستخدام
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [location?.state]);
 
@@ -189,142 +205,7 @@ const CoursesTrainerDash = () => {
             <h2 className="font-bebas text-2xl px-4">Filter</h2>
             <span className="flex-1 h-px bg-muted" />
           </div>
-          {/* <section>
-            <div className="border-b border-[#808080] py-3">
-              <div className="flex flex-wrap items-center gap-4 md:gap-8 md:justify-between mb-[1.75rem]">
-                <label className="flex items-center gap-2 text-[15px]">
-                  <span>📂 Category:</span>
-                  <select className="border-l border-r border-black rounded   text-[18px] outline-none focus:border-black">
-                    <option>All</option>
-                    <option>Web</option>
-                    <option>Mobile</option>
-                    <option>Data</option>
-                  </select>
-                </label>
 
-                <label className="flex items-center gap-2 text-[15px]">
-                  <span>📈 Status:</span>
-                  <select className="border-l border-r border-black rounded text-[18px] outline-none focus:border-black">
-                    <option>Published</option>
-                    <option>Draft</option>
-                    <option>Archived</option>
-                  </select>
-                </label>
-
-                <label className="flex items-center gap-2 text-[15px]">
-                  <span>📅 Sort by:</span>
-                  <select className="border-l border-r border-black rounded text-[18px] outline-none focus:border-black">
-                    <option>Newest</option>
-                    <option>Oldest</option>
-                    <option>Title (A–Z)</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-          </section> */}
-          {/* -------------------------------------------------- */}
-          {/* <section>
-            <div>
-              <div className="mt-[1.75rem] text-[#FF8A1A] bebas-regular text-[2rem] uppercase">
-                <h2>Courses List</h2>
-              </div>
-
-              <div className="w-full mt-[31px]">
-                <div className="overflow-x-auto">
-                  <table className="table w-full min-w-full ">
-                    <thead className="border-b ">
-                      <tr className="bebas-regular text-[1.375rem]">
-                        <th className="text-start bebas-regular text-[1.375rem] pb-[12px]">
-                          Thumbnail
-                        </th>
-                        <th className="text-start bebas-regular text-[1.375rem] pb-[12px]">
-                          Course Title
-                        </th>
-                        <th className="text-start bebas-regular text-[1.375rem] pb-[12px]">
-                          Client
-                        </th>
-                        <th className="text-start bebas-regular text-[1.375rem] pb-[12px]">
-                          Status
-                        </th>
-                        <th className="text-center bebas-regular text-[1.375rem] pb-[12px]">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {rows.map((row) => (
-                        <tr key={row.id}>
-                          <td>
-                            <div className="avatar">
-                              <div className=" h-[110px] w-[131px]  flex items-center justify-center  ">
-                                <img src={testimg} alt="dd" />
-                              </div>
-                            </div>
-                          </td>
-
-                          <td>{row.title}</td>
-                          <td>{row.client}</td>
-                          <td>{row.status}</td>
-
-                          <td className="text-center">
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1 me-4 btn btn-link p-0 text-blue-600 hover:text-blue-800 cursor-pointer"
-                              aria-label={`Edit ${row.title}`}
-                            >
-                              <MdOutlineEdit />
-                              Edit
-                            </button>
-                            <button
-                              type="button"
-                              className="inline-flex items-center gap-1 btn btn-link p-0 text-red-600 hover:text-red-800  cursor-pointer"
-                              aria-label={`Delete ${row.title}`}
-                            >
-                              <IoIosTrash />
-                              Delete
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div className="py-6 text-center text-sm font-semibold tracking-wide">
-                <div className="inline-flex items-center gap-3">
-                  <button
-                    className="px-3 py-1 rounded border border-border bg-background/60"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page <= 1}
-                  >
-                    PREV
-                  </button>
-
-                  {Array.from({ length: totalPages }).map((_, i) => {
-                    const p = i + 1;
-                    return (
-                      <button
-                        key={p}
-                        onClick={() => setPage(p)}
-                        className={`px-3 py-1 rounded ${p === page ? 'underline' : ''}`}
-                      >
-                        {p}
-                      </button>
-                    );
-                  })}
-
-                  <button
-                    className="px-3 py-1 rounded border border-border bg-background/60"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page >= totalPages}
-                  >
-                    NEXT
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section> */}
           <section>
             <div className="border-b border-[#808080] py-3">
               <div className="flex flex-wrap items-center gap-4 md:gap-8 md:justify-between mb-[1.75rem]">
@@ -392,6 +273,8 @@ const CoursesTrainerDash = () => {
                       <tr className="text-sm text-muted-foreground">
                         <th className="px-4 py-3 text-left">Thumbnail</th>
                         <th className="px-4 py-3 text-left">Course Title</th>
+                        <th className="px-4 py-3 text-left">Price</th>
+                        <th className="px-4 py-3 text-left">Lesson</th>
                         <th className="px-4 py-3 text-left">Client</th>
                         <th className="px-4 py-3 text-left">Status</th>
                         <th className="px-4 py-3 text-center">Actions</th>
@@ -416,21 +299,57 @@ const CoursesTrainerDash = () => {
                               <input
                                 className="w-full rounded border border-border px-2 py-1 bg-background text-foreground"
                                 value={editValues.title || ""}
-                                onChange={(e) => setEditValues((v) => ({ ...v, title: e.target.value }))}
+                                onChange={(e) =>
+                                  setEditValues((v) => ({
+                                    ...v,
+                                    title: e.target.value,
+                                  }))
+                                }
                               />
                             ) : (
-                              row.title
+                              <Link
+                                to={`/courses/${row.id}`} // الرابط لصفحة التفاصيل
+                                className="text-blue-600 hover:underline"
+                              >
+                                {row.title}
+                              </Link>
                             )}
                           </td>
                           <td className="px-4 py-4">
                             {editingId === row.id ? (
                               <input
                                 className="w-24 rounded border border-border px-2 py-1 bg-background text-foreground"
-                                value={editValues.client || ""}
-                                onChange={(e) => setEditValues((v) => ({ ...v, client: e.target.value }))}
+                                value={editValues.price || ""}
+                                onChange={(e) =>
+                                  setEditValues((v) => ({
+                                    ...v,
+                                    price: e.target.value,
+                                  }))
+                                }
                               />
                             ) : (
-                              row.client
+                              `$${row.price || 0}`
+                            )}
+                          </td>
+
+                          <td className="px-4 py-4">
+                            {row.lessons ? row.lessons.length : 0}
+                          </td>
+
+                          <td className="px-4 py-4">
+                            {editingId === row.id ? (
+                              <input
+                                className="w-24 rounded border border-border px-2 py-1 bg-background text-foreground"
+                                value={editValues.client || ""}
+                                onChange={(e) =>
+                                  setEditValues((v) => ({
+                                    ...v,
+                                    client: e.target.value,
+                                  }))
+                                }
+                              />
+                            ) : (
+                              row.client || 0
                             )}
                           </td>
                           <td className="px-4 py-4">
@@ -438,7 +357,12 @@ const CoursesTrainerDash = () => {
                               <select
                                 className="rounded border border-border px-2 py-1 bg-background text-foreground"
                                 value={editValues.status || row.status}
-                                onChange={(e) => setEditValues((v) => ({ ...v, status: e.target.value }))}
+                                onChange={(e) =>
+                                  setEditValues((v) => ({
+                                    ...v,
+                                    status: e.target.value,
+                                  }))
+                                }
                               >
                                 <option>Published</option>
                                 <option>Draft</option>
@@ -447,7 +371,6 @@ const CoursesTrainerDash = () => {
                             ) : (
                               row.status
                             )}
-
                           </td>
 
                           <td className="px-4 py-4 text-center">
@@ -457,25 +380,31 @@ const CoursesTrainerDash = () => {
                                   <button
                                     type="button"
                                     className="inline-flex items-center gap-2 text-sm text-green-600 hover:underline"
-                                    onClick={async () => {
-                                      // save
-                                      try {
-                                        const payload = { ...editValues };
-                                        const res = await fetch(`/api/courses/${row.id}`, {
-                                          method: 'PUT',
-                                          headers: { 'Content-Type': 'application/json' },
-                                          body: JSON.stringify(payload),
-                                        });
-                                        if (!res.ok) {
-                                          // fallback: update local state
-                                          setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...payload } : r)));
-                                        } else {
-                                          const updated = await res.json();
-                                          setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...updated } : r)));
-                                        }
-                                      } catch (e) {
-                                        setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...editValues } : r)));
-                                      }
+                                    onClick={() => {
+                                      const payload = { ...editValues };
+
+                                      // تحديث الـ rows
+                                      const updatedRows = rows.map((r) =>
+                                        r.id === row.id
+                                          ? { ...r, ...payload }
+                                          : r
+                                      );
+                                      setRows(updatedRows);
+
+                                      // تحديث الـ localStorage
+                                      localStorage.setItem(
+                                        "courses",
+                                        JSON.stringify(updatedRows)
+                                      );
+
+                                      // اطلاق حدث لتحديث صفحة الكورسات العامة
+                                      window.dispatchEvent(
+                                        new CustomEvent("courseStatusChanged", {
+                                          detail: { ...row, ...payload },
+                                        })
+                                      );
+
+                                      // إعادة تعيين الـ editing state
                                       setEditingId(null);
                                       setEditValues({});
                                     }}
@@ -501,7 +430,12 @@ const CoursesTrainerDash = () => {
                                     aria-label={`Edit ${row.title}`}
                                     onClick={() => {
                                       setEditingId(row.id);
-                                      setEditValues({ title: row.title, client: row.client, status: row.status });
+                                      setEditValues({
+                                        title: row.title,
+                                        client: row.client,
+                                        status: row.status,
+                                        price: row.price || "",
+                                      });
                                     }}
                                   >
                                     <MdOutlineEdit />
@@ -511,20 +445,22 @@ const CoursesTrainerDash = () => {
                                     type="button"
                                     className="inline-flex items-center gap-2 text-sm text-red-600 hover:underline"
                                     aria-label={`Delete ${row.title}`}
-                                    onClick={async () => {
-                                      const ok = window.confirm(`Delete course \"${row.title}\"?`);
+                                    onClick={() => {
+                                      const ok = window.confirm(
+                                        `Delete course "${row.title}"?`
+                                      );
                                       if (!ok) return;
-                                      try {
-                                        const res = await fetch(`/api/courses/${row.id}`, { method: 'DELETE' });
-                                        if (res.ok) {
-                                          setRows((rs) => rs.filter((r) => r.id !== row.id));
-                                        } else {
-                                          // fallback remove locally
-                                          setRows((rs) => rs.filter((r) => r.id !== row.id));
-                                        }
-                                      } catch (e) {
-                                        setRows((rs) => rs.filter((r) => r.id !== row.id));
-                                      }
+
+                                      setRows((rs) => {
+                                        const updated = rs.filter(
+                                          (r) => r.id !== row.id
+                                        );
+                                        localStorage.setItem(
+                                          "courses",
+                                          JSON.stringify(updated)
+                                        );
+                                        return updated;
+                                      });
                                     }}
                                   >
                                     <IoIosTrash />
@@ -557,7 +493,9 @@ const CoursesTrainerDash = () => {
                       <button
                         key={p}
                         onClick={() => setPage(p)}
-                        className={`px-3 py-1 rounded ${p === page ? 'underline' : ''}`}
+                        className={`px-3 py-1 rounded ${
+                          p === page ? "underline" : ""
+                        }`}
                       >
                         {p}
                       </button>

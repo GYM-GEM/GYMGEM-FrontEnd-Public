@@ -11,25 +11,31 @@ const AddCourse = () => {
   } = useForm();
 
   const navigate = useNavigate();
-
+  
   const onSubmit = (data) => {
     const course = {
       id: Date.now(),
       title: data.title,
-      client: data.client || "0",
-      status: data.status || "Draft",
-      category: data.category || "",
+      category: data.category,
+      level: data.level,
+      language: data.language,
+      description: data.description,
+      price: data.price,
+      status: data.status
+        ? data.status.charAt(0).toUpperCase() + data.status.slice(1)
+        : "Draft",
       img: data.coverUrl || "/assets/cardCo1.png",
-      description: data.description || "",
     };
 
-    // no backend in front-only mode — dispatch event and navigate with state
-    try {
-      window.dispatchEvent(new CustomEvent('courseCreated', { detail: course }));
-    } catch (e) {}
+    // حفظ الكورس في localStorage
+    const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    const updatedCourses = [course, ...savedCourses];
+    localStorage.setItem("courses", JSON.stringify(updatedCourses));
 
-    navigate('/trainer/courses', { state: { newCourse: course } });
+    // الانتقال لصفحة Add Lesson
+    navigate("/addlesson", { state: { course } });
   };
+
   return (
     <>
       <Navbar />
@@ -80,32 +86,16 @@ const AddCourse = () => {
                 <div>
                   <select
                     {...register("category", { required: true })}
-                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
+                    className="w-full border rounded-md p-[10px] text-[#000] poppins-extralight"
                   >
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value=""
-                    >
-                      Select Category
+                    <option value="">Select Category</option>
+                    <option value="Strength Training">Strength Training</option>
+                    <option value="Bodybuilding">Bodybuilding</option>
+                    <option value="Cardio">Cardio</option>
+                    <option value="Flexibility & Mobility">
+                      Flexibility & Mobility
                     </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="fitness"
-                    >
-                      Fitness
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="yoga"
-                    >
-                      Yoga
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="nutrition"
-                    >
-                      Nutrition
-                    </option>
+                    <option value="Nutrition">Nutrition</option>
                   </select>
                 </div>
               </div>
@@ -176,6 +166,29 @@ const AddCourse = () => {
                     </option>
                   </select>
                 </div>
+              </div>
+              <div>
+                <div className="pb-[0.25rem]">
+                  <label className="poppins-medium text-[1rem]">Price</label>
+                </div>
+                <div>
+                  <input
+                    {...register("price", {
+                      required: "Price is required",
+                      pattern: {
+                        value: /^\d+(\.\d{1,2})?$/,
+                        message: "Enter a valid price (max 2 decimals)",
+                      },
+                    })}
+                    placeholder="99.99"
+                    className="w-full border rounded-md p-[10px] text-[#000] poppins-extralight"
+                  />
+                </div>
+                {errors.price && (
+                  <p className="text-red-500 text-sm mt-1">
+                    {errors.price.message}
+                  </p>
+                )}
               </div>
 
               <div>
@@ -260,7 +273,7 @@ const AddCourse = () => {
                   type="submit"
                   className="bg-[#FF8211] text-white text-[18px] items-center h-[32px] w-[121px] rounded-full  shadow-md transition duration-150 ease-in-out hover:opacity-80 focus:opacity-90 active:opacity-100 bebas-regular"
                 >
-                  NEXT 
+                  NEXT
                 </button>
               </div>
             </form>

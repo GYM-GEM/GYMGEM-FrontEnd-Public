@@ -42,6 +42,7 @@ import TrainerprofileDash from "./components/Dashboard/Trainer/TrainerprofileDas
 import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
 import TraineProfileDash from "./components/Dashboard/Traine/TraineProfileDash.jsx";
 import CoursesTraineDash from "./components/Dashboard/Traine/CoursesTraineDash.jsx";
+import CourseDetails from "./components/courses/CourseDetails.jsx";
 
 function App() {
   const location = useLocation();
@@ -59,9 +60,9 @@ function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="requestdetails" element={<RequestDetails />} />
           <Route path="addcourse" element={<AddCourse />} />
-          <Route path="newlesson" element={<NewLeason />} />
+          <Route path="addlesson" element={<NewLeason />} />
           <Route path="community" element={<Community />} />
-          <Route path="coursedetails" element={<Coursedetails />} />
+          <Route path="/courses/:id" element={<CourseDetails />} />
           <Route path="viewprofile" element={<Viewprofile />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />

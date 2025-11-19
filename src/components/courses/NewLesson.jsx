@@ -2,16 +2,39 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const NewLeason = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const course = location.state?.course;
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log(data);
+  const onSubmit = (lessonData) => {
+    if (!course) return;
+
+    const newLesson = {
+      ...lessonData,
+      courseId: course.id, // link to parent course
+    };
+
+    // حفظ في localStorage
+    const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    const updatedCourses = savedCourses.map((c) =>
+      c.id === course.id
+        ? { ...c, lessons: [...(c.lessons || []), newLesson] }
+        : c
+    );
+
+    localStorage.setItem("courses", JSON.stringify(updatedCourses));
+
+    // توجيه بعد الحفظ
+    navigate(`/trainer/courses`); // أو أي مسار تحب تروّحله
   };
   return (
     <>
@@ -63,7 +86,7 @@ const NewLeason = () => {
                 </div>
                 <div>
                   <input
-                    {...register("title", { required: true })}
+                    {...register("cover")}
                     placeholder="Paste your course cover image link"
                     className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
                   />
@@ -81,7 +104,7 @@ const NewLeason = () => {
                 </div>
                 <div>
                   <input
-                    {...register("coverUrl")}
+                    {...register("duration")}
                     placeholder="e.g. 00:45:00"
                     className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
                   />
@@ -96,7 +119,7 @@ const NewLeason = () => {
                 </div>
                 <div>
                   <textarea
-                    {...register("description", { required: true })}
+                    {...register("description")}
                     placeholder="Write a short description about your course"
                     className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight h-[125px]"
                     rows={4}

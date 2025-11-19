@@ -15,9 +15,8 @@ function Navbar() {
 
   const logout = async (e) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user"));
-    const token = user.refresh;
-    const access = user.access;
+    const token = localStorage.getItem('refresh');
+    const access = localStorage.getItem('access');
     try {
       const response = await axios.post(
         "http://127.0.0.1:8000/api/auth/logout",
@@ -77,8 +76,7 @@ function Navbar() {
   const linkBase =
     "rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200";
   const resolveLinkClass = (isActive) =>
-    `${linkBase} ${
-      isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+    `${linkBase} ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
     }`;
 
   return (
@@ -89,17 +87,15 @@ function Navbar() {
           className="flex items-center gap-2 text-lg font-semibold tracking-wide transition hover:text-primary/80"
         >
           <FaGem
-            className={`text-[#86ac55] transition-transform duration-500 ${
-              showFullName ? "scale-105" : "scale-100"
-            }`}
+            className={`text-[#86ac55] transition-transform duration-500 ${showFullName ? "scale-105" : "scale-100"
+              }`}
           />
           <span className="relative h-6 w-24 overflow-hidden">
             <span
-              className={` absolute inset-0 font-bebas text-2xl  text-[#ff8211] transition-all duration-500 ${
-                showGG
-                  ? "translate-y-0 opacity-100"
-                  : "-translate-y-2 opacity-0"
-              }`}
+              className={` absolute inset-0 font-bebas text-2xl  text-[#ff8211] transition-all duration-500 ${showGG
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-2 opacity-0"
+                }`}
             >
               GG
             </span>
@@ -112,11 +108,10 @@ function Navbar() {
                   <span
                     key={char + index}
                     style={{ transitionDelay: `${delay}s` }}
-                    className={` transition-all duration-300 ${
-                      showFullName
-                        ? "translate-y-0 opacity-100"
-                        : "translate-y-2 opacity-0"
-                    }`}
+                    className={` transition-all duration-300 ${showFullName
+                      ? "translate-y-0 opacity-100"
+                      : "translate-y-2 opacity-0"
+                      }`}
                   >
                     {char}
                   </span>
@@ -139,9 +134,8 @@ function Navbar() {
 
         <div
           id="primary-navigation"
-          className={`absolute left-0 top-full w-full border-b border-border bg-background px-4 pb-4 pt-2 shadow-lg transition-all duration-200 md:static md:flex md:w-auto md:items-center md:gap-4 md:border-none md:bg-transparent md:p-0 md:shadow-none ${
-            isOpen ? "flex flex-col" : "hidden md:flex"
-          }`}
+          className={`absolute left-0 top-full w-full border-b border-border bg-background px-4 pb-4 pt-2 shadow-lg transition-all duration-200 md:static md:flex md:w-auto md:items-center md:gap-4 md:border-none md:bg-transparent md:p-0 md:shadow-none ${isOpen ? "flex flex-col" : "hidden md:flex"
+            }`}
         >
           <NavLink
             to="/"
@@ -301,7 +295,7 @@ function Navbar() {
                     </NavLink>
                     <button
                       onClick={(event) => logout(event)}
-                      className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted"
+                      className="w-full text-left px-4 py-2 text-sm text-foreground hover:black cursor-pointer"
                     >
                       Logout
                     </button>

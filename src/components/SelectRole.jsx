@@ -81,8 +81,8 @@ const Selectrole = () => {
   };
 
   return (
-    <section className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10">
+    <section className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8 w-full">
+      <div className="mx-auto flex w-[80%]  flex-col gap-10">
         <header className="space-y-4 text-center">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
             Choose your role

@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import Cover_img from "../assets/fitCartoon3.png";
+import Cover_img from "../../assets/fitCartoon3.png";
 import axios from "axios";
-import GoogleLogin from "../components/GoogleLogin.jsx";
+import GoogleLogin from "../../components/GoogleLogin.jsx";
 
 function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,7 +21,6 @@ const LoginPage = () => {
   useEffect(() => {
     // Google sign-in handled by `GoogleLogin` component.
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
 
   // Google sign-in is handled by `GoogleLogin` component which posts the id_token.
   const onSubmit = async (e) => {

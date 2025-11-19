@@ -17,9 +17,9 @@ const Trainerexp = () => {
     const onSubmit = async (data) => {
 
         const user = JSON.parse(localStorage.getItem("user"));
-        const payload = { ...data, account_id: user.account.id };
+        const payload = { ...data, account_id: user.id };
         console.log(payload)
-        const token = user.access
+        const token = localStorage.getItem("access");
         try {
             // Send POST request to backend
             const response = await axios.post("http://127.0.0.1:8000/api/trainers/experiences", payload,

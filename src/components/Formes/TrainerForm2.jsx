@@ -18,9 +18,9 @@ const TrainerFormProfessional = () => {
   const onSubmit = async (data) => {
 
     const user = JSON.parse(localStorage.getItem("user"));
-    const payload = { ...data, account_id: user.account.id };
+    const payload = { ...data, account_id: user.id };
     console.log(payload)
-    const token = user.access
+    const token = localStorage.getItem('access')
     try {
       // Send POST request to backend
       const response = await axios.post("http://127.0.0.1:8000/api/trainers/specializations", payload,
@@ -78,7 +78,7 @@ const TrainerFormProfessional = () => {
                 <option value={4}>Cardio</option>
                 <option value={3}>Yoga</option>
                 <option value={2}>Fitness</option>
-                <option value={1}>Box</option>
+                <option value={1}>Boxing</option>
               </select>
               {errors.specialization && (
                 <p className="text-red-500 text-sm mt-1">

@@ -8,7 +8,7 @@ import Navbar from "../components/Navbar.jsx";
 
 function Home() {
   return (
-    <>
+    <div className="bg-background text-foreground">
       <Navbar />
       <HeroSc />
       <WhatWeOffer />
@@ -16,7 +16,7 @@ function Home() {
       <ForTrainers />
       <NutritionSec />
       <Footer />
-    </>
+    </div>
   );
 }
 

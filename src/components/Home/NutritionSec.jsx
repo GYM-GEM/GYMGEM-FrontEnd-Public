@@ -1,88 +1,87 @@
 import { Check, Clock, Dumbbell } from "lucide-react";
-import Nutrition from "../../assets/Nutrition & Diet Plans.png";
+import Nutrition from "../../assets/Nutrition & Diet Plans.jpg";
 
 function NutritionSec() {
   return (
-    <section className="w-full  pt-[3.75rem] pb-[3.75rem]">
-      <div className="flex flex-col lg:flex-row  w-full overflow-hidden bg-[#FFF8F0]">
-        <div className="lg:w-[75%] flex flex-col justify-center">
-          {/* -------------------------------------------------------------------- */}
-          <div className=" w-[80%] mx-auto mt-[3.75rem]">
-            <div>
-              <h3 className="text-[2.5rem] font-bold text-[#FF8211] uppercase tracking-wider font-bebas ">
-                Nutrition & Diet Plans
-              </h3>
-            </div>
-            <div className="mt-[0.5rem] w-[100%]">
-              <p className="lg:text-[1.5rem] md:text-xl  text-[#555555] poppins-regular leading-[2rem]  ">
-                Eat smarter, train better. Get personalized meal plans and
-                expert nutrition advice designed to match your fitness goals.
-              </p>
-            </div>
-          </div>
-          {/* -------------------------------------------------------------------- */}
-          <div className=" mt-[3.75rem] w-[80%] mx-auto ">
-            <div>
-              <div className="flex items-start ">
-                <Check className="w-5 h-5 text-[#6AA84F] mr-3 mt-[2px] flex-shrink-0" />
-                <h4 className="text-[1rem] font-semibold text-[#333333] poppins-medium">
-                  Personalized Meal Plans
-                </h4>
-              </div>
-              <div className="pt-[0.5rem]">
-                <p className="text-gray-700 text-base ml-8 poppins-regular">
-                  Receive tailored nutrition programs based on your fitness
-                  level, preferences, and goals.
-                </p>
-              </div>
-            </div>
+    <section className="w-full bg-background py-20">
+      <div className="mx-auto flex w-[80%] flex-col overflow-hidden rounded-[32px] border border-border bg-card shadow-sm lg:flex-row">
+        <div className="flex flex-1 flex-col justify-center gap-10 px-6 py-12 sm:px-10 lg:px-12">
+          <header className="space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              Nutrition &amp; diet plans
+            </p>
+            <h3 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl text-[#FF8211]">
+              Eat smarter so your training lasts longer
+            </h3>
+            <p className="text-base text-muted-foreground sm:text-lg text-[#555555]">
+              Get calm, personalized nutrition coaching that aligns your meals
+              with the way you train and recover.
+            </p>
+          </header>
 
-            <div className="pt-[1rem]">
-              <div className="flex items-start ">
-                <Clock className="w-5 h-5 text-[#4A86E8] mr-3 mt-[2px] flex-shrink-0" />
-                <h4 className="text-lg font-semibold text-[#333333] poppins-medium">
-                  Expert Guidance
-                </h4>
+          <div className="space-y-6">
+            <div className="flex gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Check className="h-4 w-4" />
               </div>
-              <div className="pt-[0.5rem]">
-                <p className="text-gray-700 text-base ml-8 poppins-regular">
-                  Work with certified nutritionists and diet coaches who help
-                  you stay consistent.
-                </p>
+              <div>
+                <dt className="text-sm font-semibold text-foreground">
+                  Personalized meal plans
+                </dt>
+                <dd className="mt-1 text-sm text-muted-foreground">
+                  Receive plans adapted to your nutrition preferences, energy
+                  output, and lifestyle.
+                </dd>
               </div>
             </div>
-
-            <div className="pt-[1rem]">
-              <div className="flex items-start mb-1">
-                <Dumbbell className="w-5 h-5 text-[#134F5C] mr-3 mt-[2px] flex-shrink-0" />
-                <h4 className="text-lg font-semibold text-[#333333] poppins-medium">
-                  Track Your Progress
-                </h4>
+            <div className="flex gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 text-secondary">
+                <Clock className="h-4 w-4" />
               </div>
-              <div className="pt-[0.5rem]">
-                <p className="text-gray-700 text-base ml-8 poppins-regular">
-                  Monitor your calories, macros, and results all in one
-                  dashboard.
-                </p>
+              <div>
+                <dt className="text-sm font-semibold text-foreground">
+                  Expert guidance
+                </dt>
+                <dd className="mt-1 text-sm text-muted-foreground">
+                  Work with certified nutritionists who help you align macros,
+                  hydration, and recovery.
+                </dd>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/40 text-foreground">
+                <Dumbbell className="h-4 w-4" />
+              </div>
+              <div>
+                <dt className="text-sm font-semibold text-foreground">
+                  Track your progress
+                </dt>
+                <dd className="mt-1 text-sm text-muted-foreground">
+                  Monitor meals, milestones, and performance trends from a
+                  single, intuitive dashboard.
+                </dd>
               </div>
             </div>
           </div>
-          <div className="flex flex-col justify-end w-full items-end pb-[1rem]">
+
+          <div className="flex justify-start">
             <a
               href="#"
-              className="mt-12 pe-[0.5rem] text-[#FF8211] poppins-regular text-lg hover:text-[#FFAB63]   transition duration-300 "
+              className="inline-flex items-center text-[#FF8211] gap-2 text-sm font-semibold text-primary transition hover:text-primary/80"
             >
-              Explore Nutrition Plans
-              <span className="ml-2 text-xl">→</span>
+              Explore nutrition plans
+              <span aria-hidden>→</span>
             </a>
           </div>
         </div>
 
-        <div className="lg:w-[50%] relative">
-          <div
-            className="w-full h-full bg-cover bg-center clip-diagonal2"
-            style={{ backgroundImage: `url(${Nutrition})` }}
-          ></div>
+        <div className="relative h-80 w-full flex-1 lg:h-auto">
+          <div className="absolute inset-0 bg-gradient-to-br from-background/10 via-transparent to-background/50" />
+          <img
+            src={Nutrition}
+            alt="Nutrition and diet plans"
+            className="h-full w-full object-cover"
+          />
         </div>
       </div>
     </section>

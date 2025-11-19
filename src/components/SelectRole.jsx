@@ -1,40 +1,73 @@
-import trainer from "../assets/1trainer.png";
-import trainer1 from "../assets/trainer1.png";
-import weight from "../assets/weight.png";
-import store from "../assets/store.png";
-import Nutrition from "../assets/nutritionist.png";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { useState } from "react";
-import { Pause } from "lucide-react";
+import traineeIcon from "../assets/trainer1.png";
+import trainerIcon from "../assets/1trainer.png";
+import gymIcon from "../assets/weight.png";
+import storeIcon from "../assets/store.png";
+import nutritionIcon from "../assets/nutritionist.png";
+
+const roles = [
+  {
+    id: "trainee",
+    title: "Trainee",
+    description:
+      "Find trainers, programs, and nutrition plans tailored to your pace.",
+    icon: traineeIcon,
+  },
+  {
+    id: "trainer",
+    title: "Trainer",
+    description:
+      "Create programs, guide trainees, and manage your sessions with ease.",
+    icon: trainerIcon,
+  },
+  {
+    id: "gym",
+    title: "Gym",
+    description:
+      "Manage facilities, trainers, and memberships from one calm dashboard.",
+    icon: gymIcon,
+  },
+  {
+    id: "store",
+    title: "Store",
+    description:
+      "Showcase verified products, supplements, and gear to the GymGem community.",
+    icon: storeIcon,
+  },
+  {
+    id: "nutrition",
+    title: "Nutrition Specialist",
+    description:
+      "Offer meal plans and ongoing nutrition support to motivated clients.",
+    icon: nutritionIcon,
+  },
+];
+
 const Selectrole = () => {
   const navigate = useNavigate();
-
-
-
   const [selectedRole, setSelectedRole] = useState("");
-
-
 
   const onSubmit = async () => {
     if (!selectedRole) {
       alert("Please select a role first!");
       return;
     }
+
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const payload = { profile_type: selectedRole, account: user.account.id };
-      console.log(user)
-      console.log(payload)
-      const token = user.access
-      console.log(token)
+      const payload = { profile_type: selectedRole, account: user.id };
+      const token = localStorage.getItem("access");
+
       const response = await axios.post(
         "http://127.0.0.1:8000/api/profiles/create",
         payload,
         {
-          headers: {Authorization: `Bearer ${token}`}
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
+
       console.log("Response:", response.data);
       alert(`${selectedRole} profile created successfully!`);
 
@@ -47,132 +80,77 @@ const Selectrole = () => {
     }
   };
 
-
-
-
-
-
   return (
-    <>
-      <section className="w-full bg-white">
-        <div className="w-[80%] mx-auto">
-          <div className="flex flex-col justify-center items-center w-full pt-[4rem] pb-[72px]">
-            <h1 className="bebas-bold text-[64px] text-[#FF8211]">Select Your Role</h1>
-          </div>
+    <section className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8 w-full">
+      <div className="mx-auto flex w-[80%]  flex-col gap-10">
+        <header className="space-y-4 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+            Choose your role
+          </p>
+          <h1 className="font-bebas text-4xl tracking-tight sm:text-5xl text-[#ff8211]">
+            Tell us how you want to use GymGem
+          </h1>
+          <p className="mx-auto max-w-3xl text-base text-muted-foreground  text-[#555555] sm:text-lg">
+            Select the workspace that matches your goals. You can always add
+            more roles later to collaborate across training, nutrition, and
+            commerce.
+          </p>
+        </header>
 
-          <div className="flex flex-wrap justify-center items-center gap-[1rem]">
-            <div
-              onClick={() => setSelectedRole("trainee")}
-              className={`group rounded-[1rem] p-[2rem] w-[30%] h-[270px] shadow-md transition-all duration-300 cursor-pointer border border-transparent
-    ${selectedRole === "trainee"
-                  ? "bg-[#FF8211] text-white shadow-lg -translate-y-1"
-                  : "bg-white text-[#111111] hover:bg-[#FF8211] hover:text-white hover:shadow-lg hover:-translate-y-1"
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {roles.map((role) => {
+            const isSelected = role.id === selectedRole;
+            return (
+              <button
+                key={role.id}
+                type="button"
+                onClick={() => setSelectedRole(role.id)}
+                className={`cursor-pointer group flex h-full flex-col justify-between rounded-3xl border border-border bg-card/80 p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-[#ff8211] hover:text-white ${
+                  isSelected ? "bg-[#ff8211] text-white" : ""
                 }`}
-            >
-              <div className="pb-[0.25rem]">
-                <img src={trainer1} width="50px" height="50px" />
-              </div>
-              <div className={`pb-[0.75rem] bebas-bold text-[2rem] ${selectedRole === "trainee" ? "text-white" : "text-[#111111] group-hover:text-white"}`}>
-                <h4>Trainee</h4>
-              </div>
-              <p className={`${selectedRole === "trainee" ? "text-white" : "text-[#555555] group-hover:text-white"} poppins-regular text-[1.5rem]`}>
-                Find courses, trainers, and nutrition plans to reach your goals.
-              </p>
-            </div>
-
-
-            <div
-              onClick={() => setSelectedRole("trainer")}
-              className={`group rounded-[1rem] p-[2rem] w-[30%] h-[270px] shadow-md transition-all duration-300 cursor-pointer border border-transparent
-           ${selectedRole === "trainer"
-                  ? "bg-[#FF8211] text-white shadow-lg -translate-y-1"
-                  : "bg-white text-[#111111] hover:bg-[#FF8211] hover:text-white hover:shadow-lg hover:-translate-y-1"
-                }`}
-            >
-              <div className="pb-[0.25rem]">
-                <img src={trainer} width="50px" height="50px" />
-              </div>
-              <div className={`pb-[0.75rem] bebas-bold text-[2rem] ${selectedRole === "trainer" ? "text-white" : "text-[#111111] group-hover:text-white"}`}>
-                <h4>Trainer</h4>
-              </div>
-              <p className={`${selectedRole === "trainer" ? "text-white" : "text-[#555555] group-hover:text-white"} poppins-regular text-[1.5rem]`}>
-                Create programs, guide trainees, and manage your sessions.
-              </p>
-            </div>
-
-
-            <div
-              onClick={() => setSelectedRole("gym")}
-              className={`group rounded-[1rem] p-[2rem] w-[30%] h-[270px] shadow-md transition-all duration-200 cursor-pointer border border-transparent
-    ${selectedRole === "gym"
-                  ? "bg-[#FF8211] text-white shadow-lg -translate-y-1"
-                  : "bg-white text-[#111111] hover:bg-[#FF8211] hover:text-white hover:shadow-lg hover:-translate-y-1"
-                }`}
-            >
-              <div className="pb-[0.25rem]">
-                <img src={weight} width="50px" height="50px" />
-              </div>
-              <div className={`pb-[0.75rem] bebas-bold text-[2rem] ${selectedRole === "gym" ? "text-white" : "text-[#111111] group-hover:text-white"}`}>
-                <h4>Gym</h4>
-              </div>
-              <p className={`${selectedRole === "gym" ? "text-white" : "text-[#555555] group-hover:text-white"} poppins-regular text-[1.5rem]`}>
-                Manage your gym, trainers, and members easily.
-              </p>
-            </div>
-
-
-            <div
-              onClick={() => setSelectedRole("store")}
-              className={`group rounded-[1rem] p-[2rem] w-[30%] h-[270px] shadow-md transition-all duration-200 cursor-pointer border border-transparent
-    ${selectedRole === "store"
-                  ? "bg-[#FF8211] text-white shadow-lg -translate-y-1"
-                  : "bg-white text-[#111111] hover:bg-[#FF8211] hover:text-white hover:shadow-lg hover:-translate-y-1"
-                }`}
-            >
-              <div className="pb-[0.25rem]">
-                <img src={store} width="50px" height="50px" />
-              </div>
-              <div className={`pb-[0.75rem] bebas-bold text-[2rem] ${selectedRole === "store" ? "text-white" : "text-[#111111] group-hover:text-white"}`}>
-                <h4>Store</h4>
-              </div>
-              <p className={`${selectedRole === "store" ? "text-white" : "text-[#555555] group-hover:text-white"} poppins-regular text-[1.5rem]`}>
-                Sell fitness products, supplements, and gear online.
-              </p>
-            </div>
-
-            <div
-              onClick={() => setSelectedRole("nutrition")}
-              className={`group rounded-[1rem] p-[2rem] w-[30%] h-[270px] shadow-md transition-all duration-200 cursor-pointer border border-transparent
-    ${selectedRole === "nutrition"
-                  ? "bg-[#FF8211] text-white shadow-lg -translate-y-1"
-                  : "bg-white text-[#111111] hover:bg-[#FF8211] hover:text-white hover:shadow-lg hover:-translate-y-1"
-                }`}
-            >
-              <div className="pb-[0.25rem]">
-                <img src={Nutrition} width="50px" height="50px" />
-              </div>
-              <div className={`pb-[0.75rem] bebas-bold text-[2rem] ${selectedRole === "nutrition" ? "text-white" : "text-[#111111] group-hover:text-white"}`}>
-                <h4>Nutrition Specialist</h4>
-              </div>
-              <p className={`${selectedRole === "nutrition" ? "text-white" : "text-[#555555] group-hover:text-white"} poppins-regular text-[1.5rem]`}>
-                Offer diet plans and guide clients to healthier lifestyles.
-              </p>
-            </div>
-          </div>
-
-
-          <div className="flex justify-center mt-6">
-            <button
-              onClick={onSubmit}
-              disabled={!selectedRole}
-              className="py-3 px-6 bg-[#FF8211] text-white rounded-md font-bold hover:bg-[#e9750f] disabled:opacity-50"
-            >
-              Confirm Role
-            </button>
-          </div>
+              >
+                <div className="space-y-4">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                    <img
+                      src={role.icon}
+                      alt={role.title}
+                      className="h-8 w-8 object-contain"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <h2 className="font-bebas text-2xl text-foreground">
+                      {role.title}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      {role.description}
+                    </p>
+                  </div>
+                </div>
+                <span
+                  className={`pt-4 text-sm font-semibold transition ${
+                    isSelected
+                      ? "text-primary"
+                      : "text-muted-foreground group-hover:text-primary"
+                  }`}
+                >
+                  {isSelected ? "Selected" : "Select"} →
+                </span>
+              </button>
+            );
+          })}
         </div>
-      </section>
-    </>
+
+        <div className="flex justify-center pt-4">
+          <button
+            onClick={onSubmit}
+            disabled={!selectedRole}
+            className="cursor-pointer inline-flex h-12 min-w-[200px] items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Confirm role
+          </button>
+        </div>
+      </div>
+    </section>
   );
 };
 

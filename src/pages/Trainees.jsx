@@ -1,142 +1,171 @@
-import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
-import Button from "../components/Button";
+import Footer from "../components/Footer";
 import TraineesCardData from "../js/TraineesCardData";
+import { Link } from "react-router-dom";
+import { useState } from "react";
+
 function Trainees() {
+  const [selectedFilter, setSelectedFilter] = useState("All Requests");
+
+  const filterOptions = [
+    {
+      label: "All Requests",
+      icon: "✨",
+      bgColor: "bg-muted",
+      textColor: "text-muted-foreground",
+      hoverColor: "hover:bg-primary/10 hover:text-primary hover:shadow-sm",
+      activeColor:
+        "bg-primary/10 text-primary shadow-sm ring-2 ring-primary/20",
+    },
+    {
+      label: "Weight Loss",
+      icon: "🏃",
+      bgColor: "bg-orange-50",
+      textColor: "text-orange-700",
+      hoverColor: "hover:bg-orange-100 hover:shadow-md hover:-translate-y-0.5",
+      activeColor:
+        "bg-orange-100 text-orange-800 shadow-md ring-2 ring-orange-300",
+    },
+    {
+      label: "Strength & Conditioning",
+      icon: "🏋️",
+      bgColor: "bg-blue-50",
+      textColor: "text-blue-700",
+      hoverColor: "hover:bg-blue-100 hover:shadow-md hover:-translate-y-0.5",
+      activeColor: "bg-blue-100 text-blue-800 shadow-md ring-2 ring-blue-300",
+    },
+    {
+      label: "Mobility & Yoga",
+      icon: "🧘",
+      bgColor: "bg-green-50",
+      textColor: "text-green-700",
+      hoverColor: "hover:bg-green-100 hover:shadow-md hover:-translate-y-0.5",
+      activeColor:
+        "bg-green-100 text-green-800 shadow-md ring-2 ring-green-300",
+    },
+    {
+      label: "Nutrition Support",
+      icon: "🥗",
+      bgColor: "bg-amber-50",
+      textColor: "text-amber-700",
+      hoverColor: "hover:bg-amber-100 hover:shadow-md hover:-translate-y-0.5",
+      activeColor:
+        "bg-amber-100 text-amber-800 shadow-md ring-2 ring-amber-300",
+    },
+    {
+      label: "Accountability Coaching",
+      icon: "📋",
+      bgColor: "bg-purple-50",
+      textColor: "text-purple-700",
+      hoverColor: "hover:bg-purple-100 hover:shadow-md hover:-translate-y-0.5",
+      activeColor:
+        "bg-purple-100 text-purple-800 shadow-md ring-2 ring-purple-300",
+    },
+  ];
+
   return (
-    <>
+    <div className="bg-background text-foreground">
       <Navbar />
-      <section className="w-full">
-        <div className="w-[80%] m-auto s  flex justify-center items-center gap-[11px] flex-wrap mb-[2rem]">
-          <div className="flex flex-col justify-start w-[100%] pt-[2rem] pb-[3rem]">
-            <div className="pb-[3px]">
-              <h1 className="text-[#FF8211] text-[4rem] bebas-medium">
-                Connect with Trainees Who Need Your Expertise
-              </h1>
-            </div>
-            <div>
-              <p className="text-[#555555] text-[1rem] poppins-regular">
-                Browse personalized training requests and help clients achieve
-                their fitness goals.
-              </p>
-            </div>
-          </div>
-          <div className="w-full flex justify-center gap-[1rem] pb-[40px]">
-            <div className="w-full">
-              {" "}
-              <Button
-                text="All Courses"
-                color="#FFF3E6"
-                textColor="#FF8211"
-                width="100%"
-                height="70px"
-                to="/courses"
-              />
-            </div>
-            <div className="w-full">
-              {" "}
-              <Button
-                text="🧘 Yoga & Flexibility"
-                color="#A3D9A5"
-                textColor="#000000"
-                width="100%"
-                height="70px"
-                to="/courses"
-              />
-            </div>
-            <div className="w-full">
-              {" "}
-              <Button
-                text="🏃 Weight Loss & Cardio"
-                color="#FFB56B"
-                textColor="#000000"
-                width="100%"
-                height="70px"
-                to="/courses"
-              />
-            </div>
-            <div className="w-full">
-              {" "}
-              <Button
-                text="🥗 Nutrition Coaches"
-                color="#C8E57C"
-                textColor="#fff"
-                width="100%"
-                height="70px"
-                to="/courses"
-              />
-            </div>
-            <div className="w-full">
-              {" "}
-              <Button
-                text="🏋️ Strength & Conditioning"
-                color="#D0D4E4"
-                textColor="#000000"
-                width="100%"
-                height="70px"
-                to="/courses"
-              />
-            </div>
-            <div className="w-full">
-              {" "}
-              <Button
-                text="🥊 Boxing & MMA"
-                color="#FF5C5C"
-                textColor="#fff"
-                width="100%"
-                height="70px"
-                to="/courses"
-              />
+      <section className="w-full bg-background">
+        <div className="mx-auto flex w-[80%] flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
+          <header className="space-y-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              Trainee requests
+            </p>
+            <h1 className="font-bebas text-4xl tracking-tight text-foreground sm:text-5xl text-[#ff8211]">
+              Connect with trainees who need your expertise
+            </h1>
+            <p className="max-w-2xl text-base text-muted-foreground sm:text-lg text-[#555555]">
+              Browse personalized goals and reach out to clients looking for
+              coaching, accountability, and structured support.
+            </p>
+          </header>
+
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">
+              Filter by category:
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {filterOptions.map((option) => {
+                const isActive = selectedFilter === option.label;
+                return (
+                  <button
+                    key={option.label}
+                    type="button"
+                    onClick={() => setSelectedFilter(option.label)}
+                    className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border border-transparent px-3 py-1.5 text-xs font-medium transition-all duration-200 ease-in-out ${
+                      isActive
+                        ? option.activeColor
+                        : `${option.bgColor} ${option.textColor} ${option.hoverColor}`
+                    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background active:scale-95`}
+                  >
+                    <span className="text-sm leading-none">{option.icon}</span>
+                    <span>{option.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
-          {/*-------------------------------- card-------------------------- */}
+        </div>
+      </section>
+
+      <section className="w-full bg-background pb-20">
+        <div className="mx-auto flex w-[80%] flex-col gap-6 px-4 sm:px-6 lg:px-8">
           {TraineesCardData.map((item) => (
-            <div className="w-full flex justify-center">
-              <div className="w-[75%]  justify-between items-center border border-[#E5E7EB] rounded-2xl  bg-white">
-                <div className="flex justify-between items-center w-full pt-[1.5rem] pb-[1.5rem] pl-[1rem] pr-[1rem]  ">
-                  <div>
-                    <h3 className="text-[#000] text-[1.5rem] bebas-regular">
-                      {item.title}
-                    </h3>
-                  </div>
-                  <div>
-                    <Button
-                      text="Apply Now"
-                      color="#FF8211"
-                      textColor="#fff"
-                      width="109px"
-                      height="40px"
-                      to="/requestdetails"
-                      rounded="md"
-                      uppercase={false}
-                    />
-                  </div>
+            <article
+              key={item.id}
+              className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md"
+            >
+              <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-start sm:justify-between sm:p-8">
+                <div className="max-w-3xl space-y-3">
+                  <h2 className="font-bebas text-2xl text-foreground">
+                    {item.title}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">{item.desc}</p>
+                  <dl className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-6">
+                    <div className="flex items-center gap-2">
+                      <span role="img" aria-label="location">
+                        📍
+                      </span>
+                      <span className="font-medium text-foreground">
+                        Location:
+                      </span>
+                      <span>{item.Location}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span role="img" aria-label="duration">
+                        🕒
+                      </span>
+                      <span className="font-medium text-foreground">
+                        Duration:
+                      </span>
+                      <span>{item.Duration}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span role="img" aria-label="goal">
+                        💪
+                      </span>
+                      <span className="font-medium text-foreground">Goal:</span>
+                      <span>{item.Goal}</span>
+                    </div>
+                  </dl>
                 </div>
-                <div className="border-t border-[#E5E7EB] justify-center items-center w-full">
-                  <div className="pl-[3.1875rem] pr-[3.1875rem]">
-                    <p className="pt-[1rem] text-[#4B5563] text-[1rem]">
-                      {item.desc}
-                    </p>
-                  </div>
-                  <div className="flex justify-around pt-[1rem] pb-[3.875rem]">
-                    <h4 className="text-[1rem] text-[#6B7280] bebas-regular">
-                      📍 Location: {item.Location}
-                    </h4>
-                    <h4 className="text-[1rem] text-[#6B7280] bebas-regular">
-                      🕒 Duration: {item.Duration}
-                    </h4>
-                    <h4 className="text-[1rem] text-[#6B7280] bebas-regular">
-                      💪 Goal: {item.Goal}
-                    </h4>
-                  </div>
+
+                <div className="flex shrink-0 items-center justify-start sm:justify-end">
+                  <Link
+                    to="/requestdetails"
+                    className="inline-flex items-center justify-center rounded-xl bg-[#FF8211] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#A3D9A5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
+                    Apply now
+                  </Link>
                 </div>
               </div>
-            </div>
+            </article>
           ))}
         </div>
       </section>
       <Footer />
-    </>
+    </div>
   );
 }
 

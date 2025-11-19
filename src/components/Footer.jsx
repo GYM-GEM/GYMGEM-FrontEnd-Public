@@ -15,114 +15,143 @@ import { FaGem } from "react-icons/fa";
 
 function Footer() {
   return (
-    <footer className="bg-[#FFF8F0] text-center w-[100%] ">
-      <div className="w-[80%] m-auto">
-        <div className="flex items-center justify-center border-b-2 border-neutral-200 p-6 dark:border-white/10 lg:justify-between">
-          <div className="me-12 hidden lg:block">
-            <span className="text-black">
-              Get connected with us on social networks:
-            </span>
+    <footer className="border-t border-border bg-muted/40 text-muted-foreground w-full">
+      <div className="mx-auto w-[80%]  px-4 py-12 sm:px-6 lg:px-8">
+        <div className="flex flex-col items-center justify-between gap-6 border-b border-border/60 pb-8 text-center sm:flex-row sm:text-left">
+          <div className="flex items-center gap-3 text-foreground">
+            <FaGem className="text-xl text-secondary" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Stay in sync with GymGem
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Follow along for new programs, community highlights, and product
+                updates.
+              </p>
+            </div>
           </div>
 
-          <div className="flex justify-center gap-6">
-            <a href="#!" className="hover:text-blue-600">
-              <Facebook size={25} />
-            </a>
-            <a href="#!" className="hover:text-sky-500">
-              <Twitter size={25} />
-            </a>
-            <a href="#!" className="hover:text-pink-500">
-              <Instagram size={25} />
-            </a>
-            <a href="#!" className="hover:text-red-600">
-              <Youtube size={25} />
-            </a>
-            <a href="#!" className="hover:text-gray-900 dark:hover:text-white">
-              <Github size={25} />
-            </a>
-            <a href="#!" className="hover:text-blue-700">
-              <Linkedin size={25} />
-            </a>
-          </div>
-        </div>
-
-        <div className="mx-6 py-10 text-center md:text-left">
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            <div>
-              <h6 className="text-[#FF7A00] mb-4 flex items-center justify-center font-semibold uppercase md:justify-start">
-                <FaGem className="text-2xls mr-2 text-[#81a346]" />
-                GYMGEM
-              </h6>
-              <p>
-                Here you can use rows and columns to organize your footer
-                content. Lorem ipsum dolor sit amet, consectetur adipisicing
-                elit.
-              </p>
-            </div>
-
-            <div>
-              <h6 className="mb-4 flex justify-center font-semibold uppercase md:justify-start">
-                Products
-              </h6>
-              <p className="mb-4">
-                <a href="#!">Angular</a>
-              </p>
-              <p className="mb-4">
-                <a href="#!">React</a>
-              </p>
-              <p className="mb-4">
-                <a href="#!">Vue</a>
-              </p>
-              <p>
-                <a href="#!">Laravel</a>
-              </p>
-            </div>
-
-            <div>
-              <h6 className="mb-4 flex justify-center font-semibold uppercase md:justify-start">
-                Useful links
-              </h6>
-              <p className="mb-4">
-                <a href="#!">Pricing</a>
-              </p>
-              <p className="mb-4">
-                <a href="#!">Settings</a>
-              </p>
-              <p className="mb-4">
-                <a href="#!">Orders</a>
-              </p>
-              <p>
-                <a href="#!">Help</a>
-              </p>
-            </div>
-
-            <div>
-              <h6 className="mb-4 flex justify-center font-semibold uppercase md:justify-start">
-                Contact
-              </h6>
-              <p className="mb-4 flex items-center justify-center md:justify-start">
-                <Home className="me-3 h-5 w-5" />
-                New York, NY 10012, US
-              </p>
-              <p className="mb-4 flex items-center justify-center md:justify-start">
-                <Mail className="me-3 h-5 w-5" />
-                info@example.com
-              </p>
-              <p className="mb-4 flex items-center justify-center md:justify-start">
-                <Phone className="me-3 h-5 w-5" />+ 01 234 567 88
-              </p>
-              <p className="flex items-center justify-center md:justify-start">
-                <PhoneCall className="me-3 h-5 w-5" />+ 01 234 567 89
-              </p>
-            </div>
+          <div className="flex flex-wrap items-center justify-center gap-4 text-foreground">
+            {[Facebook, Twitter, Instagram, Youtube, Github, Linkedin].map(
+              (Icon, index) => (
+                <a
+                  key={`social-${index}`}
+                  href="#!"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-muted-foreground transition hover:-translate-y-0.5 hover:border-ring hover:text-foreground"
+                >
+                  <Icon className="h-4 w-4" />
+                </a>
+              )
+            )}
           </div>
         </div>
 
-        <div className=" p-6 text-center">
-          <span>© 2025 Copyright:</span>
-          <a className="font-semibold ml-1" href="https://pin.it/5rGLlXZeA/">
-            GYMGEM
-          </a>
+        <div className="grid gap-8 py-12 text-center text-sm sm:grid-cols-2 sm:text-left lg:grid-cols-4">
+          <div className="space-y-3">
+            <div className="flex items-center justify-center gap-2 font-semibold text-foreground sm:justify-start">
+              <FaGem className="text-base text-secondary" />
+              GYMGEM
+            </div>
+            <p>
+              We bring trainers, gyms, stores, and trainees together through
+              calm, purposeful experiences that keep the focus on progress.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            <h6 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Explore
+            </h6>
+            <ul className="space-y-2">
+              <li>
+                <a href="#!" className="transition hover:text-foreground">
+                  Programs
+                </a>
+              </li>
+              <li>
+                <a href="#!" className="transition hover:text-foreground">
+                  Trainers
+                </a>
+              </li>
+              <li>
+                <a href="#!" className="transition hover:text-foreground">
+                  Nutrition
+                </a>
+              </li>
+              <li>
+                <a href="#!" className="transition hover:text-foreground">
+                  Partnerships
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h6 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Resources
+            </h6>
+            <ul className="space-y-2">
+              <li>
+                <a href="#!" className="transition hover:text-foreground">
+                  Pricing
+                </a>
+              </li>
+              <li>
+                <a href="#!" className="transition hover:text-foreground">
+                  Support
+                </a>
+              </li>
+              <li>
+                <a href="#!" className="transition hover:text-foreground">
+                  Guides
+                </a>
+              </li>
+              <li>
+                <a href="#!" className="transition hover:text-foreground">
+                  Updates
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-3">
+            <h6 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Contact
+            </h6>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-center justify-center gap-2 sm:justify-start">
+                <Home className="h-4 w-4" />
+                Cairo, Egypt
+              </li>
+              <li className="flex items-center justify-center gap-2 sm:justify-start">
+                <Mail className="h-4 w-4" />
+                hello@gymgem.com
+              </li>
+              <li className="flex items-center justify-center gap-2 sm:justify-start">
+                <Phone className="h-4 w-4" />
+                +20 101 234 5678
+              </li>
+              <li className="flex items-center justify-center gap-2 sm:justify-start">
+                <PhoneCall className="h-4 w-4" />
+                +20 101 876 5432
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center justify-between gap-3 border-t border-border/60 pt-6 text-xs text-muted-foreground sm:flex-row">
+          <p>© {new Date().getFullYear()} GymGem. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <a href="#!" className="transition hover:text-foreground">
+              Privacy
+            </a>
+            <a href="#!" className="transition hover:text-foreground">
+              Terms
+            </a>
+            <a href="#!" className="transition hover:text-foreground">
+              Cookies
+            </a>
+          </div>
         </div>
       </div>
     </footer>

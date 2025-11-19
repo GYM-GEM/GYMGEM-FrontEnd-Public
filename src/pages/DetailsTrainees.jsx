@@ -1,137 +1,120 @@
-import Button from "../components/Button";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
+import { useState } from "react";
 
 const RequestDetails = () => {
+  const [message, setMessage] = useState("");
+  const [price, setPrice] = useState("");
+
   return (
-    <>
+    <div className="bg-background text-foreground">
       <Navbar />
-      <section className="w-full flex items-center mt-[1.5rem] mb-[3rem]">
-        <div className="w-[80%] m-auto flex justify-start items-center bg-[#fff]">
-          <div className="w-[60%] bg-white  ">
-            <div className="">
-              <h2 className="text-[2.25rem]  text-[#1F2937] bebas-regular ">
-                REQUEST DETAILS
-              </h2>
-            </div>
-            <div className="mt-[1.5rem]">
-              <h3 className="text-[2rem]  text-[#1E1E1E] bebas-regular ">
-                LOOKING FOR PERSONAL TRAINER FOR WEIGHT LOSS
-              </h3>
-            </div>
-            <div className="mt-[1rem] mb-[1rem]">
-              <p className="text-[#6B7280] text-[0.95rem] ">
-                Posted by Ahmed Khaled · 2 days ago · 📍 Cairo, Egypt ·
-              </p>
-            </div>
+      <section className="w-full">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-12 px-4 py-16 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
+              Request details
+            </p>
+            <h2 className="font-bebas text-4xl tracking-tight text-foreground sm:text-5xl">
+              Looking for personal trainer for weight loss
+            </h2>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Posted by Ahmed Khaled · 2 days ago · Cairo, Egypt
+            </p>
+          </div>
 
-            <div className="w-full h-[200px] bg-[#E5E7EB] rounded-md mb-[2.5rem]"></div>
+          <div className="h-48 w-full overflow-hidden rounded-3xl border border-border bg-muted/60" />
 
-            <div className="mb-[1.5rem]">
-              <div>
-                <h4 className="text-[1.5rem]  text-[#111] bebas-regular ">
-                  ABOUT THE REQUEST
-                </h4>
-              </div>
-              <div className="mt-[1rem]">
-                <p className="text-[#4B5563] text-[1rem] leading-relaxed">
+          <div className="grid gap-10 lg:grid-cols-[2fr,1fr] lg:items-start">
+            <article className="space-y-6 rounded-3xl border border-border bg-card p-8 shadow-sm">
+              <header className="space-y-3">
+                <h3 className="font-bebas text-2xl text-foreground">
+                  About the request
+                </h3>
+                <p className="text-sm text-muted-foreground">
                   “I’m looking for a certified trainer who can help me lose 5kg
-                  in 8 weeks.
-                  <br />I prefer online sessions 3 times per week, with guidance
-                  on workouts and nutrition.”
+                  in 8 weeks. I prefer online sessions three times per week,
+                  with guidance on workouts and nutrition. Consistency and
+                  accountability are key for me.”
+                </p>
+              </header>
+
+              <dl className="grid gap-4 text-sm text-muted-foreground sm:grid-cols-2">
+                <div className="flex flex-col rounded-2xl bg-muted/40 p-4">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Focus areas
+                  </dt>
+                  <dd className="mt-2 text-foreground">
+                    Endurance, clean nutrition, at-home sessions
+                  </dd>
+                </div>
+                <div className="flex flex-col rounded-2xl bg-muted/40 p-4">
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    Preferred schedule
+                  </dt>
+                  <dd className="mt-2 text-foreground">
+                    3 sessions per week · 45 minutes
+                  </dd>
+                </div>
+              </dl>
+            </article>
+
+            <aside className="space-y-6 rounded-3xl border border-border bg-card p-6 shadow-sm lg:sticky lg:top-28">
+              <div className="space-y-2">
+                <h4 className="font-bebas text-2xl text-foreground">
+                  Apply for this request
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  Introduce yourself, outline your approach, and share your
+                  proposed coaching fee.
                 </p>
               </div>
-            </div>
-
-            <div className="border border-[#E5E7EB] rounded-[1rem] w-[80%] p-[2rem]">
-              <div className="w-[80%] m-auto ">
-                <div className="pb-[2.25rem]">
-                  <div>
-                    <h4 className="text-[#FF8211] text-[1.5rem]  bebas-regular">
-                      Apply for this request
-                    </h4>
-                  </div>
-                  <div className="mt-[8px] ">
-                    <p className="text-[#4B5563] text-[1rem] poppins-regular">
-                      Send your proposal and introduce yourself to the trainee.
-                    </p>
-                  </div>
+              <form className="space-y-4">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="message"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Your message
+                  </label>
+                  <textarea
+                    id="message"
+                    value={message}
+                    onChange={(event) => setMessage(event.target.value)}
+                    placeholder="Write a short message..."
+                    rows={4}
+                    className="w-full rounded-xl border border-border bg-background/80 px-3 py-2 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                  />
                 </div>
-
-                <form className="flex flex-col gap-4">
-                  {/* <div>
-                    <label className="block text-[#111] text-[1rem] mb-1 poppins-regular">
-                      Your Message
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Write a short message..."
-                      className="border border-[#000] w-full h-[50px] p-[1rem] focus:outline-none focus:border-[#FF8211]"
-                    />
-                  </div> */}
-                  <div className="relative mb-[33px]">
-                    <input
-                      type="text"
-                      id="message"
-                      placeholder=" "
-                      className="peer border border-[#000] w-full h-[50px] p-[1rem] focus:outline-none focus:border-[#FF8211]"
-                    />
-                    <label
-                      htmlFor="message"
-                      className="absolute left-[1rem] top-1/2 -translate-y-1/2 text-[#111] text-[1rem] poppins-regular transition-all duration-200 
-                              peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-[#aaa] peer-placeholder-shown:text-[1rem]
-                              peer-focus:top-0 peer-focus:text-[1rem] peer-focus:text-[#000] bg-white px-1"
-                    >
-                      Your Message
-                    </label>
-                  </div>
-
-                  {/* <div>
-                    <label className="block text-[#111] text-[1rem] mb-1 poppins-regular">
-                      Expected Price ($)
-                    </label>
-                    <input
-                      type="number"
-                      placeholder="Enter your price"
-                      className="border border-[#000] w-full h-[50px] p-[1rem] focus:outline-none focus:border-[#FF8211]"
-                    />
-                  </div> */}
-                  <div className="relative">
-                    <input
-                      type="number"
-                      id="price"
-                      placeholder=" "
-                      className="peer border border-[#000] w-full h-[50px] p-[1rem] focus:outline-none focus:border-[#FF8211]"
-                    />
-                    <label
-                      htmlFor="price"
-                      className="absolute left-[1rem] top-1/2 -translate-y-1/2 text-[#111] text-[1rem] poppins-regular transition-all duration-200 
-                              peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-[#aaa] peer-placeholder-shown:text-[1rem]
-                              peer-focus:top-0 peer-focus:text-[1rem] peer-focus:text-[#000] bg-white px-1"
-                    >
-                      Expected Price ($)
-                    </label>
-                  </div>
-                  <div className="mt-[21px]">
-                    <Button
-                      text="Apply Now"
-                      color="#FF8211"
-                      textColor="#fff"
-                      width="100%"
-                      height="50px"
-                      to="/#"
-                      rounded="2xl"
-                      uppercase={false}
-                    />
-                  </div>
-                </form>
-              </div>
-            </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="price"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Expected price (EGP)
+                  </label>
+                  <input
+                    id="price"
+                    type="number"
+                    value={price}
+                    onChange={(event) => setPrice(event.target.value)}
+                    placeholder="Enter your package price"
+                    className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#FF8211]/90 px-4 text-sm font-semibold text-white transition hover:bg-[#e9750f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  Apply now
+                </button>
+              </form>
+            </aside>
           </div>
         </div>
       </section>
       <Footer />
-    </>
+    </div>
   );
 };
 

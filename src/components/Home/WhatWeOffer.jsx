@@ -1,4 +1,8 @@
-import { HiArrowCircleRight } from "react-icons/hi";
+import {
+  HiArrowCircleRight,
+  HiChevronLeft,
+  HiChevronRight,
+} from "react-icons/hi";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, FreeMode } from "swiper/modules";
 import "swiper/css";
@@ -7,70 +11,104 @@ import "swiper/css/pagination";
 import "swiper/css/free-mode";
 import cards from "../../js/cardData";
 import "../../index.css";
+import { useEffect, useRef, useState } from "react";
 
 function WhatWeOffer() {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
+  const swiperRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <section className="w-[100%] pt-[3.75rem] pb-[3.75rem]">
-      <div className="w-[80%] mx-auto bg-white">
-        <div className="text-center">
-          <h1 className="text-[2.5rem] md:text-[2.2rem] font-bold text-[#FF8211] uppercase tracking-wider font-bebas">
-            WHAT WE OFFER
-          </h1>
-        </div>
-        <div className="pt-[1rem] flex justify-center flex-col items-center poppins-medium">
-          <p className="text-[#333333] text-lg md:text-xl ">
-            Discover your perfect way to stay fit and connected.
+    <section ref={sectionRef} className="w-full bg-background py-16">
+      <div className="mx-auto w-[80%]  ">
+        <div
+          className={`text-center transition-all duration-700 ease-out ${
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          }`}
+        >
+          <h2 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl text-[#FF8211]">
+            What we offer
+          </h2>
+          <p className="mt-3 text-base text-muted-foreground sm:text-lg text-[#555555]">
+            Discover calm, purposeful ways to stay fit and connected to your
+            community.
           </p>
         </div>
 
-        <div className="pt-[2rem] w-full  ">
+        <div
+          className={`mt-12 w-full transition-all duration-700 delay-200 ease-out ${
+            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+          }`}
+        >
           <Swiper
-            className="offers-swiper "
+            className="offers-swiper"
             modules={[Navigation, Pagination, Autoplay, FreeMode]}
-            spaceBetween={16}
+            spaceBetween={20}
             slidesPerView={1}
             navigation
             pagination={{ clickable: true }}
             autoplay={{
-              delay: 2000,
+              delay: 4000,
               disableOnInteraction: false,
             }}
-            speed={600}
-            freeMode={true}
-            loop={true}
-            grabCursor={true}
+            speed={700}
+            freeMode
+            loop
+            grabCursor
             freeModeMomentum={false}
             breakpoints={{
-              640: { slidesPerView: 1 },
+              640: { slidesPerView: 1.1 },
               768: { slidesPerView: 2 },
               1024: { slidesPerView: 3 },
             }}
           >
             {cards.map((item, index) => (
               <SwiperSlide key={index}>
-                <div className="w-[100%] h-[265px] bg-[#ff7906] rounded-[1rem] overflow-hidden relative">
-                  <div className="w-[36%] absolute left-0 top-[8px]">
+                <article className="relative flex h-72 flex-col overflow-hidden rounded-2xl  border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-lg hover:scale-[1.02]">
+                  <div className="absolute inset-y-4 left-4 w-32 overflow-hidden rounded-xl ">
                     <img
                       loading="lazy"
                       src={item.img}
                       alt={item.title}
-                      className="h-[265px] w-[155px] object-cover object-center"
+                      className="h-full w-full object-cover"
                     />
                   </div>
-                  <div className="w-[64%] absolute right-0 top-0 h-full">
-                    <div className="flex justify-end pe-[1.5rem] pt-[1.5rem]">
-                      <h3 className="poppins-semibold text-white text-[1.125rem] flex items-center gap-[0.5rem]">
+                  <div className="ml-[9rem] flex h-full flex-col justify-between p-5">
+                    <div>
+                      <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground text-[#FF8211]">
                         {item.title}
-                        <HiArrowCircleRight className="text-[1.5rem] text-[#ffffaa] " />
+                        <HiArrowCircleRight className="text-primary" />
                       </h3>
-                    </div>
-                    <div className="absolute bottom-[27px] right-[8px]">
-                      <p className="text-[#ffd6b3] text-[1rem] poppins-regular leading-[24px] w-[213px] h-[76px]">
+                      <p className="mt-3 text-sm text-muted-foreground">
                         {item.desc}
                       </p>
                     </div>
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Tailored support • Flexible access • Measurable results
+                    </span>
                   </div>
-                </div>
+                </article>
               </SwiperSlide>
             ))}
           </Swiper>

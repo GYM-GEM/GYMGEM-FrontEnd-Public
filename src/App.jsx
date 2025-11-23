@@ -18,11 +18,11 @@ import Viewprofile from "./components/Viewprofile.jsx";
 
 // forms
 import Selectrole from "./components/SelectRole";
-import Trainerform from "./components/Formes/TrainerForm";
-import Trainerform2 from "./components/Formes/TrainerForm2";
-import Trainerform3 from "./components/Formes/TrainerForm3";
-import Traineeform from "./components/Formes/TraineeForm";
-import Traineeinfo from "./components/Formes/TraineeInfoForm.jsx";
+import Trainerform from "./components/Forms/TrainerForm.jsx";
+import Trainerform2 from "./components/Forms/TrainerForm2.jsx";
+import Trainerform3 from "./components/Forms/TrainerForm3.jsx";
+import Traineeform from "./components/Forms/TraineeForm.jsx";
+import Traineeinfo from "./components/Forms/TraineeInfoForm.jsx";
 
 // layout
 import RootLayout from "./Layout/Rootlayout";
@@ -43,6 +43,12 @@ import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
 import TraineProfileDash from "./components/Dashboard/Traine/TraineProfileDash.jsx";
 import CoursesTraineDash from "./components/Dashboard/Traine/CoursesTraineDash.jsx";
 import CourseDetails from "./components/courses/CourseDetails.jsx";
+// dashboard gym
+import GymDashboard from "./components/Dashboard/GYM/GymDashboard.jsx";
+import GymMember from "./components/Dashboard/GYM/GymMember.jsx";
+import GymSessions from "./components/Dashboard/GYM/GymSessions.jsx";
+import GymClasses from "./components/Dashboard/GYM/GymClasses.jsx";
+import Gymprofile from "./components/Dashboard/GYM/Gymprofile.jsx";
 
 function App() {
   const location = useLocation();
@@ -83,6 +89,15 @@ function App() {
           <Route path="dashboard" element={<TraineeDash />} />
           <Route path="courses" element={<CoursesTraineDash />} />
           <Route path="profile" element={<TraineProfileDash />} />
+        </Route>
+        {/* -------------------- GYM DASHBOARD -------------------- */}
+        <Route path="Gym">
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<GymDashboard />} />
+          <Route path="GymMember" element={<GymMember />} />
+          <Route path="GymSessions" element={<GymSessions />} />
+          <Route path="GymClasses" element={<GymClasses />} />
+          <Route path="Gymprofile" element={<Gymprofile />} />
         </Route>
 
         {/* -------------------- AUTH + FORMS -------------------- */}

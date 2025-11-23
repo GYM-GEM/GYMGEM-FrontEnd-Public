@@ -15,6 +15,7 @@ import NotFound from "./components/NotFound.jsx";
 import Community from "./pages/Community.jsx";
 import Coursedetails from "./components/courses/CourseDetails.jsx";
 import Viewprofile from "./components/Viewprofile.jsx";
+import Store from "./pages/Store.jsx";
 
 // forms
 import Selectrole from "./components/SelectRole";
@@ -50,6 +51,15 @@ import GymSessions from "./components/Dashboard/GYM/GymSessions.jsx";
 import GymClasses from "./components/Dashboard/GYM/GymClasses.jsx";
 import Gymprofile from "./components/Dashboard/GYM/Gymprofile.jsx";
 
+// dashboard store
+import StoreDashboard from "./components/Dashboard/Store/StoreDashboard.jsx";
+import Storeprofile from "./components/Dashboard/Store/Storeprofile.jsx"; 
+import StoreProduct from "./components/Dashboard/Store/StoreProduct.jsx";
+import StoreOrder from "./components/Dashboard/Store/StoreOrder.jsx";
+
+
+
+
 function App() {
   const location = useLocation();
 
@@ -72,6 +82,7 @@ function App() {
           <Route path="viewprofile" element={<Viewprofile />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
+          <Route path="stores" element={<Store />} />
         </Route>
 
         {/* -------------------- TRAINER DASHBOARD -------------------- */}
@@ -91,13 +102,22 @@ function App() {
           <Route path="profile" element={<TraineProfileDash />} />
         </Route>
         {/* -------------------- GYM DASHBOARD -------------------- */}
-        <Route path="Gym">
+        <Route path="gym">
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<GymDashboard />} />
-          <Route path="GymMember" element={<GymMember />} />
-          <Route path="GymSessions" element={<GymSessions />} />
-          <Route path="GymClasses" element={<GymClasses />} />
-          <Route path="Gymprofile" element={<Gymprofile />} />
+          <Route path="gymMember" element={<GymMember />} />
+          <Route path="gymSessions" element={<GymSessions />} />
+          <Route path="gymClasses" element={<GymClasses />} />
+          <Route path="gymprofile" element={<Gymprofile />} />
+        </Route>
+
+        {/* --------------------Store DASHBOARD -------------------- */}
+        <Route path="store">
+          <Route index element={<Navigate to="dashboard" replace />} />
+          <Route path="dashboard" element={<StoreDashboard />} />
+          <Route path="product" element={<StoreProduct />} />
+          <Route path="order" element={<StoreOrder />} />
+          <Route path="profile" element={<Storeprofile />} />
         </Route>
 
         {/* -------------------- AUTH + FORMS -------------------- */}

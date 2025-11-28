@@ -6,7 +6,7 @@ const Community = () => {
   const user = JSON.parse(localStorage.getItem("user")) || { username: "Guest" };
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem("communityDarkMode");
-    return saved !== null ? JSON.parse(saved) : true;
+    return saved !== null ? JSON.parse(saved) : false;
   });
   
   const [postContent, setPostContent] = useState("");

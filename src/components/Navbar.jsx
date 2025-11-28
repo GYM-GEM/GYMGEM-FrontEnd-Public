@@ -27,6 +27,8 @@ function Navbar() {
       );
 
       localStorage.removeItem("user");
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
 
       console.log("Response:", response.data);
       alert("logout is successful!");
@@ -39,7 +41,6 @@ function Navbar() {
 
   useEffect(() => {
     let interval;
-
     const runAnimation = () => {
       setTimeout(() => {
         setShowGG(false);

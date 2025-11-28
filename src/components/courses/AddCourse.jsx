@@ -27,12 +27,10 @@ const AddCourse = () => {
       img: data.coverUrl || "/assets/cardCo1.png",
     };
 
-    // حفظ الكورس في localStorage
     const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
     const updatedCourses = [course, ...savedCourses];
     localStorage.setItem("courses", JSON.stringify(updatedCourses));
 
-    // الانتقال لصفحة Add Lesson
     navigate("/addlesson", { state: { course } });
   };
 
@@ -89,13 +87,13 @@ const AddCourse = () => {
                     className="w-full border rounded-md p-[10px] text-[#000] poppins-extralight"
                   >
                     <option value="">Select Category</option>
-                    <option value="Strength Training">Strength Training</option>
-                    <option value="Bodybuilding">Bodybuilding</option>
-                    <option value="Cardio">Cardio</option>
-                    <option value="Flexibility & Mobility">
+                    <option value={1}>Strength Training</option>
+                    <option value={2}>Bodybuilding</option>
+                    <option value={3}>Cardio</option>
+                    <option value={4}>
                       Flexibility & Mobility
                     </option>
-                    <option value="Nutrition">Nutrition</option>
+                    <option value={5}>Nutrition</option>
                   </select>
                 </div>
               </div>
@@ -117,19 +115,19 @@ const AddCourse = () => {
                     </option>
                     <option
                       className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="beginner"
+                      value={1}
                     >
                       Beginner
                     </option>
                     <option
                       className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="intermediate"
+                      value={2}
                     >
                       Intermediate
                     </option>
                     <option
                       className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="advanced"
+                      value={3}
                     >
                       Advanced
                     </option>
@@ -154,13 +152,13 @@ const AddCourse = () => {
                     </option>
                     <option
                       className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="english"
+                      value="EN"
                     >
                       English
                     </option>
                     <option
                       className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="arabic"
+                      value="AR"
                     >
                       Arabic
                     </option>

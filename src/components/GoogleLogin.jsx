@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-export default function GoogleLogin() {
+export default function GoogleLogin({ signType }) {
 	const navigate = useNavigate();
 
 	const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
@@ -41,7 +41,16 @@ export default function GoogleLogin() {
 			if (!res.data.user && res.data) localStorage.setItem("user", JSON.stringify(res.data));
 
 			console.log("Google signup/login response:", res.data);
-			alert("Sign in successful!");
+
+			if (signType === 'signup') {
+				alert("Registered Successfully")
+
+			} else {
+				alert("Sign in successful{!");
+
+			}
+
+
 			navigate("/role");
 			// } catch (err) {
 			// 	console.error("Google login error:", err.response ?? err);
@@ -49,7 +58,19 @@ export default function GoogleLogin() {
 			// }
 		};
 
+
+
 		script.onload = () => {
+			let buttonText;
+
+			if (signType === 'signup') {
+				buttonText = 'signup_with';
+			}
+			else{
+				buttonText = 'signin_with';
+			}
+			console.log(buttonText)
+
 			if (window.google && window.google.accounts && window.google.accounts.id) {
 				window.google.accounts.id.initialize({
 					client_id: clientId,
@@ -58,7 +79,7 @@ export default function GoogleLogin() {
 
 				window.google.accounts.id.renderButton(
 					document.getElementById("google-signup-button"),
-					{ theme: "outline", size: "large" }
+					{ theme: "outline", size: "large", text: buttonText }
 				);
 
 				// optional: show One Tap
@@ -73,7 +94,7 @@ export default function GoogleLogin() {
 			if (window.google && window.google.accounts && window.google.accounts.id) {
 				try {
 					window.google.accounts.id.cancel();
-				} catch (e) {}
+				} catch (e) { }
 			}
 		};
 	}, [navigate, clientId]);

@@ -52,6 +52,7 @@ const Selectrole = () => {
   const onSubmit = async () => {
     if (!selectedRole) {
       alert("Please select a role first!");
+
       return;
     }
 
@@ -59,6 +60,7 @@ const Selectrole = () => {
       const user = JSON.parse(localStorage.getItem("user"));
       const payload = { profile_type: selectedRole, account: user.id };
       const token = localStorage.getItem("access");
+      const refresh = localStorage.getItem("refresh")
 
       const response = await axios.post(
         "http://127.0.0.1:8000/api/profiles/create",
@@ -68,7 +70,18 @@ const Selectrole = () => {
         }
       );
 
-      console.log("Response:", response.data);
+      const refreshResp = await axios.post(
+        "http://127.0.0.1:8000/api/auth/renew-refresh", {},
+        {
+          headers: { refresh: `${refresh}` },
+        }
+      );
+
+      console.log("refreshresponse:", refreshResp);
+
+      localStorage.setItem('access', refreshResp.data.access)
+      localStorage.setItem('refresh', refreshResp.data.refresh)
+
       alert(`${selectedRole} profile created successfully!`);
 
       if (selectedRole === "trainer") navigate("/trainerform");

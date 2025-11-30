@@ -3,6 +3,22 @@ import { useForm } from "react-hook-form";
 import form3 from "../../assets/form3.png";
 import form2 from "../../assets/form2.svg";
 import { useToast } from "../../context/ToastContext";
+import axios from "axios";
+
+
+
+const countries = async () => {
+    
+    try {
+        res = await axios.get(`https://countriesnow.space/api/v0.1/countries`)
+        console.log(res.data)
+        
+    } catch (error) {
+        console.log("Faild loading countries list")
+    }
+} 
+
+
 
 const Traineeform = () => {
 
@@ -14,13 +30,22 @@ const Traineeform = () => {
 
     const { showToast } = useToast();
 
-    const onSubmit = (data) => {
+    const onSubmit =async (data) => {
         console.log("Trainee Form Data:", data);
+        await axios.post('http://127.0.0.1:8000/api/trainees/create', {...data}, 
+            {
+                headers:{
+                    Authorization: `Bearer ${localStorage.getItem('access')}`
+                }
+            }
+        )
         showToast("Trainee form submitted successfully!", { type: "success" });
     };
 
+    
 
     const [selectedCountry, setSelectedCountry] = useState("");
+
 
     const countries = {
         Egypt: ["Cairo", "Giza", "Alexandria", "Mansoura", "Aswan", "Luxor", "Tanta"],
@@ -211,7 +236,7 @@ const Traineeform = () => {
                                 )}
                             </div>
                             {/* ================= State ================= */}
-                            <div>
+                            {/* <div>
                                 <label
                                     htmlFor="state"
                                     className="font-bebas text-md font-medium text-black poppins-medium"
@@ -241,7 +266,7 @@ const Traineeform = () => {
                                         {errors.state.message}
                                     </p>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* ================= ZIP Code ================= */}
                             <div>

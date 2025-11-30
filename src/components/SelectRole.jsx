@@ -73,9 +73,9 @@ const Selectrole = () => {
       );
 
       const refreshResp = await axios.post(
-        "http://127.0.0.1:8000/api/auth/renew-refresh", {},
+        "http://127.0.0.1:8000/api/auth/renew-refresh", {profile_id:response.data.id},
         {
-          headers: { refresh: `${refresh}` },
+          headers: { refresh: `${refresh}`, Authorization: `Bearer ${token}` },
         }
       );
 

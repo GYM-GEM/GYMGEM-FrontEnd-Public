@@ -142,9 +142,11 @@ const StoreDashboard = () => {
                     <button onClick={handleAddProductClick} className="text-left text-slate-700 hover:text-[#ff8211] hover:underline">
                       ➕ Add Product
                     </button>
+                    <Link to="/store/order" className="text-left text-slate-700 hover:text-[#ff8211] hover:underline">
                     <button className="text-left text-slate-700 hover:text-[#ff8211] hover:underline">
                       📦 View Recent Orders
                     </button>
+                    </Link>
                   </div>
                 </div>
               </div>

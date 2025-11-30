@@ -4,10 +4,12 @@ import form3 from "../../assets/form3.png";
 import form2 from "../../assets/form2.svg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../context/ToastContext";
 
 const TrainerFormProfessional = () => {
   const navigate = useNavigate()
   const [step, setStep] = useState(1);
+  const { showToast } = useToast();
   const {
     register,
     handleSubmit,
@@ -29,11 +31,11 @@ const TrainerFormProfessional = () => {
         }
       );
       console.log("Response:", response.data);
-      alert("trainer successful!");
+      showToast("trainer successful!", { type: "success" });
       navigate("/trainerform3");
     } catch (error) {
       console.error("Error during registration:", error);
-      alert("failed. Please try again.");
+      showToast("failed. Please try again.", { type: "error" });
     }
   };
 

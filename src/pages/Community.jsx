@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
+import { useToast } from "../context/ToastContext";
 import { FaHeart, FaComment, FaTimes, FaShare, FaEllipsisV, FaMoon, FaSun } from "react-icons/fa";
 import Footer from "../components/Footer.jsx"
 const Community = () => {
@@ -73,6 +74,8 @@ const Community = () => {
   const [openCommentsId, setOpenCommentsId] = useState(null);
   const [commentTexts, setCommentTexts] = useState({});
 
+  const { showToast } = useToast();
+
   const handlePostSubmit = () => {
     if (postContent.trim() === "") return;
 
@@ -127,7 +130,7 @@ const Community = () => {
       questionData.choice2.trim() === "" ||
       questionData.choice3.trim() === ""
     ) {
-      alert("Please fill in all fields");
+      showToast("Please fill in all fields", { type: "error" });
       return;
     }
 
@@ -221,7 +224,7 @@ const Community = () => {
         await navigator.share({ title: `${post.author} on GYMGEM`, text: post.content.slice(0, 120), url: postUrl });
       } else if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(postUrl);
-        alert("Link copied to clipboard");
+        showToast("Link copied to clipboard", { type: "success" });
       } else {
         prompt("Copy this link:", postUrl);
       }
@@ -230,7 +233,7 @@ const Community = () => {
       setOpenDropdownId(null);
     } catch (err) {
       console.error(err);
-      alert("Share failed");
+      showToast("Share failed", { type: "error" });
     }
   };
 

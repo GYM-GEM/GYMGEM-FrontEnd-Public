@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import form3 from "../../assets/form3.png";
 import form2 from "../../assets/form2.svg";
+import { useToast } from "../../context/ToastContext";
 
 const TraineeinforForm = () => {
 
@@ -10,9 +11,11 @@ const TraineeinforForm = () => {
         formState: { errors },
     } = useForm({ mode: "onChange" });
 
+    const { showToast } = useToast();
+
     const onSubmit = (data) => {
         console.log("Trainee Form Data:", data);
-        alert("Trainee form submitted successfully!");
+        showToast("Trainee form submitted successfully!", { type: "success" });
     };
 
     return (

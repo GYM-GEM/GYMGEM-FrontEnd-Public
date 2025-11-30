@@ -3,9 +3,11 @@ import FooterDash from "../FooterDash";
 import { Lock, CreditCard, LogOut, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../../context/ToastContext";
 
 const TraineProfileDash = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // State management
   const [trainerData, setTrainerData] = useState({
@@ -106,7 +108,7 @@ const TraineProfileDash = () => {
 
     setTrainerData(updated);
     closeModal("editProfile");
-    alert("Profile updated successfully!");
+    showToast("Profile updated successfully!", { type: "success" });
   };
 
   // Change Password handlers
@@ -123,11 +125,11 @@ const TraineProfileDash = () => {
       formData.changePassword.newPassword !==
       formData.changePassword.confirmPassword
     ) {
-      alert("New passwords do not match!");
+      showToast("New passwords do not match!", { type: "error" });
       return;
     }
     closeModal("changePassword");
-    alert("Password changed successfully!");
+    showToast("Password changed successfully!", { type: "success" });
     setFormData((prev) => ({
       ...prev,
       changePassword: {
@@ -149,7 +151,7 @@ const TraineProfileDash = () => {
 
   const handleSavePayment = () => {
     closeModal("paymentInfo");
-    alert("Payment information saved successfully!");
+    showToast("Payment information saved successfully!", { type: "success" });
     setFormData((prev) => ({
       ...prev,
       paymentInfo: { cardNumber: "", expiryDate: "", cvv: "", cardHolder: "" },

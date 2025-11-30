@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useToast } from "../context/ToastContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import traineeIcon from "../assets/trainer1.png";
@@ -48,10 +49,11 @@ const roles = [
 const Selectrole = () => {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
+  const { showToast } = useToast();
 
   const onSubmit = async () => {
     if (!selectedRole) {
-      alert("Please select a role first!");
+      showToast("Please select a role first!", { type: "error" });
 
       return;
     }
@@ -82,14 +84,14 @@ const Selectrole = () => {
       localStorage.setItem('access', refreshResp.data.access)
       localStorage.setItem('refresh', refreshResp.data.refresh)
 
-      alert(`${selectedRole} profile created successfully!`);
+      showToast(`${selectedRole} profile created successfully!`, { type: "success" });
 
       if (selectedRole === "trainer") navigate("/trainerform");
       else if (selectedRole === "trainee") navigate("/traineeform");
       else navigate("/");
     } catch (error) {
       console.error("Error during registration:", error);
-      alert("Failed. Please try again.");
+      showToast("Failed. Please try again.", { type: "error" });
     }
   };
 

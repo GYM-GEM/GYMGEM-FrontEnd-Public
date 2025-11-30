@@ -1,9 +1,12 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useToast } from "../context/ToastContext";
 
 export default function GoogleLogin({ signType }) {
 	const navigate = useNavigate();
+
+	const { showToast } = useToast();
 
 	const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
@@ -43,10 +46,10 @@ export default function GoogleLogin({ signType }) {
 			console.log("Google signup/login response:", res.data);
 
 			if (signType === 'signup') {
-				alert("Registered Successfully")
+				showToast("Registered Successfully", { type: "success" })
 
 			} else {
-				alert("Sign in successful{!");
+				showToast("Sign in successful!", { type: "success" });
 
 			}
 

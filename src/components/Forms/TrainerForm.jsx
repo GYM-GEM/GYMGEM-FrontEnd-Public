@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../context/ToastContext";
 
 const Trainerform = () => {
   const navigate = useNavigate();
@@ -9,6 +10,8 @@ const Trainerform = () => {
     handleSubmit,
     formState: { errors },
   } = useForm({ mode: "onChange" });
+
+  const { showToast } = useToast();
 
   const onSubmit = async (data) => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -25,11 +28,11 @@ const Trainerform = () => {
         }
       );
       console.log("Response:", response.data);
-      alert("trainer successful!");
+      showToast("trainer successful!", { type: "success" });
       navigate("/trainerform2");
     } catch (error) {
       console.error("Error during registration:", error);
-      alert("failed. Please try again.");
+      showToast("failed. Please try again.", { type: "error" });
     }
   };
 

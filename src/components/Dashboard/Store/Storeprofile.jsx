@@ -3,9 +3,11 @@ import NavBarDashStore from "./NavBarDashStore";
 import { Lock, CreditCard, LogOut, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../../context/ToastContext";
 
 const Storeprofile = () => {
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // State management
   const [storeData, setStoreData] = useState({
@@ -111,7 +113,7 @@ const Storeprofile = () => {
 
     setStoreData(updated);
     closeModal("editProfile");
-    alert("Store profile updated successfully!");
+    showToast("Store profile updated successfully!", { type: "success" });
   };
 
   // Change Password handlers
@@ -128,11 +130,11 @@ const Storeprofile = () => {
       formData.changePassword.newPassword !==
       formData.changePassword.confirmPassword
     ) {
-      alert("New passwords do not match!");
+      showToast("New passwords do not match!", { type: "error" });
       return;
     }
     closeModal("changePassword");
-    alert("Password changed successfully!");
+    showToast("Password changed successfully!", { type: "success" });
     setFormData((prev) => ({
       ...prev,
       changePassword: {
@@ -154,7 +156,7 @@ const Storeprofile = () => {
 
   const handleSavePayment = () => {
     closeModal("paymentInfo");
-    alert("Payment information saved successfully!");
+    showToast("Payment information saved successfully!", { type: "success" });
     setFormData((prev) => ({
       ...prev,
       paymentInfo: { cardNumber: "", expiryDate: "", cvv: "", cardHolder: "" },

@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
 import axios from "axios";
+import { useToast } from "../context/ToastContext";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ function Navbar() {
   const [showGG, setShowGG] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const { showToast } = useToast();
 
   const menuRef = useRef(null);
 
@@ -31,11 +34,11 @@ function Navbar() {
       localStorage.removeItem("refresh");
 
       console.log("Response:", response.data);
-      alert("logout is successful!");
+      showToast("logout is successful!", { type: "success" });
       navigate("/login");
     } catch (error) {
       console.error("Error during login:", error);
-      alert("Logout failed. Please try again.");
+      showToast("Logout failed. Please try again.", { type: "error" });
     }
   };
 

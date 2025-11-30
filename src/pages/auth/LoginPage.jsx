@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Cover_img from "../../assets/fitCartoon3.png";
 import axios from "axios";
 import GoogleLogin from "../../components/GoogleLogin.jsx";
+import { useToast } from "../../context/ToastContext";
 
 function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,6 +18,7 @@ const LoginPage = () => {
   const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   useEffect(() => {
     // Google sign-in handled by `GoogleLogin` component.
@@ -46,11 +48,11 @@ const LoginPage = () => {
       localStorage.setItem("user", JSON.stringify(response.data));
 
       console.log("Response:", response.data);
-      alert("Sign in successful!");
+      showToast("Sign in successful!", { type: "success" });
       navigate("/");
     } catch (error) {
       console.error("Error during login:", error);
-      alert("Login failed. Please try again.");
+      showToast("Login failed. Please try again.", { type: "error" });
     }
   };
 

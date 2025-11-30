@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import cover_img from "../../assets/cover.svg";
 import axios from "axios";
 import GoogleLogin from "../../components/GoogleLogin";
+import { useToast } from "../../context/ToastContext";
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -28,11 +29,11 @@ const SignUpPage = () => {
         data
       );
       console.log("Response:", response.data);
-      alert("Sign up successful!");
+      showToast("Sign up successful!", { type: "success" });
       navigate("/role");
     } catch (error) {
       console.error("Error during registration:", error);
-      alert("Registration failed. Please try again.");
+      showToast("Registration failed. Please try again.", { type: "error" });
     }
   };
 

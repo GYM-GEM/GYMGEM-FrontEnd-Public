@@ -3,6 +3,7 @@ import form3 from "../../assets/form3.png";
 import form2 from "../../assets/form2.svg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../context/ToastContext";
 
 const Trainerexp = () => {
     const navigate = useNavigate()
@@ -11,6 +12,8 @@ const Trainerexp = () => {
         handleSubmit,
         formState: { errors },
     } = useForm({ mode: "onChange" });
+
+    const { showToast } = useToast();
 
 
 
@@ -28,11 +31,11 @@ const Trainerexp = () => {
                 }
             );
             console.log("Response:", response.data);
-            alert("trainer successful!");
+            showToast("trainer successful!", { type: "success" });
             navigate("/");
         } catch (error) {
             console.error("Error during registration:", error);
-            alert("failed. Please try again.");
+            showToast("failed. Please try again.", { type: "error" });
         }
     };
 

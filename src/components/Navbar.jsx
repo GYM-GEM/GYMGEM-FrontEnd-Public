@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
+import { ChevronDown, Menu, X, LayoutDashboard, User, LogOut } from "lucide-react";
 import axios from "axios";
 import { useToast } from "../context/ToastContext";
 
@@ -9,19 +10,26 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [showFullName, setShowFullName] = useState(false);
   const [showGG, setShowGG] = useState(true);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const user = JSON.parse(localStorage.getItem("user"));
 
+  // Dropdown states
+  const [trainingOpen, setTrainingOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem("user"));
   const { showToast } = useToast();
 
   const menuRef = useRef(null);
+  const trainingRef = useRef(null);
+  const userRef = useRef(null);
+
+  
 
   const logout = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('refresh');
     const access = localStorage.getItem('access');
     try {
-      const response = await axios.post(
+      await axios.post(
         "http://127.0.0.1:8000/api/auth/logout",
         {},
         {
@@ -33,15 +41,20 @@ function Navbar() {
       localStorage.removeItem("access");
       localStorage.removeItem("refresh");
 
-      console.log("Response:", response.data);
-      showToast("logout is successful!", { type: "success" });
+      showToast("Logout successful!", { type: "success" });
       navigate("/login");
     } catch (error) {
-      console.error("Error during login:", error);
-      showToast("Logout failed. Please try again.", { type: "error" });
+      console.error("Error during logout:", error);
+      // Force logout on error just in case
+      localStorage.removeItem("user");
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      showToast("Logged out.", { type: "info" });
+      navigate("/login");
     }
   };
 
+  // Logo Animation Effect
   useEffect(() => {
     let interval;
     const runAnimation = () => {
@@ -60,15 +73,17 @@ function Navbar() {
     };
 
     runAnimation();
-
     interval = setInterval(runAnimation, 14500);
-
     return () => clearInterval(interval);
   }, []);
 
+  // Click Outside Handler
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+      if (trainingRef.current && !trainingRef.current.contains(e.target)) {
+        setTrainingOpen(false);
+      }
+      if (userRef.current && !userRef.current.contains(e.target)) {
         setUserMenuOpen(false);
       }
     };
@@ -77,18 +92,26 @@ function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const linkBase =
-    "rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-200";
-  const resolveLinkClass = (isActive) =>
-    `${linkBase} ${isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
-    }`;
+  // Styles for Desktop Links
+  const navLinkClasses = ({ isActive }) =>
+    `relative px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center gap-1 
+    ${isActive ? "text-[#ff8211]" : "text-gray-700 hover:text-[#ff8211]"}
+    after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2 after:bottom-0 
+    after:h-[2px] after:bg-[#ff8211] after:transition-all after:duration-300
+    ${isActive ? "after:w-full" : "after:w-0 hover:after:w-full"}`;
+
+  // Styles for Mobile Links
+  const mobileLinkClasses = ({ isActive }) =>
+    `block px-4 py-2 text-base font-medium transition-colors duration-200 rounded-md 
+    ${isActive ? "bg-[#ff8211]/10 text-[#ff8211]" : "text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"}`;
 
   return (
-    <nav className="relative z-40 border-b border-border bg-background/80 text-foreground backdrop-blur supports-[backdrop-filter]:backdrop-blur">
-      <div className="mx-auto flex w-[80%] items-center justify-between px-4 py-4 sm:px-6">
+    <nav className="sticky top-0 z-50 w-full border-b border-gray-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Logo Section */}
         <Link
           to="/"
-          className="flex items-center gap-2 text-lg font-semibold tracking-wide transition hover:text-primary/80"
+          className="flex items-center gap-2 text-lg font-semibold tracking-wide transition hover:opacity-90"
         >
           <FaGem
             className={`text-[#86ac55] transition-transform duration-500 ${showFullName ? "scale-105" : "scale-100"
@@ -96,14 +119,12 @@ function Navbar() {
           />
           <span className="relative h-6 w-24 overflow-hidden">
             <span
-              className={` absolute inset-0 font-bebas text-2xl  text-[#ff8211] transition-all duration-500 ${showGG
-                ? "translate-y-0 opacity-100"
-                : "-translate-y-2 opacity-0"
+              className={`absolute inset-0 font-bebas text-2xl text-[#ff8211] transition-all duration-500 ${showGG ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
                 }`}
             >
               GG
             </span>
-            <span className="absolute inset-0 flex items-center text-[#ff8211] font-bebas text-2xl tracking-tight ">
+            <span className="absolute inset-0 flex items-center text-[#ff8211] font-bebas text-2xl tracking-tight">
               {"GYMGEM".split("").map((char, index, arr) => {
                 const delay = showFullName
                   ? index * 0.1
@@ -112,7 +133,7 @@ function Navbar() {
                   <span
                     key={char + index}
                     style={{ transitionDelay: `${delay}s` }}
-                    className={` transition-all duration-300 ${showFullName
+                    className={`transition-all duration-300 ${showFullName
                       ? "translate-y-0 opacity-100"
                       : "translate-y-2 opacity-0"
                       }`}
@@ -125,219 +146,272 @@ function Navbar() {
           </span>
         </Link>
 
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-background text-sm font-semibold text-foreground shadow-sm transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:hidden"
-          aria-expanded={isOpen}
-          aria-controls="primary-navigation"
-        >
-          <span className="sr-only">Toggle navigation</span>
-          <span className="text-lg">{isOpen ? "×" : "☰"}</span>
-        </button>
-
-        <div
-          id="primary-navigation"
-          className={`absolute left-0 top-full w-full border-b border-border bg-background px-4 pb-4 pt-2 shadow-lg transition-all duration-200 md:static md:flex md:w-auto md:items-center md:gap-4 md:border-none md:bg-transparent md:p-0 md:shadow-none ${isOpen ? "flex flex-col" : "hidden md:flex"
-            }`}
-        >
-          <NavLink
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              [
-                "relative inline-block mx-2 px-3 py-2 transition-colors duration-200",
-                isActive
-                  ? "text-[#ff7906]"
-                  : "text-gray-900 hover:text-[#ff7906]",
-                "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
-                "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#ff8211]/90",
-                isActive
-                  ? "after:w-[100%] after:opacity-100"
-                  : "after:w-0 after:opacity-0",
-              ].join(" ")
-            }
-          >
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex md:items-center md:gap-6">
+          <NavLink to="/" end className={navLinkClasses}>
             Home
           </NavLink>
-          <NavLink
-            to="/Courses"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              [
-                "relative inline-block  px-3 py-2 transition-colors duration-200",
-                isActive
-                  ? "text-[#ff7906]"
-                  : "text-gray-900 hover:text-[#ff7906]",
-                "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
-                "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#ff8211]/90",
-                isActive
-                  ? "after:w-[100%] after:opacity-100"
-                  : "after:w-0 after:opacity-0",
-              ].join(" ")
-            }
-          >
-            Courses
-          </NavLink>
-          <NavLink
-            to="/Trainers"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              [
-                "relative inline-block  px-3 py-2 transition-colors duration-200",
-                isActive
-                  ? "text-[#ff7906]"
-                  : "text-gray-900 hover:text-[#ff7906]",
-                "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
-                "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#ff8211]/90",
-                isActive
-                  ? "after:w-[100%] after:opacity-100"
-                  : "after:w-0 after:opacity-0",
-              ].join(" ")
-            }
-          >
-            Trainers
-          </NavLink>
-          <NavLink
-            to="/Trainees"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              [
-                "relative inline-block  px-3 py-2 transition-colors duration-200",
-                isActive
-                  ? "text-[#ff7906]"
-                  : "text-gray-900 hover:text-[#ff7906]",
-                "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
-                "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#ff8211]/90",
-                isActive
-                  ? "after:w-[100%] after:opacity-100"
-                  : "after:w-0 after:opacity-0",
-              ].join(" ")
-            }
-          >
-            Trainees
-          </NavLink>
-          <NavLink
-            to="/community"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              [
-                "relative inline-block  px-3 py-2 transition-colors duration-200",
-                isActive
-                  ? "text-[#ff7906]"
-                  : "text-gray-900 hover:text-[#ff7906]",
-                "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
-                "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#ff8211]/90",
-                isActive
-                  ? "after:w-[100%] after:opacity-100"
-                  : "after:w-0 after:opacity-0",
-              ].join(" ")
-            }
-          >
-            Community
-          </NavLink>
-          <NavLink
-            to="/About"
-            onClick={() => setIsOpen(false)}
-            className={({ isActive }) =>
-              [
-                "relative inline-block  px-3 py-2 transition-colors duration-200",
-                isActive
-                  ? "text-[#ff7906]"
-                  : "text-gray-900 hover:text-[#ff7906]",
-                "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
-                "after:-bottom-[1.05rem] after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                "after:bg-[#ff8211]/90",
-                isActive
-                  ? "after:w-[100%] after:opacity-100"
-                  : "after:w-0 after:opacity-0",
-              ].join(" ")
-            }
-          >
-            About
-          </NavLink>
-          <div className="relative" ref={menuRef}>
-            {user ? (
-              <>
-                {/* User logged in */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsOpen(false);
-                    setUserMenuOpen((s) => !s);
-                  }}
-                  className={`${resolveLinkClass(
-                    false
-                  )} flex items-center gap-2`}
-                  aria-expanded={userMenuOpen}
-                  aria-haspopup="true"
-                >
-                  <FaUserCircle className="text-lg" />
-                  <span className="text-sm">{user.username}</span>
-                </button>
 
-                {userMenuOpen && (
-                  <div className="absolute right-0 z-50 mt-2 w-44 rounded-md border border-border bg-white/85 shadow-lg">
-                    <NavLink
-                      to="/trainer"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
-                    >
-                      Dashboard
-                    </NavLink>
-                    <NavLink
-                      to="/trainer/profile"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="block px-4 py-2 text-sm text-foreground hover:bg-muted"
-                    >
-                      Profile
-                    </NavLink>
-                    <button
-                      onClick={(event) => logout(event)}
-                      className="w-full text-left px-4 py-2 text-sm text-foreground hover:black cursor-pointer"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <>
-                {/* No user logged in */}
+          {/* Training Dropdown */}
+          <div className="relative" ref={trainingRef}>
+            <button
+              onClick={() => setTrainingOpen(!trainingOpen)}
+              className={`group flex items-center gap-1 text-sm font-medium transition-colors duration-200 
+                ${trainingOpen ? "text-[#ff8211]" : "text-gray-700 hover:text-[#ff8211]"}`}
+            >
+              Training
+              <ChevronDown
+                className={`h-4 w-4 transition-transform duration-200 ${trainingOpen ? "rotate-180" : ""
+                  }`}
+              />
+            </button>
+
+            {trainingOpen && (
+              <div className="absolute left-0 top-full mt-2 w-48 rounded-md border border-gray-200 bg-white p-1 shadow-lg animate-in fade-in zoom-in-95 duration-200">
                 <NavLink
-                  to="/login"
-                  onClick={() => setIsOpen(false)}
-                  className={({ isActive }) =>
-                    `${resolveLinkClass(isActive)} flex items-center gap-2`
-                  }
+                  to="/courses"
+                  onClick={() => setTrainingOpen(false)}
+                  className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
                 >
-                  <FaUserCircle className="text-lg" />
-                  <span className="text-sm">Sign In</span>
+                  Courses
                 </NavLink>
-              </>
+                <NavLink
+                  to="/trainers"
+                  onClick={() => setTrainingOpen(false)}
+                  className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
+                >
+                  Trainers
+                </NavLink>
+                <NavLink
+                  to="/trainees"
+                  onClick={() => setTrainingOpen(false)}
+                  className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
+                >
+                  Trainees
+                </NavLink>
+              </div>
             )}
           </div>
 
-          {/* {user && (
-            <button
-              onClick={(event) => {
-                setIsOpen(false);
-                logout(event);
-              }}
-              className="mt-2 inline-flex items-center justify-center rounded-lg bg-destructive px-3 py-2 text-sm font-semibold text-destructive-foreground transition hover:bg-destructive/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:mt-0"
-            >
-              Logout
-            </button>
-          )} */}
+          <NavLink to="/stores" className={navLinkClasses}>
+            Store
+          </NavLink>
+
+          <NavLink to="/gym" className={navLinkClasses}>
+            Gym
+          </NavLink>
+
+          <NavLink to="/about" className={navLinkClasses}>
+            About
+          </NavLink>
+        </div>
+
+        {/* User Section (Desktop) */}
+        <div className="hidden md:flex md:items-center md:gap-4">
+          {user ? (
+            <div className="relative" ref={userRef}>
+              <button
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff8211]/20"
+              >
+                <FaUserCircle className="text-lg text-[#ff8211]" />
+                <span className="max-w-[100px] truncate">{user.username}</span>
+                <ChevronDown
+                  className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-56 rounded-md border border-gray-200 bg-white p-1 shadow-lg animate-in fade-in zoom-in-95 duration-200">
+                  <div className="px-3 py-2 border-b border-gray-100 mb-1">
+                    <p className="text-sm font-medium text-gray-900">{user.username}</p>
+                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  </div>
+                  <NavLink
+                    to='/trainer/dashboard'
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
+                  >
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </NavLink>
+                  <NavLink
+                    to="/trainer/profile"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
+                  >
+                    <User className="h-4 w-4" />
+                    Profile
+                  </NavLink>
+                  <button
+                    onClick={(e) => {
+                      setUserMenuOpen(false);
+                      logout(e);
+                    }}
+                    className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                className="rounded-md px-4 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-[#ff8211]"
+              >
+                Log in
+              </Link>
+              <Link
+                to="/signup"
+                className="rounded-md bg-[#ff8211] px-4 py-2 text-sm font-medium text-white shadow transition-colors hover:bg-[#ff8211]/90"
+              >
+                Sign up
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Menu Button */}
+        <div className="flex md:hidden">
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#ff8211]"
+          >
+            <span className="sr-only">Open main menu</span>
+            {isOpen ? (
+              <X className="block h-6 w-6" aria-hidden="true" />
+            ) : (
+              <Menu className="block h-6 w-6" aria-hidden="true" />
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden border-t border-gray-200 bg-white">
+          <div className="space-y-1 px-4 py-3">
+            <NavLink to="/" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
+              Home
+            </NavLink>
+
+            {/* Mobile Training Dropdown */}
+            <div className="space-y-1">
+              <button
+                onClick={() => setTrainingOpen(!trainingOpen)}
+                className="flex w-full items-center justify-between px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-[#ff8211] rounded-md"
+              >
+                Training
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-200 ${trainingOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
+              {trainingOpen && (
+                <div className="pl-4 space-y-1 border-l-2 border-gray-200 ml-4">
+                  <NavLink
+                    to="/courses"
+                    onClick={() => setIsOpen(false)}
+                    className={mobileLinkClasses}
+                  >
+                    Courses
+                  </NavLink>
+                  <NavLink
+                    to="/trainers"
+                    onClick={() => setIsOpen(false)}
+                    className={mobileLinkClasses}
+                  >
+                    Trainers
+                  </NavLink>
+                  <NavLink
+                    to="/trainees"
+                    onClick={() => setIsOpen(false)}
+                    className={mobileLinkClasses}
+                  >
+                    Trainees
+                  </NavLink>
+                </div>
+              )}
+            </div>
+
+            <NavLink to="/stores" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
+              Store
+            </NavLink>
+            <NavLink to="/gym" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
+              Gym
+            </NavLink>
+            <NavLink to="/about" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
+              About
+            </NavLink>
+          </div>
+
+          {/* Mobile User Section */}
+          <div className="border-t border-gray-200 px-4 py-4">
+            {user ? (
+              <div className="space-y-3">
+                <div className="flex items-center px-2">
+                  <div className="flex-shrink-0">
+                    <FaUserCircle className="h-8 w-8 text-[#ff8211]" />
+                  </div>
+                  <div className="ml-3">
+                    <div className="text-base font-medium text-gray-900">{user.username}</div>
+                    <div className="text-sm font-medium text-gray-500">{user.email}</div>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <NavLink
+                    to='/trainer/dashboard'
+                    onClick={() => setIsOpen(false)}
+                    className={mobileLinkClasses}
+                  >
+                    Dashboard
+                  </NavLink>
+                  <NavLink
+                    to="/trainer/profile"
+                    onClick={() => setIsOpen(false)}
+                    className={mobileLinkClasses}
+                  >
+                    Profile
+                  </NavLink>
+                  <button
+                    onClick={(e) => {
+                      setIsOpen(false);
+                      logout(e);
+                    }}
+                    className="block w-full text-left px-4 py-2 text-base font-medium text-red-600 hover:bg-red-50 rounded-md"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 px-2">
+                <Link
+                  to="/login"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/signup"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center justify-center rounded-md bg-[#ff8211] px-4 py-2 text-sm font-medium text-white shadow hover:bg-[#ff8211]/90"
+                >
+                  Sign up
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
 
 export default Navbar;
+

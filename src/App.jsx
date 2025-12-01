@@ -23,7 +23,7 @@ import Trainerform from "./components/Forms/TrainerForm.jsx";
 import Trainerform2 from "./components/Forms/TrainerForm2.jsx";
 import Trainerform3 from "./components/Forms/TrainerForm3.jsx";
 import Traineeform from "./components/Forms/TraineeForm.jsx";
-import Traineeinfo from "./components/Forms/TraineeInfoForm.jsx";
+import TraineeRecord from "./components/Forms/TraineeRecord.jsx";
 
 // layout
 import RootLayout from "./Layout/Rootlayout";
@@ -53,7 +53,7 @@ import Gymprofile from "./components/Dashboard/GYM/Gymprofile.jsx";
 
 // dashboard store
 import StoreDashboard from "./components/Dashboard/Store/StoreDashboard.jsx";
-import Storeprofile from "./components/Dashboard/Store/Storeprofile.jsx"; 
+import Storeprofile from "./components/Dashboard/Store/Storeprofile.jsx";
 import StoreProduct from "./components/Dashboard/Store/StoreProduct.jsx";
 import StoreOrder from "./components/Dashboard/Store/StoreOrder.jsx";
 
@@ -82,7 +82,7 @@ function App() {
           <Route path="viewprofile" element={<Viewprofile />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="*" element={<NotFound />} />
-          <Route path="stores" element={<Store />} />
+          <Route path="/stores" element={<Store />} />
         </Route>
 
         {/* -------------------- TRAINER DASHBOARD -------------------- */}
@@ -124,11 +124,13 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<SignUpPage />} />
         <Route path="/role" element={<Selectrole />} />
+        {/* -------------------- Trainer Form -------------------- */}
         <Route path="/trainerform" element={<Trainerform />} />
         <Route path="/trainerform2" element={<Trainerform2 />} />
         <Route path="/trainerform3" element={<Trainerform3 />} />
+        {/* -------------------- Tarinee Form -------------------- */}
         <Route path="/traineeform" element={<Traineeform />} />
-        <Route path="/traineeinfo" element={<Traineeinfo />} />
+        <Route path="/traineerecord" element={<TraineeRecord />} />
 
         {/* -------------------- CATCH ALL -------------------- */}
         <Route path="*" element={<NotFound />} />

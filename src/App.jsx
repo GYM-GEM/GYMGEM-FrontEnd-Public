@@ -41,7 +41,7 @@ import TrainerprofileDash from "./components/Dashboard/Trainer/TrainerprofileDas
 
 // dashboard trainee
 import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
-import TraineProfileDash from "./components/Dashboard/Traine/TraineProfileDash.jsx";
+import SettingsTrainee from "./components/Dashboard/Traine/SettingsTrainee.jsx";
 import CoursesTraineDash from "./components/Dashboard/Traine/CoursesTraineDash.jsx";
 import CourseDetails from "./components/courses/CourseDetails.jsx";
 // dashboard gym
@@ -99,7 +99,7 @@ function App() {
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<TraineeDash />} />
           <Route path="courses" element={<CoursesTraineDash />} />
-          <Route path="profile" element={<TraineProfileDash />} />
+          <Route path="settings" element={<SettingsTrainee />} />
         </Route>
         {/* -------------------- GYM DASHBOARD -------------------- */}
         <Route path="gym">

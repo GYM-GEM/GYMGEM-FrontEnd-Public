@@ -3,6 +3,7 @@ import { Link, NavLink } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
 import { MdOutlineNotificationsActive } from "react-icons/md";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
+import { motion, AnimatePresence } from "framer-motion";
 
 const NavBarDash = () => {
   const [open, setOpen] = useState(false);
@@ -45,24 +46,30 @@ const NavBarDash = () => {
 
   return (
     <>
-      <nav className="fixed w-full top-0 left-0 z-50 bg-background/80 backdrop-blur-sm border-b border-muted">
-        <div className="max-w-6xl mx-auto px-4">
+      <motion.nav
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+        className="fixed w-full top-0 left-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
+            {/* LOGO */}
             <Link
               to="/"
-              className="flex items-center gap-2 text-lg font-semibold tracking-wide  transition hover:text-primary/80"
+              className="flex items-center gap-2 text-lg font-semibold tracking-wide transition hover:opacity-80"
             >
               <FaGem
                 className={`text-[#86ac55] transition-transform duration-500 ${
-                  showFullName ? "scale-105" : "scale-100"
+                  showFullName ? "scale-110" : "scale-100"
                 }`}
               />
-              <span className="relative h-6 w-24 overflow-hidden">
+              <span className="relative h-6 w-32 overflow-hidden">
                 <span
-                  className={`absolute inset-0 font-bebas text-2xl transition-all  text-[#ff8211] duration-500 ${
+                  className={`absolute inset-0 font-bebas text-2xl transition-all text-[#ff8211] duration-500 ${
                     showGG
                       ? "translate-y-0 opacity-100"
-                      : "-translate-y-2 opacity-0"
+                      : "-translate-y-4 opacity-0"
                   }`}
                 >
                   GG
@@ -70,8 +77,8 @@ const NavBarDash = () => {
                 <span className="absolute inset-0 flex items-center font-bebas text-2xl text-[#ff8211] tracking-tight">
                   {"GYMGEM".split("").map((char, index, arr) => {
                     const delay = showFullName
-                      ? index * 0.1
-                      : (arr.length - index - 1) * 0.1;
+                      ? index * 0.05
+                      : (arr.length - index - 1) * 0.05;
                     return (
                       <span
                         key={char + index}
@@ -79,7 +86,7 @@ const NavBarDash = () => {
                         className={`transition-all duration-300 ${
                           showFullName
                             ? "translate-y-0 opacity-100"
-                            : "translate-y-2 opacity-0"
+                            : "translate-y-4 opacity-0"
                         }`}
                       >
                         {char}
@@ -90,54 +97,62 @@ const NavBarDash = () => {
               </span>
             </Link>
 
+            {/* DESKTOP LINKS */}
             <div className="hidden md:flex flex-1 justify-center">
-              <div className="inline-flex items-center gap-6 bg-transparent px-4 py-1 rounded-full">
+              <div className="flex items-center space-x-1 bg-slate-50/50 px-2 py-1 rounded-full border border-slate-100">
                 {links.map((l) => (
                   <NavLink
                     key={l.to}
                     to={l.to}
                     end
                     className={({ isActive }) =>
-                      [
-                        "relative inline-block mx-3 px-3 py-2 transition-colors duration-200",
-                        isActive
-                          ? "text-[#ff8211]"
-                          : "text-gray-900 hover:text-[#ff7906]",
-                        "after:content-[''] after:absolute after:left-1/2 after:-translate-x-1/2",
-                        "after:-bottom-3 after:h-[4px] after:rounded-full after:transition-all after:duration-200",
-                        "after:bg-[#ff8211]",
-                        isActive
-                          ? "after:w-[100%] after:opacity-100"
-                          : "after:w-0 after:opacity-0",
-                      ].join(" ")
+                      `relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
+                        isActive ? "text-[#ff8211]" : "text-slate-600 hover:text-[#ff8211]"
+                      }`
                     }
                   >
-                    {l.label}
+                    {({ isActive }) => (
+                      <>
+                        {isActive && (
+                          <motion.div
+                            layoutId="navbar-active"
+                            className="absolute inset-0 bg-orange-50 rounded-full -z-10"
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                          />
+                        )}
+                        {l.label}
+                      </>
+                    )}
                   </NavLink>
                 ))}
               </div>
             </div>
 
-            {/* Right icons */}
-            <div className="flex items-center gap-3">
-              <NavLink
-                to="/notifications"
-                className="text-xl text-muted-foreground hover:text-primary"
-                aria-label="Notifications"
-              >
-                <MdOutlineNotificationsActive />
-              </NavLink>
-              <NavLink
-                to="/trainer/profile"
-                className="text-2xl text-muted-foreground hover:text-primary"
-                aria-label="Profile"
-              >
-                <FaUserCircle />
-              </NavLink>
-
+            {/* RIGHT ICONS */}
+            <div className="flex items-center gap-4">
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                <NavLink
+                  to="/notifications"
+                  className="text-xl text-slate-500 hover:text-[#ff8211] transition-colors p-2 rounded-full hover:bg-slate-50 block"
+                  aria-label="Notifications"
+                >
+                  <MdOutlineNotificationsActive />
+                </NavLink>
+              </motion.div>
               
-              <button
-                className="md:hidden p-2 rounded-md bg-background/60 border border-muted text-foreground"
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+                <NavLink
+                  to="/trainer/profile"
+                  className="text-2xl text-slate-500 hover:text-[#ff8211] transition-colors p-1 rounded-full hover:bg-slate-50 block"
+                  aria-label="Profile"
+                >
+                  <FaUserCircle />
+                </NavLink>
+              </motion.div>
+
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                className="md:hidden p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
                 onClick={() => setOpen((s) => !s)}
                 aria-label="Toggle menu"
               >
@@ -146,33 +161,45 @@ const NavBarDash = () => {
                 ) : (
                   <HiOutlineMenu className="h-5 w-5" />
                 )}
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
 
-        {/* Mobile menu panel */}
-        <div className={`${open ? "block" : "hidden"} md:hidden px-4 pb-4`}>
-          <div className="mt-3 bg-surface rounded-lg shadow-sm border border-muted p-4 space-y-2">
-            {links.map((l) => (
-              <NavLink
-                key={l.to}
-                to={l.to}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  isActive
-                    ? "block text-primary px-3 py-2 rounded"
-                    : "block text-foreground px-3 py-2 rounded hover:bg-background/50"
-                }
-              >
-                {l.label}
-              </NavLink>
-            ))}
-          </div>
-        </div>
-      </nav>
+        {/* MOBILE MENU */}
+        <AnimatePresence>
+          {open && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="md:hidden overflow-hidden bg-white border-t border-slate-100"
+            >
+              <div className="px-4 py-4 space-y-2">
+                {links.map((l) => (
+                  <NavLink
+                    key={l.to}
+                    to={l.to}
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      `block px-4 py-3 rounded-xl text-base font-medium transition-all ${
+                        isActive
+                          ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      }`
+                    }
+                  >
+                    {l.label}
+                  </NavLink>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
 
-      {/* spacer so content isn't hidden behind fixed nav */}
+      {/* Spacer */}
       <div className="h-16" />
     </>
   );

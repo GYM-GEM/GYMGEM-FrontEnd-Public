@@ -139,7 +139,7 @@ const LoginPage = () => {
                 <p className="text-center text-sm text-muted-foreground">
                   Don’t have an account?{" "}
                   <Link
-                    to="/register"
+                    to="/signup"
                     className="font-semibold text-primary hover:text-primary/80"
                   >
                     Join GymGem

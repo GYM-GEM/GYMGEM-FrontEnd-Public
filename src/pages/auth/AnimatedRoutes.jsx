@@ -11,7 +11,7 @@ const AnimatedRoutes = () => {
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<SignUpPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
       </Routes>
     </AnimatePresence>
   );

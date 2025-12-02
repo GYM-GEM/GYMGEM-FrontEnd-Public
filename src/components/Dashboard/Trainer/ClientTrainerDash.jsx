@@ -133,29 +133,32 @@ const ClientTrainerDash = () => {
   return (
     <>
       <NavBarDash />
-      <main className="bg-background text-foreground min-h-screen py-12">
+      <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900 py-12">
         <section>
           <div className="max-w-6xl mx-auto px-4">
             <div className="flex items-center">
-              <span className="flex-1 h-px bg-muted" />
+              <span className="flex-1 h-px bg-slate-200" />
               <div className="px-4">
-                <h2 className="font-bebas text-4xl text-center">Overview</h2>
+                <h2 className="font-bebas text-4xl text-center text-slate-900">Overview</h2>
               </div>
-              <span className="flex-1 h-px bg-muted" />
+              <span className="flex-1 h-px bg-slate-200" />
             </div>
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-surface rounded-xl p-4 text-center shadow-sm">
-                <p className="text-sm text-primary">👨‍🎓 Total Clients</p>
-                <p className="mt-2 font-bebas text-2xl">120</p>
+              <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm text-center">
+                <p className="text-xs font-semibold text-[#ff8211] uppercase">Total Clients</p>
+                <p className="mt-2 font-bebas text-3xl text-slate-900">120</p>
+                <p className="text-xs text-slate-500 mt-1">All registered</p>
               </div>
-              <div className="bg-surface rounded-xl p-4 text-center shadow-sm">
-                <p className="text-sm text-primary">🔥 Active Clients</p>
-                <p className="mt-2 font-bebas text-2xl">85</p>
+              <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm text-center">
+                <p className="text-xs font-semibold text-green-600 uppercase">Active Clients</p>
+                <p className="mt-2 font-bebas text-3xl text-slate-900">85</p>
+                <p className="text-xs text-slate-500 mt-1">Currently enrolled</p>
               </div>
-              <div className="bg-surface rounded-xl p-4 text-center shadow-sm">
-                <p className="text-sm text-primary">💤 Inactive</p>
-                <p className="mt-2 font-bebas text-2xl">35</p>
+              <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm text-center">
+                <p className="text-xs font-semibold text-blue-600 uppercase">Inactive</p>
+                <p className="mt-2 font-bebas text-3xl text-slate-900">35</p>
+                <p className="text-xs text-slate-500 mt-1">Not active</p>
               </div>
             </div>
           </div>
@@ -164,13 +167,13 @@ const ClientTrainerDash = () => {
         <section className="w-full ">
           <div className="max-w-6xl mx-auto px-4 mt-8">
             <div>
-              <div className="mt-2 text-primary font-bebas text-2xl uppercase">
-                <h2>Client List</h2>
+              <div className="mb-6">
+                <h2 className="font-bebas text-3xl text-slate-900">Client List</h2>
               </div>
               {/* --------------------------------------------------- */}
 
-              <div className="border-b border-muted mt-4 pb-4">
-                <div className="flex flex-wrap items-center gap-4 md:gap-8 md:justify-between mb-4">
+              <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                <div className="flex flex-wrap items-center gap-4 md:gap-8 md:justify-between">
                   <div className="inline-block">
                     {isSearching ? (
                       <input
@@ -186,7 +189,7 @@ const ClientTrainerDash = () => {
                           }
                         }}
                         placeholder="Search clients, email or phone"
-                        className="text-sm px-4 py-2 rounded-full border bg-background/60 outline-none focus:ring-2 focus:ring-primary"
+                        className="text-sm px-4 py-2 rounded-full border border-orange-200 bg-white outline-none focus:ring-2 focus:ring-[#ff8211] shadow-sm"
                         aria-label="Search"
                       />
                     ) : (
@@ -207,11 +210,11 @@ const ClientTrainerDash = () => {
                   </div>
                   {/* --------------------------------------------- */}
                   <label className="flex items-center gap-2 text-sm">
-                    <span>📂 Category:</span>
+                    <span className="font-medium text-slate-700">📂 Category:</span>
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="rounded border bg-background/60 text-sm px-2 py-1 outline-none"
+                      className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#ff8211] focus:ring-1 focus:ring-[#ff8211] bg-white"
                     >
                       <option value="all">All</option>
                       <option value="enrolled">Enrolled</option>
@@ -220,11 +223,11 @@ const ClientTrainerDash = () => {
                   </label>
 
                   <label className="flex items-center gap-2 text-sm">
-                    <span>📈 Status:</span>
+                    <span className="font-medium text-slate-700">📈 Status:</span>
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="rounded border bg-background/60 text-sm px-2 py-1 outline-none"
+                      className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#ff8211] focus:ring-1 focus:ring-[#ff8211] bg-white"
                     >
                       <option value="all">All</option>
                       <option value="active">Active</option>
@@ -233,11 +236,11 @@ const ClientTrainerDash = () => {
                   </label>
 
                   <label className="flex items-center gap-2 text-sm">
-                    <span>📅 Sort by:</span>
+                    <span className="font-medium text-slate-700">📅 Sort by:</span>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="rounded border bg-background/60 text-sm px-2 py-1 outline-none"
+                      className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-[#ff8211] focus:ring-1 focus:ring-[#ff8211] bg-white"
                     >
                       <option value="name-asc">Name (A–Z)</option>
                       <option value="name-desc">Name (Z–A)</option>
@@ -253,10 +256,10 @@ const ClientTrainerDash = () => {
               </div>
               {/* ------------------------------------------------------ */}
               <div className="w-full mt-6">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-full bg-surface rounded-lg shadow-sm">
-                    <thead className="bg-background/40">
-                      <tr className="text-sm text-muted-foreground">
+                <div className="overflow-x-auto bg-white border border-slate-100 rounded-2xl shadow-sm">
+                  <table className="w-full min-w-full">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr className="text-sm text-slate-700 font-semibold">
                         <th className="text-center px-4 py-3">
                           👤 Client Name
                         </th>
@@ -272,7 +275,7 @@ const ClientTrainerDash = () => {
                       {filteredRows.map((row) => (
                         <tr
                           key={row.id}
-                          className="text-sm text-center border-b last:border-b-0 hover:bg-background/50 h-[100px]"
+                          className="text-sm text-center border-b border-slate-100 last:border-b-0 hover:bg-slate-50 transition-colors"
                         >
                           <td className="px-4 py-4">{row.name}</td>
 
@@ -316,9 +319,24 @@ const ClientTrainerDash = () => {
                   row={selected}
                 />
               </div>
-              <div className="py-6 text-center text-sm font-semibold tracking-wide">
-                &laquo;&laquo; PREV | <span className="underline">1</span> | 2 |
-                3 | NEXT &raquo;&raquo;
+              <div className="py-6 text-center">
+                <div className="inline-flex items-center gap-2">
+                  <button className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                    PREV
+                  </button>
+                  <button className="px-3 py-2 rounded-lg text-sm font-medium transition bg-[#ff8211] text-white">
+                    1
+                  </button>
+                  <button className="px-3 py-2 rounded-lg text-sm font-medium transition text-slate-700 hover:bg-slate-100">
+                    2
+                  </button>
+                  <button className="px-3 py-2 rounded-lg text-sm font-medium transition text-slate-700 hover:bg-slate-100">
+                    3
+                  </button>
+                  <button className="px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+                    NEXT
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -65,7 +65,7 @@ function HeroSc() {
               Find a trainer
             </button>
             <button
-              onClick={() => navigate("/register")}
+              onClick={() => navigate("/signup")}
               className="inline-flex h-12 min-w-[180px]  items-center justify-center bg-white rounded-xl border border-border bg-background/80 px-6 text-sm font-semibold text-foreground shadow-sm transition-all duration-300 hover:scale-105 hover:bg-muted hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Join as a trainer

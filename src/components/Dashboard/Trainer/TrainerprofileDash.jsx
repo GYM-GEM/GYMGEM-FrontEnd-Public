@@ -1,7 +1,11 @@
 import NavBarDash from "./NavBarDash";
 import FooterDash from "../FooterDash";
-import { Lock, CreditCard, LogOut, X } from "lucide-react";
-import { useState } from "react";
+import { 
+  Edit, Trash2, Plus, X, Save, 
+  MapPin, Phone, Mail, Calendar,
+  Briefcase, Award, Activity, TrendingUp
+} from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
 
@@ -9,627 +13,818 @@ const TrainerProfileDash = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  // State management
-  const [trainerData, setTrainerData] = useState({
-    name: "Mahmoud Gado",
-    email: "mahmoudgado@gmail.com",
-    location: "Cairo, Egypt",
-    phone: "+20 100 1234567",
-    job: "Trainee Developer",
-    joined: "January 2023",
-    level: "Beginner",
-    city: "Cairo",
-    goal: "Become a full stack developer",
-    avatar: "https://i.pravatar.cc/150?img=3",
-    bio: "I'm a full stack trainer specialized in Django & React.",
-    skills: ["Django", "React", "Python", "JavaScript"],
-    linkedin: "linkedin.com/in/alikamal",
+  // Initialize state from localStorage
+  const [profileData, setProfileData] = useState(() => {
+    const saved = localStorage.getItem("trainerProfileData");
+    return saved ? JSON.parse(saved) : {
+      profile: {
+        avatar: "https://i.pravatar.cc/150?img=3",
+        name: "Mahmoud Gado",
+        gender: "Male",
+        birthdate: "1990-01-15",
+        phone: "+20 100 1234567",
+        country: "Egypt",
+        state: "Cairo",
+        zip: "12345",
+        bio: "I'm a full stack trainer specialized in Django & React.",
+        skills: ["Django", "React", "Python", "JavaScript"],
+        linkedin: "linkedin.com/in/mahmoudgado",
+        email: "mahmoudgado@gmail.com"
+      },
+      specializations: [
+        {
+          id: 1,
+          name: "Strength Training",
+          yearsExperience: 5,
+          hourlyRate: 50,
+          location: "Both"
+        }
+      ],
+      workExperience: [
+        {
+          id: 1,
+          workplace: "FitHub Gym",
+          position: "Senior Trainer",
+          startDate: "2020-01",
+          endDate: "Present",
+          description: "Leading group classes and personal training sessions"
+        }
+      ],
+      records: [
+        {
+          id: 1,
+          date: "2024-12-01",
+          weight: 75,
+          height: 180,
+          bodyFat: 15,
+          muscleMass: 60,
+          boneMass: 3.5,
+          bodyWater: 55,
+          bmr: 1650
+        }
+      ]
+    };
   });
 
   const [modals, setModals] = useState({
     editProfile: false,
-    changePassword: false,
-    paymentInfo: false,
+    addSpecialization: false,
+    editSpecialization: false,
+    addExperience: false,
+    editExperience: false,
+    addRecord: false,
+    editRecord: false
   });
 
-  const [formData, setFormData] = useState({
-    editProfile: {
-      ...trainerData,
-      skills: Array.isArray(trainerData.skills)
-        ? trainerData.skills.join(", ")
-        : trainerData.skills,
-    },
-    changePassword: {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    },
-    paymentInfo: { cardNumber: "", expiryDate: "", cvv: "", cardHolder: "" },
-  });
+  const [currentEdit, setCurrentEdit] = useState(null);
+  const [formData, setFormData] = useState({});
+
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    localStorage.setItem("trainerProfileData", JSON.stringify(profileData));
+    // Also update the legacy trainerProfile for backward compatibility
+    localStorage.setItem("trainerProfile", JSON.stringify(profileData.profile));
+  }, [profileData]);
 
   // Modal handlers
-  const openModal = (modalName) => {
-    // When opening editProfile, make sure form reflects latest trainer data
+  const openModal = (modalName, data = null) => {
+    setCurrentEdit(data);
     if (modalName === "editProfile") {
-      setFormData((prev) => ({
-        ...prev,
-        editProfile: {
-          ...trainerData,
-          skills: Array.isArray(trainerData.skills)
-            ? trainerData.skills.join(", ")
-            : trainerData.skills,
-        },
-      }));
+      setFormData({ ...profileData.profile });
+    } else if (data) {
+      setFormData({ ...data });
+    } else {
+      setFormData({});
     }
-
-    setModals((prev) => ({ ...prev, [modalName]: true }));
+    setModals(prev => ({ ...prev, [modalName]: true }));
   };
 
   const closeModal = (modalName) => {
-    setModals((prev) => ({ ...prev, [modalName]: false }));
+    setModals(prev => ({ ...prev, [modalName]: false }));
+    setCurrentEdit(null);
+    setFormData({});
   };
 
-  // Edit Profile handlers
-  const handleEditProfileChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      editProfile: { ...prev.editProfile, [name]: value },
-    }));
-  };
-
-  // Avatar upload (reads file as data URL and sets preview in form)
+  // Avatar upload
   const handleAvatarUpload = (e) => {
-    const file = e.target.files && e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      setFormData((prev) => ({
-        ...prev,
-        editProfile: {
-          ...prev.editProfile,
-          avatar: reader.result,
-          avatarFile: file,
-        },
-      }));
+      setFormData(prev => ({ ...prev, avatar: reader.result }));
     };
     reader.readAsDataURL(file);
   };
 
+  // Profile handlers
   const handleSaveProfile = () => {
-    // Normalize skills input (allow comma separated string)
-    const updated = { ...formData.editProfile };
-    if (typeof updated.skills === "string") {
-      updated.skills = updated.skills
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    }
-
-    setTrainerData(updated);
+    setProfileData(prev => ({ ...prev, profile: formData }));
     closeModal("editProfile");
     showToast("Profile updated successfully!", { type: "success" });
   };
 
-  // Change Password handlers
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      changePassword: { ...prev.changePassword, [name]: value },
-    }));
-  };
-
-  const handleSavePassword = () => {
-    if (
-      formData.changePassword.newPassword !==
-      formData.changePassword.confirmPassword
-    ) {
-      showToast("New passwords do not match!", { type: "error" });
-      return;
+  // Specialization handlers
+  const handleSaveSpecialization = () => {
+    if (currentEdit) {
+      setProfileData(prev => ({
+        ...prev,
+        specializations: prev.specializations.map(s => 
+          s.id === currentEdit.id ? { ...formData, id: s.id } : s
+        )
+      }));
+      showToast("Specialization updated!", { type: "success" });
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        specializations: [...prev.specializations, { ...formData, id: Date.now() }]
+      }));
+      showToast("Specialization added!", { type: "success" });
     }
-    closeModal("changePassword");
-    showToast("Password changed successfully!", { type: "success" });
-    setFormData((prev) => ({
-      ...prev,
-      changePassword: {
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      },
-    }));
+    closeModal(currentEdit ? "editSpecialization" : "addSpecialization");
   };
 
-  // Payment Info handlers
-  const handlePaymentChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      paymentInfo: { ...prev.paymentInfo, [name]: value },
-    }));
-  };
-
-  const handleSavePayment = () => {
-    closeModal("paymentInfo");
-    showToast("Payment information saved successfully!", { type: "success" });
-    setFormData((prev) => ({
-      ...prev,
-      paymentInfo: { cardNumber: "", expiryDate: "", cvv: "", cardHolder: "" },
-    }));
-  };
-
-  // Logout handler
-  const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      // Clear auth tokens/session here
-      localStorage.removeItem("authToken");
-      navigate("/login");
+  const handleDeleteSpecialization = (id) => {
+    if (window.confirm("Delete this specialization?")) {
+      setProfileData(prev => ({
+        ...prev,
+        specializations: prev.specializations.filter(s => s.id !== id)
+      }));
+      showToast("Specialization deleted!", { type: "success" });
     }
   };
+
+  // Experience handlers
+  const handleSaveExperience = () => {
+    if (currentEdit) {
+      setProfileData(prev => ({
+        ...prev,
+        workExperience: prev.workExperience.map(e => 
+          e.id === currentEdit.id ? { ...formData, id: e.id } : e
+        )
+      }));
+      showToast("Experience updated!", { type: "success" });
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        workExperience: [...prev.workExperience, { ...formData, id: Date.now() }]
+      }));
+      showToast("Experience added!", { type: "success" });
+    }
+    closeModal(currentEdit ? "editExperience" : "addExperience");
+  };
+
+  const handleDeleteExperience = (id) => {
+    if (window.confirm("Delete this experience?")) {
+      setProfileData(prev => ({
+        ...prev,
+        workExperience: prev.workExperience.filter(e => e.id !== id)
+      }));
+      showToast("Experience deleted!", { type: "success" });
+    }
+  };
+
+  // Record handlers
+  const handleSaveRecord = () => {
+    if (currentEdit) {
+      setProfileData(prev => ({
+        ...prev,
+        records: prev.records.map(r => 
+          r.id === currentEdit.id ? { ...formData, id: r.id } : r
+        )
+      }));
+      showToast("Record updated!", { type: "success" });
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        records: [...prev.records, { ...formData, id: Date.now() }]
+      }));
+      showToast("Record added!", { type: "success" });
+    }
+    closeModal(currentEdit ? "editRecord" : "addRecord");
+  };
+
+  const handleDeleteRecord = (id) => {
+    if (window.confirm("Delete this record?")) {
+      setProfileData(prev => ({
+        ...prev,
+        records: prev.records.filter(r => r.id !== id)
+      }));
+      showToast("Record deleted!", { type: "success" });
+    }
+  };
+
+  const { profile } = profileData;
 
   return (
     <>
       <NavBarDash />
-
-      <main className="bg-background text-foreground min-h-screen py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          {/* PERSONAL INFORMATION SECTION */}
-          <section className="mb-12">
-            <div className="flex flex-col md:flex-row gap-8">
-              {/* Avatar */}
-              <div className="flex-shrink-0">
+      <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 py-8">
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Profile Header */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
+            <div className="flex flex-col md:flex-row gap-6 items-start">
+              <div className="relative">
                 <img
-                  src={trainerData.avatar}
-                  alt={trainerData.name}
-                  className="w-40 h-40 rounded-full object-cover border-4 border-primary"
+                  src={profile.avatar}
+                  alt={profile.name}
+                  className="w-32 h-32 rounded-full object-cover border-4 border-primary"
                 />
               </div>
-
-              {/* Personal Info */}
+              
               <div className="flex-1">
-                <h2 className="text-[#ff8211] text-sm font-bold uppercase mb-4">
-                  👤 Personal Information
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="flex items-start justify-between mb-4">
                   <div>
-                    <p className="text-gray-700 font-semibold">
-                      Name:{" "}
-                      <span className="font-normal">{trainerData.name}</span>
+                    <h1 className="text-3xl font-bold text-foreground bebas-regular">
+                      {profile.name}
+                    </h1>
+                    <p className="text-muted-foreground poppins-regular">
+                      Personal Trainer
                     </p>
                   </div>
-                  <div>
-                    <p className="text-gray-700 font-semibold">
-                      Location:{" "}
-                      <span className="font-normal">
-                        {trainerData.location}
-                      </span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-700 font-semibold">
-                      Email:{" "}
-                      <span className="font-normal">{trainerData.email}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-700 font-semibold">
-                      Phone:{" "}
-                      <span className="font-normal">{trainerData.phone}</span>
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-700 font-semibold">
-                      Job:{" "}
-                      <span className="font-normal">{trainerData.job}</span>
-                    </p>
-                  </div>
+                  <button
+                    onClick={() => openModal("editProfile")}
+                    className="px-4 py-2 bg-[#FF8211] text-white rounded-lg hover:bg-[#ff7906] transition-colors poppins-medium text-sm flex items-center gap-2"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit Profile
+                  </button>
                 </div>
 
-                {/* Edit Profile Button */}
-                <button
-                  onClick={() => openModal("editProfile")}
-                  className="bg-[#ff8211] text-white px-6 py-2 rounded-full font-bold uppercase hover:opacity-95 transition"
-                >
-                  <span className="text-[black]">✎</span> Edit Profile
-                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>Gender: {profile.gender}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    <span>Birthdate: {profile.birthdate}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Phone className="w-4 h-4" />
+                    <span>{profile.phone}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Mail className="w-4 h-4" />
+                    <span>{profile.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <MapPin className="w-4 h-4" />
+                    <span>{profile.country}, {profile.state} {profile.zip}</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </section>
+          </div>
 
-          <hr className="border-t border-muted my-8" />
-
-          {/* PROFESSIONAL DETAILS SECTION */}
-          <section className="mb-12">
-            <h2 className="text-[#ff8211] text-2xl font-bold uppercase mb-6 flex items-center gap-2">
-              <span>💼</span> Professional Details
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <p className="text-gray-700 font-semibold">
-                  Bio: <span className="font-normal ">{trainerData.bio}</span>
-                </p>
-              </div>
-
-              <div>
-                <p className="text-gray-700 font-semibold mb-2">
-                  Skills:{" "}
-                  <span className="font-normal">
-                    [{trainerData.skills.join("] [")}]
-                  </span>
-                </p>
-              </div>
-
-              <div>
-                <p className="text-gray-700 font-semibold">
-                  LinkedIn:{" "}
-                  <span className="font-normal">{trainerData.linkedin}</span>
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <hr className="border-t border-muted my-8" />
-
-          {/* SETTINGS SECTION */}
-          <section>
-            <h2 className="text-[#ff8211] text-2xl font-bold uppercase mb-6 flex items-center gap-2">
-              <span>⚙️</span> Settings
-            </h2>
-
-            <div className="space-y-4">
-              {/* Change Password */}
-              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition">
-                <Lock className="h-5 w-5 text-muted-foreground" />
-                <button
-                  onClick={() => openModal("changePassword")}
-                  className="text-foreground font-semibold hover:text-primary transition"
-                >
-                  Change Password
-                </button>
-              </div>
-
-              {/* Payment Info */}
-              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition">
-                <CreditCard className="h-5 w-5 text-muted-foreground" />
-                <button
-                  onClick={() => openModal("paymentInfo")}
-                  className="text-foreground font-semibold hover:text-primary transition"
-                >
-                  Payment Info
-                </button>
-              </div>
-
-              {/* Logout */}
-              <div className="flex items-center gap-3 p-3 hover:bg-background/50 rounded cursor-pointer transition">
-                <LogOut className="h-5 w-5 text-red-600" />
-                <button
-                  onClick={handleLogout}
-                  className="text-red-600 font-semibold hover:text-red-800 transition"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
-
-      {/* EDIT PROFILE MODAL */}
-      {modals.editProfile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md bg-white shadow-2xl rounded-lg overflow-hidden max-h-[80vh]">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold">Edit Profile</h2>
+          {/* Specializations & Services */}
+          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-foreground bebas-regular flex items-center gap-2">
+                <Award className="w-6 h-6 text-[#FF8211]" />
+                Specializations & Services
+              </h2>
               <button
-                onClick={() => closeModal("editProfile")}
-                className="p-1 hover:bg-gray-100 rounded"
+                onClick={() => openModal("addSpecialization")}
+                className="px-4 py-2 bg-[#FF8211] text-white rounded-lg hover:bg-[#ff7906] transition-colors poppins-medium text-sm flex items-center gap-2"
               >
-                <X className="h-5 w-5" />
+                <Plus className="w-4 h-4" />
+                Add Specialization
               </button>
             </div>
 
-            {/* Avatar preview + quick info */}
-            {formData.editProfile?.avatar && (
-              <div className="px-6 pt-4 pb-2 flex items-center gap-4">
-                <img
-                  src={formData.editProfile.avatar}
-                  alt="avatar preview"
-                  className="w-16 h-16 rounded-full object-cover border border-muted"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-foreground">
-                    {formData.editProfile.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Preview</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {profileData.specializations.map(spec => (
+                <div key={spec.id} className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="font-bold text-lg text-foreground poppins-medium">
+                      {spec.name}
+                    </h3>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openModal("editSpecialization", spec)}
+                        className="text-[#FF8211] hover:text-[#ff7906] p-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSpecialization(spec.id)}
+                        className="text-red-600 hover:text-red-700 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2 text-sm text-muted-foreground poppins-regular">
+                    <p>Experience: {spec.yearsExperience} years</p>
+                    <p>Rate: ${spec.hourlyRate}/hour</p>
+                    <p>Location: {spec.location}</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              ))}
+            </div>
+          </div>
 
-            <div className="px-6 py-5 space-y-4 overflow-y-auto max-h-[56vh]">
-              <div>
-                <label className="block text-sm font-semibold mb-1">Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.editProfile.name}
-                  onChange={handleEditProfileChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.editProfile.email}
-                  onChange={handleEditProfileChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  value={formData.editProfile.location}
-                  onChange={handleEditProfileChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Phone
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.editProfile.phone}
-                  onChange={handleEditProfileChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">Job</label>
-                <input
-                  type="text"
-                  name="job"
-                  value={formData.editProfile.job}
-                  onChange={handleEditProfileChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
+          {/* Work Experience */}
+          <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-foreground bebas-regular flex items-center gap-2">
+                <Briefcase className="w-6 h-6 text-[#FF8211]" />
+                Work Experience
+              </h2>
+              <button
+                onClick={() => openModal("addExperience")}
+                className="px-4 py-2 bg-[#FF8211] text-white rounded-lg hover:bg-[#ff7906] transition-colors poppins-medium text-sm flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Experience
+              </button>
+            </div>
 
+            <div className="space-y-4">
+              {profileData.workExperience.map(exp => (
+                <div key={exp.id} className="border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-bold text-lg text-foreground poppins-medium">
+                        {exp.position}
+                      </h3>
+                      <p className="text-[#FF8211] poppins-regular">{exp.workplace}</p>
+                      <p className="text-sm text-muted-foreground poppins-regular">
+                        {exp.startDate} - {exp.endDate}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => openModal("editExperience", exp)}
+                        className="text-[#FF8211] hover:text-[#ff7906] p-1"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteExperience(exp.id)}
+                        className="text-red-600 hover:text-red-700 p-1"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground poppins-regular">
+                    {exp.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Trainer Records */}
+          <div className="bg-card rounded-lg shadow-sm border border-border p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-foreground bebas-regular flex items-center gap-2">
+                <Activity className="w-6 h-6 text-[#FF8211]" />
+                Body Measurements
+              </h2>
+              <button
+                onClick={() => openModal("addRecord")}
+                className="px-4 py-2 bg-[#FF8211] text-white rounded-lg hover:bg-[#ff7906] transition-colors poppins-medium text-sm flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Record
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left p-3 poppins-medium">Date</th>
+                    <th className="text-left p-3 poppins-medium">Weight</th>
+                    <th className="text-left p-3 poppins-medium">Height</th>
+                    <th className="text-left p-3 poppins-medium">Body Fat</th>
+                    <th className="text-left p-3 poppins-medium">Muscle</th>
+                    <th className="text-left p-3 poppins-medium">BMR</th>
+                    <th className="text-left p-3 poppins-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {profileData.records.map(record => (
+                    <tr key={record.id} className="border-b border-border hover:bg-muted/50">
+                      <td className="p-3 poppins-regular">{record.date}</td>
+                      <td className="p-3 poppins-regular">{record.weight} kg</td>
+                      <td className="p-3 poppins-regular">{record.height} cm</td>
+                      <td className="p-3 poppins-regular">{record.bodyFat}%</td>
+                      <td className="p-3 poppins-regular">{record.muscleMass} kg</td>
+                      <td className="p-3 poppins-regular">{record.bmr}</td>
+                      <td className="p-3">
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openModal("editRecord", record)}
+                            className="text-[#FF8211] hover:text-[#ff7906] p-1"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteRecord(record.id)}
+                            className="text-red-600 hover:text-red-700 p-1"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Edit Profile Modal */}
+      {modals.editProfile && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+              <h3 className="text-xl font-bold">Edit Profile</h3>
+              <button onClick={() => closeModal("editProfile")} className="p-1 hover:bg-gray-100 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Upload Avatar
-                </label>
+                <label className="block text-sm font-medium mb-1">Profile Picture</label>
+                {formData.avatar && (
+                  <img src={formData.avatar} alt="Preview" className="w-24 h-24 rounded-full mb-2" />
+                )}
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleAvatarUpload}
-                  className="w-full text-sm border border-gray-500 cursor-pointer rounded px-3 py-2 outline-none focus:border-[#FF8A1A] hover:bg-[#4fe60f]"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Select an image from your device
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Skills (comma separated)
-                </label>
-                <input
-                  type="text"
-                  name="skills"
-                  value={formData.editProfile.skills}
-                  onChange={handleEditProfileChange}
-                  placeholder="React, Node, CSS"
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  LinkedIn
-                </label>
-                <input
-                  type="text"
-                  name="linkedin"
-                  value={formData.editProfile.linkedin}
-                  onChange={handleEditProfileChange}
-                  placeholder="linkedin.com/in/username"
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">Bio</label>
-                <textarea
-                  name="bio"
-                  value={formData.editProfile.bio}
-                  onChange={handleEditProfileChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                  rows="3"
-                />
-              </div>
-            </div>
-
-            <div className="px-6 pb-6 flex gap-3 bg-white sticky bottom-0">
-              <button
-                onClick={handleSaveProfile}
-                className="flex-1 bg-[#FF8A1A] text-white py-2.5 font-semibold rounded hover:opacity-95 transition-colors"
-              >
-                Save Changes
-              </button>
-              <button
-                onClick={() => closeModal("editProfile")}
-                className="flex-1 bg-[#FF8A1A] text-white py-2.5 font-semibold rounded hover:bg-[#e6760f] transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* CHANGE PASSWORD MODAL */}
-      {modals.changePassword && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md bg-white shadow-2xl rounded-lg overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold">Change Password</h2>
-              <button
-                onClick={() => closeModal("changePassword")}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Current Password
-                </label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={formData.changePassword.currentPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  New Password
-                </label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={formData.changePassword.newPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Confirm Password
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.changePassword.confirmPassword}
-                  onChange={handlePasswordChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-            </div>
-
-            <div className="px-6 pb-6 flex gap-3">
-              <button
-                onClick={handleSavePassword}
-                className="flex-1 bg-[#FF8A1A] text-white py-2.5 font-semibold rounded hover:bg-[#e6760f] transition-colors"
-              >
-                Change Password
-              </button>
-              <button
-                onClick={() => closeModal("changePassword")}
-                className="flex-1 bg-gray-200 text-gray-700 py-2.5 font-semibold rounded hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PAYMENT INFO MODAL */}
-      {modals.paymentInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md bg-white shadow-2xl rounded-lg overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold">Payment Information</h2>
-              <button
-                onClick={() => closeModal("paymentInfo")}
-                className="p-1 hover:bg-gray-100 rounded"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="px-6 py-5 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Card Holder Name
-                </label>
-                <input
-                  type="text"
-                  name="cardHolder"
-                  value={formData.paymentInfo.cardHolder}
-                  onChange={handlePaymentChange}
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">
-                  Card Number
-                </label>
-                <input
-                  type="text"
-                  name="cardNumber"
-                  value={formData.paymentInfo.cardNumber}
-                  onChange={handlePaymentChange}
-                  placeholder="1234 5678 9012 3456"
-                  className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
+                  className="w-full text-sm"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-1">
-                    Expiry Date
-                  </label>
+                  <label className="block text-sm font-medium mb-1">Name</label>
                   <input
                     type="text"
-                    name="expiryDate"
-                    value={formData.paymentInfo.expiryDate}
-                    onChange={handlePaymentChange}
-                    placeholder="MM/YY"
-                    className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
+                    value={formData.name || ""}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold mb-1">
-                    CVV
-                  </label>
+                  <label className="block text-sm font-medium mb-1">Gender</label>
+                  <select
+                    value={formData.gender || ""}
+                    onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  >
+                    <option>Male</option>
+                    <option>Female</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Birthdate</label>
+                  <input
+                    type="date"
+                    value={formData.birthdate || ""}
+                    onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    value={formData.phone || ""}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Country</label>
                   <input
                     type="text"
-                    name="cvv"
-                    value={formData.paymentInfo.cvv}
-                    onChange={handlePaymentChange}
-                    placeholder="123"
-                    className="w-full border border-gray-300 rounded px-3 py-2 outline-none focus:border-[#FF8A1A]"
+                    value={formData.country || ""}
+                    onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">State</label>
+                  <input
+                    type="text"
+                    value={formData.state || ""}
+                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">ZIP Code</label>
+                  <input
+                    type="text"
+                    value={formData.zip || ""}
+                    onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={formData.email || ""}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
                   />
                 </div>
               </div>
             </div>
-
-            <div className="px-6 pb-6 flex gap-3">
+            <div className="sticky bottom-0 bg-white border-t px-6 py-4 flex justify-end gap-3">
               <button
-                onClick={handleSavePayment}
-                className="flex-1 bg-[#FF8A1A] text-white py-2.5 font-semibold rounded hover:bg-[#e6760f] transition-colors"
-              >
-                Save Payment
-              </button>
-              <button
-                onClick={() => closeModal("paymentInfo")}
-                className="flex-1 bg-gray-200 text-gray-700 py-2.5 font-semibold rounded hover:bg-gray-300 transition-colors"
+                onClick={() => closeModal("editProfile")}
+                className="px-4 py-2 border rounded hover:bg-gray-50"
               >
                 Cancel
+              </button>
+              <button
+                onClick={handleSaveProfile}
+                className="px-4 py-2 bg-[#FF8211] text-white rounded hover:bg-[#ff7906]"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Specialization Modal */}
+      {(modals.addSpecialization || modals.editSpecialization) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-md">
+            <div className="border-b px-6 py-4 flex justify-between items-center">
+              <h3 className="text-xl font-bold">
+                {currentEdit ? "Edit" : "Add"} Specialization
+              </h3>
+              <button 
+                onClick={() => closeModal(currentEdit ? "editSpecialization" : "addSpecialization")}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Specialization Name</label>
+                <input
+                  type="text"
+                  value={formData.name || ""}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="e.g., Strength Training"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Years of Experience</label>
+                <input
+                  type="number"
+                  value={formData.yearsExperience || ""}
+                  onChange={(e) => setFormData({ ...formData, yearsExperience: parseInt(e.target.value) })}
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Hourly Rate ($)</label>
+                <input
+                  type="number"
+                  value={formData.hourlyRate || ""}
+                  onChange={(e) => setFormData({ ...formData, hourlyRate: parseInt(e.target.value) })}
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Service Location</label>
+                <select
+                  value={formData.location || ""}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  className="w-full border rounded px-3 py-2"
+                >
+                  <option value="">Select...</option>
+                  <option>Online</option>
+                  <option>Offline</option>
+                  <option>Both</option>
+                </select>
+              </div>
+            </div>
+            <div className="border-t px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => closeModal(currentEdit ? "editSpecialization" : "addSpecialization")}
+                className="px-4 py-2 border rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSpecialization}
+                className="px-4 py-2 bg-[#FF8211] text-white rounded hover:bg-[#ff7906]"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Experience Modal */}
+      {(modals.addExperience || modals.editExperience) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-md">
+            <div className="border-b px-6 py-4 flex justify-between items-center">
+              <h3 className="text-xl font-bold">
+                {currentEdit ? "Edit" : "Add"} Experience
+              </h3>
+              <button 
+                onClick={() => closeModal(currentEdit ? "editExperience" : "addExperience")}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Workplace</label>
+                <input
+                  type="text"
+                  value={formData.workplace || ""}
+                  onChange={(e) => setFormData({ ...formData, workplace: e.target.value })}
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Position</label>
+                <input
+                  type="text"
+                  value={formData.position || ""}
+                  onChange={(e) => setFormData({ ...formData, position: e.target.value })}
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Start Date</label>
+                  <input
+                    type="month"
+                    value={formData.startDate || ""}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">End Date</label>
+                  <input
+                    type="text"
+                    value={formData.endDate || ""}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                    placeholder="Present or YYYY-MM"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <textarea
+                  value={formData.description || ""}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full border rounded px-3 py-2"
+                  rows="3"
+                />
+              </div>
+            </div>
+            <div className="border-t px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => closeModal(currentEdit ? "editExperience" : "addExperience")}
+                className="px-4 py-2 border rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveExperience}
+                className="px-4 py-2 bg-[#FF8211] text-white rounded hover:bg-[#ff7906]"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Record Modal */}
+      {(modals.addRecord || modals.editRecord) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-2xl">
+            <div className="border-b px-6 py-4 flex justify-between items-center">
+              <h3 className="text-xl font-bold">
+                {currentEdit ? "Edit" : "Add"} Body Measurement
+              </h3>
+              <button 
+                onClick={() => closeModal(currentEdit ? "editRecord" : "addRecord")}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Date</label>
+                  <input
+                    type="date"
+                    value={formData.date || ""}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Weight (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.weight || ""}
+                    onChange={(e) => setFormData({ ...formData, weight: parseFloat(e.target.value) })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Height (cm)</label>
+                  <input
+                    type="number"
+                    value={formData.height || ""}
+                    onChange={(e) => setFormData({ ...formData, height: parseInt(e.target.value) })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Body Fat (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.bodyFat || ""}
+                    onChange={(e) => setFormData({ ...formData, bodyFat: parseFloat(e.target.value) })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Muscle Mass (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.muscleMass || ""}
+                    onChange={(e) => setFormData({ ...formData, muscleMass: parseFloat(e.target.value) })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Bone Mass (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.boneMass || ""}
+                    onChange={(e) => setFormData({ ...formData, boneMass: parseFloat(e.target.value) })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Body Water (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.bodyWater || ""}
+                    onChange={(e) => setFormData({ ...formData, bodyWater: parseFloat(e.target.value) })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">BMR (cal/day)</label>
+                  <input
+                    type="number"
+                    value={formData.bmr || ""}
+                    onChange={(e) => setFormData({ ...formData, bmr: parseInt(e.target.value) })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="border-t px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => closeModal(currentEdit ? "editRecord" : "addRecord")}
+                className="px-4 py-2 border rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveRecord}
+                className="px-4 py-2 bg-[#FF8211] text-white rounded hover:bg-[#ff7906]"
+              >
+                Save
               </button>
             </div>
           </div>

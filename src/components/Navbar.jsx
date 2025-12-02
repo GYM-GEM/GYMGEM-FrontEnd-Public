@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
-import { ChevronDown, Menu, X, LayoutDashboard, User, LogOut } from "lucide-react";
+import { ChevronDown, Menu, X, LayoutDashboard, Settings as SettingsIcon, UserPlus, LogOut } from "lucide-react";
 import axios from "axios";
 import { useToast } from "../context/ToastContext";
 
@@ -229,7 +229,7 @@ function Navbar() {
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                   </div>
                   <NavLink
-                    to='/trainer/dashboard'
+                    to='/traine/dashboard'
                     onClick={() => setUserMenuOpen(false)}
                     className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
                   >
@@ -237,13 +237,22 @@ function Navbar() {
                     Dashboard
                   </NavLink>
                   <NavLink
-                    to="/trainer/profile"
+                    to="/settings"
                     onClick={() => setUserMenuOpen(false)}
                     className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
                   >
-                    <User className="h-4 w-4" />
-                    Profile
+                    <SettingsIcon className="h-4 w-4" />
+                    Settings
                   </NavLink>
+                  <NavLink
+                    to="/role"
+                    onClick={() => setUserMenuOpen(false)}
+                    className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    Change Profile
+                  </NavLink>
+                  <div className="border-t border-gray-100 my-1"></div>
                   <button
                     onClick={(e) => {
                       setUserMenuOpen(false);
@@ -364,18 +373,25 @@ function Navbar() {
                 </div>
                 <div className="space-y-1">
                   <NavLink
-                    to='/trainer/dashboard'
+                    to='/traine/dashboard'
                     onClick={() => setIsOpen(false)}
                     className={mobileLinkClasses}
                   >
                     Dashboard
                   </NavLink>
                   <NavLink
-                    to="/trainer/profile"
+                    to="/settings"
                     onClick={() => setIsOpen(false)}
                     className={mobileLinkClasses}
                   >
-                    Profile
+                    Settings
+                  </NavLink>
+                  <NavLink
+                    to="/role"
+                    onClick={() => setIsOpen(false)}
+                    className={mobileLinkClasses}
+                  >
+                    Change Profile
                   </NavLink>
                   <button
                     onClick={(e) => {

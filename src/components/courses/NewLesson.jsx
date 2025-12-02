@@ -19,11 +19,14 @@ const NewLeason = () => {
     if (!course) return;
 
     const newLesson = {
+      id: Date.now(),
       ...lessonData,
-      courseId: course.id, // link to parent course
+      courseId: course.id,
+      sections: [], // Initialize empty sections array
+      status: lessonData.status || "draft",
     };
 
-    // حفظ في localStorage
+    // Save to localStorage
     const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
     const updatedCourses = savedCourses.map((c) =>
       c.id === course.id
@@ -33,8 +36,14 @@ const NewLeason = () => {
 
     localStorage.setItem("courses", JSON.stringify(updatedCourses));
 
-    // توجيه بعد الحفظ
-    navigate(`/trainer/courses`); // أو أي مسار تحب تروّحله
+    // Navigate to AddSection page to add sections to this lesson
+    const updatedCourse = updatedCourses.find((c) => c.id === course.id);
+    navigate("/addsection", { 
+      state: { 
+        course: updatedCourse, 
+        lesson: newLesson 
+      } 
+    });
   };
   return (
     <>

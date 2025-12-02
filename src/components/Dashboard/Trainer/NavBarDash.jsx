@@ -1,12 +1,21 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useEffect, useState, useRef } from "react";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
 import { MdOutlineNotificationsActive } from "react-icons/md";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
+import { ChevronDown, LayoutDashboard, Settings as SettingsIcon, UserPlus, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "../../../context/ToastContext";
+import axios from "axios";
 
 const NavBarDash = () => {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
   const [open, setOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userRef = useRef(null);
+  
+  const user = JSON.parse(localStorage.getItem("user"));
 
   const links = [
     { to: "/", label: "Home" },
@@ -18,6 +27,50 @@ const NavBarDash = () => {
 
   const [showFullName, setShowFullName] = useState(false);
   const [showGG, setShowGG] = useState(true);
+
+  // Logout function
+  const logout = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('refresh');
+    const access = localStorage.getItem('access');
+    try {
+      await axios.post(
+        "http://127.0.0.1:8000/api/auth/logout",
+        {},
+        {
+          headers: { Authorization: `Bearer ${access} `, refresh: token },
+        }
+      );
+
+      localStorage.removeItem("user");
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+
+      showToast("Logout successful!", { type: "success" });
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      localStorage.removeItem("user");
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      showToast("Logged out", { type: "info" });
+      navigate("/login");
+    }
+  };
+
+  // Click outside handler for user menu
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userRef.current && !userRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+
+    if (userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [userMenuOpen]);
 
   useEffect(() => {
     let interval;
@@ -140,15 +193,71 @@ const NavBarDash = () => {
                 </NavLink>
               </motion.div>
               
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                <NavLink
-                  to="/trainer/profile"
-                  className="text-2xl text-slate-500 hover:text-[#ff8211] transition-colors p-1 rounded-full hover:bg-slate-50 block"
-                  aria-label="Profile"
+              {/* User Dropdown Menu */}
+              <div className="relative" ref={userRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#ff8211]/20"
                 >
-                  <FaUserCircle />
-                </NavLink>
-              </motion.div>
+                  <FaUserCircle className="text-lg text-[#ff8211]" />
+                  <span className="max-w-[100px] truncate hidden sm:inline">
+                    {user?.username || "Trainer"}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${
+                      userMenuOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-slate-200 bg-white p-1 shadow-lg animate-in fade-in zoom-in-95 duration-200 z-50">
+                    <div className="px-3 py-2 border-b border-slate-100 mb-1">
+                      <p className="text-sm font-medium text-slate-900">
+                        {user?.username || "Trainer"}
+                      </p>
+                      <p className="text-xs text-slate-500 truncate">
+                        {user?.email || "trainer@gymgem.com"}
+                      </p>
+                    </div>
+                    <NavLink
+                      to="/trainer"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-[#ff8211]"
+                    >
+                      <LayoutDashboard className="h-4 w-4" />
+                      Dashboard
+                    </NavLink>
+                    <NavLink
+                      to="/settings"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-[#ff8211]"
+                    >
+                      <SettingsIcon className="h-4 w-4" />
+                      Settings
+                    </NavLink>
+                    <NavLink
+                      to="/role"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-[#ff8211]"
+                    >
+                      <UserPlus className="h-4 w-4" />
+                      Change Profile
+                    </NavLink>
+                    <div className="border-t border-slate-100 my-1"></div>
+                    <button
+                      onClick={(e) => {
+                        setUserMenuOpen(false);
+                        logout(e);
+                      }}
+                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <motion.button
                 whileTap={{ scale: 0.9 }}

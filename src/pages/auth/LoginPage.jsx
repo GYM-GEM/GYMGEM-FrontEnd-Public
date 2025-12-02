@@ -45,7 +45,8 @@ const LoginPage = () => {
 
       localStorage.setItem("access", response.data.access);
       localStorage.setItem("refresh", response.data.refresh);
-      localStorage.setItem("user", JSON.stringify(response.data));
+      console.log(response.data)
+      localStorage.setItem("user", JSON.stringify(response.data.account));
 
       console.log("Response:", response.data);
       showToast("Sign in successful!", { type: "success" });

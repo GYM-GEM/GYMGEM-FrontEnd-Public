@@ -29,36 +29,37 @@ export default function GoogleLogin({ signType }) {
 		script.defer = true;
 
 		const handleCredentialResponse = async (response) => {
-			// try {
-			const id_token = response.credential;
-			// POST id_token to your custom accounts/google/login/ endpoint (backend should verify)
-			const res = await axios.post(
-				"http://127.0.0.1:8000/api/auth/social/google/login/",
-				{ id_token },
-				{ headers: { "Content-Type": "application/json" } }
-			);
+			try {
+				const id_token = response.credential;
+				// POST id_token to your custom accounts/google/login/ endpoint (backend should verify)
+				const res = await axios.post(
+					"http://127.0.0.1:8000/api/auth/social/google/login/",
+					{ id_token },
+					{ headers: { "Content-Type": "application/json" } }
+				);
 
-			if (res.data.access) localStorage.setItem("access", res.data.access);
-			if (res.data.refresh) localStorage.setItem("refresh", res.data.refresh);
-			if (res.data.user) localStorage.setItem("user", JSON.stringify(res.data.user));
-			if (!res.data.user && res.data) localStorage.setItem("user", JSON.stringify(res.data));
+				localStorage.setItem("access", res.data.access);
+				localStorage.setItem("refresh", res.data.refresh);
+				console.log(res.data)
+				localStorage.setItem("user", JSON.stringify(res.data.account));
 
-			console.log("Google signup/login response:", res.data);
+				console.log("Google signup/login response:", res.data);
 
-			if (signType === 'signup') {
-				showToast("Registered Successfully", { type: "success" })
+				if (signType === 'signup') {
+					showToast("Registered Successfully", { type: "success" })
+					navigate("/role");
 
-			} else {
-				showToast("Sign in successful!", { type: "success" });
+
+				} else {
+					showToast("Sign in successful!", { type: "success" });
+					navigate("/");
+				}
+			}
+			catch {
+				console.error("Error during login:", error);
+				showToast("Login failed. Please try again.", { type: "error" });
 
 			}
-
-
-			navigate("/role");
-			// } catch (err) {
-			// 	console.error("Google login error:", err.response ?? err);
-			// 	alert("Google sign-in failed. Check console and backend expectations (id_token vs access_token).");
-			// }
 		};
 
 
@@ -69,7 +70,7 @@ export default function GoogleLogin({ signType }) {
 			if (signType === 'signup') {
 				buttonText = 'signup_with';
 			}
-			else{
+			else {
 				buttonText = 'signin_with';
 			}
 			console.log(buttonText)

@@ -32,7 +32,7 @@ const TrainerSpecialization = () => {
       );
       console.log("Response:", response.data);
       showToast("trainer successful!", { type: "success" });
-      navigate("/trainerform3");
+      navigate("/trainerExperience");
     } catch (error) {
       console.error("Error during registration:", error);
       showToast("failed. Please try again.", { type: "error" });

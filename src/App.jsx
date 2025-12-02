@@ -73,6 +73,7 @@ function App() {
         {/* -------------------- PUBLIC + LAYOUT -------------------- */}
         <Route path="/" element={<RootLayout />}>
           <Route index element={<Home />} />
+          <Route path="home" element={<Home />} />
           <Route path="courses" element={<Courses />} />
           <Route path="trainers" element={<Trainers />} />
           <Route path="trainees" element={<Trainees />} />
@@ -103,7 +104,7 @@ function App() {
         </Route>
 
         {/* -------------------- TRAINEE DASHBOARD -------------------- */}
-        <Route path="traine">
+        <Route path="trainee">
           <Route index element={<Navigate to="dashboard" replace />} />
           <Route path="dashboard" element={<TraineeDash />} />
           <Route path="courses" element={<CoursesTraineDash />} />

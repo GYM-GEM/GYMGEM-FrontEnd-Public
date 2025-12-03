@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { 
   Star, 
@@ -30,6 +30,61 @@ const CourseEnroll = () => {
   const [expandedSections, setExpandedSections] = useState(new Set([0]));
   const [currentLesson, setCurrentLesson] = useState(null);
   const [completedLessons, setCompletedLessons] = useState(new Set());
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState("");
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Load user and comments on mount
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    setCurrentUser(user);
+    
+    // Load comments for this specific course
+    const storedComments = JSON.parse(localStorage.getItem(`course_comments_${id}`)) || [];
+    if (storedComments.length === 0) {
+      // Add some mock comments if none exist
+      const mockComments = [
+        {
+          id: 1,
+          user: "John Doe",
+          avatar: "JD",
+          avatarColor: "bg-[#FF8211]",
+          text: "Great explanation! This really helped me understand the basics.",
+          time: "2 days ago"
+        },
+        {
+          id: 2,
+          user: "Anna Smith",
+          avatar: "AS",
+          avatarColor: "bg-[#86ac55]",
+          text: "Can you provide more examples for the advanced techniques?",
+          time: "1 week ago"
+        }
+      ];
+      setComments(mockComments);
+      localStorage.setItem(`course_comments_${id}`, JSON.stringify(mockComments));
+    } else {
+      setComments(storedComments);
+    }
+  }, [id]);
+
+  const handlePostComment = () => {
+    if (!newComment.trim()) return;
+
+    const comment = {
+      id: Date.now(),
+      user: currentUser?.name || "Guest User",
+      avatar: currentUser?.name ? currentUser.name.substring(0, 2).toUpperCase() : "GU",
+      avatarColor: "bg-[#FF8211]",
+      text: newComment,
+      time: "Just now"
+    };
+
+    const updatedComments = [comment, ...comments];
+    setComments(updatedComments);
+    setNewComment("");
+    localStorage.setItem(`course_comments_${id}`, JSON.stringify(updatedComments));
+  };
 
   if (!course) {
     return (
@@ -57,12 +112,19 @@ const CourseEnroll = () => {
     rating: 4.8,
     reviewsCount: 1247,
     enrolledCount: 5832,
-    instructor: {
-      name: "Sarah Johnson",
-      title: "Certified Fitness Trainer",
-      bio: "15+ years of experience in strength training and nutrition",
-      avatar: "https://ui-avatars.com/api/?name=Sarah+Johnson&background=FF8211&color=fff",
-    },
+    instructor: (() => {
+      // Try to get trainer profile from localStorage or use course data
+      const savedProfile = JSON.parse(localStorage.getItem("trainerProfile"));
+      // In a real app, we would fetch the specific trainer by ID
+      // For now, we'll use the saved profile if available, or fallback data
+      return {
+        id: savedProfile?.id || "trainer-1",
+        name: savedProfile?.name || "Sarah Johnson",
+        title: savedProfile?.job || "Certified Fitness Trainer",
+        bio: savedProfile?.bio || "15+ years of experience in strength training and nutrition",
+        avatar: savedProfile?.avatar || "https://ui-avatars.com/api/?name=Sarah+Johnson&background=FF8211&color=fff",
+      };
+    })(),
     lastUpdated: "December 2024",
     certificate: true,
     includes: [
@@ -200,15 +262,7 @@ const CourseEnroll = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-wrap items-center gap-4">
-            <button className="px-8 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-md flex items-center gap-2">
-              <PlayCircle className="w-5 h-5" />
-              Start Learning
-            </button>
-            <button className="px-8 py-3 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-semibold bebas-regular text-lg hover:bg-[#FF8211]/10 transition-colors flex items-center gap-2">
-              <Heart className="w-5 h-5" />
-              Add to Wishlist
-            </button>
-            <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <button className="p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="Share Course">
               <Share2 className="w-5 h-5 text-gray-600" />
             </button>
           </div>
@@ -296,49 +350,45 @@ const CourseEnroll = () => {
                 Discussion
               </h3>
               
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#FF8211] flex items-center justify-center text-white font-semibold">
-                    JD
-                  </div>
-                  <div className="flex-1">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="font-semibold text-gray-900 text-sm poppins-medium mb-1">
-                        John Doe
-                      </p>
-                      <p className="text-gray-700 text-sm poppins-regular">
-                        Great explanation! This really helped me understand the basics.
-                      </p>
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                {comments.length > 0 ? (
+                  comments.map((comment) => (
+                    <div key={comment.id} className="flex gap-4">
+                      <div className={`w-10 h-10 rounded-full ${comment.avatarColor} flex items-center justify-center text-white font-semibold shrink-0`}>
+                        {comment.avatar}
+                      </div>
+                      <div className="flex-1">
+                        <div className="bg-gray-50 rounded-lg p-4">
+                          <p className="font-semibold text-gray-900 text-sm poppins-medium mb-1">
+                            {comment.user}
+                          </p>
+                          <p className="text-gray-700 text-sm poppins-regular">
+                            {comment.text}
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1 poppins-regular">{comment.time}</p>
+                      </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1 poppins-regular">2 days ago</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-full bg-[#86ac55] flex items-center justify-center text-white font-semibold">
-                    AS
-                  </div>
-                  <div className="flex-1">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="font-semibold text-gray-900 text-sm poppins-medium mb-1">
-                        Anna Smith
-                      </p>
-                      <p className="text-gray-700 text-sm poppins-regular">
-                        Can you provide more examples for the advanced techniques?
-                      </p>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1 poppins-regular">1 week ago</p>
-                  </div>
-                </div>
+                  ))
+                ) : (
+                  <p className="text-center text-gray-500 poppins-regular py-4">No comments yet. Be the first to start the discussion!</p>
+                )}
               </div>
 
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <textarea
-                  placeholder="Add your comment..."
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8211] focus:border-transparent poppins-regular text-sm resize-none"
+                  placeholder={currentUser ? "Add your comment..." : "Please log in to comment"}
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  disabled={!currentUser}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8211] focus:border-transparent poppins-regular text-sm resize-none disabled:bg-gray-50 disabled:cursor-not-allowed"
                   rows={3}
                 />
-                <button className="mt-3 px-6 py-2 bg-[#FF8211] text-white rounded-lg font-medium bebas-regular hover:bg-[#ff7906] transition-colors">
+                <button 
+                  onClick={handlePostComment}
+                  disabled={!currentUser || !newComment.trim()}
+                  className="mt-3 px-6 py-2 bg-[#FF8211] text-white rounded-lg font-medium bebas-regular hover:bg-[#ff7906] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   Post Comment
                 </button>
               </div>
@@ -483,9 +533,12 @@ const CourseEnroll = () => {
                 <p className="text-sm text-gray-600 poppins-regular mb-4">
                   {courseData.instructor.bio}
                 </p>
-                <button className="w-full px-4 py-2 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-semibold bebas-regular hover:bg-[#FF8211]/10 transition-colors">
+                <Link 
+                  to="/trainer-profile"
+                  className="block w-full text-center px-4 py-2 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-semibold bebas-regular hover:bg-[#FF8211]/10 transition-colors"
+                >
                   View Profile
-                </button>
+                </Link>
               </div>
 
               {/* Course Includes */}

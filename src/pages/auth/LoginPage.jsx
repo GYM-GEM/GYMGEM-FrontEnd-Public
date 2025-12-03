@@ -130,7 +130,7 @@ const LoginPage = () => {
 
                 <button
                   type="submit"
-                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8211] px-4 text-sm font-semibold text-white transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8211] px-4 text-sm font-semibold text-white transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
                 >
                   Sign in
                 </button>

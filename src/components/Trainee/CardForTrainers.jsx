@@ -1,4 +1,4 @@
-import CoursesData from "../js/TrainersData";
+import CoursesData from "../../js/TrainersData";
 import { Link } from "react-router-dom";
 
 function CardForTrainers() {

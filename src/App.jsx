@@ -19,11 +19,11 @@ import Store from "./pages/Store.jsx";
 
 // forms
 import Selectrole from "./components/SelectRole";
-import Trainerform from "./components/Forms/TrainerForm.jsx";
-import TrainerSpecialization from "./components/Forms/TrainerSpecialization.jsx";
-import TrainerExperience from "./components/Forms/TrainerExperience.jsx";
-import Traineeform from "./components/Forms/TraineeForm.jsx";
-import TraineeRecord from "./components/Forms/TraineeRecord.jsx";
+import Trainerform from "./components/Forms/Trainer/TrainerForm.jsx";
+import TrainerSpecialization from "./components/Forms/Trainer/TrainerSpecialization.jsx";
+import TrainerExperience from "./components/Forms/Trainer/TrainerExperience.jsx";
+import Traineeform from "./components/Forms/Trainee/TraineeForm.jsx";
+import TraineeRecord from "./components/Forms/Trainee/TraineeRecord.jsx";
 
 // layout
 import RootLayout from "./Layout/Rootlayout";
@@ -48,6 +48,11 @@ import CoursesTraineDash from "./components/Dashboard/Traine/CoursesTraineDash.j
 import CourseDetails from "./components/courses/CourseDetails.jsx";
 import Settings from "./components/Settings.jsx";
 import PublicTrainerProfile from "./components/PublicTrainerProfile.jsx";
+import Favorite from "./components/Dashboard/Traine/Favorite.jsx";
+import CourseEnroll from "./components/courses/CourseEnroll.jsx";
+// Checkout components
+import Checkout from "./components/BuyNow/Checkout.jsx";
+import OrderSuccess from "./components/BuyNow/OrderSuccess.jsx";
 // dashboard gym
 import GymDashboard from "./components/Dashboard/GYM/GymDashboard.jsx";
 import GymMember from "./components/Dashboard/GYM/GymMember.jsx";
@@ -89,6 +94,9 @@ function App() {
           <Route path="viewprofile" element={<Viewprofile />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="/courses/:id/learn" element={<CourseEnroll />} />
+          <Route path="checkout" element={<Checkout />} />
+          <Route path="order-success/:orderId" element={<OrderSuccess />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/stores" element={<Store />} />
         </Route>

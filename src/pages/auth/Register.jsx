@@ -105,7 +105,7 @@ const SignUpPage = () => {
                       className="h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
                     />
                     {errors.firstName && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-xs text-red-500">
                         {errors.firstName.message}
                       </p>
                     )}
@@ -128,7 +128,7 @@ const SignUpPage = () => {
                       className="h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
                     />
                     {errors.lastName && (
-                      <p className="text-xs text-destructive">
+                      <p className="text-xs text-red-500">
                         {errors.lastName.message}
                       </p>
                     )}
@@ -156,7 +156,7 @@ const SignUpPage = () => {
                     className="h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
                   />
                   {errors.username && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-xs text-red-500">
                       {errors.username.message}
                     </p>
                   )}
@@ -183,7 +183,7 @@ const SignUpPage = () => {
                     className="h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
                   />
                   {errors.email && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-xs text-red-500">
                       {errors.email.message}
                     </p>
                   )}
@@ -220,7 +220,7 @@ const SignUpPage = () => {
                     </button>
                   </div>
                   {errors.password && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-xs text-red-500">
                       {errors.password.message}
                     </p>
                   )}
@@ -254,7 +254,7 @@ const SignUpPage = () => {
                     </button>
                   </div>
                   {errors.confirmPassword && (
-                    <p className="text-xs text-destructive">
+                    <p className="text-xs text-red-500">
                       {errors.confirmPassword.message}
                     </p>
                   )}
@@ -262,7 +262,7 @@ const SignUpPage = () => {
 
                 <button
                   type="submit"
-                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8211] px-4 text-sm font-semibold text-white transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8211] px-4 text-sm font-semibold text-white transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
                 >
                   Create account
                 </button>

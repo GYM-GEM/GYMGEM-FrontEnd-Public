@@ -1,4 +1,4 @@
-import CardForTrainers from "../components/CardForTrainers";
+import CardForTrainers from "../components/Trainee/CardForTrainers";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useState } from "react";

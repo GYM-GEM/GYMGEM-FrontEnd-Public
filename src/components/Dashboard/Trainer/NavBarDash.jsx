@@ -3,10 +3,11 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
 import { MdOutlineNotificationsActive } from "react-icons/md";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
-import { ChevronDown, LayoutDashboard, Settings as SettingsIcon, UserPlus, LogOut } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../../../context/ToastContext";
 import axios from "axios";
+import UserDropdown from "../../UserDropdown";
 
 const NavBarDash = () => {
   const navigate = useNavigate();
@@ -194,70 +195,12 @@ const NavBarDash = () => {
               </motion.div>
               
               {/* User Dropdown Menu */}
-              <div className="relative" ref={userRef}>
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#ff8211]/20"
-                >
-                  <FaUserCircle className="text-lg text-[#ff8211]" />
-                  <span className="max-w-[100px] truncate hidden sm:inline">
-                    {user?.username || "Trainer"}
-                  </span>
-                  <ChevronDown
-                    className={`h-4 w-4 text-slate-500 transition-transform duration-200 ${
-                      userMenuOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-
-                {userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-slate-200 bg-white p-1 shadow-lg animate-in fade-in zoom-in-95 duration-200 z-50">
-                    <div className="px-3 py-2 border-b border-slate-100 mb-1">
-                      <p className="text-sm font-medium text-slate-900">
-                        {user?.username || "Trainer"}
-                      </p>
-                      <p className="text-xs text-slate-500 truncate">
-                        {user?.email || "trainer@gymgem.com"}
-                      </p>
-                    </div>
-                    <NavLink
-                      to="/trainer"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-[#ff8211]"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </NavLink>
-                    <NavLink
-                      to="/settings"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-[#ff8211]"
-                    >
-                      <SettingsIcon className="h-4 w-4" />
-                      Settings
-                    </NavLink>
-                    <NavLink
-                      to="/role"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-[#ff8211]"
-                    >
-                      <UserPlus className="h-4 w-4" />
-                      Change Profile
-                    </NavLink>
-                    <div className="border-t border-slate-100 my-1"></div>
-                    <button
-                      onClick={(e) => {
-                        setUserMenuOpen(false);
-                        logout(e);
-                      }}
-                      className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+              <UserDropdown 
+                user={user} 
+                logout={logout} 
+                dashboardPath="/trainer" 
+                settingsPath="/trainer/settings"
+              />
 
               <motion.button
                 whileTap={{ scale: 0.9 }}

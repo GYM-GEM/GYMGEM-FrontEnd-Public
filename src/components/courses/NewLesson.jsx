@@ -28,16 +28,32 @@ const NewLeason = () => {
 
     // Save to localStorage
     const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
-    const updatedCourses = savedCourses.map((c) =>
-      c.id === course.id
-        ? { ...c, lessons: [...(c.lessons || []), newLesson] }
-        : c
-    );
+    let updatedCourses;
+    
+    // Check if course exists in localStorage
+    const courseExists = savedCourses.some(c => c.id === course.id);
+
+    if (courseExists) {
+      // Update existing course
+      updatedCourses = savedCourses.map((c) =>
+        c.id === course.id
+          ? { ...c, lessons: [...(c.lessons || []), newLesson] }
+          : c
+      );
+    } else {
+      // Add new course from API response + new lesson
+      const courseWithLesson = {
+        ...course,
+        lessons: [newLesson]
+      };
+      updatedCourses = [...savedCourses, courseWithLesson];
+    }
 
     localStorage.setItem("courses", JSON.stringify(updatedCourses));
 
     // Navigate to AddSection page to add sections to this lesson
     const updatedCourse = updatedCourses.find((c) => c.id === course.id);
+    
     navigate("/addsection", { 
       state: { 
         course: updatedCourse, 

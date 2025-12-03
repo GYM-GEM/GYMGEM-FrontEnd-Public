@@ -5,8 +5,45 @@ import { MdOutlineNotificationsActive } from "react-icons/md";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { useNavigate } from "react-router-dom";
+import { useToast } from "../../../context/ToastContext";
+import axios from "axios";
+import UserDropdown from "../../UserDropdown";
+
 const NavBarDashStore = () => {
+  const navigate = useNavigate();
+  const { showToast } = useToast();
   const [open, setOpen] = useState(false);
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  const logout = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('refresh');
+    const access = localStorage.getItem('access');
+    try {
+      await axios.post(
+        "http://127.0.0.1:8000/api/auth/logout",
+        {},
+        {
+          headers: { Authorization: `Bearer ${access} `, refresh: token },
+        }
+      );
+
+      localStorage.removeItem("user");
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+
+      showToast("Logout successful!", { type: "success" });
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
+      localStorage.removeItem("user");
+      localStorage.removeItem("access");
+      localStorage.removeItem("refresh");
+      showToast("Logged out", { type: "info" });
+      navigate("/login");
+    }
+  };
 
   const links = [
     { to: "/", label: "Home" },
@@ -140,15 +177,12 @@ const NavBarDashStore = () => {
                 </NavLink>
               </motion.div>
               
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                <NavLink
-                  to="/store/profile"
-                  className="text-2xl text-slate-500 hover:text-[#ff8211] transition-colors p-1 rounded-full hover:bg-slate-50 block"
-                  aria-label="Profile"
-                >
-                  <FaUserCircle />
-                </NavLink>
-              </motion.div>
+              <UserDropdown 
+                user={user} 
+                logout={logout} 
+                dashboardPath="/store/dashboard" 
+                settingsPath="/store/settings"
+              />
 
               <motion.button
                 whileTap={{ scale: 0.9 }}

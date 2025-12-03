@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   Star,
   Users,
@@ -21,11 +21,40 @@ import {
 } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
+import { addToFavorites, removeFromFavorites, isFavorite } from "../Dashboard/Traine/Favorite";
+import { isUserEnrolled } from "../BuyNow/Checkout";
 
 const CourseDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const courses = JSON.parse(localStorage.getItem("courses")) || [];
   const course = courses.find((c) => String(c.id) === id);
+  const [isPurchased, setIsPurchased] = useState(false);
+
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    if (user && course) {
+      setIsPurchased(isUserEnrolled(user.id, course.id));
+    }
+  }, [course]);
+
+  const [isFavoriteCourse, setIsFavoriteCourse] = useState(false);
+
+  useEffect(() => {
+    if (course) {
+      setIsFavoriteCourse(isFavorite(course.id));
+    }
+  }, [course]);
+
+  const handleToggleFavorite = () => {
+    if (isFavoriteCourse) {
+      removeFromFavorites(course.id);
+      setIsFavoriteCourse(false);
+    } else {
+      addToFavorites(course);
+      setIsFavoriteCourse(true);
+    }
+  };
 
   const [expandedSections, setExpandedSections] = useState(new Set());
   const [showLockModal, setShowLockModal] = useState(false);
@@ -144,7 +173,28 @@ const CourseDetails = () => {
   };
 
   const handleBuyNow = () => {
-    alert("Purchase flow would be implemented here");
+    // Check if user is logged in
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+    if (!user) {
+      // Store intended purchase for after login
+      sessionStorage.setItem('intendedPurchase', JSON.stringify({
+        courseId: course.id,
+        returnUrl: `/courses/${course.id}`
+      }));
+      
+      // Redirect to login
+      navigate('/login');
+      return;
+    }
+    
+    // Navigate to checkout with course data
+    navigate('/checkout', {
+      state: {
+        course: course,
+        user: user
+      }
+    });
   };
 
   return (
@@ -440,15 +490,32 @@ const CourseDetails = () => {
                 </div>
 
                 <div className="space-y-3">
-                  <button
-                    onClick={handleBuyNow}
-                    className="w-full px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-sm"
+                  {isPurchased ? (
+                    <Link
+                      to={`/courses/${course.id}/learn`}
+                      className="w-full px-6 py-3 bg-green-600 text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2"
+                    >
+                      <PlayCircle className="w-5 h-5" />
+                      Start Learning
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={handleBuyNow}
+                      className="w-full px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-sm"
+                    >
+                      Buy Now
+                    </button>
+                  )}
+                  <button 
+                    onClick={handleToggleFavorite}
+                    className={`w-full px-6 py-3 border-2 rounded-lg font-semibold bebas-regular text-lg transition-colors flex items-center justify-center gap-2 ${
+                      isFavoriteCourse 
+                        ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]" 
+                        : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
+                    }`}
                   >
-                    Buy Now
-                  </button>
-                  <button className="w-full px-6 py-3 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-semibold bebas-regular text-lg hover:bg-[#FF8211]/10 transition-colors flex items-center justify-center gap-2">
-                    <Heart className="w-5 h-5" />
-                    Add to Wishlist
+                    <Heart className={`w-5 h-5 ${isFavoriteCourse ? "fill-white" : ""}`} />
+                    {isFavoriteCourse ? "Remove from Wishlist" : "Add to Wishlist"}
                   </button>
                   <button className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium poppins-regular hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
                     <Share2 className="w-4 h-4" />
@@ -486,12 +553,32 @@ const CourseDetails = () => {
               ${courseData.price}
             </span>
           </div>
-          <button
-            onClick={handleBuyNow}
-            className="flex-1 px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular hover:bg-[#ff7906] transition-colors shadow-sm"
+          <button 
+            onClick={handleToggleFavorite}
+            className={`p-3 border-2 rounded-lg transition-colors ${
+              isFavoriteCourse 
+                ? "bg-[#FF8211] border-[#FF8211] text-white" 
+                : "border-[#FF8211] text-[#FF8211] bg-white"
+            }`}
           >
-            Buy Now
+            <Heart className={`w-6 h-6 ${isFavoriteCourse ? "fill-white" : ""}`} />
           </button>
+          {isPurchased ? (
+            <Link
+              to={`/courses/${course.id}/learn`}
+              className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2"
+            >
+              <PlayCircle className="w-5 h-5" />
+              Start Learning
+            </Link>
+          ) : (
+            <button
+              onClick={handleBuyNow}
+              className="flex-1 px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular hover:bg-[#ff7906] transition-colors shadow-sm"
+            >
+              Buy Now
+            </button>
+          )}
         </div>
       </div>
 

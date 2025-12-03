@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
-import { ChevronDown, Menu, X, LayoutDashboard, Settings as SettingsIcon, UserPlus, LogOut } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import axios from "axios";
 import { useToast } from "../context/ToastContext";
+import UserDropdown from "./UserDropdown";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -209,63 +210,12 @@ function Navbar() {
         {/* User Section (Desktop) */}
         <div className="hidden md:flex md:items-center md:gap-4">
           {user ? (
-            <div className="relative" ref={userRef}>
-              <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ff8211]/20"
-              >
-                <FaUserCircle className="text-lg text-[#ff8211]" />
-                <span className="max-w-[100px] truncate">{user.username}</span>
-                <ChevronDown
-                  className={`h-4 w-4 text-gray-500 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""
-                    }`}
-                />
-              </button>
-
-              {userMenuOpen && (
-                <div className="absolute right-0 top-full mt-2 w-56 rounded-md border border-gray-200 bg-white p-1 shadow-lg animate-in fade-in zoom-in-95 duration-200">
-                  <div className="px-3 py-2 border-b border-gray-100 mb-1">
-                    <p className="text-sm font-medium text-gray-900">{user.username}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                  </div>
-                  <NavLink
-                    to='/traine/dashboard'
-                    onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
-                  >
-                    <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
-                  </NavLink>
-                  <NavLink
-                    to="/settings"
-                    onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
-                  >
-                    <SettingsIcon className="h-4 w-4" />
-                    Settings
-                  </NavLink>
-                  <NavLink
-                    to="/role"
-                    onClick={() => setUserMenuOpen(false)}
-                    className="flex items-center gap-2 rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
-                  >
-                    <UserPlus className="h-4 w-4" />
-                    Change Profile
-                  </NavLink>
-                  <div className="border-t border-gray-100 my-1"></div>
-                  <button
-                    onClick={(e) => {
-                      setUserMenuOpen(false);
-                      logout(e);
-                    }}
-                    className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+              <UserDropdown 
+                user={user} 
+                logout={logout} 
+                dashboardPath="/trainer/dashboard" 
+                settingsPath="/settings"
+              />
           ) : (
             <div className="flex items-center gap-2">
               <Link

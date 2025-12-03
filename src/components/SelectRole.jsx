@@ -46,7 +46,8 @@ const roles = [
   },
 ];
 
-const userProfileTypes = JSON.parse(localStorage.getItem("user"))?.profiles.map(profile => profile.type) || [];
+// const userProfileTypes = JSON.parse(localStorage.getItem("user"))?.profiles.map(profile => profile.type) || [];
+const userProfileTypes = JSON.parse(localStorage.getItem("user"))?.profiles?.map(profile => profile.type) || [];
 
 const Selectrole = () => {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../../context/ToastContext";
+import { useToast } from "../../../context/ToastContext";
 
 const Trainerform = () => {
   const navigate = useNavigate();

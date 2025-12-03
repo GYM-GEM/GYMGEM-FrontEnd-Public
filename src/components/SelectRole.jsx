@@ -46,6 +46,8 @@ const roles = [
   },
 ];
 
+const userProfileTypes = JSON.parse(localStorage.getItem("user"))?.profiles.map(profile => profile.type) || [];
+
 const Selectrole = () => {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
@@ -113,15 +115,22 @@ const Selectrole = () => {
         </header>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {roles.map((role) => {
+          {console.log("userProfileTypes:", userProfileTypes)}
+          {
+          roles.map((role) => {
             const isSelected = role.id === selectedRole;
+            const isActive = !userProfileTypes.includes(role.id);
+            console.log(`Role: ${role.id}, isActive: ${isActive}`);
             return (
               <button
                 key={role.id}
                 type="button"
+                disabled={!isActive}
                 onClick={() => setSelectedRole(role.id)}
-                className={`cursor-pointer group flex h-full flex-col justify-between rounded-3xl border border-border bg-card/80 p-6 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background hover:bg-[#ff8211] hover:text-white ${
-                  isSelected ? "bg-[#ff8211] text-white" : ""
+                className={`group flex h-full flex-col justify-between rounded-3xl border border-border bg-card/80 p-6 text-left shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+                  !isActive ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:-translate-y-1 hover:shadow-md hover:bg-[#ff8211] hover:text-white"
+                } ${
+                  isSelected && isActive ? "bg-[#ff8211] text-white" : ""
                 }`}
               >
                 <div className="space-y-4">
@@ -143,12 +152,12 @@ const Selectrole = () => {
                 </div>
                 <span
                   className={`pt-4 text-sm font-semibold transition ${
-                    isSelected
+                    isSelected && isActive
                       ? "text-primary"
                       : "text-muted-foreground group-hover:text-primary"
                   }`}
                 >
-                  {isSelected ? "Selected" : "Select"} →
+                  {isSelected && isActive ? "Selected" : "Select"} →
                 </span>
               </button>
             );

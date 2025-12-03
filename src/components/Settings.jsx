@@ -4,6 +4,9 @@ import { Lock, CreditCard, X, UserPlus, Trash2, ChevronRight } from "lucide-reac
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { useToast } from "../context/ToastContext";
+import axios from "axios";
+
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -43,7 +46,7 @@ const Settings = () => {
     }));
   };
 
-  const handleSavePassword = () => {
+  const handleSavePassword = async () => {
     if (
       formData.changePassword.newPassword !==
       formData.changePassword.confirmPassword
@@ -51,16 +54,34 @@ const Settings = () => {
       showToast("New passwords do not match!", { type: "error" });
       return;
     }
-    closeModal("changePassword");
-    showToast("Password changed successfully!", { type: "success" });
-    setFormData((prev) => ({
-      ...prev,
-      changePassword: {
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      },
-    }));
+
+    // try {
+      const token = localStorage.getItem('access');
+      // Send POST request to backend to change password
+      await axios.post(`${VITE_API_URL}/api/accounts/change-password`,
+        {
+          currentPassword: formData.changePassword.currentPassword,
+          newPassword: formData.changePassword.newPassword,
+          confirmPassword: formData.changePassword.confirmPassword,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      closeModal("changePassword");
+      showToast("Password changed successfully!", { type: "success" });
+      setFormData((prev) => ({
+        ...prev,
+        changePassword: {
+          currentPassword: '',
+          newPassword: '',
+          confirmPassword: '',
+        },
+      }));
+
+    // } catch (error) {
+    //   showToast("Error changing password", { type: "error" });
+    // }
   };
 
   // Payment Info handlers
@@ -96,7 +117,7 @@ const Settings = () => {
       showToast("Please enter your password to confirm deletion.", { type: "error" });
       return;
     }
-    
+
     // Mock validation logic
     closeModal("deleteAccount");
     showToast("Account deletion request submitted", { type: "success" });

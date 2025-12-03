@@ -2,6 +2,10 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "../../context/ToastContext";
+import axios from "axios";
+
+const VITE_API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const AddCourse = () => {
   const {
@@ -11,27 +15,43 @@ const AddCourse = () => {
   } = useForm();
 
   const navigate = useNavigate();
-  
-  const onSubmit = (data) => {
-    const course = {
-      id: Date.now(),
-      title: data.title,
-      category: data.category,
-      level: data.level,
-      language: data.language,
-      description: data.description,
-      price: data.price,
-      status: data.status
-        ? data.status.charAt(0).toUpperCase() + data.status.slice(1)
-        : "Draft",
-      img: data.coverUrl || "/assets/cardCo1.png",
-    };
+  const { showToast } = useToast();
 
-    const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
-    const updatedCourses = [course, ...savedCourses];
-    localStorage.setItem("courses", JSON.stringify(updatedCourses));
+  const onSubmit = async (data) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = localStorage.getItem("access");
 
-    navigate("/addlesson", { state: { course } });
+      const payload = {
+        title: data.title,
+        price: data.price,
+        cover: data.coverUrl || "http://example.com",
+        status: data.status || "draft",
+        description: data.description,
+        preview_video: data.previewUrl || "http://example.com",
+        trainer_profile: user?.id || 0,
+        category: parseInt(data.category),
+        level: parseInt(data.level),
+        language: data.language,
+      };
+
+      const response = await axios.post(
+        `${VITE_API_URL}/api/courses/courses/create/`,
+        payload,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      showToast("Course created successfully!", { type: "success" });
+      navigate("/addlesson", { state: { course: response.data } });
+    } catch (error) {
+      console.error("Error creating course:", error);
+      showToast(
+        error.response?.data?.detail || "Failed to create course. Please try again.",
+        { type: "error" }
+      );
+    }
   };
 
   return (
@@ -88,12 +108,20 @@ const AddCourse = () => {
                   >
                     <option value="">Select Category</option>
                     <option value={1}>Strength Training</option>
-                    <option value={2}>Bodybuilding</option>
-                    <option value={3}>Cardio</option>
-                    <option value={4}>
-                      Flexibility & Mobility
-                    </option>
-                    <option value={5}>Nutrition</option>
+                    <option value={2}>Cardio & Endurance</option>
+                    <option value={3}>Flexibility & Mobility</option>
+                    <option value={4}>Bodyweight Only</option>
+                    <option value={5}>Yoga</option>
+                    <option value={6}>Pilates</option>
+                    <option value={7}>Recovery & Prehab</option>
+                    <option value={8}>Meditation & Breathwork</option>
+                    <option value={9}>Beginner's Journey</option>
+                    <option value={10}>Fat Loss & Toning</option>
+                    <option value={11}>Build Muscle Mass</option>
+                    <option value={12}>Prenatal & Postnatal</option>
+                    <option value={13}>Dance Fitness</option>
+                    <option value={14}>Sport-Specific Training</option>
+                    <option value={15}>Equipment Specific</option>
                   </select>
                 </div>
               </div>
@@ -152,15 +180,15 @@ const AddCourse = () => {
                     </option>
                     <option
                       className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="EN"
-                    >
-                      English
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
                       value="AR"
                     >
                       Arabic
+                    </option>
+                    <option
+                      className=" p-[10px]  text-[#000] poppins-extralight"
+                      value="EN"
+                    >
+                      English
                     </option>
                   </select>
                 </div>

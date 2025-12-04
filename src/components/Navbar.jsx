@@ -23,8 +23,6 @@ function Navbar() {
   const trainingRef = useRef(null);
   const userRef = useRef(null);
 
-  
-
   const logout = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('refresh');
@@ -52,6 +50,24 @@ function Navbar() {
       localStorage.removeItem("refresh");
       showToast("Logged out.", { type: "info" });
       navigate("/login");
+    }
+  };
+
+  const getDashboardPath = () => {
+    if (!user || !user.profiles || !user.current_profile) return "/role";
+
+    const currentProfileId = user.current_profile;
+    const activeProfile = user.profiles.find(p => p.id === currentProfileId);
+
+    if (!activeProfile) return "/role";
+
+    const type = activeProfile.type.toLowerCase();
+    switch (type) {
+      case 'trainer': return '/trainer/dashboard';
+      case 'trainee': return '/trainee/dashboard';
+      case 'gym': return '/gym/dashboard';
+      case 'store': return '/store/dashboard';
+      default: return '/role';
     }
   };
 
@@ -210,12 +226,12 @@ function Navbar() {
         {/* User Section (Desktop) */}
         <div className="hidden md:flex md:items-center md:gap-4">
           {user ? (
-              <UserDropdown 
-                user={user} 
-                logout={logout} 
-                dashboardPath="/trainer/dashboard" 
-                settingsPath="/settings"
-              />
+            <UserDropdown
+              user={user}
+              logout={logout}
+              dashboardPath={getDashboardPath()}
+              settingsPath="/settings"
+            />
           ) : (
             <div className="flex items-center gap-2">
               <Link
@@ -309,7 +325,7 @@ function Navbar() {
           </div>
 
           {/* Mobile User Section */}
-          <div className="border-t border-gray-200 px-4 py-4">
+          <div className="border-t border-gray-200 px-4 pt-4 pb-2">
             {user ? (
               <div className="space-y-3">
                 <div className="flex items-center px-2">
@@ -323,7 +339,7 @@ function Navbar() {
                 </div>
                 <div className="space-y-1">
                   <NavLink
-                    to='/traine/dashboard'
+                    to={getDashboardPath()}
                     onClick={() => setIsOpen(false)}
                     className={mobileLinkClasses}
                   >
@@ -380,4 +396,3 @@ function Navbar() {
 }
 
 export default Navbar;
-

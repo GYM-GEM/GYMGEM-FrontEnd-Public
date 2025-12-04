@@ -10,7 +10,7 @@ const AddSection = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  
+
   const course = location.state?.course;
   const lesson = location.state?.lesson;
 
@@ -40,7 +40,7 @@ const AddSection = () => {
 
     // Get all courses from localStorage
     const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
-    
+
     // Update the specific course with the new section
     const updatedCourses = savedCourses.map((c) => {
       if (c.id === course.id) {
@@ -65,39 +65,43 @@ const AddSection = () => {
   const onSubmitAndCreateAnother = (data) => {
     setIsSubmitting(true);
     const updatedCourses = saveSection(data);
-    
+
     if (updatedCourses) {
       showToast("Section created successfully!", { type: "success" });
       reset(); // Reset form for next section
     }
-    
+
     setIsSubmitting(false);
   };
 
   const onSubmitAndGoToNextLesson = (data) => {
     setIsSubmitting(true);
     const updatedCourses = saveSection(data);
-    
+
     if (updatedCourses) {
       showToast("Section saved! Create next lesson.", { type: "success" });
       // Navigate back to NewLesson page
       const updatedCourse = updatedCourses.find((c) => c.id === course.id);
       navigate("/addlesson", { state: { course: updatedCourse } });
     }
-    
+
     setIsSubmitting(false);
   };
 
   const onSubmitAndFinish = (data) => {
     setIsSubmitting(true);
     const updatedCourses = saveSection(data);
-    
+
     if (updatedCourses) {
       showToast("Course creation completed!", { type: "success" });
-      // Navigate to trainer courses dashboard
-      navigate("/trainer/courses");
+      // Get the updated course to pass to dashboard
+      const updatedCourse = updatedCourses.find((c) => c.id === course.id);
+      // Navigate to trainer courses dashboard with the updated course
+      navigate("/trainer/courses", {
+        state: { newCourse: updatedCourse }
+      });
     }
-    
+
     setIsSubmitting(false);
   };
 

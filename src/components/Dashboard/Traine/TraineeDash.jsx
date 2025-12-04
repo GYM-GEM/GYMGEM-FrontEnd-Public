@@ -43,7 +43,7 @@ const TraineeDash = () => {
   const [showAddRecordModal, setShowAddRecordModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
-  
+
   const [progressRecords, setProgressRecords] = useState([
     { id: 1, date: "2024-12-01", weight: 75.5, height: 175, bodyFat: 18.2, muscleMass: 61.8, bmr: 1720 },
     { id: 2, date: "2024-11-24", weight: 76.2, height: 175, bodyFat: 18.8, muscleMass: 61.2, bmr: 1710 },
@@ -52,38 +52,44 @@ const TraineeDash = () => {
     { id: 5, date: "2024-11-03", weight: 77.9, height: 175, bodyFat: 20.1, muscleMass: 60.1, bmr: 1695 },
   ]);
 
-  // Merged User State (combining Dashboard user and Profile trainerData)
+  // Load logged-in user data from localStorage
+  const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  // Merged User State (combining logged-in user data with default UI values)
   const [user, setUser] = useState({
-    name: "Mahmoud Gado",
-    email: "mahmoudgado@gmail.com",
-    location: "Cairo, Egypt",
-    phone: "+20 100 1234567",
-    job: "Trainee Developer",
-    joined: "January 2023",
-    level: "Beginner",
-    city: "Cairo",
-    goal: "Become a full stack developer",
-    avatar: "https://i.pravatar.cc/150?img=3",
-    bio: "I'm a full stack trainer specialized in Django & React.",
-    skills: ["Django", "React", "Python", "JavaScript"],
-    linkedin: "linkedin.com/in/alikamal",
-    membershipStatus: "Premium Member",
-    workoutsCompleted: 24,
-    currentWeight: 75.5,
-    bodyFat: 18.2,
-    muscleMass: 61.8,
-    memberSince: "January 2023",
-    birthdate: "",
-    state: "",
-    zip: ""
+    name: loggedInUser?.username ||
+      (loggedInUser?.first_name && loggedInUser?.last_name
+        ? `${loggedInUser.first_name} ${loggedInUser.last_name}`
+        : (loggedInUser?.email?.split('@')[0] || "User")),
+    email: loggedInUser?.email || "",
+    location: loggedInUser?.location || "",
+    phone: loggedInUser?.phone || "",
+    job: loggedInUser?.job || "Trainee",
+    joined: loggedInUser?.joined || "Recently",
+    level: loggedInUser?.level || "Beginner",
+    city: loggedInUser?.city || "",
+    goal: loggedInUser?.goal || "",
+    avatar: loggedInUser?.avatar || loggedInUser?.profile_picture || "",
+    bio: loggedInUser?.bio || "",
+    skills: loggedInUser?.skills || [],
+    linkedin: loggedInUser?.linkedin || "",
+    membershipStatus: loggedInUser?.membership_status || "Free Member",
+    workoutsCompleted: loggedInUser?.workoutsCompleted || 0,
+    currentWeight: loggedInUser?.currentWeight || 0,
+    bodyFat: loggedInUser?.bodyFat || 0,
+    muscleMass: loggedInUser?.muscleMass || 0,
+    memberSince: loggedInUser?.created_at ? new Date(loggedInUser.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : "Recently",
+    birthdate: loggedInUser?.birthdate || "",
+    state: loggedInUser?.state || "",
+    zip: loggedInUser?.zip || ""
   });
 
   // Edit Profile State
-  const [editedUser, setEditedUser] = useState({ 
+  const [editedUser, setEditedUser] = useState({
     ...user,
     skills: Array.isArray(user.skills) ? user.skills.join(", ") : user.skills
   });
-  
+
   const [editingRecordId, setEditingRecordId] = useState(null);
   const [editedRecord, setEditedRecord] = useState({});
 
@@ -218,7 +224,7 @@ const TraineeDash = () => {
 
   // Handle cancel edit profile
   const handleCancelEditProfile = () => {
-    setEditedUser({ 
+    setEditedUser({
       ...user,
       skills: Array.isArray(user.skills) ? user.skills.join(", ") : user.skills
     });
@@ -276,7 +282,7 @@ const TraineeDash = () => {
           {/* Animated Dropdown Header Card */}
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 mb-8 overflow-hidden hover:shadow-md transition-shadow">
             {/* Collapsed Header - Always Visible */}
-            <div 
+            <div
               className="flex items-center justify-between p-6 cursor-pointer"
               onClick={() => setIsHeaderExpanded(!isHeaderExpanded)}
             >
@@ -301,7 +307,7 @@ const TraineeDash = () => {
                   </div>
                 </div>
               </div>
-              
+
               {/* Toggle Icon */}
               <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
                 {isHeaderExpanded ? (
@@ -313,10 +319,9 @@ const TraineeDash = () => {
             </div>
 
             {/* Expanded Content - Animated */}
-            <div 
-              className={`transition-all duration-300 ease-in-out overflow-hidden ${
-                isHeaderExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
-              }`}
+            <div
+              className={`transition-all duration-300 ease-in-out overflow-hidden ${isHeaderExpanded ? 'max-h-[800px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
             >
               <div className="px-6 pb-6 pt-0 border-t border-gray-100">
                 {/* Membership Info */}
@@ -629,7 +634,7 @@ const TraineeDash = () => {
                   </button>
                   <button
                     onClick={() => {
-                      setEditedUser({ 
+                      setEditedUser({
                         ...user,
                         skills: Array.isArray(user.skills) ? user.skills.join(", ") : user.skills
                       });
@@ -694,11 +699,10 @@ const TraineeDash = () => {
                   {notifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-4 rounded-xl border-2 relative transition-all ${
-                        notification.type === 'achievement'
-                          ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:border-green-300'
-                          : 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 hover:border-blue-300'
-                      } ${notification.read ? 'opacity-60' : 'shadow-sm'}`}
+                      className={`p-4 rounded-xl border-2 relative transition-all ${notification.type === 'achievement'
+                        ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:border-green-300'
+                        : 'bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200 hover:border-blue-300'
+                        } ${notification.read ? 'opacity-60' : 'shadow-sm'}`}
                     >
                       <button
                         onClick={() => deleteNotification(notification.id)}

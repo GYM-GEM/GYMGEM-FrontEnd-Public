@@ -14,14 +14,15 @@ const NavTraineDash = () => {
   const [open, setOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userRef = useRef(null);
-  
+
   const user = JSON.parse(localStorage.getItem("user"));
 
   const links = [
     { to: "/", label: "Home" },
-    { to: "/traine", label: "Dashboard" },
-    { to: "/traine/courses", label: "Courses" },
-    { to: "/traine/settings", label: "Settings" },
+    { to: "/trainee", label: "Dashboard" },
+    { to: "/trainee/courses", label: "Courses" },
+    { to: "/trainee/favorite", label: "Favorite" },
+    { to: "/trainee/settings", label: "Settings" },
   ];
 
   const [showFullName, setShowFullName] = useState(false);
@@ -112,17 +113,15 @@ const NavTraineDash = () => {
               className="flex items-center gap-2 text-lg font-semibold tracking-wide transition hover:opacity-80"
             >
               <FaGem
-                className={`text-[#86ac55] transition-transform duration-500 ${
-                  showFullName ? "scale-110" : "scale-100"
-                }`}
+                className={`text-[#86ac55] transition-transform duration-500 ${showFullName ? "scale-110" : "scale-100"
+                  }`}
               />
               <span className="relative h-6 w-32 overflow-hidden">
                 <span
-                  className={`absolute inset-0 font-bebas text-2xl transition-all text-[#ff8211] duration-500 ${
-                    showGG
+                  className={`absolute inset-0 font-bebas text-2xl transition-all text-[#ff8211] duration-500 ${showGG
                       ? "translate-y-0 opacity-100"
                       : "-translate-y-4 opacity-0"
-                  }`}
+                    }`}
                 >
                   GG
                 </span>
@@ -135,11 +134,10 @@ const NavTraineDash = () => {
                       <span
                         key={char + index}
                         style={{ transitionDelay: `${delay}s` }}
-                        className={`transition-all duration-300 ${
-                          showFullName
+                        className={`transition-all duration-300 ${showFullName
                             ? "translate-y-0 opacity-100"
                             : "translate-y-4 opacity-0"
-                        }`}
+                          }`}
                       >
                         {char}
                       </span>
@@ -158,8 +156,7 @@ const NavTraineDash = () => {
                     to={l.to}
                     end
                     className={({ isActive }) =>
-                      `relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-                        isActive ? "text-[#ff8211]" : "text-slate-600 hover:text-[#ff8211]"
+                      `relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${isActive ? "text-[#ff8211]" : "text-slate-600 hover:text-[#ff8211]"
                       }`
                     }
                   >
@@ -191,12 +188,12 @@ const NavTraineDash = () => {
                   <MdOutlineNotificationsActive />
                 </NavLink>
               </motion.div>
-              
+
               {/* User Dropdown Menu */}
-              <UserDropdown 
-                user={user} 
-                logout={logout} 
-                dashboardPath="/trainee" 
+              <UserDropdown
+                user={user}
+                logout={logout}
+                dashboardPath="/trainee"
                 settingsPath="/settings"
               />
 
@@ -233,10 +230,9 @@ const NavTraineDash = () => {
                     to={l.to}
                     onClick={() => setOpen(false)}
                     className={({ isActive }) =>
-                      `block px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                        isActive
-                          ? "bg-orange-50 text-[#ff8211] shadow-sm"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      `block px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
+                        ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                       }`
                     }
                   >

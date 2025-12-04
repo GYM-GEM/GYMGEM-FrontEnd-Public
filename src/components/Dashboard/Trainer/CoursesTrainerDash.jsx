@@ -9,6 +9,7 @@ import { MdOutlineEdit } from "react-icons/md";
 import { ChevronDown, ChevronRight, Play, Pause } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import { getCategoryName } from "../../../utils/categoryMapping";
 
 import NavBarDash from "./NavBarDash.jsx";
 import FooterDash from "../FooterDash.jsx";
@@ -148,19 +149,38 @@ const CoursesTrainerDash = () => {
     const newCourse = location?.state?.newCourse;
 
     if (newCourse) {
+      // Map API response fields to dashboard-expected fields
       const courseWithId = {
-        ...newCourse,
-        id: uuidv4(),
+        id: newCourse.id || uuidv4(),
+        title: newCourse.title,
+        price: newCourse.price || 0,
+        // Map category ID to category name
+        category: typeof newCourse.category === 'number'
+          ? getCategoryName(newCourse.category)
+          : newCourse.category,
+        // Map cover/img field
+        img: newCourse.img || newCourse.cover || testimg,
+        // Map status (ensure proper casing)
+        status: newCourse.status
+          ? newCourse.status.charAt(0).toUpperCase() + newCourse.status.slice(1).toLowerCase()
+          : "Draft",
+        client: newCourse.client || "0",
         lessons: newCourse.lessons || [],
+        description: newCourse.description || "",
+        preview_video: newCourse.preview_video || "",
       };
 
       setRows((prev) => {
-        // منع التكرار
-        const exists = prev.some(
-          (r) =>
-            r.title === newCourse.title && r.category === newCourse.category
-        );
-        if (exists) return prev;
+        // Prevent duplicates by checking if course with same ID already exists
+        const exists = prev.some((r) => r.id === courseWithId.id);
+        if (exists) {
+          // Update existing course instead of adding duplicate
+          const updated = prev.map((r) =>
+            r.id === courseWithId.id ? courseWithId : r
+          );
+          localStorage.setItem("courses", JSON.stringify(updated));
+          return updated;
+        }
 
         const updated = [courseWithId, ...prev];
         localStorage.setItem("courses", JSON.stringify(updated));
@@ -749,9 +769,8 @@ const CoursesTrainerDash = () => {
                       <button
                         key={p}
                         onClick={() => setPage(p)}
-                        className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
-                          p === page ? "bg-[#ff8211] text-white" : "text-slate-700 hover:bg-slate-100"
-                        }`}
+                        className={`px-3 py-2 rounded-lg text-sm font-medium transition ${p === page ? "bg-[#ff8211] text-white" : "text-slate-700 hover:bg-slate-100"
+                          }`}
                       >
                         {p}
                       </button>

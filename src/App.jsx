@@ -65,6 +65,7 @@ import StoreDashboard from "./components/Dashboard/Store/StoreDashboard.jsx";
 import Storeprofile from "./components/Dashboard/Store/Storeprofile.jsx";
 import StoreProduct from "./components/Dashboard/Store/StoreProduct.jsx";
 import StoreOrder from "./components/Dashboard/Store/StoreOrder.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 
 
@@ -104,37 +105,39 @@ function App() {
         {/* -------------------- TRAINER DASHBOARD -------------------- */}
         <Route path="trainer">
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardTrainer />} />
-          <Route path="courses" element={<CoursesTrainerDash />} />
-          <Route path="courses/:id" element={<CourseDetailsDash />} />
-          <Route path="clients" element={<ClientTrainerDash />} />
-          <Route path="profile" element={<TrainerprofileDash />} />
+          <Route path="dashboard" element={<ProtectedRoute requiredProfile="trainer"><DashboardTrainer /></ProtectedRoute>} />
+          <Route path="courses" element={<ProtectedRoute requiredProfile="trainer"><CoursesTrainerDash /></ProtectedRoute>} />
+          <Route path="courses/:id" element={<ProtectedRoute requiredProfile="trainer"><CourseDetailsDash /></ProtectedRoute>} />
+          <Route path="clients" element={<ProtectedRoute requiredProfile="trainer"><ClientTrainerDash /></ProtectedRoute>} />
+          <Route path="profile" element={<ProtectedRoute requiredProfile="trainer"><TrainerprofileDash /></ProtectedRoute>} />
         </Route>
 
         {/* -------------------- TRAINEE DASHBOARD -------------------- */}
         <Route path="trainee">
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<TraineeDash />} />
-          <Route path="courses" element={<CoursesTraineDash />} />
-          <Route path="settings" element={<SettingsTrainee />} />
+          <Route path="dashboard" element={<ProtectedRoute requiredProfile="trainee"><TraineeDash /></ProtectedRoute>} />
+          <Route path="courses" element={<ProtectedRoute requiredProfile="trainee"><CoursesTraineDash /></ProtectedRoute>} />
+          <Route path="courses/:id" element={<ProtectedRoute requiredProfile="trainee"><CourseDetails /></ProtectedRoute>} />
+          <Route path="favorite" element={<ProtectedRoute requiredProfile="trainee"><Favorite /></ProtectedRoute>} />
+          <Route path="settings" element={<ProtectedRoute requiredProfile="trainee"><SettingsTrainee /></ProtectedRoute>} />
         </Route>
         {/* -------------------- GYM DASHBOARD -------------------- */}
         <Route path="gym">
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<GymDashboard />} />
-          <Route path="gymMember" element={<GymMember />} />
-          <Route path="gymSessions" element={<GymSessions />} />
-          <Route path="gymClasses" element={<GymClasses />} />
-          <Route path="gymprofile" element={<Gymprofile />} />
+          <Route path="dashboard" element={<ProtectedRoute requiredProfile="gym"><GymDashboard /></ProtectedRoute>} />
+          <Route path="gymMember" element={<ProtectedRoute requiredProfile="gym"><GymMember /></ProtectedRoute>} />
+          <Route path="gymSessions" element={<ProtectedRoute requiredProfile="gym"><GymSessions /></ProtectedRoute>} />
+          <Route path="gymClasses" element={<ProtectedRoute requiredProfile="gym"><GymClasses /></ProtectedRoute>} />
+          <Route path="gymprofile" element={<ProtectedRoute requiredProfile="gym"><Gymprofile /></ProtectedRoute>} />
         </Route>
 
         {/* --------------------Store DASHBOARD -------------------- */}
         <Route path="store">
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<StoreDashboard />} />
-          <Route path="product" element={<StoreProduct />} />
-          <Route path="order" element={<StoreOrder />} />
-          <Route path="profile" element={<Storeprofile />} />
+          <Route path="dashboard" element={<ProtectedRoute requiredProfile="store"><StoreDashboard /></ProtectedRoute>} />
+          <Route path="product" element={<ProtectedRoute requiredProfile="store"><StoreProduct /></ProtectedRoute>} />
+          <Route path="order" element={<ProtectedRoute requiredProfile="store"><StoreOrder /></ProtectedRoute>} />
+          <Route path="profile" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
         </Route>
 
         {/* -------------------- AUTH + FORMS -------------------- */}

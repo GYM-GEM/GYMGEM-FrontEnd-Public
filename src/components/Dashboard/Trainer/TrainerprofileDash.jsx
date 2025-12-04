@@ -1,7 +1,7 @@
 import NavBarDash from "./NavBarDash";
 import FooterDash from "../FooterDash";
-import { 
-  Edit, Trash2, Plus, X, Save, 
+import {
+  Edit, Trash2, Plus, X, Save,
   MapPin, Phone, Mail, Calendar,
   Briefcase, Award, Activity, TrendingUp
 } from "lucide-react";
@@ -13,59 +13,6 @@ const TrainerProfileDash = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  // Initialize state from localStorage
-  const [profileData, setProfileData] = useState(() => {
-    const saved = localStorage.getItem("trainerProfileData");
-    return saved ? JSON.parse(saved) : {
-      profile: {
-        avatar: "https://i.pravatar.cc/150?img=3",
-        name: "Mahmoud Gado",
-        gender: "Male",
-        birthdate: "1990-01-15",
-        phone: "+20 100 1234567",
-        country: "Egypt",
-        state: "Cairo",
-        zip: "12345",
-        bio: "I'm a full stack trainer specialized in Django & React.",
-        skills: ["Django", "React", "Python", "JavaScript"],
-        linkedin: "linkedin.com/in/mahmoudgado",
-        email: "mahmoudgado@gmail.com"
-      },
-      specializations: [
-        {
-          id: 1,
-          name: "Strength Training",
-          yearsExperience: 5,
-          hourlyRate: 50,
-          location: "Both"
-        }
-      ],
-      workExperience: [
-        {
-          id: 1,
-          workplace: "FitHub Gym",
-          position: "Senior Trainer",
-          startDate: "2020-01",
-          endDate: "Present",
-          description: "Leading group classes and personal training sessions"
-        }
-      ],
-      records: [
-        {
-          id: 1,
-          date: "2024-12-01",
-          weight: 75,
-          height: 180,
-          bodyFat: 15,
-          muscleMass: 60,
-          boneMass: 3.5,
-          bodyWater: 55,
-          bmr: 1650
-        }
-      ]
-    };
-  });
-
   const [modals, setModals] = useState({
     editProfile: false,
     addSpecialization: false,
@@ -74,6 +21,77 @@ const TrainerProfileDash = () => {
     editExperience: false,
     addRecord: false,
     editRecord: false
+  });
+
+  // Initialize state from localStorage with merge logic
+  const [profileData, setProfileData] = useState(() => {
+    // 1. Get the currently logged-in user (Source of Truth for identity)
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    // Construct display name from user object
+    let displayName = "Trainer";
+    if (user.first_name && user.last_name) {
+      displayName = `${user.first_name} ${user.last_name}`;
+    } else if (user.first_name) {
+      displayName = user.first_name;
+    } else if (user.username) {
+      displayName = user.username;
+    } else if (user.email) {
+      displayName = user.email.split("@")[0];
+    }
+
+    // Create a fresh profile object from the user data
+    const freshProfile = {
+      avatar: user.avatar || "https://i.pravatar.cc/150?img=3",
+      name: displayName,
+      gender: user.gender || "Not Specified",
+      birthdate: user.birth_date || "1990-01-01",
+      phone: user.phone_number || "+20 100 0000000",
+      country: user.country || "Egypt",
+      state: user.city || "Cairo",
+      zip: "12345",
+      bio: user.bio || "I'm a professional trainer ready to help you achieve your goals.",
+      skills: ["Fitness", "Nutrition", "Coaching"],
+      linkedin: "linkedin.com/in/trainer",
+      email: user.email || "trainer@example.com"
+    };
+
+    // 2. Get saved profile data (which might contain stale "Mahmoud Gado" data)
+    const savedString = localStorage.getItem("trainerProfileData");
+    let initialData = null;
+
+    if (savedString) {
+      try {
+        initialData = JSON.parse(savedString);
+      } catch (e) {
+        console.error("Error parsing saved profile data", e);
+      }
+    }
+
+    // 3. Merge logic
+    if (initialData) {
+      // If the saved data has the dummy name "Mahmoud Gado" but the real user is different,
+      // we should probably trust the fresh profile completely for identity fields.
+      return {
+        ...initialData,
+        profile: {
+          ...initialData.profile, // Keep existing fields (like zip, skills)
+          ...freshProfile,        // Overwrite identity fields (name, email, phone, etc.) with real user data
+          // Explicitly overwrite name if it was the dummy one
+          name: (initialData.profile.name === "Mahmoud Gado" && displayName !== "Trainer")
+            ? displayName
+            : (initialData.profile.name || displayName)
+        }
+      };
+    }
+
+    // 4. No saved data? Return fresh default
+    return {
+      profile: freshProfile,
+      specializations: [],
+      workExperience: [],
+      records: []
+    };
   });
 
   const [currentEdit, setCurrentEdit] = useState(null);
@@ -128,7 +146,7 @@ const TrainerProfileDash = () => {
     if (currentEdit) {
       setProfileData(prev => ({
         ...prev,
-        specializations: prev.specializations.map(s => 
+        specializations: prev.specializations.map(s =>
           s.id === currentEdit.id ? { ...formData, id: s.id } : s
         )
       }));
@@ -158,7 +176,7 @@ const TrainerProfileDash = () => {
     if (currentEdit) {
       setProfileData(prev => ({
         ...prev,
-        workExperience: prev.workExperience.map(e => 
+        workExperience: prev.workExperience.map(e =>
           e.id === currentEdit.id ? { ...formData, id: e.id } : e
         )
       }));
@@ -188,7 +206,7 @@ const TrainerProfileDash = () => {
     if (currentEdit) {
       setProfileData(prev => ({
         ...prev,
-        records: prev.records.map(r => 
+        records: prev.records.map(r =>
           r.id === currentEdit.id ? { ...formData, id: r.id } : r
         )
       }));
@@ -230,7 +248,7 @@ const TrainerProfileDash = () => {
                   className="w-32 h-32 rounded-full object-cover border-4 border-primary"
                 />
               </div>
-              
+
               <div className="flex-1">
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -566,7 +584,7 @@ const TrainerProfileDash = () => {
               <h3 className="text-xl font-bold">
                 {currentEdit ? "Edit" : "Add"} Specialization
               </h3>
-              <button 
+              <button
                 onClick={() => closeModal(currentEdit ? "editSpecialization" : "addSpecialization")}
                 className="p-1 hover:bg-gray-100 rounded"
               >
@@ -642,7 +660,7 @@ const TrainerProfileDash = () => {
               <h3 className="text-xl font-bold">
                 {currentEdit ? "Edit" : "Add"} Experience
               </h3>
-              <button 
+              <button
                 onClick={() => closeModal(currentEdit ? "editExperience" : "addExperience")}
                 className="p-1 hover:bg-gray-100 rounded"
               >
@@ -725,7 +743,7 @@ const TrainerProfileDash = () => {
               <h3 className="text-xl font-bold">
                 {currentEdit ? "Edit" : "Add"} Body Measurement
               </h3>
-              <button 
+              <button
                 onClick={() => closeModal(currentEdit ? "editRecord" : "addRecord")}
                 className="p-1 hover:bg-gray-100 rounded"
               >
@@ -803,7 +821,7 @@ const TrainerProfileDash = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">BMR (cal/day)</label>
+                  <label className="block text-sm font-medium mb-1">BMR (kcal)</label>
                   <input
                     type="number"
                     value={formData.bmr || ""}
@@ -830,8 +848,6 @@ const TrainerProfileDash = () => {
           </div>
         </div>
       )}
-
-      <FooterDash />
     </>
   );
 };

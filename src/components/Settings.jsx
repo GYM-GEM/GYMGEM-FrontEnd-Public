@@ -25,7 +25,7 @@ const Settings = () => {
       confirmPassword: "",
     },
     paymentInfo: { cardNumber: "", expiryDate: "", cvv: "", cardHolder: "" },
-    deleteAccount: { password: "" },
+    deleteAccount: { password: "", confirmationPhrase: "" },
   });
 
   // Modal handlers
@@ -56,28 +56,28 @@ const Settings = () => {
     }
 
     // try {
-      const token = localStorage.getItem('access');
-      // Send POST request to backend to change password
-      await axios.post(`${VITE_API_URL}/api/accounts/change-password`,
-        {
-          currentPassword: formData.changePassword.currentPassword,
-          newPassword: formData.changePassword.newPassword,
-          confirmPassword: formData.changePassword.confirmPassword,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      );
-      closeModal("changePassword");
-      showToast("Password changed successfully!", { type: "success" });
-      setFormData((prev) => ({
-        ...prev,
-        changePassword: {
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: '',
-        },
-      }));
+    const token = localStorage.getItem('access');
+    // Send POST request to backend to change password
+    await axios.post(`${VITE_API_URL}/api/accounts/change-password`,
+      {
+        currentPassword: formData.changePassword.currentPassword,
+        newPassword: formData.changePassword.newPassword,
+        confirmPassword: formData.changePassword.confirmPassword,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    );
+    closeModal("changePassword");
+    showToast("Password changed successfully!", { type: "success" });
+    setFormData((prev) => ({
+      ...prev,
+      changePassword: {
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      },
+    }));
 
     // } catch (error) {
     //   showToast("Error changing password", { type: "error" });
@@ -111,18 +111,46 @@ const Settings = () => {
     }));
   };
 
-  const handleDeleteAccountSubmit = () => {
-    const { password } = formData.deleteAccount;
+  const handleDeleteAccountSubmit = async () => {
+    const { password, confirmationPhrase } = formData.deleteAccount;
+    const requiredPhrase = "I want to delete my account";
+
     if (!password) {
       showToast("Please enter your password to confirm deletion.", { type: "error" });
       return;
     }
 
-    // Mock validation logic
-    closeModal("deleteAccount");
-    showToast("Account deletion request submitted", { type: "success" });
-    // In a real app, you would make an API call here and then redirect
-    // navigate("/");
+    if (confirmationPhrase !== requiredPhrase) {
+      showToast(`Please type exactly: "${requiredPhrase}"`, { type: "error" });
+      return;
+    }
+
+    const token = localStorage.getItem('access');
+    try {
+      const resp = await axios.delete(
+        `${VITE_API_URL}/api/accounts/detail`,
+        {
+          data: { password },
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (resp.status === 204) {
+        closeModal("deleteAccount");
+        showToast("Account deleted successfully!", { type: "success" });
+        localStorage.clear();
+        navigate("/goodbye");
+      }
+      else {
+        showToast(resp.data.message || "Error deleting account", { type: "error" });
+      }
+
+      console.log("rrrr:", resp.data);
+    } catch (error) {
+      showToast("Error deleting account", { type: "error" });
+    }
   };
 
   return (
@@ -441,6 +469,26 @@ const Settings = () => {
                   placeholder="Enter your password"
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Confirmation
+                </label>
+                <p className="text-xs text-gray-600 mb-2">
+                  Type the following phrase to confirm: <span className="font-mono font-bold text-red-600">"I want to delete my account"</span>
+                </p>
+                <input
+                  type="text"
+                  name="confirmationPhrase"
+                  value={formData.deleteAccount.confirmationPhrase}
+                  onChange={handleDeleteAccountChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all font-mono text-sm"
+                  placeholder="I want to delete my account"
+                />
+                {formData.deleteAccount.confirmationPhrase === "I want to delete my account" && (
+                  <p className="text-xs text-green-600 mt-1">✓ Phrase confirmed</p>
+                )}
+              </div>
             </div>
 
             <div className="px-6 pb-6 flex gap-3">
@@ -452,7 +500,8 @@ const Settings = () => {
               </button>
               <button
                 onClick={handleDeleteAccountSubmit}
-                className="flex-1 bg-red-600 text-white py-2.5 font-semibold rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-200"
+                disabled={formData.deleteAccount.confirmationPhrase !== "I want to delete my account"}
+                className="flex-1 bg-red-600 text-white py-2.5 font-semibold rounded-lg hover:bg-red-700 transition-colors shadow-lg shadow-red-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Delete Permanently
               </button>

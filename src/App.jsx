@@ -33,6 +33,7 @@ import RequestDetails from "./pages/DetailsTrainees";
 import AddCourse from "./components/courses/AddCourse.jsx";
 import NewLeason from "./components/courses/NewLesson.jsx";
 import AddSection from "./components/courses/AddSection.jsx";
+import Goodbye from "./pages/Goodbye.jsx";
 
 // dashboard trainer
 import DashboardTrainer from "./components/Dashboard/Trainer/DashboardTrainer.jsx";
@@ -144,6 +145,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/role" element={<Selectrole />} />
+        <Route path="/goodbye" element={<Goodbye />} />
         {/* -------------------- Trainer Form -------------------- */}
         <Route path="/trainerform" element={<Trainerform />} />
         <Route path="/trainerSpecialization" element={<TrainerSpecialization />} />

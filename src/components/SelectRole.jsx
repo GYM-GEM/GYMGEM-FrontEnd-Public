@@ -63,9 +63,10 @@ const Selectrole = () => {
 
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const payload = { profile_type: selectedRole, account: user.id };
+      const payload = { profile_type: selectedRole };
       const token = localStorage.getItem("access");
       const refresh = localStorage.getItem("refresh")
+
 
       const response = await axios.post(
         "http://127.0.0.1:8000/api/profiles/create",
@@ -86,6 +87,9 @@ const Selectrole = () => {
 
       localStorage.setItem('access', refreshResp.data.access)
       localStorage.setItem('refresh', refreshResp.data.refresh)
+      const updatedUser = JSON.parse(localStorage.getItem("user"));
+      updatedUser.profiles.push({ type: response.data.profile_type, id: response.data.id });
+      localStorage.setItem("user", JSON.stringify(updatedUser)); 
 
       showToast(`${selectedRole} profile created successfully!`, { type: "success" });
 

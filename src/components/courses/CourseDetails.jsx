@@ -24,6 +24,10 @@ import Footer from "../Footer";
 import { addToFavorites, removeFromFavorites, isFavorite } from "../Dashboard/Traine/Favorite";
 import { isUserEnrolled } from "../BuyNow/Checkout";
 
+const getCourseById = async (id) => {
+  const courses = await axios.get(`http://127.0.0.1:8000/api/courses/${id}`)
+}
+
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();

@@ -87,9 +87,8 @@ function App() {
           <Route path="about" element={<About />} />
           <Route path="profile" element={<Profile />} />
           <Route path="requestdetails" element={<RequestDetails />} />
-          <Route path="addcourse" element={<AddCourse />} />
-          <Route path="addlesson" element={<NewLeason />} />
-          <Route path="addsection" element={<AddSection />} />
+      
+         
           <Route path="community" element={<Community />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
           <Route path="/trainer-profile/:id" element={<PublicTrainerProfile />} />
@@ -111,6 +110,10 @@ function App() {
           <Route path="courses/:id" element={<ProtectedRoute requiredProfile="trainer"><CourseDetailsDash /></ProtectedRoute>} />
           <Route path="clients" element={<ProtectedRoute requiredProfile="trainer"><ClientTrainerDash /></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute requiredProfile="trainer"><TrainerprofileDash /></ProtectedRoute>} />
+          <Route path="addlesson" element={<ProtectedRoute requiredProfile="trainer"><NewLeason /></ProtectedRoute>} />
+          <Route path="addsection" element={<ProtectedRoute requiredProfile="trainer"><AddSection /></ProtectedRoute>} />
+          <Route path="addcourse" element={<ProtectedRoute requiredProfile="trainer"><AddCourse /></ProtectedRoute>} />
+          <Route path="settings" element={<ProtectedRoute requiredProfile="trainer"><SettingsTrainee /></ProtectedRoute>} />
         </Route>
 
         {/* -------------------- TRAINEE DASHBOARD -------------------- */}
@@ -130,6 +133,7 @@ function App() {
           <Route path="gymSessions" element={<ProtectedRoute requiredProfile="gym"><GymSessions /></ProtectedRoute>} />
           <Route path="gymClasses" element={<ProtectedRoute requiredProfile="gym"><GymClasses /></ProtectedRoute>} />
           <Route path="gymprofile" element={<ProtectedRoute requiredProfile="gym"><Gymprofile /></ProtectedRoute>} />
+          <Route path="settings" element={<ProtectedRoute requiredProfile="gym"><Gymprofile /></ProtectedRoute>} />
         </Route>
 
         {/* --------------------Store DASHBOARD -------------------- */}
@@ -139,6 +143,7 @@ function App() {
           <Route path="product" element={<ProtectedRoute requiredProfile="store"><StoreProduct /></ProtectedRoute>} />
           <Route path="order" element={<ProtectedRoute requiredProfile="store"><StoreOrder /></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
+          <Route path="settings" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
         </Route>
 
         {/* -------------------- AUTH + FORMS -------------------- */}

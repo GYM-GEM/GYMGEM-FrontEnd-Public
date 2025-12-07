@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { useToast } from "../../context/ToastContext";
+import axios from "axios";
 
 const AddSection = () => {
   const location = useLocation();
@@ -23,83 +24,76 @@ const AddSection = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const saveSection = (sectionData) => {
+  const saveSectionAPI = async (sectionData) => {
     if (!course || !lesson) {
       showToast("Missing course or lesson data", { type: "error" });
       return null;
     }
 
-    const newSection = {
-      id: uuidv4(),
+    const payload = {
       title: sectionData.title,
-      contentType: sectionData.contentType,
-      contentUrl: sectionData.contentUrl || "",
-      contentText: sectionData.contentText || "",
-      createdAt: new Date().toISOString(),
+      content_type: sectionData.contentType,
+      content_url: sectionData.contentUrl || "",
+      content_text: sectionData.contentText || "",
+      lesson: lesson.id,
+      order : sectionData.order
     };
 
-    // Get all courses from localStorage
-    const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    const token = localStorage.getItem("access");
 
-    // Update the specific course with the new section
-    const updatedCourses = savedCourses.map((c) => {
-      if (c.id === course.id) {
-        const updatedLessons = (c.lessons || []).map((l) => {
-          if (l.id === lesson.id) {
-            return {
-              ...l,
-              sections: [...(l.sections || []), newSection],
-            };
+    try {
+      const res = await axios.post(`http://127.0.0.1:8000/api/courses/sections/create/`, payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
           }
-          return l;
-        });
-        return { ...c, lessons: updatedLessons };
-      }
-      return c;
-    });
+        }
+      );
+      console.log(res.data)
+      return res.data;
 
-    localStorage.setItem("courses", JSON.stringify(updatedCourses));
-    return updatedCourses;
+    } catch (error) {
+      console.log(error)
+      showToast("Error saving section", { type: "error" });
+    }
+
+
   };
 
-  const onSubmitAndCreateAnother = (data) => {
+  const onSubmitAndCreateAnother = async (data) => {
     setIsSubmitting(true);
-    const updatedCourses = saveSection(data);
-
-    if (updatedCourses) {
+    try {
+      await saveSectionAPI(data);
       showToast("Section created successfully!", { type: "success" });
-      reset(); // Reset form for next section
+      reset();
+    } catch (err) {
+      console.log(err)
+      showToast("Error saving section", { type: "error" });
+    }
+    setIsSubmitting(false);
+  };
+
+  const onSubmitAndGoToNextLesson = async (data) => {
+    setIsSubmitting(true);
+    try {
+      await saveSectionAPI(data);
+      showToast("Section created successfully!", { type: "success" });
+      navigate("/trainer/addlesson", { state: { course } });
+    } catch (err) {
+      showToast("Error saving section", { type: "error" });
     }
 
     setIsSubmitting(false);
   };
 
-  const onSubmitAndGoToNextLesson = (data) => {
+  const onSubmitAndFinish = async (data) => {
     setIsSubmitting(true);
-    const updatedCourses = saveSection(data);
-
-    if (updatedCourses) {
-      showToast("Section saved! Create next lesson.", { type: "success" });
-      // Navigate back to NewLesson page
-      const updatedCourse = updatedCourses.find((c) => c.id === course.id);
-      navigate("/addlesson", { state: { course: updatedCourse } });
-    }
-
-    setIsSubmitting(false);
-  };
-
-  const onSubmitAndFinish = (data) => {
-    setIsSubmitting(true);
-    const updatedCourses = saveSection(data);
-
-    if (updatedCourses) {
-      showToast("Course creation completed!", { type: "success" });
-      // Get the updated course to pass to dashboard
-      const updatedCourse = updatedCourses.find((c) => c.id === course.id);
-      // Navigate to trainer courses dashboard with the updated course
-      navigate("/trainer/courses", {
-        state: { newCourse: updatedCourse }
-      });
+    try{
+      await saveSectionAPI(data);
+      showToast("Section created successfully!", { type: "success" });
+      navigate("/trainer/courses", { state: { course } });
+    } catch (err) {
+      showToast("Error saving section", { type: "error" });
     }
 
     setIsSubmitting(false);
@@ -174,6 +168,16 @@ const AddSection = () => {
                   )}
                 </div>
 
+                  <div className="">
+                  <label className="poppins-medium text-[1rem]">Section Order</label>
+                  <input
+                    type="number"
+                    {...register("order", { required: true })}
+                    placeholder="Section number"
+                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
+                  />
+                </div>
+
                 <div>
                   <label className="poppins-medium text-[1rem] block mb-1">
                     Content Type
@@ -183,14 +187,14 @@ const AddSection = () => {
                     className="w-full border rounded-md p-[10px] text-[#000] poppins-extralight"
                   >
                     <option value="">Select Content Type</option>
-                    <option value="Video">Video</option>
-                    <option value="Article">Article</option>
-                    <option value="PDF">PDF</option>
-                    <option value="Image">Image</option>
-                    <option value="Audio">Audio</option>
-                    <option value="DOC">DOC</option>
-                    <option value="PPT">PPT</option>
-                    <option value="Other">Other</option>
+                    <option value="video">Video</option>
+                    <option value="article">Article</option>
+                    <option value="pdf">PDF</option>
+                    <option value="image">Image</option>
+                    <option value="audio">Audio</option>
+                    <option value="doc">DOC</option>
+                    <option value="ppt">PPT</option>
+                    <option value="other">Other</option>
                   </select>
                   {errors.contentType && (
                     <p className="text-red-500 text-sm mt-1">

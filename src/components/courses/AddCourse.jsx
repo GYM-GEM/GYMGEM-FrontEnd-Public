@@ -44,7 +44,7 @@ const AddCourse = () => {
       );
 
       showToast("Course created successfully!", { type: "success" });
-      navigate("/addlesson", { state: { course: response.data } });
+      navigate("/trainer/addlesson", { state: { course: response.data } });
     } catch (error) {
       console.error("Error creating course:", error);
       showToast(

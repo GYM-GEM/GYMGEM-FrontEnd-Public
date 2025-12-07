@@ -3,6 +3,7 @@ import Footer from "../Footer";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const NewLeason = () => {
   const location = useLocation();
@@ -15,51 +16,82 @@ const NewLeason = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (lessonData) => {
+  const onSubmit = async (lessonData) => {
     if (!course) return;
 
-    const newLesson = {
-      id: Date.now(),
-      ...lessonData,
-      courseId: course.id,
-      sections: [], // Initialize empty sections array
-      status: lessonData.status || "draft",
-    };
-
-    // Save to localStorage
-    const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
-    let updatedCourses;
-    
-    // Check if course exists in localStorage
-    const courseExists = savedCourses.some(c => c.id === course.id);
-
-    if (courseExists) {
-      // Update existing course
-      updatedCourses = savedCourses.map((c) =>
-        c.id === course.id
-          ? { ...c, lessons: [...(c.lessons || []), newLesson] }
-          : c
-      );
-    } else {
-      // Add new course from API response + new lesson
-      const courseWithLesson = {
-        ...course,
-        lessons: [newLesson]
+    try {
+      const payload = {
+        title: lessonData.title,
+        cover: lessonData.cover,
+        duration: lessonData.duration,
+        description: lessonData.description,
+        status: lessonData.status,
+        order: lessonData.order,
       };
-      updatedCourses = [...savedCourses, courseWithLesson];
+      const token = localStorage.getItem("access");
+
+      const res = await axios.post(`http://127.0.0.1:8000/api/courses/lessons/${course.id}/create/`, payload, 
+        {
+          headers: {
+            Authorization : `Bearer ${token}`
+          }
+        }
+      );
+      console.log(res.data);
+      const createdlesson = res.data;
+
+      navigate("/trainer/addsection", {
+        state: {
+          course: course,
+          lesson: createdlesson,
+        },
+      });
+    } catch (error) {
+      console.log(error);
     }
 
-    localStorage.setItem("courses", JSON.stringify(updatedCourses));
+    // const newLesson = {
+    //   id: Date.now(),
+    //   ...lessonData,
+    //   courseId: course.id,
+    //   sections: [], // Initialize empty sections array
+    //   status: lessonData.status || "draft",
+    // };
 
-    // Navigate to AddSection page to add sections to this lesson
-    const updatedCourse = updatedCourses.find((c) => c.id === course.id);
-    
-    navigate("/addsection", { 
-      state: { 
-        course: updatedCourse, 
-        lesson: newLesson 
-      } 
-    });
+    // // Save to localStorage
+    // const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
+    // let updatedCourses;
+
+    // // Check if course exists in localStorage
+    // const courseExists = savedCourses.some(c => c.id === course.id);
+
+    // if (courseExists) {
+    //   // Update existing course
+    //   updatedCourses = savedCourses.map((c) =>
+    //     c.id === course.id
+    //       ? { ...c, lessons: [...(c.lessons || []), newLesson] }
+    //       : c
+    //   );
+    // } else {
+    //   // Add new course from API response + new lesson
+    //   const courseWithLesson = {
+    //     ...course,
+    //     lessons: [newLesson]
+    //   };
+    //   updatedCourses = [...savedCourses, courseWithLesson];
+    // }
+
+    // localStorage.setItem("courses", JSON.stringify(updatedCourses));
+
+    // // Navigate to AddSection page to add sections to this lesson
+    // const updatedCourse = updatedCourses.find((c) => c.id === course.id);
+
+    // navigate("/addsection", { 
+    //   state: { 
+    //     course: updatedCourse, 
+    //     lesson: newLesson 
+    //   } 
+    // });
   };
   return (
     <>
@@ -89,6 +121,8 @@ const NewLeason = () => {
                     Lesson Title
                   </label>
                 </div>
+                
+
                 <div>
                   <input
                     {...register("title", { required: true })}
@@ -96,12 +130,25 @@ const NewLeason = () => {
                     className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
                   />
                 </div>
+
+              
                 {errors.title && (
                   <p className="text-red-500 text-sm mt-1">
                     This field is required
                   </p>
                 )}
               </div>
+
+
+                <div className="">
+                  <label className="poppins-medium text-[1rem]">Lesson Order</label>
+                  <input
+                    type="number"
+                    {...register("order", { required: true })}
+                    placeholder="Lesson number"
+                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
+                  />
+                </div>
 
               <div>
                 <div>
@@ -130,7 +177,7 @@ const NewLeason = () => {
                 <div>
                   <input
                     {...register("duration")}
-                    placeholder="e.g. 00:45:00"
+                    placeholder="HH:MM:SS e.g. 00:45:00"
                     className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
                   />
                 </div>

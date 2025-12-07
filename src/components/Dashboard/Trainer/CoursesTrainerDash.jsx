@@ -10,7 +10,7 @@ import { ChevronDown, ChevronRight, Play, Pause } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { getCategoryName } from "../../../utils/categoryMapping";
-
+import axiosInstance from "../../../utils/axiosConfig";
 import NavBarDash from "./NavBarDash.jsx";
 import FooterDash from "../FooterDash.jsx";
 const initialRows = [
@@ -132,66 +132,112 @@ const CoursesTrainerDash = () => {
     if (page > totalPages) setPage(totalPages);
   }, [totalPages]);
 
-  // listen for newly created courses dispatched from AddCourse page
-  // useEffect(() => {
-  //   const handler = (e) => {
-  //     const item = e?.detail;
-  //     if (!item) return;
-  //     setRows((rs) => [item, ...rs]);
-  //     setPage(1);
-  //   };
-  //   window.addEventListener("courseCreated", handler);
-  //   return () => window.removeEventListener("courseCreated", handler);
-  // }, []);
+ 
 
-  // pick up newCourse passed via navigation state from AddCourse form
   useEffect(() => {
-    const newCourse = location?.state?.newCourse;
+    const fetchCourses = async () => {
+      try {
+   
+        console.log("Fetching courses from API...");
 
-    if (newCourse) {
-      // Map API response fields to dashboard-expected fields
-      const courseWithId = {
-        id: newCourse.id || uuidv4(),
-        title: newCourse.title,
-        price: newCourse.price || 0,
-        // Map category ID to category name
-        category: typeof newCourse.category === 'number'
-          ? getCategoryName(newCourse.category)
-          : newCourse.category,
-        // Map cover/img field
-        img: newCourse.img || newCourse.cover || testimg,
-        // Map status (ensure proper casing)
-        status: newCourse.status
-          ? newCourse.status.charAt(0).toUpperCase() + newCourse.status.slice(1).toLowerCase()
-          : "Draft",
-        client: newCourse.client || "0",
-        lessons: newCourse.lessons || [],
-        description: newCourse.description || "",
-        preview_video: newCourse.preview_video || "",
-      };
+        // Use axiosInstance instead of axios
+        // No need to add Authorization header - the interceptor does it!
+        const response = await axiosInstance.get("/api/courses/courses/my-courses");
 
-      setRows((prev) => {
-        // Prevent duplicates by checking if course with same ID already exists
-        const exists = prev.some((r) => r.id === courseWithId.id);
-        if (exists) {
-          // Update existing course instead of adding duplicate
-          const updated = prev.map((r) =>
-            r.id === courseWithId.id ? courseWithId : r
-          );
-          localStorage.setItem("courses", JSON.stringify(updated));
-          return updated;
+        console.log("API Response:", response.data);
+
+        // Handle different response structures
+        let coursesData = response.data;
+
+        // If the response is wrapped in a results array
+        if (coursesData.results) {
+          coursesData = coursesData.results;
         }
 
-        const updated = [courseWithId, ...prev];
-        localStorage.setItem("courses", JSON.stringify(updated));
-        return updated;
-      });
-      setPage(1);
+        // Map API data to match component's expected format
+        const mappedCourses = coursesData.map(course => {
+          // Debug: Log each course structure
+          console.log("Processing course:", course.id, course.title);
+          console.log("Course sections:", course.sections);
+          console.log("Course lessons:", course.lessons);
 
-      // Clear state after use
-      window.history.replaceState({}, document.title, window.location.pathname);
+          // Extract lessons - they might be directly in course.lessons 
+          // OR nested inside course.sections
+          let allLessons = [];
+
+          if (course.lessons && Array.isArray(course.lessons)) {
+            // Direct lessons array
+            allLessons = course.lessons;
+          } else if (course.sections && Array.isArray(course.sections)) {
+            // Lessons are nested inside sections
+            allLessons = course.sections.flatMap(section => {
+              console.log(`  Section: ${section.title}, Lessons:`, section.lessons);
+              return (section.lessons || []).map(lesson => ({
+                ...lesson,
+                sectionTitle: section.title, // Keep track of which section this lesson belongs to
+                sectionId: section.id,
+              }));
+            });
+          }
+
+          console.log(`  Total lessons found: ${allLessons.length}`);
+
+          return {
+            id: course.id,
+            title: course.title || "Untitled Course",
+            price: course.price || 0,
+            // Map cover to img
+            img: course.cover || course.img || testimg,
+            // Map category ID to name if needed
+            category: typeof course.category === 'number'
+              ? getCategoryName(course.category)
+              : (course.category || "Uncategorized"),
+            // Capitalize status
+            status: course.status
+              ? course.status.charAt(0).toUpperCase() + course.status.slice(1).toLowerCase()
+              : "Draft",
+            // Client count or enrolled students
+            client: course.enrolled_students || course.client || "0",
+            // Lessons array (extracted from sections if needed)
+            lessons: allLessons,
+            // Keep sections if they exist
+            sections: course.sections || [],
+            // Additional fields
+            description: course.description || "",
+            preview_video: course.preview_video || "",
+          };
+        });
+
+        console.log("Mapped courses:", mappedCourses);
+        setRows(mappedCourses);
+
+        // Optionally save to localStorage
+        localStorage.setItem("courses", JSON.stringify(mappedCourses));
+      }
+      catch (error) {
+        console.error("Error fetching courses:", error);
+      }
     }
-  }, [location?.state]);
+    fetchCourses();
+  }, [])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   // Toggle course expansion to show/hide lessons
   const toggleCourseExpansion = (courseId) => {
@@ -323,7 +369,7 @@ const CoursesTrainerDash = () => {
 
               <div className="w-full sm:w-auto">
                 <Link
-                  to="/addcourse"
+                  to="/trainer/addcourse"
                   className="inline-flex items-center gap-2 rounded-xl bg-[#ff8211] text-white px-6 py-3 text-sm font-semibold shadow-md hover:bg-[#e67300] hover:shadow-lg transition-all"
                 >
                   ➕ Add New Course

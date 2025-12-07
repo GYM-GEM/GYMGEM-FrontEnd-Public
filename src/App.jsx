@@ -92,7 +92,7 @@ function App() {
           <Route path="addsection" element={<AddSection />} />
           <Route path="community" element={<Community />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
-          <Route path="/trainer-profile" element={<PublicTrainerProfile />} />
+          <Route path="/trainer-profile/:id" element={<PublicTrainerProfile />} />
           <Route path="viewprofile" element={<Viewprofile />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="settings" element={<Settings />} />

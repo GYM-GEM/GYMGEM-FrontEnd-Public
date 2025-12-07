@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   Star,
@@ -23,73 +23,255 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { addToFavorites, removeFromFavorites, isFavorite } from "../Dashboard/Traine/Favorite";
 import { isUserEnrolled } from "../BuyNow/Checkout";
+import axios from "axios";
+import { get, set } from "react-hook-form";
 
-const getCourseById = async (id) => {
-  const courses = await axios.get(`http://127.0.0.1:8000/api/courses/${id}`)
+/*
+
+{
+    "id": 17,
+    "title": "Alsayed Course",
+    "price": "250.00",
+    "cover": "https://img.freepik.com/free-photo/wellness-health-lifestyle-workout-graphic-word_53876-13881.jpg?semt=ais_hybrid&w=740&q=80",
+    "status": "published",
+    "created_at": "2025-12-06T22:05:10.025300Z",
+    "updated_at": "2025-12-06T22:05:10.025320Z",
+    "description": "jjjjjajja",
+    "preview_video": "https://img.freepik.com/free-photo/wellness-health-lifestyle-workout-graphic-word_53876-13881.jpg?semt=ais_hybrid&w=740&q=80",
+    "trainer_profile": 59,
+    "category": 13,
+    "level": 1,
+    "language": "EN",
+    "lessons": []
 }
+*/
 
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const courses = JSON.parse(localStorage.getItem("courses")) || [];
-  const course = courses.find((c) => String(c.id) === id);
+
+  // All state declarations at the top (before any conditional logic)
+  const [course, setCourse] = useState(null);
+  const [trainer, setTrainer] = useState(null);
+  const [expandedSections, setExpandedSections] = useState(new Set());
+  const [showLockModal, setShowLockModal] = useState(false);
   const [isPurchased, setIsPurchased] = useState(false);
-
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user && course) {
-      setIsPurchased(isUserEnrolled(user.id, course.id));
-    }
-  }, [course]);
-
   const [isFavoriteCourse, setIsFavoriteCourse] = useState(false);
 
-  useEffect(() => {
-    if (course) {
-      setIsFavoriteCourse(isFavorite(course.id));
-    }
-  }, [course]);
-
-  const handleToggleFavorite = () => {
-    if (isFavoriteCourse) {
-      removeFromFavorites(course.id);
-      setIsFavoriteCourse(false);
-    } else {
-      addToFavorites(course);
-      setIsFavoriteCourse(true);
+  const getCourseById = async (id) => {
+    const token = localStorage.getItem('access');
+    try {
+      const course = await axios.get(`http://localhost:8000/api/courses/courses/${id}/detail/`
+        , {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+      setCourse(course.data);
+    } catch (error) {
+      console.error("Error fetching course by ID:", error);
     }
   };
 
-  const [expandedSections, setExpandedSections] = useState(new Set());
-  const [showLockModal, setShowLockModal] = useState(false);
+  const getTrainerById = async (trainerId) => {
+    const token = localStorage.getItem('access');
+    try {
+      const response = await axios.get(`http://localhost:8000/api/trainers/create?profile_id=${trainerId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      setTrainer(response.data);
+    } catch (error) {
+      console.error("Error fetching trainer by ID:", error);
+    }
+  };
+
+  useEffect(() => {
+    getCourseById(id);
+  }, [id]);
+
+  useEffect(() => {
+    if (course?.trainer_profile) {
+      getTrainerById(course.trainer_profile);
+    }
+  }, [course?.trainer_profile]);
 
   if (!course) {
     return (
       <>
         <Navbar />
-        <main className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-[#FF8211] bebas-medium mb-4">
-              Course Not Found
-            </h1>
-            <Link
-              to="/courses"
-              className="text-[#FF8211] hover:underline poppins-regular"
-            >
-              ← Back to Courses
-            </Link>
+        <main className="min-h-screen bg-white">
+          {/* Hero Section Skeleton */}
+          <div className="w-full bg-white border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+              {/* Back button skeleton */}
+              <div className="h-5 w-32 bg-gray-200 rounded mb-4 animate-pulse"></div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Content Skeleton */}
+                <div className="lg:col-span-2 space-y-4">
+                  {/* Title skeleton */}
+                  <div className="space-y-2">
+                    <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-12 bg-gray-200 rounded animate-pulse w-5/6"></div>
+                  </div>
+
+                  {/* Description skeleton */}
+                  <div className="space-y-2 mt-6">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-4/5"></div>
+                  </div>
+
+                  {/* Badges skeleton */}
+                  <div className="flex flex-wrap items-center gap-3 mt-6">
+                    <div className="h-8 w-32 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div className="h-8 w-32 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div className="h-8 w-32 bg-gray-200 rounded-lg animate-pulse"></div>
+                  </div>
+
+                  {/* Stats skeleton */}
+                  <div className="flex flex-wrap items-center gap-6 mt-6">
+                    <div className="h-6 w-40 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-6 w-40 bg-gray-200 rounded animate-pulse"></div>
+                  </div>
+
+                  {/* Mobile CTA skeleton */}
+                  <div className="flex flex-wrap items-center gap-4 lg:hidden mt-6">
+                    <div className="flex-1 h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                    <div className="h-12 w-16 bg-gray-200 rounded-lg animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Image skeleton */}
+                <div className="lg:col-span-1">
+                  <div className="relative rounded-xl overflow-hidden shadow-lg border border-gray-200 aspect-video bg-gray-200 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Skeleton */}
+          <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Left Column Skeleton */}
+              <div className="lg:col-span-2 space-y-8">
+                {/* Curriculum skeleton */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="h-8 bg-gray-200 rounded animate-pulse mb-6 w-40"></div>
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div key={i} className="h-12 bg-gray-200 rounded animate-pulse"></div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Description skeleton */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="h-8 bg-gray-200 rounded animate-pulse mb-4 w-48"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-4/5"></div>
+                  </div>
+                </div>
+
+                {/* Instructor skeleton */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <div className="h-8 bg-gray-200 rounded animate-pulse mb-6 w-40"></div>
+                  <div className="flex items-start gap-6">
+                    <div className="w-20 h-20 rounded-full bg-gray-200 animate-pulse flex-shrink-0"></div>
+                    <div className="flex-1 space-y-3">
+                      <div className="h-6 bg-gray-200 rounded animate-pulse w-40"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-32"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-10 w-32 bg-gray-200 rounded-lg animate-pulse mt-4"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Sidebar Skeleton */}
+              <div className="lg:col-span-1 hidden lg:block">
+                <div className="sticky top-24 space-y-6">
+                  {/* Price card skeleton */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="h-10 bg-gray-200 rounded animate-pulse mb-6 w-24"></div>
+                    <div className="space-y-3">
+                      <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                      <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                      <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                    </div>
+                  </div>
+
+                  {/* What's Included skeleton */}
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div className="h-8 bg-gray-200 rounded animate-pulse mb-4 w-40"></div>
+                    <div className="space-y-3">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div key={i} className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       </>
     );
   }
 
-  // Course data
+  const handleToggleFavorite = () => {
+    if (isFavoriteCourse) {
+      removeFromFavorites(course.id);
+      setIsFavoriteCourse(false);
+    } else {
+      addToFavorites(course.id);
+      setIsFavoriteCourse(true);
+    }
+  };
+
+  // Map backend level ID to level name
+  const getLevelName = (levelId) => {
+    const levels = { 1: "Beginner", 2: "Intermediate", 3: "Advanced" };
+    return levels[levelId] || "Beginner";
+  };
+
+  // Map backend category ID to category name
+  const getCategoryName = (categoryId) => {
+    const categories = {
+      13: "Strength Training",
+      1: "Bodybuilding",
+      2: "Cardio",
+      3: "Flexibility & Mobility",
+      5: "Nutrition",
+    };
+    return categories[categoryId] || "Fitness";
+  };
+
+  // Course data - mixed from backend and dummy data
   const courseData = {
+    // Backend data
+    title: course.title,
+    description: course.description,
+    price: parseFloat(course.price) || 49.99,
+    cover: course.cover,
+    language: course.language || "EN",
+    category: getCategoryName(course.category),
+    level: getLevelName(course.level),
+    status: course.status,
+    createdAt: course.created_at,
+    updatedAt: course.updated_at,
+    trainerProfileId: course.trainer_profile,
+    totalLessons: course.lessons?.length || 0,
+
+    // Dummy data (until backend is ready)
     rating: 4.8,
     reviewsCount: 1247,
     enrolledCount: 5832,
-    price: course.price || 49.99,
     instructor: (() => {
       const savedProfile = JSON.parse(localStorage.getItem("trainerProfile"));
       return {
@@ -97,14 +279,12 @@ const CourseDetails = () => {
         title: savedProfile?.job || "Certified Fitness Trainer",
         bio: savedProfile?.bio || "Passionate about helping people achieve their fitness goals through proper strength training and nutrition guidance.",
         avatar: savedProfile?.avatar || "https://i.pravatar.cc/150?img=3",
-        totalCourses: 12, // This could be dynamic based on courses length
+        totalCourses: 12,
         totalTrainees: 25000,
       };
     })(),
     lastUpdated: "December 2024",
-    language: course.language || "English",
     totalVideoHours: 12,
-    totalLessons: course.lessons?.reduce((acc, l) => acc + (l.sections?.length || 0), 0) || 0,
     whatYouLearn: [
       "Master the fundamentals of strength training",
       "Create personalized workout routines",
@@ -115,7 +295,7 @@ const CourseDetails = () => {
     ],
     includes: [
       { icon: Video, text: `${12} hours of on-demand video` },
-      { icon: FileText, text: `${course.lessons?.reduce((acc, l) => acc + (l.sections?.length || 0), 0) || 0} lessons` },
+      { icon: FileText, text: `${course.lessons?.length || 0} lessons` },
       { icon: Download, text: "Downloadable resources" },
       { icon: Award, text: "Certificate of completion" },
     ],
@@ -179,19 +359,19 @@ const CourseDetails = () => {
   const handleBuyNow = () => {
     // Check if user is logged in
     const user = JSON.parse(localStorage.getItem("user"));
-    
+
     if (!user) {
       // Store intended purchase for after login
       sessionStorage.setItem('intendedPurchase', JSON.stringify({
         courseId: course.id,
         returnUrl: `/courses/${course.id}`
       }));
-      
+
       // Redirect to login
       navigate('/login');
       return;
     }
-    
+
     // Navigate to checkout with course data
     navigate('/checkout', {
       state: {
@@ -219,21 +399,21 @@ const CourseDetails = () => {
             {/* Left Content */}
             <div className="lg:col-span-2">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 bebas-regular mb-3">
-                {course.title}
+                {courseData.title}
               </h1>
 
               <p className="text-lg text-gray-600 poppins-regular mb-6">
-                {course.description || "Master the fundamentals and transform your approach to fitness"}
+                {courseData.description || "Master the fundamentals and transform your approach to fitness"}
               </p>
 
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-3 mb-4">
                 <span className="px-3 py-1 bg-[#FF8211]/10 text-[#FF8211] rounded-lg text-sm font-medium poppins-regular">
-                  {course.category || "Fitness"}
+                  {courseData.category}
                 </span>
                 <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium poppins-regular flex items-center gap-1">
                   <Award className="w-4 h-4" />
-                  {course.level || "Beginner"}
+                  {courseData.level}
                 </span>
                 <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium poppins-regular flex items-center gap-1">
                   <Globe className="w-4 h-4" />
@@ -282,8 +462,8 @@ const CourseDetails = () => {
             <div className="lg:col-span-1">
               <div className="relative rounded-xl overflow-hidden shadow-lg border border-gray-200">
                 <img
-                  src={course.img || "https://via.placeholder.com/400x225"}
-                  alt={course.title}
+                  src={courseData.cover}
+                  alt={courseData.title}
                   className="w-full aspect-video object-cover"
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -346,7 +526,7 @@ const CourseDetails = () => {
                             <ChevronRight className="w-4 h-4 text-gray-600" />
                           )}
                           <span className="font-semibold text-gray-900 text-sm poppins-medium text-left">
-                            {lesson.title}
+                            {lesson.title || `Lesson ${lessonIndex + 1}`}
                           </span>
                         </div>
                         <span className="text-xs text-gray-500 poppins-regular">
@@ -385,7 +565,7 @@ const CourseDetails = () => {
                   ))
                 ) : (
                   <p className="text-sm text-gray-500 poppins-regular text-center py-8">
-                    No curriculum available
+                    No curriculum available yet
                   </p>
                 )}
               </div>
@@ -398,9 +578,8 @@ const CourseDetails = () => {
               </h2>
               <div className="space-y-4">
                 <p className="text-gray-700 poppins-regular leading-relaxed">
-                  {course.description || "Transform your fitness journey with this comprehensive strength training course designed for all levels."}
+                  {courseData.description || "Transform your fitness journey with this comprehensive strength training course designed for all levels."}
                 </p>
-
               </div>
             </div>
 
@@ -409,40 +588,68 @@ const CourseDetails = () => {
               <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
                 Your Trainer
               </h2>
-              <div className="flex items-start gap-6 mb-6">
-                <img
-                  src={courseData.instructor.avatar}
-                  alt={courseData.instructor.name}
-                  className="w-20 h-20 rounded-full border-2 border-[#FF8211] flex-shrink-0"
-                />
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 poppins-medium mb-1">
-                    {courseData.instructor.name}
-                  </h3>
-                  <p className="text-gray-600 poppins-regular text-sm mb-4">
-                    {courseData.instructor.title}
-                  </p>
-                  <div className="flex flex-wrap gap-6 text-sm text-gray-600 poppins-regular mb-4">
-                    <div className="flex items-center gap-2">
-                      <PlayCircle className="w-4 h-4 text-[#FF8211]" />
-                      <span>{courseData.instructor.totalCourses} Courses</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-[#FF8211]" />
-                      <span>{courseData.instructor.totalTrainees.toLocaleString()} Trainees</span>
-                    </div>
+              {trainer ? (
+                <div className="flex items-start gap-6 mb-6">
+                  <div className="w-20 h-20 rounded-full border-2 border-[#FF8211] flex-shrink-0 overflow-hidden bg-[#FF8211]/20 flex items-center justify-center">
+                    {trainer.profile_picture ? (
+                      <img
+                        src={trainer.profile_picture}
+                        alt={trainer.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-2xl font-bold text-[#FF8211]">
+                        {trainer.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .toUpperCase()}
+                      </span>
+                    )}
                   </div>
-                  <p className="text-gray-700 poppins-regular text-sm leading-relaxed mb-4">
-                    {courseData.instructor.bio}
-                  </p>
-                  <Link 
-                    to="/trainer-profile"
-                    className="px-4 py-2 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-medium poppins-regular text-sm hover:bg-[#FF8211]/10 transition-colors inline-block"
-                  >
-                    View Trainer Profile
-                  </Link>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 poppins-medium mb-1">
+                      {trainer.name}
+                    </h3>
+                    <p className="text-gray-600 poppins-regular text-sm mb-4">
+                      {trainer.gender ? trainer.gender.charAt(0).toUpperCase() + trainer.gender.slice(1) : ""} • {trainer.country || "Location not specified"}
+                    </p>
+                    <div className="flex flex-wrap gap-6 text-sm text-gray-600 poppins-regular mb-4">
+                      {trainer.phone_number && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#FF8211]">📞</span>
+                          <span>{trainer.phone_number}</span>
+                        </div>
+                      )}
+                      {trainer.birthdate && (
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#FF8211]">📅</span>
+                          <span>{new Date(trainer.birthdate).toLocaleDateString()}</span>
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-gray-700 poppins-regular text-sm leading-relaxed mb-4">
+                      Professional trainer dedicated to helping you achieve your fitness goals.
+                    </p>
+                    <Link
+                      to={`/trainer-profile/${course.trainer_profile}`}
+                      className="px-4 py-2 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-medium poppins-regular text-sm hover:bg-[#FF8211]/10 transition-colors inline-block"
+                    >
+                      View Trainer Profile
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className="flex items-start gap-6 mb-6 animate-pulse">
+                  <div className="w-20 h-20 rounded-full bg-gray-300 flex-shrink-0" />
+                  <div className="flex-1">
+                    <div className="h-6 bg-gray-300 rounded w-1/3 mb-3" />
+                    <div className="h-4 bg-gray-200 rounded w-1/4 mb-4" />
+                    <div className="h-4 bg-gray-200 rounded w-full mb-3" />
+                    <div className="h-10 bg-gray-200 rounded w-40" />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Client Reviews */}
@@ -510,13 +717,12 @@ const CourseDetails = () => {
                       Buy Now
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={handleToggleFavorite}
-                    className={`w-full px-6 py-3 border-2 rounded-lg font-semibold bebas-regular text-lg transition-colors flex items-center justify-center gap-2 ${
-                      isFavoriteCourse 
-                        ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]" 
-                        : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
-                    }`}
+                    className={`w-full px-6 py-3 border-2 rounded-lg font-semibold bebas-regular text-lg transition-colors flex items-center justify-center gap-2 ${isFavoriteCourse
+                      ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]"
+                      : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
+                      }`}
                   >
                     <Heart className={`w-5 h-5 ${isFavoriteCourse ? "fill-white" : ""}`} />
                     {isFavoriteCourse ? "Remove from Wishlist" : "Add to Wishlist"}
@@ -557,13 +763,12 @@ const CourseDetails = () => {
               ${courseData.price}
             </span>
           </div>
-          <button 
+          <button
             onClick={handleToggleFavorite}
-            className={`p-3 border-2 rounded-lg transition-colors ${
-              isFavoriteCourse 
-                ? "bg-[#FF8211] border-[#FF8211] text-white" 
-                : "border-[#FF8211] text-[#FF8211] bg-white"
-            }`}
+            className={`p-3 border-2 rounded-lg transition-colors ${isFavoriteCourse
+              ? "bg-[#FF8211] border-[#FF8211] text-white"
+              : "border-[#FF8211] text-[#FF8211] bg-white"
+              }`}
           >
             <Heart className={`w-6 h-6 ${isFavoriteCourse ? "fill-white" : ""}`} />
           </button>

@@ -1,35 +1,13 @@
 import { Check, Clock, Dumbbell } from "lucide-react";
 import traineesImg2 from "../../assets/333333333333333333.jpg";
-import { useEffect, useRef, useState } from "react";
+import { useScrollAnimation } from "../../hooks/useScrollAnimation";
 
 function ForTrainers() {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, []);
+  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.15 });
 
   return (
-    <section ref={sectionRef} className="w-full bg-background py-20">
-      <div className="mx-auto flex w-[80%]  flex-col overflow-hidden rounded-[32px] border border-border bg-card shadow-sm lg:flex-row">
+    <section ref={sectionRef} className="w-full bg-gradient-to-r from-purple-50/40 via-background to-pink-50/40 py-20">
+      <div className="mx-auto flex w-[80%]  flex-col overflow-hidden rounded-[32px] border-2 border-purple-200 bg-gradient-to-br from-white via-purple-50/20 to-white shadow-lg lg:flex-row">
         <div
           className={`relative h-80 w-full flex-1 transition-all duration-700 delay-300 ease-out lg:order-1 lg:h-auto ${
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"

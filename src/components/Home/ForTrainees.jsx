@@ -1,35 +1,13 @@
 import { Check, Clock, Dumbbell } from "lucide-react";
 import traineesImg from "../../assets/trainees.jpg";
-import { useEffect, useRef, useState } from "react";
+import { useScrollAnimation } from "../../hooks/useScrollAnimation";
 
 function ForTrainees() {
-  const [isVisible, setIsVisible] = useState(false);
-  const sectionRef = useRef(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => {
-      if (sectionRef.current) {
-        observer.unobserve(sectionRef.current);
-      }
-    };
-  }, []);
+  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.15 });
 
   return (
-    <section ref={sectionRef} className="w-full bg-background py-20">
-      <div className="mx-auto flex w-[80%] flex-col overflow-hidden rounded-[32px] border border-border bg-card shadow-sm lg:flex-row">
+    <section ref={sectionRef} className="w-full bg-gradient-to-r from-blue-50/40 via-background to-cyan-50/40 py-20">
+      <div className="mx-auto flex w-[80%] flex-col overflow-hidden rounded-[32px] border-2 border-cyan-200 bg-gradient-to-br from-white via-blue-50/20 to-white shadow-lg lg:flex-row">
         <div
           className={`flex flex-1 flex-col justify-center gap-10 px-6 py-12 transition-all duration-700 ease-out sm:px-10 lg:px-12 ${
             isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"

@@ -18,6 +18,13 @@ import {
   Video,
   File,
   Image as ImageIcon,
+  Sparkles,
+  Loader2,
+  Facebook,
+  Twitter,
+  Linkedin,
+  Link as LinkIcon,
+  X,
 } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
@@ -26,25 +33,6 @@ import { isUserEnrolled } from "../BuyNow/Checkout";
 import axios from "axios";
 import { get, set } from "react-hook-form";
 
-/*
-
-{
-    "id": 17,
-    "title": "Alsayed Course",
-    "price": "250.00",
-    "cover": "https://img.freepik.com/free-photo/wellness-health-lifestyle-workout-graphic-word_53876-13881.jpg?semt=ais_hybrid&w=740&q=80",
-    "status": "published",
-    "created_at": "2025-12-06T22:05:10.025300Z",
-    "updated_at": "2025-12-06T22:05:10.025320Z",
-    "description": "jjjjjajja",
-    "preview_video": "https://img.freepik.com/free-photo/wellness-health-lifestyle-workout-graphic-word_53876-13881.jpg?semt=ais_hybrid&w=740&q=80",
-    "trainer_profile": 59,
-    "category": 13,
-    "level": 1,
-    "language": "EN",
-    "lessons": []
-}
-*/
 
 const CourseDetails = () => {
   const { id } = useParams();
@@ -57,6 +45,9 @@ const CourseDetails = () => {
   const [showLockModal, setShowLockModal] = useState(false);
   const [isPurchased, setIsPurchased] = useState(false);
   const [isFavoriteCourse, setIsFavoriteCourse] = useState(false);
+  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const getCourseById = async (id) => {
     const token = localStorage.getItem('access');
@@ -96,7 +87,10 @@ const CourseDetails = () => {
     if (course?.trainer_profile) {
       getTrainerById(course.trainer_profile);
     }
-  }, [course?.trainer_profile]);
+    if (course) {
+      setIsFavoriteCourse(course.enrollment === "wishlist");
+    }
+  }, [course?.trainer_profile, course]);
 
   if (!course) {
     return (
@@ -224,15 +218,59 @@ const CourseDetails = () => {
     );
   }
 
-  const handleToggleFavorite = () => {
-    if (isFavoriteCourse) {
-      removeFromFavorites(course.id);
-      setIsFavoriteCourse(false);
-    } else {
-      addToFavorites(course.id);
-      setIsFavoriteCourse(true);
+  const handleToggleFavorite = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = localStorage.getItem('access');
+
+    if (!user || !token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setIsWishlistLoading(true);
+      await axios.post(
+        `http://localhost:8000/api/courses/enrollments/${course.id}/add-to-wishlist/`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // Update local state based on successful toggle (assuming backend toggles)
+      // Since we don't get the new state back explicitly in the prompt description, we toggle locally
+      // Ideally backend returns { status: 'added' | 'removed' } or similar
+      setIsFavoriteCourse(prev => !prev);
+
+      // Update local storage if using it as backup/cache
+      if (!isFavoriteCourse) {
+        addToFavorites(course.id);
+      } else {
+        removeFromFavorites(course.id);
+      }
+
+    } catch (error) {
+      console.error("Failed to update wishlist:", error);
+    } finally {
+      setIsWishlistLoading(false);
     }
   };
+
+  const handleShare = () => {
+    setShowShareModal(true);
+  };
+
+  const handleCopyLink = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareUrl = window.location.href;
+  const shareText = `Check out this course: ${course?.title}`;
 
   // Map backend level ID to level name
   const getLevelName = (levelId) => {
@@ -267,23 +305,14 @@ const CourseDetails = () => {
     updatedAt: course.updated_at,
     trainerProfileId: course.trainer_profile,
     totalLessons: course.lessons?.length || 0,
+    enrolledCount: course.students_enrolled,
+    rating: course.ratings.average_rating,
+    totalRatings: course.ratings.total_ratings,
+    reviewsCount: course.ratings.total_ratings,
+    lastUpdated: course.updated_at,
+    enrollment: course.enrollment,
 
-    // Dummy data (until backend is ready)
-    rating: 4.8,
-    reviewsCount: 1247,
-    enrolledCount: 5832,
-    instructor: (() => {
-      const savedProfile = JSON.parse(localStorage.getItem("trainerProfile"));
-      return {
-        name: savedProfile?.name || "Mahmoud Gado",
-        title: savedProfile?.job || "Certified Fitness Trainer",
-        bio: savedProfile?.bio || "Passionate about helping people achieve their fitness goals through proper strength training and nutrition guidance.",
-        avatar: savedProfile?.avatar || "https://i.pravatar.cc/150?img=3",
-        totalCourses: 12,
-        totalTrainees: 25000,
-      };
-    })(),
-    lastUpdated: "December 2024",
+
     totalVideoHours: 12,
     whatYouLearn: [
       "Master the fundamentals of strength training",
@@ -424,17 +453,33 @@ const CourseDetails = () => {
               {/* Stats */}
               <div className="flex flex-wrap items-center gap-6 mb-6">
                 <div className="flex items-center gap-1">
-                  <div className="flex text-[#FF8211]">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-current" strokeWidth={0} />
-                    ))}
-                  </div>
-                  <span className="text-sm font-semibold text-gray-900 ml-2 poppins-regular">
-                    {courseData.rating}
-                  </span>
-                  <span className="text-sm text-gray-600 poppins-regular">
-                    ({courseData.reviewsCount.toLocaleString()} reviews)
-                  </span>
+                  {courseData.rating ? (
+                    <>
+                      <div className="flex text-[#FF8211]">
+                        {[...Array(5)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-5 h-5 ${i < Math.round(courseData.rating)
+                              ? "fill-current"
+                              : "text-gray-300 fill-gray-200"
+                              }`}
+                            strokeWidth={0}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-semibold text-gray-900 ml-2 poppins-regular">
+                        {Number(courseData.rating).toFixed(1)}
+                      </span>
+                      <span className="text-sm text-gray-600 poppins-regular">
+                        ({courseData.reviewsCount.toLocaleString()} reviews)
+                      </span>
+                    </>
+                  ) : (
+                    <div className="inline-flex items-center gap-1 rounded-full bg-blue-600/90 px-2.5 py-1 text-xs font-bold shadow-sm text-white tracking-wide">
+                      <Sparkles className="h-3.5 w-3.5 fill-white text-white" />
+                      <span>NEW</span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 text-gray-600 poppins-regular">
                   <Users className="w-5 h-5" />
@@ -629,7 +674,7 @@ const CourseDetails = () => {
                       )}
                     </div>
                     <p className="text-gray-700 poppins-regular text-sm leading-relaxed mb-4">
-                      Professional trainer dedicated to helping you achieve your fitness goals.
+                      {trainer.bio || "No bio available"}
                     </p>
                     <Link
                       to={`/trainer-profile/${course.trainer_profile}`}
@@ -714,20 +759,28 @@ const CourseDetails = () => {
                       onClick={handleBuyNow}
                       className="w-full px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-sm"
                     >
-                      Buy Now
+                      Enroll Now
                     </button>
                   )}
                   <button
                     onClick={handleToggleFavorite}
+                    disabled={isWishlistLoading}
                     className={`w-full px-6 py-3 border-2 rounded-lg font-semibold bebas-regular text-lg transition-colors flex items-center justify-center gap-2 ${isFavoriteCourse
                       ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]"
                       : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
-                      }`}
+                      } ${isWishlistLoading ? "opacity-70 cursor-not-allowed" : ""}`}
                   >
-                    <Heart className={`w-5 h-5 ${isFavoriteCourse ? "fill-white" : ""}`} />
+                    {isWishlistLoading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Heart className={`w-5 h-5 ${isFavoriteCourse ? "fill-white" : ""}`} />
+                    )}
                     {isFavoriteCourse ? "Remove from Wishlist" : "Add to Wishlist"}
                   </button>
-                  <button className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium poppins-regular hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                  <button
+                    onClick={handleShare}
+                    className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium poppins-regular hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  >
                     <Share2 className="w-4 h-4" />
                     Share
                   </button>
@@ -822,6 +875,101 @@ const CourseDetails = () => {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowShareModal(false)}>
+          <div className="bg-white rounded-xl max-w-sm w-full p-6" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-900 bebas-regular">
+                Share this course
+              </h3>
+              <button onClick={() => setShowShareModal(false)} className="text-gray-500 hover:text-gray-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-gray-600 poppins-regular mb-6">
+              Share this course with your friends and colleagues.
+            </p>
+
+            <div className="flex justify-center gap-6 mb-8">
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-2 group"
+              >
+                <div className="w-12 h-12 rounded-full bg-blue-600/10 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                  <Facebook className="w-5 h-5 text-blue-600 group-hover:text-white" />
+                </div>
+                <span className="text-xs text-gray-600 poppins-regular">Facebook</span>
+              </a>
+
+              <a
+                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-2 group"
+              >
+                <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center group-hover:bg-sky-500 transition-colors">
+                  <Twitter className="w-5 h-5 text-sky-500 group-hover:text-white" />
+                </div>
+                <span className="text-xs text-gray-600 poppins-regular">Twitter</span>
+              </a>
+
+              <a
+                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-2 group"
+              >
+                <div className="w-12 h-12 rounded-full bg-blue-700/10 flex items-center justify-center group-hover:bg-blue-700 transition-colors">
+                  <Linkedin className="w-5 h-5 text-blue-700 group-hover:text-white" />
+                </div>
+                <span className="text-xs text-gray-600 poppins-regular">LinkedIn</span>
+              </a>
+
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-2 group"
+              >
+                <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center group-hover:bg-green-500 transition-colors">
+                  <div className="w-5 h-5 flex items-center justify-center text-green-500 group-hover:text-white font-bold text-xs" >WA</div>
+                </div>
+                <span className="text-xs text-gray-600 poppins-regular">WhatsApp</span>
+              </a>
+            </div>
+
+            <div className="relative">
+              <input
+                type="text"
+                readOnly
+                value={shareUrl}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 poppins-regular pr-24"
+              />
+              <button
+                onClick={handleCopyLink}
+                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#FF8211] text-white rounded-md text-xs font-semibold hover:bg-[#ff7906] transition-colors flex items-center gap-1"
+              >
+                {copied ? (
+                  <>
+                    <CheckCircle2 className="w-3 h-3" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <LinkIcon className="w-3 h-3" />
+                    Copy
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

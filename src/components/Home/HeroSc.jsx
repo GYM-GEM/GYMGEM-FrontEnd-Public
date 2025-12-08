@@ -4,17 +4,18 @@ import { useEffect, useRef, useState } from "react";
 
 function HeroSc() {
   const navigate = useNavigate();
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const sectionRef = useRef(null);
 
   useEffect(() => {
+    // Hero is visible on page load
     setIsVisible(true);
   }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="relative isolate flex min-h-[70vh] items-center justify-center overflow-hidden bg-background text-foreground w-full"
+      className="relative isolate flex min-h-[70vh] items-center justify-center overflow-hidden bg-gradient-to-br from-background via-orange-50/30 to-background text-foreground w-full"
     >
       <div className="w-[80%] mx-auto">
         <div className="absolute inset-0">
@@ -26,7 +27,7 @@ function HeroSc() {
           >
             <source src={Hero1} type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-br from-background via-background/80 to-background/60" />
+          <div className="absolute inset-0 bg-gradient-to-br from-background/70 via-orange-900/20 to-background/70" />
         </div>
 
         <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center gap-8 px-4 py-20 text-center sm:px-6">
@@ -60,13 +61,13 @@ function HeroSc() {
           >
             <button
               onClick={() => navigate("/Trainers")}
-              className="inline-flex h-12 min-w-[180px] items-center bg-[#ff8211] text-white justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-300 hover:scale-105 hover:bg-accent hover:text-accent-foreground hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background group relative"
+              className="inline-flex h-12 min-w-[180px] items-center bg-gradient-to-r from-[#ff8211] to-orange-600 text-white justify-center rounded-xl px-6 text-sm font-semibold shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-2xl hover:from-orange-600 hover:to-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background group relative"
             >
               Find a trainer
             </button>
             <button
               onClick={() => navigate("/signup")}
-              className="inline-flex h-12 min-w-[180px]  items-center justify-center bg-white rounded-xl border border-border bg-background/80 px-6 text-sm font-semibold text-foreground shadow-sm transition-all duration-300 hover:scale-105 hover:bg-muted hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="inline-flex h-12 min-w-[180px] items-center justify-center bg-gradient-to-r from-white to-gray-100 rounded-xl border-2 border-[#ff8211] px-6 text-sm font-semibold text-[#ff8211] shadow-md transition-all duration-300 hover:scale-110 hover:from-orange-50 hover:to-orange-100 hover:shadow-lg hover:text-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Join as a trainer
             </button>

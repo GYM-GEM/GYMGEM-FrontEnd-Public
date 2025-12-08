@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import Cover_img from "../../assets/fitCartoon3.png";
 import axios from "axios";
 import GoogleLogin from "../../components/GoogleLogin.jsx";
+import { Loader2 } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
 
 function isValidEmail(email) {
@@ -19,6 +20,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     // Google sign-in handled by `GoogleLogin` component.
@@ -27,7 +29,8 @@ const LoginPage = () => {
   // Google sign-in is handled by `GoogleLogin` component which posts the id_token.
   const onSubmit = async (e) => {
     e.preventDefault();
-
+    setIsLoading(true);
+    
     try {
       const IsEmail = isValidEmail(emailOrUsername);
       const payload = { password };
@@ -54,6 +57,8 @@ const LoginPage = () => {
     } catch (error) {
       console.error("Error during login:", error);
       showToast("Login failed. Please try again.", { type: "error" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -94,7 +99,8 @@ const LoginPage = () => {
                     value={emailOrUsername}
                     onChange={(e) => setEmailOrUsername(e.target.value)}
                     required
-                    className="h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                    disabled={isLoading}
+                    className={`h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                   />
                 </div>
 
@@ -116,12 +122,14 @@ const LoginPage = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                      disabled={isLoading}
+                      className={`h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-3 flex items-center text-muted-foreground transition hover:text-foreground"
+                      disabled={isLoading}
+                      className={`absolute inset-y-0 right-3 flex items-center text-muted-foreground transition ${isLoading ? 'pointer-events-none' : 'hover:text-foreground'}`}
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </button>
@@ -130,9 +138,17 @@ const LoginPage = () => {
 
                 <button
                   type="submit"
-                  className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8211] px-4 text-sm font-semibold text-white transition hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background cursor-pointer"
+                  disabled={isLoading}
+                  className={`inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8211] px-4 text-sm font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-primary/90'}`}
                 >
-                  Sign in
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    'Sign in'
+                  )}
                 </button>
               </form>
 
@@ -153,7 +169,9 @@ const LoginPage = () => {
                   <div className="h-px flex-1 bg-border" />
                 </div>
 
-                <GoogleLogin />
+                <div className={`${isLoading ? 'pointer-events-none opacity-60' : ''}`}>
+                  <GoogleLogin onStart={() => setIsLoading(true)} onComplete={() => setIsLoading(false)} />
+                </div>
               </div>
             </div>
           </div>

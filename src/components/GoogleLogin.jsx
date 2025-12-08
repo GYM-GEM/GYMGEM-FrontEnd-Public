@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useToast } from "../context/ToastContext";
 
-export default function GoogleLogin({ signType }) {
+export default function GoogleLogin({ signType, onStart, onComplete }) {
 	const navigate = useNavigate();
 
 	const { showToast } = useToast();
@@ -28,7 +28,11 @@ export default function GoogleLogin({ signType }) {
 		script.async = true;
 		script.defer = true;
 
+		let attachedButton = null;
+		let clickHandler = null;
+
 		const handleCredentialResponse = async (response) => {
+			if (onStart) onStart();
 			try {
 				const id_token = response.credential;
 				// POST id_token to your custom accounts/google/login/ endpoint (backend should verify)
@@ -40,28 +44,22 @@ export default function GoogleLogin({ signType }) {
 
 				localStorage.setItem("access", res.data.access);
 				localStorage.setItem("refresh", res.data.refresh);
-				console.log(res.data)
 				localStorage.setItem("user", JSON.stringify(res.data.account));
 
-				console.log("Google signup/login response:", res.data);
-
 				if (signType === 'signup') {
-					showToast("Registered Successfully", { type: "success" })
+					showToast("Registered Successfully", { type: "success" });
 					navigate("/role");
-
-
 				} else {
 					showToast("Sign in successful!", { type: "success" });
 					navigate("/");
 				}
-			}
-			catch {
+			} catch (error) {
 				console.error("Error during login:", error);
 				showToast("Login failed. Please try again.", { type: "error" });
-
+			} finally {
+				if (onComplete) onComplete();
 			}
 		};
-
 
 
 		script.onload = () => {
@@ -69,11 +67,9 @@ export default function GoogleLogin({ signType }) {
 
 			if (signType === 'signup') {
 				buttonText = 'signup_with';
-			}
-			else {
+			} else {
 				buttonText = 'signin_with';
 			}
-			console.log(buttonText)
 
 			if (window.google && window.google.accounts && window.google.accounts.id) {
 				window.google.accounts.id.initialize({
@@ -86,6 +82,16 @@ export default function GoogleLogin({ signType }) {
 					{ theme: "outline", size: "large", text: buttonText }
 				);
 
+				// Attach click handler to the generated button to start buffering immediately on user action
+				const container = document.getElementById("google-signup-button");
+				if (container) {
+					attachedButton = container.firstElementChild || container.querySelector('button') || container.querySelector('div');
+					if (attachedButton) {
+						clickHandler = () => { if (onStart) onStart(); };
+						attachedButton.addEventListener('click', clickHandler);
+					}
+				}
+
 				// optional: show One Tap
 				// window.google.accounts.id.prompt();
 			}
@@ -95,13 +101,16 @@ export default function GoogleLogin({ signType }) {
 
 		return () => {
 			document.body.removeChild(script);
+			if (attachedButton && clickHandler) {
+				try { attachedButton.removeEventListener('click', clickHandler); } catch (e) { }
+			}
 			if (window.google && window.google.accounts && window.google.accounts.id) {
 				try {
 					window.google.accounts.id.cancel();
 				} catch (e) { }
 			}
 		};
-	}, [navigate, clientId]);
+	}, [navigate, clientId, onStart, onComplete, signType]);
 
 	return (
 		<div>

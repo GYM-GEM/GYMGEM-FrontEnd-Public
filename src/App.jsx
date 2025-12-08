@@ -88,7 +88,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="requestdetails" element={<RequestDetails />} />
       
-         
+        
           <Route path="community" element={<Community />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
           <Route path="/trainer-profile/:id" element={<PublicTrainerProfile />} />

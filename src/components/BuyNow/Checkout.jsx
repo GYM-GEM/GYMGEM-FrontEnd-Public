@@ -3,6 +3,7 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import { CreditCard, Lock, ShieldCheck, ArrowLeft } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
+import axios from "axios";
 
 // ============================================================================
 // ORDER MANAGEMENT LOGIC
@@ -33,14 +34,16 @@ const getAllOrders = () => {
   }
 };
 
-/**
- * Get all enrolled courses
- * @returns {Array} Array of enrollments
- */
+
 const getEnrolledCourses = () => {
+  const token = localStorage.getItem("access");
   try {
-    const enrollments = localStorage.getItem(ENROLLED_COURSES_KEY);
-    return enrollments ? JSON.parse(enrollments) : [];
+    const response = axios.get("http://127.0.0.1:8000/api/courses/enrollments/my-enrollments", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    return response.data;
   } catch (error) {
     console.error('Error reading enrollments:', error);
     return [];
@@ -296,7 +299,25 @@ const Checkout = () => {
       });
 
       if (paymentResult.success) {
-        //  Create order
+        // Enroll user in course via API
+        const token = localStorage.getItem("access");
+        try {
+          const enrollmentResponse = await axios.post(
+            `http://127.0.0.1:8000/api/courses/enrollments/${course.id}/enroll/`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+          console.log("Enrollment successful:", enrollmentResponse.data);
+        } catch (enrollError) {
+          console.error("Enrollment API error:", enrollError);
+          // Continue anyway with local enrollment
+        }
+
+        // Create order locally
         const order = createOrder(user.id, course, {
           method: paymentMethod,
           transactionId: paymentResult.transactionId
@@ -513,6 +534,7 @@ const Checkout = () => {
                   <button
                     type="submit"
                     disabled={isProcessing}
+                    onClick={handleSubmit}
                     className="w-full px-6 py-4 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isProcessing ? (

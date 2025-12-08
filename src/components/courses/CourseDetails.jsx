@@ -290,6 +290,9 @@ const CourseDetails = () => {
     return categories[categoryId] || "Fitness";
   };
 
+  // Check if user is enrolled in the course
+  const isEnrolled = course?.enrollment === "in_progress";
+
   // Course data - mixed from backend and dummy data
   const courseData = {
     // Backend data
@@ -328,29 +331,7 @@ const CourseDetails = () => {
       { icon: Download, text: "Downloadable resources" },
       { icon: Award, text: "Certificate of completion" },
     ],
-    reviews: [
-      {
-        name: "Michael Turner",
-        avatar: "MT",
-        rating: 5,
-        date: "2 weeks ago",
-        comment: "Excellent course! The techniques are easy to follow and very effective. I've seen great results in just a few weeks.",
-      },
-      {
-        name: "Emma Rodriguez",
-        avatar: "ER",
-        rating: 5,
-        date: "1 month ago",
-        comment: "This transformed my approach to fitness. The trainer is knowledgeable and explains everything clearly.",
-      },
-      {
-        name: "David Chen",
-        avatar: "DC",
-        rating: 4,
-        date: "1 month ago",
-        comment: "Great content and clear instruction. The workout plans are practical and effective.",
-      },
-    ],
+    reviews: course.reviews
   };
 
   const toggleSection = (index) => {
@@ -491,12 +472,21 @@ const CourseDetails = () => {
 
               {/* CTA Buttons (Mobile) */}
               <div className="flex flex-wrap items-center gap-4 lg:hidden mb-6">
-                <button
-                  onClick={handleBuyNow}
-                  className="flex-1 px-8 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-sm"
-                >
-                  Buy Now - ${courseData.price}
-                </button>
+                {isEnrolled ? (
+                  <button
+                    disabled
+                    className="flex-1 px-8 py-3 bg-gray-400 text-white rounded-lg font-semibold bebas-regular text-lg cursor-not-allowed shadow-sm"
+                  >
+                    Already Enrolled
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleBuyNow}
+                    className="flex-1 px-8 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-sm"
+                  >
+                    Buy Now - ${courseData.price}
+                  </button>
+                )}
                 <button className="px-6 py-3 border-2 border-[#FF8211] text-[#FF8211] rounded-lg hover:bg-[#FF8211]/10 transition-colors flex items-center gap-2">
                   <Heart className="w-5 h-5" />
                 </button>
@@ -511,14 +501,16 @@ const CourseDetails = () => {
                   alt={courseData.title}
                   className="w-full aspect-video object-cover"
                 />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <div className="text-center">
-                    <Lock className="w-16 h-16 text-white mx-auto mb-3 opacity-90" />
-                    <p className="text-white poppins-medium text-sm px-4">
-                      🔒 You must enroll before accessing this course
-                    </p>
+                {!isEnrolled && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                    <div className="text-center">
+                      <Lock className="w-16 h-16 text-white mx-auto mb-3 opacity-90" />
+                      <p className="text-white poppins-medium text-sm px-4">
+                        🔒 You must enroll before accessing this course
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
@@ -557,8 +549,8 @@ const CourseDetails = () => {
               </div>
 
               <div className="space-y-2">
-                {course.lessons && course.lessons.length > 0 ? (
-                  course.lessons.map((lesson, lessonIndex) => (
+                {course.lessons_details && course.lessons_details.length > 0 ? (
+                  course.lessons_details.map((lesson, lessonIndex) => (
                     <div key={lessonIndex} className="border border-gray-200 rounded-lg overflow-hidden">
                       <button
                         onClick={() => toggleSection(lessonIndex)}
@@ -585,18 +577,22 @@ const CourseDetails = () => {
                             lesson.sections.map((section) => (
                               <button
                                 key={section.id}
-                                onClick={handleLockedLessonClick}
-                                className="w-full px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors flex items-center justify-between group"
+                                onClick={isEnrolled ? null : handleLockedLessonClick}
+                                className={`w-full px-4 py-3 border-t border-gray-100 transition-colors flex items-center justify-between group ${
+                                  isEnrolled ? "cursor-default" : "hover:bg-gray-50 cursor-pointer"
+                                }`}
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className="text-gray-400">
-                                    {getContentIcon(section.contentType)}
+                                  <div className={isEnrolled ? "text-gray-600" : "text-gray-400"}>
+                                    {getContentIcon(section.content_type)}
                                   </div>
-                                  <span className="text-sm text-gray-700 poppins-regular text-left">
+                                  <span className={`text-sm poppins-regular text-left ${
+                                    isEnrolled ? "text-gray-900" : "text-gray-700"
+                                  }`}>
                                     {section.title}
                                   </span>
                                 </div>
-                                <Lock className="w-4 h-4 text-gray-400" />
+                                {!isEnrolled && <Lock className="w-4 h-4 text-gray-400" />}
                               </button>
                             ))
                           ) : (
@@ -746,7 +742,14 @@ const CourseDetails = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {isPurchased ? (
+                  {isEnrolled ? (
+                    <button
+                      disabled
+                      className="w-full px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold bebas-regular text-lg cursor-not-allowed shadow-sm"
+                    >
+                      Already Enrolled
+                    </button>
+                  ) : isPurchased ? (
                     <Link
                       to={`/courses/${course.id}/learn`}
                       className="w-full px-6 py-3 bg-green-600 text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2"
@@ -825,7 +828,14 @@ const CourseDetails = () => {
           >
             <Heart className={`w-6 h-6 ${isFavoriteCourse ? "fill-white" : ""}`} />
           </button>
-          {isPurchased ? (
+          {isEnrolled ? (
+            <button
+              disabled
+              className="flex-1 px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold bebas-regular cursor-not-allowed shadow-sm"
+            >
+              Already Enrolled
+            </button>
+          ) : isPurchased ? (
             <Link
               to={`/courses/${course.id}/learn`}
               className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2"

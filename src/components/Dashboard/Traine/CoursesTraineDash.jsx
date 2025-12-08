@@ -4,21 +4,63 @@ import { Star, Clock, Award, BookOpen, ArrowRight } from "lucide-react";
 import NavTraineDash from "./NavTraineDash";
 import FooterDash from "./../FooterDash";
 import { getUserEnrolledCourses } from "../../BuyNow/Checkout";
+import axios from "axios";
 
 const CoursesTraineDash = () => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Helper function to format duration from minutes to hours
+  const formatDuration = (minutes) => {
+    if (!minutes || minutes === 0) return "--";
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    if (hours > 0 && mins > 0) return `${hours}h ${mins}m`;
+    if (hours > 0) return `${hours}h`;
+    return `${mins}m`;
+  };
+
+  // Helper function to get category name (you might need to adjust based on your categories)
+  const getCategoryName = (categoryId) => {
+    const categories = {
+      1: "Strength",
+      2: "Cardio",
+      3: "Yoga",
+      4: "Nutrition",
+      // Add more categories as needed
+    };
+    return categories[categoryId] || "Fitness";
+  };
+
+  // Helper function to get level name
+  const getLevelName = (levelId) => {
+    const levels = {
+      1: "Beginner",
+      2: "Intermediate",
+      3: "Advanced",
+    };
+    return levels[levelId] || "Beginner";
+  };
+
+
+  const getEnrolledCourses = async () => {
+  const token = localStorage.getItem("access");
+  try {
+
+    const response = await axios.get("http://127.0.0.1:8000/api/courses/enrollments/my-enrollments", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    setEnrolledCourses(response.data);
+    console.log(enrolledCourses);
+  } catch (error) {
+    console.error('Error reading enrollments:', error);
+  }
+};
   useEffect(() => {
-    // Get current user
-    const user = JSON.parse(localStorage.getItem("user"));
-    
-    if (user) {
-      // Load enrolled courses for this user
-      const courses = getUserEnrolledCourses(user.id);
-      setEnrolledCourses(courses);
-    }
-    
+    getEnrolledCourses();
+    console.log(enrolledCourses);
     setLoading(false);
   }, []);
 
@@ -48,14 +90,14 @@ const CoursesTraineDash = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {enrolledCourses.map((course) => (
                   <div
-                    key={course.id}
+                    key={course.course_details.id}
                     className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-300"
                   >
                     {/* Course Image */}
                     <div className="relative">
                       <img
-                        src={course.img || "https://via.placeholder.com/400x225"}
-                        alt={course.title}
+                        src={course.course_details.cover || "https://via.placeholder.com/400x225"}
+                        alt={course.course_details.title}
                         className="w-full h-48 object-cover"
                       />
                       <div className="absolute top-3 right-3 px-3 py-1 bg-green-600 text-white rounded-lg text-xs font-medium poppins-regular">
@@ -68,22 +110,22 @@ const CoursesTraineDash = () => {
                       {/* Category & Level Badges */}
                       <div className="flex items-center gap-2 mb-3">
                         <span className="px-3 py-1 bg-[#FF8211]/10 text-[#FF8211] rounded-lg text-xs font-medium poppins-regular">
-                          {course.category || "Fitness"}
+                          {getCategoryName(course.course_details.category)}
                         </span>
                         <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium poppins-regular flex items-center gap-1">
                           <Award className="w-3 h-3" />
-                          {course.level || "Beginner"}
+                          {getLevelName(course.course_details.level)}
                         </span>
                       </div>
 
                       {/* Title */}
                       <h3 className="text-xl font-bold text-gray-900 bebas-regular mb-2 line-clamp-2">
-                        {course.title}
+                        {course.course_details.title}
                       </h3>
 
                       {/* Description */}
                       <p className="text-gray-600 poppins-regular text-sm mb-4 line-clamp-2">
-                        {course.description || "Master the fundamentals and transform your approach"}
+                        {course.course_details.description || "Master the fundamentals and transform your approach"}
                       </p>
 
                       {/* Progress Bar */}
@@ -108,17 +150,17 @@ const CoursesTraineDash = () => {
                       <div className="flex items-center gap-4 mb-4 text-sm text-gray-600 poppins-regular">
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
-                          <span>12h</span>
+                          <span>{formatDuration(course.course_details.total_duration)}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <BookOpen className="w-4 h-4" />
-                          <span>{course.lessons?.length || 0} lessons</span>
+                          <span>{course.course_details.lesson_count || 0} lessons</span>
                         </div>
                       </div>
 
                       {/* Action Button */}
                       <Link
-                        to={`/courses/${course.id}/learn`}
+                        to={`/courses/${course.course_details.id}/learn`}
                         className="w-full px-4 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-sm flex items-center justify-center gap-2"
                       >
                         Continue Learning

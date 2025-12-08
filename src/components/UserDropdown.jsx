@@ -18,7 +18,7 @@ import {
   Check
 } from "lucide-react";
 import { getCreatedProfileTypes } from "../utils/auth";
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 
 const UserDropdown = ({
   user,
@@ -42,15 +42,10 @@ const UserDropdown = ({
   const switchProfile = async (profile_id) => {
     setIsLoadingProfileSwitch(true);
     try {
-      const token = localStorage.getItem('access');
-      const response = await axios.post(
-        'http://localhost:8000/api/auth/switch-profile',
-        { profile_id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      // ✅ Using axiosInstance - automatic 401 handling and token refresh!
+      const response = await axiosInstance.post(
+        '/api/auth/switch-profile',
+        { profile_id }
       );
 
       localStorage.setItem('access', response.data.access);
@@ -161,11 +156,10 @@ const UserDropdown = ({
       <button
         onClick={toggleDropdown}
         disabled={isLoadingProfileSwitch}
-        className={`flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium transition-colors ${
-          isLoadingProfileSwitch 
-            ? "opacity-60 cursor-not-allowed" 
-            : "hover:bg-slate-50"
-        } focus:outline-none focus:ring-2 focus:ring-[#ff8211]/20`}
+        className={`flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium transition-colors ${isLoadingProfileSwitch
+          ? "opacity-60 cursor-not-allowed"
+          : "hover:bg-slate-50"
+          } focus:outline-none focus:ring-2 focus:ring-[#ff8211]/20`}
       >
         <FaUserCircle className="text-lg text-[#ff8211]" />
         <span className="max-w-[100px] truncate hidden sm:inline">
@@ -184,9 +178,8 @@ const UserDropdown = ({
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className={`absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg animate-in fade-in zoom-in-95 duration-200 z-50 transition-[height] ease-in-out ${
-            isLoadingProfileSwitch ? "opacity-60 pointer-events-none" : ""
-          }`}
+          className={`absolute right-0 top-full mt-2 w-64 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg animate-in fade-in zoom-in-95 duration-200 z-50 transition-[height] ease-in-out ${isLoadingProfileSwitch ? "opacity-60 pointer-events-none" : ""
+            }`}
           style={{ height: menuHeight ? `${menuHeight}px` : 'auto' }}
         >
 
@@ -265,9 +258,8 @@ const UserDropdown = ({
                 <button
                   onClick={() => setMenuView("main")}
                   disabled={isLoadingProfileSwitch}
-                  className={`p-1 rounded-full text-slate-500 transition-colors ${
-                    isLoadingProfileSwitch ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
-                  }`}
+                  className={`p-1 rounded-full text-slate-500 transition-colors ${isLoadingProfileSwitch ? "cursor-not-allowed opacity-50" : "hover:bg-slate-200"
+                    }`}
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
@@ -318,11 +310,10 @@ const UserDropdown = ({
                 <button
                   onClick={() => handleProfileSwitch("/role")}
                   disabled={isLoadingProfileSwitch}
-                  className={`w-full flex items-center justify-center gap-2 rounded-md bg-[#ff8211] px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors ${
-                    isLoadingProfileSwitch 
-                      ? "opacity-50 cursor-not-allowed" 
-                      : "hover:bg-[#ff7906]"
-                  }`}
+                  className={`w-full flex items-center justify-center gap-2 rounded-md bg-[#ff8211] px-3 py-2 text-sm font-medium text-white shadow-sm transition-colors ${isLoadingProfileSwitch
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-[#ff7906]"
+                    }`}
                 >
                   <UserPlus className="h-4 w-4" />
                   Create Profile

@@ -4,7 +4,7 @@ import { Star, Clock, Award, BookOpen, ArrowRight } from "lucide-react";
 import NavTraineDash from "./NavTraineDash";
 import FooterDash from "./../FooterDash";
 import { getUserEnrolledCourses } from "../../BuyNow/Checkout";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 
 const CoursesTraineDash = () => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
@@ -44,20 +44,15 @@ const CoursesTraineDash = () => {
 
 
   const getEnrolledCourses = async () => {
-  const token = localStorage.getItem("access");
-  try {
-
-    const response = await axios.get("http://127.0.0.1:8000/api/courses/enrollments/my-enrollments", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    setEnrolledCourses(response.data);
-    console.log(enrolledCourses);
-  } catch (error) {
-    console.error('Error reading enrollments:', error);
-  }
-};
+    try {
+      // Using axiosInstance - automatic token refresh!
+      const response = await axiosInstance.get("/api/courses/enrollments/my-enrollments");
+      setEnrolledCourses(response.data);
+      console.log(enrolledCourses);
+    } catch (error) {
+      console.error('Error reading enrollments:', error);
+    }
+  };
   useEffect(() => {
     getEnrolledCourses();
     console.log(enrolledCourses);

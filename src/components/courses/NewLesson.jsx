@@ -3,7 +3,7 @@ import Footer from "../Footer";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosConfig";
 
 const NewLeason = () => {
   const location = useLocation();
@@ -28,15 +28,9 @@ const NewLeason = () => {
         status: lessonData.status,
         order: lessonData.order,
       };
-      const token = localStorage.getItem("access");
+      // ✅ No manual token - axiosInstance handles it!
 
-      const res = await axios.post(`http://127.0.0.1:8000/api/courses/lessons/${course.id}/create/`, payload, 
-        {
-          headers: {
-            Authorization : `Bearer ${token}`
-          }
-        }
-      );
+      const res = await axiosInstance.post(`/api/courses/lessons/${course.id}/create/`, payload);
       console.log(res.data);
       const createdlesson = res.data;
 
@@ -121,7 +115,7 @@ const NewLeason = () => {
                     Lesson Title
                   </label>
                 </div>
-                
+
 
                 <div>
                   <input
@@ -131,7 +125,7 @@ const NewLeason = () => {
                   />
                 </div>
 
-              
+
                 {errors.title && (
                   <p className="text-red-500 text-sm mt-1">
                     This field is required
@@ -140,15 +134,15 @@ const NewLeason = () => {
               </div>
 
 
-                <div className="">
-                  <label className="poppins-medium text-[1rem]">Lesson Order</label>
-                  <input
-                    type="number"
-                    {...register("order", { required: true })}
-                    placeholder="Lesson number"
-                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
-                  />
-                </div>
+              <div className="">
+                <label className="poppins-medium text-[1rem]">Lesson Order</label>
+                <input
+                  type="number"
+                  {...register("order", { required: true })}
+                  placeholder="Lesson number"
+                  className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
+                />
+              </div>
 
               <div>
                 <div>

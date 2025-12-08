@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { useToast } from "../../../context/ToastContext";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 import { useNavigate } from "react-router-dom";
 
 const countries = async () => {
@@ -27,14 +27,11 @@ const Traineeform = () => {
 
   const onSubmit = async (data) => {
     console.log("Trainee Form Data:", data);
-    await axios.post(
-      "http://127.0.0.1:8000/api/trainees/create",
-      { ...data },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("access")}`,
-        },
-      }
+    // ✅ Using axiosInstance - token is automatically added by interceptor!
+    // No need to manually get token or add Authorization header
+    await axiosInstance.post(
+      "/api/trainees/create",
+      { ...data }
     );
     showToast("Trainee form submitted successfully!", { type: "success" });
     navigate(`/traineerecord`);
@@ -109,7 +106,7 @@ const Traineeform = () => {
 
         <div className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-10">
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
-            
+
             <div className="grid gap-4 sm:grid-cols-2">
               {/* Name */}
               <div className="space-y-2">
@@ -262,7 +259,7 @@ const Traineeform = () => {
               type="submit"
               className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-[#ff8211]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
-              Submit & Next 
+              Submit & Next
             </button>
           </form>
         </div>

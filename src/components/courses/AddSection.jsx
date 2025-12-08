@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { useToast } from "../../context/ToastContext";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosConfig";
 
 const AddSection = () => {
   const location = useLocation();
@@ -36,19 +36,12 @@ const AddSection = () => {
       content_url: sectionData.contentUrl || "",
       content_text: sectionData.contentText || "",
       lesson: lesson.id,
-      order : sectionData.order
+      order: sectionData.order
     };
 
-    const token = localStorage.getItem("access");
-
+    // ✅ Using axiosInstance - no manual token needed!
     try {
-      const res = await axios.post(`http://127.0.0.1:8000/api/courses/sections/create/`, payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const res = await axiosInstance.post(`/api/courses/sections/create/`, payload);
       console.log(res.data)
       return res.data;
 
@@ -88,7 +81,7 @@ const AddSection = () => {
 
   const onSubmitAndFinish = async (data) => {
     setIsSubmitting(true);
-    try{
+    try {
       await saveSectionAPI(data);
       showToast("Section created successfully!", { type: "success" });
       navigate("/trainer/courses", { state: { course } });
@@ -168,7 +161,7 @@ const AddSection = () => {
                   )}
                 </div>
 
-                  <div className="">
+                <div className="">
                   <label className="poppins-medium text-[1rem]">Section Order</label>
                   <input
                     type="number"

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
 
 const NavBarDashGym = () => {
@@ -19,13 +19,12 @@ const NavBarDashGym = () => {
   const logout = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('refresh');
-    const access = localStorage.getItem('access');
     try {
-      await axios.post(
-        "http://127.0.0.1:8000/api/auth/logout",
+      await axiosInstance.post(
+        "/api/auth/logout",
         {},
         {
-          headers: { Authorization: `Bearer ${access} `, refresh: token },
+          headers: { refresh: token },
         }
       );
 
@@ -98,17 +97,15 @@ const NavBarDashGym = () => {
               className="flex items-center gap-2 text-lg font-semibold tracking-wide transition hover:opacity-80"
             >
               <FaGem
-                className={`text-[#86ac55] transition-transform duration-500 ${
-                  showFullName ? "scale-110" : "scale-100"
-                }`}
+                className={`text-[#86ac55] transition-transform duration-500 ${showFullName ? "scale-110" : "scale-100"
+                  }`}
               />
               <span className="relative h-6 w-32 overflow-hidden">
                 <span
-                  className={`absolute inset-0 font-bebas text-2xl transition-all text-[#ff8211] duration-500 ${
-                    showGG
+                  className={`absolute inset-0 font-bebas text-2xl transition-all text-[#ff8211] duration-500 ${showGG
                       ? "translate-y-0 opacity-100"
                       : "-translate-y-4 opacity-0"
-                  }`}
+                    }`}
                 >
                   GG
                 </span>
@@ -121,11 +118,10 @@ const NavBarDashGym = () => {
                       <span
                         key={char + index}
                         style={{ transitionDelay: `${delay}s` }}
-                        className={`transition-all duration-300 ${
-                          showFullName
+                        className={`transition-all duration-300 ${showFullName
                             ? "translate-y-0 opacity-100"
                             : "translate-y-4 opacity-0"
-                        }`}
+                          }`}
                       >
                         {char}
                       </span>
@@ -144,8 +140,7 @@ const NavBarDashGym = () => {
                     to={l.to}
                     end
                     className={({ isActive }) =>
-                      `relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${
-                        isActive ? "text-[#ff8211]" : "text-slate-600 hover:text-[#ff8211]"
+                      `relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${isActive ? "text-[#ff8211]" : "text-slate-600 hover:text-[#ff8211]"
                       }`
                     }
                   >
@@ -177,11 +172,11 @@ const NavBarDashGym = () => {
                   <MdOutlineNotificationsActive />
                 </NavLink>
               </motion.div>
-              
-              <UserDropdown 
-                user={user} 
-                logout={logout} 
-                dashboardPath="/gym" 
+
+              <UserDropdown
+                user={user}
+                logout={logout}
+                dashboardPath="/gym"
                 settingsPath="/gym/settings"
               />
 
@@ -218,10 +213,9 @@ const NavBarDashGym = () => {
                     to={l.to}
                     onClick={() => setOpen(false)}
                     className={({ isActive }) =>
-                      `block px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                        isActive
-                          ? "bg-orange-50 text-[#ff8211] shadow-sm"
-                          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                      `block px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
+                        ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                       }`
                     }
                   >

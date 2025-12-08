@@ -5,7 +5,7 @@ import { MdOutlineNotificationsActive } from "react-icons/md";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../../../context/ToastContext";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
 
 const NavTraineDash = () => {
@@ -32,13 +32,12 @@ const NavTraineDash = () => {
   const logout = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('refresh');
-    const access = localStorage.getItem('access');
     try {
-      await axios.post(
-        "http://127.0.0.1:8000/api/auth/logout",
+      await axiosInstance.post(
+        "/api/auth/logout",
         {},
         {
-          headers: { Authorization: `Bearer ${access} `, refresh: token },
+          headers: { refresh: token },
         }
       );
 
@@ -119,8 +118,8 @@ const NavTraineDash = () => {
               <span className="relative h-6 w-32 overflow-hidden">
                 <span
                   className={`absolute inset-0 font-bebas text-2xl transition-all text-[#ff8211] duration-500 ${showGG
-                      ? "translate-y-0 opacity-100"
-                      : "-translate-y-4 opacity-0"
+                    ? "translate-y-0 opacity-100"
+                    : "-translate-y-4 opacity-0"
                     }`}
                 >
                   GG
@@ -135,8 +134,8 @@ const NavTraineDash = () => {
                         key={char + index}
                         style={{ transitionDelay: `${delay}s` }}
                         className={`transition-all duration-300 ${showFullName
-                            ? "translate-y-0 opacity-100"
-                            : "translate-y-4 opacity-0"
+                          ? "translate-y-0 opacity-100"
+                          : "translate-y-4 opacity-0"
                           }`}
                       >
                         {char}

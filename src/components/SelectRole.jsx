@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useToast } from "../context/ToastContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 import traineeIcon from "../assets/trainer1.png";
 import trainerIcon from "../assets/1trainer.png";
 import gymIcon from "../assets/weight.png";
@@ -64,22 +64,19 @@ const Selectrole = () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
       const payload = { profile_type: selectedRole };
-      const token = localStorage.getItem("access");
+      // ✅ No manual token management needed!
       const refresh = localStorage.getItem("refresh")
 
 
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/profiles/create",
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const response = await axiosInstance.post(
+        "/api/profiles/create",
+        payload
       );
 
-      const refreshResp = await axios.post(
-        "http://127.0.0.1:8000/api/auth/renew-refresh", {profile_id:response.data.id},
+      const refreshResp = await axiosInstance.post(
+        "/api/auth/renew-refresh", { profile_id: response.data.id },
         {
-          headers: { refresh: `${refresh}`, Authorization: `Bearer ${token}` },
+          headers: { refresh: `${refresh}` },
         }
       );
 
@@ -89,7 +86,7 @@ const Selectrole = () => {
       localStorage.setItem('refresh', refreshResp.data.refresh)
       const updatedUser = JSON.parse(localStorage.getItem("user"));
       updatedUser.profiles.push({ type: response.data.profile_type, id: response.data.id });
-      localStorage.setItem("user", JSON.stringify(updatedUser)); 
+      localStorage.setItem("user", JSON.stringify(updatedUser));
 
       showToast(`${selectedRole} profile created successfully!`, { type: "success" });
 
@@ -122,51 +119,48 @@ const Selectrole = () => {
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {console.log("userProfileTypes:", userProfileTypes)}
           {
-          roles.map((role) => {
-            const isSelected = role.id === selectedRole;
-            const isActive = !userProfileTypes.includes(role.id);
-            console.log(`Role: ${role.id}, isActive: ${isActive}`);
-            return (
-              <button
-                key={role.id}
-                type="button"
-                disabled={!isActive}
-                onClick={() => setSelectedRole(role.id)}
-                className={`group flex h-full flex-col justify-between rounded-3xl border border-border bg-card/80 p-6 text-left shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
-                  !isActive ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:-translate-y-1 hover:shadow-md hover:bg-[#ff8211] hover:text-white"
-                } ${
-                  isSelected && isActive ? "bg-[#ff8211] text-white" : ""
-                }`}
-              >
-                <div className="space-y-4">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                    <img
-                      src={role.icon}
-                      alt={role.title}
-                      className="h-8 w-8 object-contain"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <h2 className="font-bebas text-2xl text-foreground">
-                      {role.title}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                      {role.description}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  className={`pt-4 text-sm font-semibold transition ${
-                    isSelected && isActive
-                      ? "text-primary"
-                      : "text-muted-foreground group-hover:text-primary"
-                  }`}
+            roles.map((role) => {
+              const isSelected = role.id === selectedRole;
+              const isActive = !userProfileTypes.includes(role.id);
+              console.log(`Role: ${role.id}, isActive: ${isActive}`);
+              return (
+                <button
+                  key={role.id}
+                  type="button"
+                  disabled={!isActive}
+                  onClick={() => setSelectedRole(role.id)}
+                  className={`group flex h-full flex-col justify-between rounded-3xl border border-border bg-card/80 p-6 text-left shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${!isActive ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:-translate-y-1 hover:shadow-md hover:bg-[#ff8211] hover:text-white"
+                    } ${isSelected && isActive ? "bg-[#ff8211] text-white" : ""
+                    }`}
                 >
-                  {isSelected && isActive ? "Selected" : "Select"} →
-                </span>
-              </button>
-            );
-          })}
+                  <div className="space-y-4">
+                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                      <img
+                        src={role.icon}
+                        alt={role.title}
+                        className="h-8 w-8 object-contain"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <h2 className="font-bebas text-2xl text-foreground">
+                        {role.title}
+                      </h2>
+                      <p className="text-sm text-muted-foreground">
+                        {role.description}
+                      </p>
+                    </div>
+                  </div>
+                  <span
+                    className={`pt-4 text-sm font-semibold transition ${isSelected && isActive
+                        ? "text-primary"
+                        : "text-muted-foreground group-hover:text-primary"
+                      }`}
+                  >
+                    {isSelected && isActive ? "Selected" : "Select"} →
+                  </span>
+                </button>
+              );
+            })}
         </div>
 
         <div className="flex justify-center pt-4">

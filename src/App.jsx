@@ -67,12 +67,16 @@ import Storeprofile from "./components/Dashboard/Store/Storeprofile.jsx";
 import StoreProduct from "./components/Dashboard/Store/StoreProduct.jsx";
 import StoreOrder from "./components/Dashboard/Store/StoreOrder.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import useAuthCheck from "./hooks/useAuthCheck.js";
 
 
 
 
 function App() {
   const location = useLocation();
+
+
+  useAuthCheck();
 
   return (
     <AnimatePresence mode="wait">
@@ -87,8 +91,8 @@ function App() {
           <Route path="about" element={<About />} />
           <Route path="profile" element={<Profile />} />
           <Route path="requestdetails" element={<RequestDetails />} />
-      
-        
+
+
           <Route path="community" element={<Community />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
           <Route path="/trainer-profile/:id" element={<PublicTrainerProfile />} />

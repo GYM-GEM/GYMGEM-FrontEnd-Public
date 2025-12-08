@@ -3,7 +3,7 @@ import Footer from "../Footer";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosConfig";
 
 const VITE_API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
@@ -20,7 +20,7 @@ const AddCourse = () => {
   const onSubmit = async (data) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const token = localStorage.getItem("access");
+      // ✅ No manual token handling needed!
 
       const payload = {
         title: data.title,
@@ -35,12 +35,9 @@ const AddCourse = () => {
         language: data.language,
       };
 
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${VITE_API_URL}/api/courses/courses/create/`,
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        payload
       );
 
       showToast("Course created successfully!", { type: "success" });

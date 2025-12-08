@@ -1,41 +1,37 @@
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
 
 const Trainerexp = () => {
-    const navigate = useNavigate()
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-    } = useForm({ mode: "onChange" });
+  const navigate = useNavigate()
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({ mode: "onChange" });
 
-    const { showToast } = useToast();
+  const { showToast } = useToast();
 
 
 
-    const onSubmit = async (data) => {
+  const onSubmit = async (data) => {
 
-        const user = JSON.parse(localStorage.getItem("user"));
-        const payload = { ...data, account_id: user.id };
-        console.log(payload)
-        const token = localStorage.getItem("access");
-        try {
-            // Send POST request to backend
-            const response = await axios.post("http://127.0.0.1:8000/api/trainers/experiences", payload,
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                }
-            );
-            console.log("Response:", response.data);
-            showToast("trainer successful!", { type: "success" });
-            navigate("/");
-        } catch (error) {
-            console.error("Error during registration:", error);
-            showToast("failed. Please try again.", { type: "error" });
-        }
-    };
+    const user = JSON.parse(localStorage.getItem("user"));
+    const payload = { ...data, account_id: user.id };
+    console.log(payload)
+    // ✅ No need to get token manually - axiosInstance handles it!
+    try {
+      // Send POST request to backend
+      const response = await axiosInstance.post("/api/trainers/experiences", payload);
+      console.log("Response:", response.data);
+      showToast("trainer successful!", { type: "success" });
+      navigate("/");
+    } catch (error) {
+      console.error("Error during registration:", error);
+      showToast("failed. Please try again.", { type: "error" });
+    }
+  };
 
 
   return (
@@ -52,7 +48,7 @@ const Trainerexp = () => {
 
         <div className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-10">
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
-            
+
             <div className="grid gap-4 sm:grid-cols-2">
               {/* Work Place */}
               <div className="space-y-2">

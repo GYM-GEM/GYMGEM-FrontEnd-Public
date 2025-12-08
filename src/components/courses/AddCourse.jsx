@@ -1,5 +1,6 @@
 import Navbar from "../Navbar";
 import Footer from "../Footer";
+import UploadImage from "../UploadImage";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
@@ -11,6 +12,7 @@ const AddCourse = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -221,11 +223,17 @@ const AddCourse = () => {
                   </label>
                 </div>
                 <div>
-                  <input
-                    {...register("coverUrl")}
-                    placeholder="Paste your course cover image link"
-                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
-                  />
+                  <UploadImage onUpload={(url) => setValue("coverUrl", url)} />
+                  {/* Hidden input to register the field validation if needed, or just let handleSubmit pick up the value if setValue registered it effectively? 
+                      useForm requires register for validation usually, but setValue with {shouldValidate: true} works too if we register it manually or use a hidden input.
+                      Using hidden input is safer for 'required' validation. 
+                  */}
+                  <input type="hidden" {...register("coverUrl", { required: true })} />
+                  {errors.coverUrl && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Cover image is required
+                    </p>
+                  )}
                 </div>
               </div>
 

@@ -28,12 +28,49 @@ const PublicTrainerProfile = () => {
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
 
+  // Dummy Availability Data
+  const [selectedDate, setSelectedDate] = useState(null);
+  const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  // Generate next 7 days
+  const getNext7Days = () => {
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      dates.push({
+        day: weekDays[d.getDay()],
+        date: d.getDate(),
+        fullDate: d.toISOString().split('T')[0],
+        isToday: i === 0
+      });
+    }
+    return dates;
+  };
+
+  const next7Days = getNext7Days();
+  const [activeDayIndex, setActiveDayIndex] = useState(0);
+
+  // Dummy slots for each day
+  const dummySlots = {
+    0: ["09:00 AM", "10:00 AM", "02:00 PM", "04:00 PM"], // Today
+    1: ["09:00 AM", "11:00 AM", "03:00 PM"],
+    2: ["10:00 AM", "12:00 PM", "05:00 PM"],
+    3: [], // No availability
+    4: ["08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM"],
+    5: ["01:00 PM", "02:00 PM"],
+    6: ["10:00 AM", "11:00 AM"],
+  };
+
+  const currentSlots = dummySlots[activeDayIndex] || [];
+
   useEffect(() => {
     // Fetch Categories for mapping
     const getCategories = async () => {
       try {
         const response = await axios.get('http://localhost:8000/api/utils/categories');
         setCategories(response.data.results);
+        console.log("categories:", response.data.results);
       } catch (error) {
         console.log("Failed to load categories");
       }
@@ -54,23 +91,35 @@ const PublicTrainerProfile = () => {
 
         // Map API response to component state structure
         const apiData = response.data;
+        const trainer = apiData.trainer;
 
         // This is the structure expected by the UI populated from the API
         setProfileData({
           profile: {
-            name: apiData.name,
-            avatar: apiData.profile_picture || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541", // Fallback image
-            email: null, // API doesn't seem to return email in the provided example, unless implied.
-            country: apiData.country || "Location not specified",
-            state: apiData.state || "",
-            bio: apiData.bio || "No bio available for this trainer.",
+            name: trainer.name,
+            avatar: trainer.profile_picture || "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541", // Fallback image
+            email: null, // API doesn't seem to return email in the provided example
+            country: trainer.country || "Location not specified",
+            state: trainer.state || "",
+            bio: trainer.bio || "",
             linkedin: null, // Not in provided response example
-            phone: apiData.phone_number,
+            phone: trainer.phone_number,
+            rating: trainer.rating // Assuming rating might come from API eventually
           },
-          // API example doesn't show these lists, so initializing empty to avoid crashes.
-          // If a different endpoint provides these, it should be called here.
-          specializations: [],
-          workExperience: [],
+          specializations: apiData.specializations ? apiData.specializations.map(spec => ({
+            id: spec.specialization, // This is the category ID
+            yearsExperience: spec.years_of_experience,
+            hourlyRate: spec.hourly_rate,
+            location: spec.service_location,
+            // name will be resolved in render
+          })) : [],
+          workExperience: apiData.experiences ? apiData.experiences.map(exp => ({
+            position: exp.position,
+            workplace: exp.work_place,
+            startDate: exp.start_date,
+            endDate: exp.end_date,
+            description: exp.description
+          })) : [],
         });
 
       } catch (err) {
@@ -146,6 +195,7 @@ const PublicTrainerProfile = () => {
 
       return {
         ...category,
+        label: category.name,
         icon: icons[idx % icons.length],
         ...colorScheme
       };
@@ -187,252 +237,292 @@ const PublicTrainerProfile = () => {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gray-50">
-        {/* Compact Centered Header */}
+      <div className="min-h-screen bg-gray-50 pb-12">
+
+        {/* Header / Hero Section */}
         <div className="bg-white border-b border-gray-200">
-          <div className="max-w-5xl mx-auto px-4 py-12 text-center">
-            {/* Avatar */}
-            <div className="inline-block relative mb-6">
-              <div className="w-32 h-32 rounded-full border-4 border-[#FF8211] shadow-lg overflow-hidden bg-gray-100">
-                <img
-                  src={profile.avatar}
-                  alt={profile.name}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-2 -right-2 bg-[#FF8211] text-white p-2 rounded-full shadow-md">
-                <Award className="w-5 h-5" />
-              </div>
-            </div>
+          {/* Cover Photo Area */}
+          <div className="h-32 bg-gradient-to-r from-gray-100 to-gray-200 w-full relative">
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#FF8211 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+          </div>
 
-            {/* Name & Title */}
-            <h1 className="text-5xl font-bold text-gray-900 bebas-regular mb-2">
-              {profile.name}
-            </h1>
-            <p className="text-xl text-[#FF8211] font-semibold poppins-medium mb-4">
-              Personal Trainer & Fitness Expert
-            </p>
-
-            {/* Contact Info - Compact */}
-            <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-600 poppins-regular mb-8">
-              {profile.country && (
-                <div className="flex items-center gap-1.5">
-                  <MapPin className="w-4 h-4 text-[#FF8211]" />
-                  <span>{profile.country}{profile.state ? `, ${profile.state}` : ''}</span>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 pb-6">
+            <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
+              {/* Avatar */}
+              <div className="relative">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-lg overflow-hidden bg-gray-100">
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              )}
-              {profile.email && (
-                <div className="flex items-center gap-1.5">
-                  <Mail className="w-4 h-4 text-[#FF8211]" />
-                  <span>{profile.email}</span>
-                </div>
-              )}
-            </div>
-
-            {/* Stats Pills - Single Row */}
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <div className="px-5 py-3 bg-white border-2 border-[#FF8211] rounded-full shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Book className="w-5 h-5 text-[#FF8211]" />
-                  <span className="text-2xl font-bold text-gray-900 bebas-regular">{publishedCourses.length}</span>
-                  <span className="text-sm text-gray-600 poppins-medium">Courses</span>
+                <div className="absolute bottom-2 right-2 bg-[#FF8211] text-white p-1.5 rounded-full shadow border-2 border-white">
+                  <Award className="w-4 h-4 md:w-5 md:h-5" />
                 </div>
               </div>
-              <div className="px-5 py-3 bg-white border-2 border-[#86ac55] rounded-full shadow-sm">
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5 text-[#86ac55]" />
-                  <span className="text-2xl font-bold text-gray-900 bebas-regular">{specializations?.length || 0}</span>
-                  <span className="text-sm text-gray-600 poppins-medium">Specializations</span>
+
+              {/* Name & Title & Stats */}
+              <div className="flex-1 text-center md:text-left mb-2 md:mb-0">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 bebas-regular">
+                  {profile.name}
+                </h1>
+                <p className="text-[#FF8211] font-semibold poppins-medium text-lg">
+                  Personal Trainer & Fitness Expert
+                </p>
+                <div className="flex items-center justify-center md:justify-start gap-4 mt-3 text-sm text-gray-600 poppins-regular">
+                  {profile.country && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      {profile.country}, {profile.state}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1 text-yellow-500 font-medium">
+                    <Star className="w-4 h-4 fill-current" />
+                    {profile.rating || "4.9"} (120 reviews)
+                  </span>
                 </div>
               </div>
-              <div className="px-5 py-3 bg-white border-2 border-yellow-400 rounded-full shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                  <span className="text-2xl font-bold text-gray-900 bebas-regular">4.9</span>
-                  <span className="text-sm text-gray-600 poppins-medium">Rating</span>
-                </div>
+
+              {/* Action Button (Mobile Only - Desktop has sidebar) */}
+              <div className="md:hidden w-full sm:w-auto">
+                <button className="w-full bg-[#FF8211] text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-orange-200 active:scale-95 transition-transform">
+                  Book Session
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content - 2 Column Layout */}
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            {/* Left: Contact/Bio Card */}
-            <div className="lg:col-span-1 space-y-6">
+        {/* Main Layout Grid */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-              {/* Bio Card - Moved here for better layout with limited API data */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-4">
-                  About Me
-                </h2>
-                <p className="text-gray-600 poppins-regular leading-relaxed">
-                  {profile.bio}
-                </p>
-              </div>
-
-              {/* Contact Card */}
-              {(profile.linkedin || profile.email || profile.phone) && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
-                    Get In Touch
-                  </h2>
-                  <div className="space-y-4">
-                    {profile.linkedin && (
-                      <a
-                        href={`https://${profile.linkedin}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                      >
-                        <div className="w-10 h-10 bg-[#0077b5]/10 rounded-lg flex items-center justify-center">
-                          <Linkedin className="w-5 h-5 text-[#0077b5]" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700 poppins-medium">LinkedIn</span>
-                      </a>
-                    )}
-                    {profile.email && (
-                      <a
-                        href={`mailto:${profile.email}`}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
-                      >
-                        <div className="w-10 h-10 bg-[#FF8211]/10 rounded-lg flex items-center justify-center">
-                          <Mail className="w-5 h-5 text-[#FF8211]" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700 poppins-medium">Email</span>
-                      </a>
-                    )}
-                    {profile.phone && (
-                      <div className="flex items-center gap-3 p-3 rounded-lg bg-gray-50">
-                        <div className="w-10 h-10 bg-[#86ac55]/10 rounded-lg flex items-center justify-center">
-                          <Phone className="w-5 h-5 text-[#86ac55]" />
-                        </div>
-                        <span className="text-sm font-medium text-gray-700 poppins-medium">{profile.phone}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Right: Content Area (Specializations & Experience) */}
+            {/* Left Column: Main Content */}
             <div className="lg:col-span-2 space-y-8">
 
+              {/* About Me */}
+              <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-4 flex items-center gap-2">
+                  <span className="w-1 h-8 bg-[#FF8211] rounded-full block"></span>
+                  About Me
+                </h2>
+                <p className="text-gray-600 poppins-regular leading-relaxed whitespace-pre-line">
+                  {profile.bio || "No bio available."}
+                </p>
+              </section>
+
               {/* Specializations */}
-              {specializations && specializations.length > 0 ? (
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 bebas-regular mb-6">
-                    Specializations & Services
+              {specializations && specializations.length > 0 && (
+                <section>
+                  <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6 flex items-center gap-2">
+                    <span className="w-1 h-8 bg-[#86ac55] rounded-full block"></span>
+                    Specializations
                   </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {specializations.map((spec, idx) => (
-                      <div key={idx} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                        <h3 className="text-xl font-bold text-gray-900 poppins-semibold mb-4">
-                          {spec.name}
-                        </h3>
-                        <div className="space-y-3">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Clock className="w-4 h-4 text-[#86ac55]" />
-                            <span className="poppins-regular">{spec.yearsExperience} years experience</span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {specializations.map((spec, idx) => {
+                      const category = categories.find(c => c.id === spec.id);
+                      const specName = category ? category.name : "Unknown Specialization";
+
+                      return (
+                        <div key={idx} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 hover:border-[#86ac55]/30 hover:shadow-md transition-all group">
+                          <div className="flex justify-between items-start mb-3">
+                            <h3 className="font-bold text-lg text-gray-900 poppins-semibold group-hover:text-[#86ac55] transition-colors">{specName}</h3>
+                            <div className="bg-[#86ac55]/10 text-[#86ac55] p-2 rounded-lg">
+                              <Award className="w-5 h-5" />
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <DollarSign className="w-4 h-4 text-[#86ac55]" />
-                            <span className="font-bold text-[#86ac55] poppins-semibold">${spec.hourlyRate}/hour</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <MapPin className="w-4 h-4 text-gray-500" />
-                            <span className="poppins-regular">{spec.location}</span>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between border-b border-dashed border-gray-100 pb-2">
+                              <span className="text-gray-500">Experience</span>
+                              <span className="font-medium text-gray-900">{spec.yearsExperience} years</span>
+                            </div>
+                            <div className="flex justify-between border-b border-dashed border-gray-100 pb-2">
+                              <span className="text-gray-500">Rate</span>
+                              <span className="font-medium text-gray-900">${spec.hourlyRate}/hr</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-500">Location</span>
+                              <span className="font-medium text-gray-900 capitalize">{spec.location}</span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
-                </div>
-              ) : (
-                // Only show this empty state if there's no bio either, otherwise it looks empty
-                !profile.bio && <div className="bg-white p-8 rounded-xl border border-dashed border-gray-300 text-center text-gray-500">
-                  No additional details available.
-                </div>
+                </section>
               )}
 
               {/* Work Experience */}
               {workExperience && workExperience.length > 0 && (
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900 bebas-regular mb-8">
-                    Work Experience
+                <section>
+                  <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6 flex items-center gap-2">
+                    <span className="w-1 h-8 bg-blue-500 rounded-full block"></span>
+                    Experience
                   </h2>
-                  <div className="space-y-6">
+                  <div className="space-y-0">
                     {workExperience.map((exp, idx) => (
-                      <div key={idx} className="relative pl-10">
-                        {/* Timeline Dot */}
-                        <div className="absolute left-0 top-2 w-4 h-4 rounded-full bg-[#FF8211] border-4 border-white shadow" />
+                      <div key={idx} className="flex gap-4 pb-8 last:pb-0 relative">
                         {/* Timeline Line */}
                         {idx < workExperience.length - 1 && (
-                          <div className="absolute left-1.5 top-6 bottom-0 w-0.5 bg-gray-200" />
+                          <div className="absolute left-[19px] top-8 bottom-0 w-0.5 bg-gray-200"></div>
                         )}
 
-                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-3">
-                            <div>
-                              <h3 className="text-xl font-bold text-gray-900 poppins-semibold mb-1">
-                                {exp.position}
-                              </h3>
-                              <p className="text-[#FF8211] font-semibold poppins-medium">
-                                {exp.workplace}
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-gray-500 poppins-regular mt-2 sm:mt-0">
-                              <Clock className="w-4 h-4" />
-                              <span>{exp.startDate} - {exp.endDate}</span>
-                            </div>
+                        <div className="flex-shrink-0 mt-1">
+                          <div className="w-10 h-10 rounded-full bg-blue-50 border-2 border-blue-100 flex items-center justify-center text-blue-500 z-10 relative">
+                            <Briefcase className="w-5 h-5" />
                           </div>
-                          <p className="text-sm text-gray-600 poppins-regular leading-relaxed">
-                            {exp.description}
-                          </p>
+                        </div>
+                        <div className="flex-1 bg-white p-5 rounded-xl border border-gray-100 shadow-sm">
+                          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
+                            <div>
+                              <h3 className="font-bold text-lg text-gray-900">{exp.position}</h3>
+                              <p className="text-blue-600 font-medium">{exp.workplace}</p>
+                            </div>
+                            <span className="text-sm text-gray-500 bg-gray-50 px-3 py-1 rounded-full mt-2 sm:mt-0 inline-block w-fit">
+                              {exp.startDate} — {exp.endDate || 'Present'}
+                            </span>
+                          </div>
+                          <p className="text-gray-600 text-sm leading-relaxed">{exp.description}</p>
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
+                </section>
               )}
+
+              {/* Courses */}
+              <section>
+                <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6 flex items-center gap-2">
+                  <span className="w-1 h-8 bg-[#FF8211] rounded-full block"></span>
+                  My Courses ({publishedCourses.length})
+                </h2>
+
+                {publishedCourses.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {publishedCourses.map((course) => {
+                      const theme = categoryOptions.find(opt => opt.id === course.category);
+                      return (
+                        <div key={course.id} className="h-full">
+                          <CourseCard key={course.id || course.title} course={course} categoryTheme={theme} />
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 p-8 text-center">
+                    <p className="text-gray-500">No courses published yet.</p>
+                  </div>
+                )}
+              </section>
             </div>
-          </div>
 
-          {/* My Courses - Consistent Grid */}
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 bebas-regular mb-8">
-              My Courses
-            </h2>
+            {/* Right Column: Sticky Sidebar (Availability & Contact) */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-24 space-y-6">
 
-            {publishedCourses.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {publishedCourses.map((course) => {
-                  const theme = categoryOptions.find(opt => opt.id === course.category);
-                  return (
-                    <div key={course.id} className="h-full">
-                      <CourseCard key={course.id || course.title} course={course} categoryTheme={theme} />
+                {/* Availability Calendar Widget */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="p-4 bg-gray-900 text-white">
+                    <h3 className="font-bold text-lg flex items-center gap-2">
+                      <Clock className="w-5 h-5 text-[#FF8211]" />
+                      Book a Session
+                    </h3>
+                    <p className="text-gray-400 text-xs mt-1">Select a time slot to book a 1-on-1 session.</p>
+                  </div>
+
+                  <div className="p-4">
+                    {/* Days Row */}
+                    <div className="flex justify-between mb-6 overflow-x-auto pb-2 no-scrollbar gap-2">
+                      {next7Days.map((day, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setActiveDayIndex(idx)}
+                          className={`flex flex-col items-center justify-center min-w-[44px] h-[60px] rounded-xl transition-all ${activeDayIndex === idx
+                            ? "bg-[#FF8211] text-white shadow-md shadow-orange-200 scale-105"
+                            : "bg-gray-50 text-gray-500 hover:bg-gray-100"
+                            }`}
+                        >
+                          <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">{day.day}</span>
+                          <span className="text-lg font-bold">{day.date}</span>
+                        </button>
+                      ))}
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Book className="w-8 h-8 text-gray-400" />
+
+                    {/* Time Slots */}
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-gray-900 flex justify-between">
+                        Available Slots
+                        <span className="text-gray-400 font-normal text-xs">{currentSlots.length} slots</span>
+                      </h4>
+
+                      {currentSlots.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-2">
+                          {currentSlots.map((slot, idx) => (
+                            <button key={idx} className="py-2.5 px-3 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:border-[#FF8211] hover:text-[#FF8211] hover:bg-orange-50 transition-all text-center">
+                              {slot}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                          <p className="text-gray-500 text-sm">No slots available on this day.</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <button className="w-full mt-6 bg-gray-900 text-white font-bold py-3.5 rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 group">
+                      Confirm Booking
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2 bebas-regular">
-                  No courses published yet
-                </h3>
-                <p className="text-gray-500 poppins-regular">
-                  Check back later for new content!
-                </p>
+
+                {/* Contact Info Card */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                  <h3 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wider text-gray-400">Contact Info</h3>
+                  <div className="space-y-4">
+                    {profile.email && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center text-[#FF8211]">
+                          <Mail className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Email Address</p>
+                          <a href={`mailto:${profile.email}`} className="text-sm font-medium text-gray-900 hover:text-[#FF8211] truncate block max-w-[200px]">{profile.email}</a>
+                        </div>
+                      </div>
+                    )}
+                    {profile.phone && (
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                          <Phone className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500">Phone Number</p>
+                          <p className="text-sm font-medium text-gray-900">{profile.phone}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Socials */}
+                    <div className="pt-4 mt-2 border-t border-gray-100 flex gap-2">
+                      {profile.linkedin && (
+                        <a href={`https://${profile.linkedin}`} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-lg bg-[#0077b5] text-white flex items-center justify-center hover:opacity-90 transition-opacity">
+                          <Linkedin className="w-5 h-5" />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
               </div>
-            )}
+            </div>
+
           </div>
         </div>
+        <Footer />
       </div>
-      <Footer />
     </>
   );
 };

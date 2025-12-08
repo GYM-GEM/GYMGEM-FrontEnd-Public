@@ -207,13 +207,13 @@ function Navbar() {
                   >
                     Trainers
                   </NavLink>
-                  <NavLink
+                  {/* <NavLink
                     to="/trainees"
                     onClick={() => setTrainingOpen(false)}
                     className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
                   >
                     Trainees
-                  </NavLink>
+                  </NavLink> */}
                 </div>
               )}
             </div>

@@ -13,13 +13,13 @@ const OrderSuccess = () => {
   useEffect(() => {
     // Get order from localStorage
     const orderData = getOrderById(orderId);
-    
+
     if (!orderData) {
       // If no order found, redirect to courses
       navigate('/courses');
       return;
     }
-    
+
     setOrder(orderData);
   }, [orderId, navigate]);
 
@@ -30,7 +30,7 @@ const OrderSuccess = () => {
   return (
     <>
       <Navbar />
-      
+
       <div className="min-h-screen bg-gray-50 py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Success Icon */}
@@ -61,7 +61,7 @@ const OrderSuccess = () => {
                   <span className="font-medium text-gray-900">Date:</span>{" "}
                   {new Date(order.createdAt).toLocaleDateString('en-US', {
                     year: 'numeric',
-                    month: 'long', 
+                    month: 'long',
                     day: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'

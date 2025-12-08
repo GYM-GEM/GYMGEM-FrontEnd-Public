@@ -1,13 +1,13 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import { 
-  Star, 
-  Users, 
-  Globe, 
-  Award, 
-  Clock, 
-  PlayCircle, 
-  FileText, 
+import {
+  Star,
+  Users,
+  Globe,
+  Award,
+  Clock,
+  PlayCircle,
+  FileText,
   Download,
   CheckCircle2,
   ChevronDown,
@@ -24,9 +24,50 @@ import Footer from "../Footer";
 
 const CourseEnroll = () => {
   const { id } = useParams();
-  const courses = JSON.parse(localStorage.getItem("courses")) || [];
-  const course = courses.find((c) => String(c.id) === id);
-  
+
+  // Dummy Data for demonstration
+  const dummyCourse = {
+    id: id || "1",
+    title: "Complete Fitness Mastery: Beginner to Pro",
+    description: "Transform your body and mind with this comprehensive guide to strength, flexibility, and nutrition. Perfect for all levels.",
+    category: "Strength Training",
+    level: "Intermediate",
+    language: "English",
+    price: 49.99,
+    coverUrl: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1470&auto=format&fit=crop",
+    lessons: [
+      {
+        title: "Module 1: Foundations",
+        duration: "45min",
+        sections: [
+          { id: "l1s1", title: "Introduction to Strength", contentType: "Video", contentUrl: "#", isCompleted: true },
+          { id: "l1s2", title: "Safety First", contentType: "Article", contentUrl: "#", isCompleted: true }
+        ]
+      },
+      {
+        title: "Module 2: Upper Body",
+        duration: "60min",
+        sections: [
+          { id: "l2s1", title: "Push Movements", contentType: "Video", contentUrl: "#", isCompleted: false },
+          { id: "l2s2", title: "Pull Movements", contentType: "Video", contentUrl: "#", isCompleted: false }
+        ]
+      },
+      {
+        title: "Module 3: Lower Body",
+        duration: "55min",
+        sections: [
+          { id: "l3s1", title: "Squat Mechanics", contentType: "Video", contentUrl: "#", isCompleted: false },
+          { id: "l3s2", title: "Deadlift Mastery", contentType: "Video", contentUrl: "#", isCompleted: false }
+        ]
+      }
+    ]
+  };
+
+  // Override local storage with dummy data
+  const course = dummyCourse;
+  // const courses = JSON.parse(localStorage.getItem("courses")) || [];
+  // const course = courses.find((c) => String(c.id) === id);
+
   const [expandedSections, setExpandedSections] = useState(new Set([0]));
   const [currentLesson, setCurrentLesson] = useState(null);
   const [completedLessons, setCompletedLessons] = useState(new Set());
@@ -38,7 +79,7 @@ const CourseEnroll = () => {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     setCurrentUser(user);
-    
+
     // Load comments for this specific course
     const storedComments = JSON.parse(localStorage.getItem(`course_comments_${id}`)) || [];
     if (storedComments.length === 0) {
@@ -185,8 +226,8 @@ const CourseEnroll = () => {
     return acc + (lesson.sections?.length || 1);
   }, 0) || 0;
 
-  const completionPercentage = totalLessons > 0 
-    ? Math.round((completedLessons.size / totalLessons) * 100) 
+  const completionPercentage = totalLessons > 0
+    ? Math.round((completedLessons.size / totalLessons) * 100)
     : 0;
 
   // Set first lesson as current if none selected
@@ -199,7 +240,7 @@ const CourseEnroll = () => {
   return (
     <>
       <Navbar />
-      
+
       {/* Hero Header */}
       <div className="w-full bg-gradient-to-r from-[#FF8211]/10 to-[#86ac55]/10 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -306,11 +347,10 @@ const CourseEnroll = () => {
                     </div>
                     <button
                       onClick={toggleComplete}
-                      className={`px-4 py-2 rounded-lg font-medium poppins-regular text-sm flex items-center gap-2 transition-colors ${
-                        completedLessons.has(currentLesson.id)
-                          ? "bg-[#86ac55] text-white"
-                          : "bg-[#FF8211] text-white hover:bg-[#ff7906]"
-                      }`}
+                      className={`px-4 py-2 rounded-lg font-medium poppins-regular text-sm flex items-center gap-2 transition-colors ${completedLessons.has(currentLesson.id)
+                        ? "bg-[#86ac55] text-white"
+                        : "bg-[#FF8211] text-white hover:bg-[#ff7906]"
+                        }`}
                     >
                       <CheckCircle2 className="w-4 h-4" />
                       {completedLessons.has(currentLesson.id)
@@ -349,7 +389,7 @@ const CourseEnroll = () => {
                 <MessageCircle className="w-5 h-5 text-[#FF8211]" />
                 Discussion
               </h3>
-              
+
               <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
                 {comments.length > 0 ? (
                   comments.map((comment) => (
@@ -384,7 +424,7 @@ const CourseEnroll = () => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8211] focus:border-transparent poppins-regular text-sm resize-none disabled:bg-gray-50 disabled:cursor-not-allowed"
                   rows={3}
                 />
-                <button 
+                <button
                   onClick={handlePostComment}
                   disabled={!currentUser || !newComment.trim()}
                   className="mt-3 px-6 py-2 bg-[#FF8211] text-white rounded-lg font-medium bebas-regular hover:bg-[#ff7906] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -472,11 +512,10 @@ const CourseEnroll = () => {
                                 <button
                                   key={section.id}
                                   onClick={() => handleLessonClick(section)}
-                                  className={`w-full px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors flex items-center justify-between group ${
-                                    currentLesson?.id === section.id
-                                      ? "bg-[#FF8211]/5 border-l-4 border-l-[#FF8211]"
-                                      : ""
-                                  }`}
+                                  className={`w-full px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors flex items-center justify-between group ${currentLesson?.id === section.id
+                                    ? "bg-[#FF8211]/5 border-l-4 border-l-[#FF8211]"
+                                    : ""
+                                    }`}
                                 >
                                   <div className="flex items-center gap-3">
                                     <div className="text-gray-500 group-hover:text-[#FF8211] transition-colors">
@@ -533,7 +572,7 @@ const CourseEnroll = () => {
                 <p className="text-sm text-gray-600 poppins-regular mb-4">
                   {courseData.instructor.bio}
                 </p>
-                <Link 
+                <Link
                   to="/trainer-profile"
                   className="block w-full text-center px-4 py-2 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-semibold bebas-regular hover:bg-[#FF8211]/10 transition-colors"
                 >

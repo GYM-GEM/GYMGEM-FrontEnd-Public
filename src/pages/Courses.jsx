@@ -392,7 +392,9 @@ function Courses() {
             ))
           ) : displayedCourses.length > 0 ? (
             displayedCourses.map((item) => {
+              console.log("item:", item);
               const theme = categoryOptions.find(opt => opt.id === item.category);
+              console.log("theme:", theme);
               return (
                 <CourseCard
                   key={item.id || item.title}

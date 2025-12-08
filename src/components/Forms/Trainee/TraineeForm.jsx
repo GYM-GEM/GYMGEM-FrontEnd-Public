@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import UploadImage from "../../UploadImage";
 
 import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
@@ -20,6 +21,7 @@ const Traineeform = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({ mode: "onChange" });
 
@@ -106,6 +108,17 @@ const Traineeform = () => {
 
         <div className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-10">
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
+
+            {/* Profile Picture */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Profile Picture
+              </label>
+              <div className="flex flex-col items-center sm:items-start gap-4 p-4 border rounded-xl bg-gray-50/50">
+                <UploadImage onUpload={(url) => setValue("profile_picture", url)} />
+                <input type="hidden" {...register("profile_picture")} />
+              </div>
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               {/* Name */}

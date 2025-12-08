@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Clock, User, ArrowRight, Tag, Star, Sparkles } from 'lucide-react';
 
 const CourseCard = ({ course, categoryTheme }) => {
+    console.log("course:", course);
+    console.log("categoryTheme:", categoryTheme);
     const {
         id,
         title,
@@ -39,7 +41,7 @@ const CourseCard = ({ course, categoryTheme }) => {
                 {/* Category Badge */}
                 <div className={`absolute left-3 top-3 z-20 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold backdrop-blur-md ${theme.bgColor} ${theme.textColor} shadow-sm`}>
                     <span>{theme.icon}</span>
-                    <span className="uppercase tracking-wide">{theme.label || "Course"}</span>
+                    <span className="uppercase tracking-wide">{theme.name || "Course"}</span>
                 </div>
 
                 {/* Rating Badge or New Badge */}

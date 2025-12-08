@@ -28,10 +28,7 @@ import {
 } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
-import { addToFavorites, removeFromFavorites, isFavorite } from "../Dashboard/Traine/Favorite";
-import { isUserEnrolled } from "../BuyNow/Checkout";
 import axios from "axios";
-import { get, set } from "react-hook-form";
 
 
 const CourseDetails = () => {
@@ -73,7 +70,7 @@ const CourseDetails = () => {
           Authorization: `Bearer ${token}`
         }
       });
-      setTrainer(response.data);
+      setTrainer(response.data.trainer);
     } catch (error) {
       console.error("Error fetching trainer by ID:", error);
     }
@@ -244,12 +241,6 @@ const CourseDetails = () => {
       // Ideally backend returns { status: 'added' | 'removed' } or similar
       setIsFavoriteCourse(prev => !prev);
 
-      // Update local storage if using it as backup/cache
-      if (!isFavoriteCourse) {
-        addToFavorites(course.id);
-      } else {
-        removeFromFavorites(course.id);
-      }
 
     } catch (error) {
       console.error("Failed to update wishlist:", error);
@@ -314,6 +305,7 @@ const CourseDetails = () => {
     reviewsCount: course.ratings.total_ratings,
     lastUpdated: course.updated_at,
     enrollment: course.enrollment,
+    reviews: course.reviews,
 
 
     totalVideoHours: 12,
@@ -331,7 +323,6 @@ const CourseDetails = () => {
       { icon: Download, text: "Downloadable resources" },
       { icon: Award, text: "Certificate of completion" },
     ],
-    reviews: course.reviews
   };
 
   const toggleSection = (index) => {
@@ -578,17 +569,15 @@ const CourseDetails = () => {
                               <button
                                 key={section.id}
                                 onClick={isEnrolled ? null : handleLockedLessonClick}
-                                className={`w-full px-4 py-3 border-t border-gray-100 transition-colors flex items-center justify-between group ${
-                                  isEnrolled ? "cursor-default" : "hover:bg-gray-50 cursor-pointer"
-                                }`}
+                                className={`w-full px-4 py-3 border-t border-gray-100 transition-colors flex items-center justify-between group ${isEnrolled ? "cursor-default" : "hover:bg-gray-50 cursor-pointer"
+                                  }`}
                               >
                                 <div className="flex items-center gap-3">
                                   <div className={isEnrolled ? "text-gray-600" : "text-gray-400"}>
                                     {getContentIcon(section.content_type)}
                                   </div>
-                                  <span className={`text-sm poppins-regular text-left ${
-                                    isEnrolled ? "text-gray-900" : "text-gray-700"
-                                  }`}>
+                                  <span className={`text-sm poppins-regular text-left ${isEnrolled ? "text-gray-900" : "text-gray-700"
+                                    }`}>
                                     {section.title}
                                   </span>
                                 </div>
@@ -703,15 +692,29 @@ const CourseDetails = () => {
                   <div key={idx} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
                     <div className="flex items-start gap-4">
                       <div className="w-12 h-12 rounded-full bg-[#FF8211] flex items-center justify-center text-white font-semibold flex-shrink-0">
-                        {review.avatar}
+                        {review.profile_picture ? (
+                          <img
+                            src={review.profile_picture}
+                            alt={review.username}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-2xl font-bold text-[#FF8211]">
+                            {review.username
+                              ?.split(" ")
+                              .map((n) => n[0])
+                              .join("")
+                              .toUpperCase()}
+                          </span>
+                        )}
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-semibold text-gray-900 poppins-medium">
-                            {review.name}
+                            {review.username}
                           </h4>
                           <span className="text-xs text-gray-500 poppins-regular">
-                            {review.date}
+                            {review.review_date.split("T")[0]}
                           </span>
                         </div>
                         <div className="flex text-[#FF8211] mb-2">
@@ -720,7 +723,7 @@ const CourseDetails = () => {
                           ))}
                         </div>
                         <p className="text-gray-700 poppins-regular text-sm">
-                          {review.comment}
+                          {review.review}
                         </p>
                       </div>
                     </div>

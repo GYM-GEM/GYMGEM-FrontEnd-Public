@@ -13,7 +13,8 @@ const CourseCard = ({ course, categoryTheme }) => {
         total_duration,
         price,
         category,
-        average_rating
+        average_rating,
+        level
     } = course;
 
     // Default theme if none provided
@@ -79,7 +80,7 @@ const CourseCard = ({ course, categoryTheme }) => {
                     <div className="flex items-center justify-between border-t border-border pt-4 text-xs font-medium text-muted-foreground">
                         <div className="flex items-center gap-1.5">
                             <User className="h-3.5 w-3.5 text-primary" />
-                            <Link to={`trainer-profile/${trainer_profile}`} className="hover:text-foreground transition-colors truncate max-w-[100px]">
+                            <Link to={`/trainer-profile/${trainer_profile}`} className="hover:text-foreground transition-colors truncate max-w-[100px]">
                                 {trainer_profile_name}
                             </Link>
                         </div>
@@ -87,6 +88,13 @@ const CourseCard = ({ course, categoryTheme }) => {
                             <Clock className="h-3.5 w-3.5 text-primary" />
                             <span>{Math.ceil(total_duration / 3600)} Hours</span>
                         </div>
+                    </div>
+
+                    {/* Level Badge - Added as requested */}
+                    <div className="text-xs font-medium text-muted-foreground pt-2">
+                        <span className="bg-primary/5 text-primary px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">
+                            {level === 1 ? "Beginner" : level === 2 ? "Intermediate" : level === 3 ? "Advanced" : "All Levels"}
+                        </span>
                     </div>
 
                     {/* Action Button */}

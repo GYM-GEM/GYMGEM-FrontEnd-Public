@@ -71,6 +71,13 @@ function Navbar() {
     }
   };
 
+  const isTrainer = () => {
+    if (!user || !user.profiles || !user.current_profile) return false;
+    const currentProfileId = user.current_profile;
+    const activeProfile = user.profiles.find(p => p.id === currentProfileId);
+    return activeProfile?.type.toLowerCase() === 'trainer';
+  };
+
   // Logo Animation Effect
   useEffect(() => {
     let interval;
@@ -169,46 +176,48 @@ function Navbar() {
             Home
           </NavLink>
 
-          {/* Training Dropdown */}
-          <div className="relative" ref={trainingRef}>
-            <button
-              onClick={() => setTrainingOpen(!trainingOpen)}
-              className={`group flex items-center gap-1 text-sm font-medium transition-colors duration-200 
-                ${trainingOpen ? "text-[#ff8211]" : "text-gray-700 hover:text-[#ff8211]"}`}
-            >
-              Training
-              <ChevronDown
-                className={`h-4 w-4 transition-transform duration-200 ${trainingOpen ? "rotate-180" : ""
-                  }`}
-              />
-            </button>
+          {/* Training Dropdown - Hidden for Trainers */}
+          {!isTrainer() && (
+            <div className="relative" ref={trainingRef}>
+              <button
+                onClick={() => setTrainingOpen(!trainingOpen)}
+                className={`group flex items-center gap-1 text-sm font-medium transition-colors duration-200 
+                  ${trainingOpen ? "text-[#ff8211]" : "text-gray-700 hover:text-[#ff8211]"}`}
+              >
+                Training
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-200 ${trainingOpen ? "rotate-180" : ""
+                    }`}
+                />
+              </button>
 
-            {trainingOpen && (
-              <div className="absolute left-0 top-full mt-2 w-48 rounded-md border border-gray-200 bg-white p-1 shadow-lg animate-in fade-in zoom-in-95 duration-200">
-                <NavLink
-                  to="/courses"
-                  onClick={() => setTrainingOpen(false)}
-                  className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
-                >
-                  Courses
-                </NavLink>
-                <NavLink
-                  to="/trainers"
-                  onClick={() => setTrainingOpen(false)}
-                  className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
-                >
-                  Trainers
-                </NavLink>
-                <NavLink
-                  to="/trainees"
-                  onClick={() => setTrainingOpen(false)}
-                  className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
-                >
-                  Trainees
-                </NavLink>
-              </div>
-            )}
-          </div>
+              {trainingOpen && (
+                <div className="absolute left-0 top-full mt-2 w-48 rounded-md border border-gray-200 bg-white p-1 shadow-lg animate-in fade-in zoom-in-95 duration-200">
+                  <NavLink
+                    to="/courses"
+                    onClick={() => setTrainingOpen(false)}
+                    className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
+                  >
+                    Courses
+                  </NavLink>
+                  <NavLink
+                    to="/trainers"
+                    onClick={() => setTrainingOpen(false)}
+                    className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
+                  >
+                    Trainers
+                  </NavLink>
+                  <NavLink
+                    to="/trainees"
+                    onClick={() => setTrainingOpen(false)}
+                    className="block rounded-sm px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-[#ff8211]"
+                  >
+                    Trainees
+                  </NavLink>
+                </div>
+              )}
+            </div>
+          )}
 
           <NavLink to="/stores" className={navLinkClasses}>
             Store
@@ -274,44 +283,46 @@ function Navbar() {
               Home
             </NavLink>
 
-            {/* Mobile Training Dropdown */}
-            <div className="space-y-1">
-              <button
-                onClick={() => setTrainingOpen(!trainingOpen)}
-                className="flex w-full items-center justify-between px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-[#ff8211] rounded-md"
-              >
-                Training
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform duration-200 ${trainingOpen ? "rotate-180" : ""
-                    }`}
-                />
-              </button>
-              {trainingOpen && (
-                <div className="pl-4 space-y-1 border-l-2 border-gray-200 ml-4">
-                  <NavLink
-                    to="/courses"
-                    onClick={() => setIsOpen(false)}
-                    className={mobileLinkClasses}
-                  >
-                    Courses
-                  </NavLink>
-                  <NavLink
-                    to="/trainers"
-                    onClick={() => setIsOpen(false)}
-                    className={mobileLinkClasses}
-                  >
-                    Trainers
-                  </NavLink>
-                  <NavLink
-                    to="/trainees"
-                    onClick={() => setIsOpen(false)}
-                    className={mobileLinkClasses}
-                  >
-                    Trainees
-                  </NavLink>
-                </div>
-              )}
-            </div>
+            {/* Mobile Training Dropdown - Hidden for Trainers */}
+            {!isTrainer() && (
+              <div className="space-y-1">
+                <button
+                  onClick={() => setTrainingOpen(!trainingOpen)}
+                  className="flex w-full items-center justify-between px-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 hover:text-[#ff8211] rounded-md"
+                >
+                  Training
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform duration-200 ${trainingOpen ? "rotate-180" : ""
+                      }`}
+                  />
+                </button>
+                {trainingOpen && (
+                  <div className="pl-4 space-y-1 border-l-2 border-gray-200 ml-4">
+                    <NavLink
+                      to="/courses"
+                      onClick={() => setIsOpen(false)}
+                      className={mobileLinkClasses}
+                    >
+                      Courses
+                    </NavLink>
+                    <NavLink
+                      to="/trainers"
+                      onClick={() => setIsOpen(false)}
+                      className={mobileLinkClasses}
+                    >
+                      Trainers
+                    </NavLink>
+                    <NavLink
+                      to="/trainees"
+                      onClick={() => setIsOpen(false)}
+                      className={mobileLinkClasses}
+                    >
+                      Trainees
+                    </NavLink>
+                  </div>
+                )}
+              </div>
+            )}
 
             <NavLink to="/stores" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
               Store

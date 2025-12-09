@@ -540,13 +540,13 @@ const CourseDetails = () => {
                   Course Curriculum
                 </h2>
                 <span className="text-sm text-gray-500 poppins-regular">
-                  {course.lessons_details?.length || 0} Lessons
+                  {course.lessons?.length || 0} Lessons
                 </span>
               </div>
 
               <div className="space-y-2">
-                {course.lessons_details && course.lessons_details.length > 0 ? (
-                  course.lessons_details.map((lesson, lessonIndex) => (
+                {course.lessons && course.lessons.length > 0 ? (
+                  course.lessons.map((lesson, lessonIndex) => (
                     <div key={lessonIndex} className="border border-gray-200 rounded-lg overflow-hidden">
                       <button
                         onClick={() => toggleSection(lessonIndex)}

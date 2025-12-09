@@ -318,7 +318,7 @@ const CourseDetails = () => {
       "Track progress and set achievable goals",
     ],
     includes: [
-      { icon: Video, text: `${12} hours of on-demand video` },
+      { icon: Video, text: `${course.total_duration / 3600} hours of on-demand video` },
       { icon: FileText, text: `${course.lessons?.length || 0} lessons` },
       { icon: Download, text: "Downloadable resources" },
       { icon: Award, text: "Certificate of completion" },
@@ -342,13 +342,16 @@ const CourseDetails = () => {
   };
 
   const getContentIcon = (type) => {
-    switch (type) {
+    // Handle null/undefined and normalize case
+    const normalizedType = type ? type.charAt(0).toUpperCase() + type.slice(1).toLowerCase() : "";
+
+    switch (normalizedType) {
       case "Video":
         return <Video className="w-4 h-4" />;
       case "Article":
         return <FileText className="w-4 h-4" />;
-      case "PDF":
-      case "DOC":
+      case "Pdf":
+      case "Doc":
         return <File className="w-4 h-4" />;
       case "Image":
         return <ImageIcon className="w-4 h-4" />;
@@ -356,6 +359,8 @@ const CourseDetails = () => {
         return <PlayCircle className="w-4 h-4" />;
     }
   };
+
+
 
   const handleBuyNow = () => {
     // Check if user is logged in
@@ -535,7 +540,7 @@ const CourseDetails = () => {
                   Course Curriculum
                 </h2>
                 <span className="text-sm text-gray-500 poppins-regular">
-                  {course.lessons?.length || 0} sections
+                  {course.lessons_details?.length || 0} Lessons
                 </span>
               </div>
 
@@ -586,7 +591,7 @@ const CourseDetails = () => {
                             ))
                           ) : (
                             <div className="px-4 py-3 border-t border-gray-100 text-sm text-gray-500 poppins-regular">
-                              No sections available
+                              {lesson.description}
                             </div>
                           )}
                         </div>

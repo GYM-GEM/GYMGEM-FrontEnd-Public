@@ -16,7 +16,7 @@ const SettingsTrainee = () => {
   });
 
   const [formData, setFormData] = useState({
-    deleteProfile: { password: "" },
+    deleteProfile: { password: "", confirmationPhrase: "" },
   });
 
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -39,18 +39,51 @@ const SettingsTrainee = () => {
     }));
   };
 
-  const handleDeleteProfileSubmit = () => {
-    const { password } = formData.deleteProfile;
+  const handleDeleteProfileSubmit = async () => {
+    const { password, confirmationPhrase } = formData.deleteProfile;
+    const requiredPhrase = "I want to delete my profile";
+
     if (!password) {
       showToast("Please enter your password to confirm deletion.", { type: "error" });
       return;
     }
 
-    // Mock validation logic
-    closeModal("deleteProfile");
-    showToast("Profile deleted successfully", { type: "success" });
-    // In a real app, you would make an API call here and then redirect
-    // navigate("/login");
+    if (confirmationPhrase !== requiredPhrase) {
+      showToast(`Please type exactly: "${requiredPhrase}"`, { type: "error" });
+      return;
+    }
+
+    try {
+      // Get profile_id from localStorage
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const profileId = user.current_profile;
+
+      if (!profileId) {
+        showToast("Profile ID not found. Please log in again.", { type: "error" });
+        return;
+      }
+
+      // Call DELETE endpoint
+      await axiosInstance.delete(`/api/profiles/update/${profileId}`, {
+        data: { password }
+      });
+
+      closeModal("deleteProfile");
+      showToast("Profile deleted successfully!", { type: "success" });
+
+      // Clear localStorage and redirect
+      localStorage.clear();
+      setTimeout(() => {
+        navigate("/login");
+      }, 500);
+
+    } catch (error) {
+      console.error("Error deleting profile:", error);
+      showToast(
+        error.response?.data?.message || "Error deleting profile. Please try again.",
+        { type: "error" }
+      );
+    }
   };
 
   /**
@@ -75,10 +108,7 @@ const SettingsTrainee = () => {
       await axiosInstance.post("/api/auth/logout-all");
 
       // Clear all authentication data from localStorage
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-      localStorage.removeItem("user");
-
+      localStorage.clear();
       // Show success message
       showToast("Successfully logged out from all devices", { type: "success" });
 
@@ -94,9 +124,7 @@ const SettingsTrainee = () => {
       console.error("Error logging out from all devices:", error);
 
       // Even if the API call fails, we should still log out locally
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
-      localStorage.removeItem("user");
+      localStorage.clear();
 
       showToast("Logged out locally. Please log in again.", { type: "warning" });
 
@@ -206,6 +234,23 @@ const SettingsTrainee = () => {
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
                   placeholder="Enter your password"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Confirmation
+                </label>
+                <input
+                  type="text"
+                  name="confirmationPhrase"
+                  value={formData.deleteProfile.confirmationPhrase}
+                  onChange={handleDeleteProfileChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                  placeholder='Type: I want to delete my profile'
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Please type <span className="font-semibold text-red-600">"I want to delete my profile"</span> to confirm
+                </p>
               </div>
             </div>
 

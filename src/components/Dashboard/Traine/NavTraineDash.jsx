@@ -22,7 +22,7 @@ const NavTraineDash = () => {
     { to: "/trainee", label: "Dashboard" },
     { to: "/trainee/courses", label: "Courses" },
     { to: "/trainee/favorite", label: "Favorite" },
-    { to: "/trainee/settings", label: "Settings" },
+    { to: "/trainee/settings", label: "Profile Settings" },
   ];
 
   const [showFullName, setShowFullName] = useState(false);

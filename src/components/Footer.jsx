@@ -1,156 +1,87 @@
 import {
   Facebook,
   Twitter,
-  Github,
   Instagram,
-  Linkedin,
   Youtube,
-  Home,
-  Mail,
-  Phone,
-  PhoneCall,
-  Briefcase,
+  Send
 } from "lucide-react";
 import { FaGem } from "react-icons/fa";
 
 function Footer() {
   return (
-    <footer className="border-t border-border bg-muted/40 text-muted-foreground w-full">
-      <div className="mx-auto w-[80%]  px-4 py-12 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-between gap-6 border-b border-border/60 pb-8 text-center sm:flex-row sm:text-left">
-          <div className="flex items-center gap-3 text-foreground">
-            <FaGem className="text-xl text-secondary" />
-            <div>
-              <p className="text-sm font-semibold text-foreground">
-                Stay in sync with GymGem
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Follow along for new programs, community highlights, and product
-                updates.
-              </p>
-            </div>
-          </div>
+    <footer className="bg-gray-900 pt-16 pb-8 text-gray-300 w-full">
+      <div className="mx-auto w-[85%] max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-4 md:grid-cols-2">
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-foreground">
-            {[Facebook, Twitter, Instagram, Youtube, Github, Linkedin].map(
-              (Icon, index) => (
-                <a
-                  key={`social-${index}`}
-                  href="#!"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background/80 text-muted-foreground transition hover:-translate-y-0.5 hover:border-ring hover:text-foreground"
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              )
-            )}
-          </div>
-        </div>
-
-        <div className="grid gap-8 py-12 text-center text-sm sm:grid-cols-2 sm:text-left lg:grid-cols-4">
-          <div className="space-y-3">
-            <div className="flex items-center justify-center gap-2 font-semibold text-foreground sm:justify-start">
-              <FaGem className="text-base text-secondary" />
-              GYMGEM
+          {/* Brand Column */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 text-white">
+              <FaGem className="text-2xl text-orange-500" />
+              <span className="font-bebas text-3xl tracking-wide">GYMGEM</span>
             </div>
-            <p>
-              We bring trainers, gyms, stores, and trainees together through
-              calm, purposeful experiences that keep the focus on progress.
+            <p className="text-sm leading-relaxed text-gray-400 max-w-xs">
+              The unified ecosystem for fitness professionals and enthusiasts.
+              Elevate your journey with clarity, community, and purpose.
             </p>
+            <div className="flex gap-4">
+              {[Facebook, Twitter, Instagram, Youtube].map((Icon, i) => (
+                <a key={i} href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
+                  <Icon size={20} />
+                </a>
+              ))}
+            </div>
           </div>
 
-          <div className="space-y-3">
-            <h6 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Explore
-            </h6>
-            <ul className="space-y-2">
-              <li>
-                <a href="#!" className="transition hover:text-foreground">
-                  Programs
-                </a>
-              </li>
-              <li>
-                <a href="#!" className="transition hover:text-foreground">
-                  Trainers
-                </a>
-              </li>
-              <li>
-                <a href="#!" className="transition hover:text-foreground">
-                  Nutrition
-                </a>
-              </li>
-              <li>
-                <a href="#!" className="transition hover:text-foreground">
-                  Partnerships
-                </a>
-              </li>
+          {/* Quick Links */}
+          <div>
+            <h3 className="font-bebas text-xl text-white mb-6 tracking-wide">Explore</h3>
+            <ul className="space-y-3 text-sm">
+              {['Programs', 'Trainers', 'Gyms', 'Store'].map((item) => (
+                <li key={item}>
+                  <a href="#" className="hover:text-orange-500 transition-colors">{item}</a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          <div className="space-y-3">
-            <h6 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Resources
-            </h6>
-            <ul className="space-y-2">
-              <li>
-                <a href="#!" className="transition hover:text-foreground">
-                  Pricing
-                </a>
-              </li>
-              <li>
-                <a href="#!" className="transition hover:text-foreground">
-                  Support
-                </a>
-              </li>
-              <li>
-                <a href="#!" className="transition hover:text-foreground">
-                  Guides
-                </a>
-              </li>
-              <li>
-                <a href="#!" className="transition hover:text-foreground">
-                  Updates
-                </a>
-              </li>
+          {/* Resources */}
+          <div>
+            <h3 className="font-bebas text-xl text-white mb-6 tracking-wide">Support</h3>
+            <ul className="space-y-3 text-sm">
+              {['Help Center', 'Terms of Service', 'Privacy Policy', 'Contact Us'].map((item) => (
+                <li key={item}>
+                  <a href="#" className="hover:text-orange-500 transition-colors">{item}</a>
+                </li>
+              ))}
             </ul>
           </div>
 
-          <div className="space-y-3">
-            <h6 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Contact
-            </h6>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-center justify-center gap-2 sm:justify-start">
-                <Home className="h-4 w-4" />
-                Cairo, Egypt
-              </li>
-              <li className="flex items-center justify-center gap-2 sm:justify-start">
-                <Mail className="h-4 w-4" />
-                hello@gymgem.com
-              </li>
-              <li className="flex items-center justify-center gap-2 sm:justify-start">
-                <Phone className="h-4 w-4" />
-                +20 101 234 5678
-              </li>
-              <li className="flex items-center justify-center gap-2 sm:justify-start">
-                <PhoneCall className="h-4 w-4" />
-                +20 101 876 5432
-              </li>
-            </ul>
+          {/* Newsletter */}
+          <div>
+            <h3 className="font-bebas text-xl text-white mb-6 tracking-wide">Stay Updated</h3>
+            <p className="text-sm text-gray-400 mb-4">
+              Join our newsletter for the latest tips, ideas, and exclusive offers.
+            </p>
+            <div className="relative">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg py-3 px-4 text-sm text-white focus:outline-none focus:border-orange-500 transition-colors placeholder:text-gray-500"
+              />
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-orange-600 rounded-md text-white hover:bg-orange-500 transition-colors">
+                <Send size={16} />
+              </button>
+            </div>
           </div>
+
         </div>
 
-        <div className="flex flex-col items-center justify-between gap-3 border-t border-border/60 pt-6 text-xs text-muted-foreground sm:flex-row">
+        <div className="mt-16 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
           <p>© {new Date().getFullYear()} GymGem. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <a href="#!" className="transition hover:text-foreground">
-              Privacy
-            </a>
-            <a href="#!" className="transition hover:text-foreground">
-              Terms
-            </a>
-            <a href="#!" className="transition hover:text-foreground">
-              Cookies
-            </a>
+          <div className="flex gap-6">
+            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+            <a href="#" className="hover:text-white transition-colors">Terms</a>
+            <a href="#" className="hover:text-white transition-colors">Cookies</a>
           </div>
         </div>
       </div>

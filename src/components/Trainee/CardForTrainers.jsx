@@ -1,46 +1,94 @@
-import CoursesData from "../../js/TrainersData";
 import { Link } from "react-router-dom";
+import { MapPin, ArrowRight } from "lucide-react";
 
-function CardForTrainers() {
+function CardForTrainers({ trainers }) {
   return (
-    <section className="w-full bg-background pb-20">
-      <div className="mx-auto grid w-[80%] gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
-        {CoursesData.map((item) => (
-          <article
-            key={item.id ?? item.title}
-            className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition hover:-translate-y-1 hover:shadow-md"
-          >
-            <div className="relative h-48 w-full overflow-hidden">
-              <img
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                src={item.image}
-                alt={item.title}
-              />
-            </div>
+    <section className="w-full pb-20">
+      <div className="mx-auto grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {trainers && trainers.length > 0 ? (
+          trainers.map((item) => {
+            // Get price from first specialization or default
+            const price = item.specializations?.[0]?.hourly_rate
+              ? `$${item.specializations[0].hourly_rate}`
+              : "Contact";
 
-            <div className="flex flex-1 flex-col gap-6 p-6">
-              <div className="space-y-3">
-                <h3 className="font-bebas text-2xl uppercase text-foreground">
-                  {item.title}
-                </h3>
-                <p className="text-sm text-muted-foreground">{item.description}</p>
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {item.ByCoach}
-                </p>
-              </div>
+            return (
+              <article
+                key={item.id}
+                className="group relative flex flex-col overflow-hidden rounded-3xl bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-orange-500/10 border border-gray-100"
+              >
+                {/* Image Container */}
+                <div className="relative aspect-[4/5] w-full overflow-hidden bg-gray-100">
+                  <img
+                    className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+                    src={item.profile_picture || "https://ui-avatars.com/api/?name=" + item.name + "&background=FF8211&color=fff"}
+                    alt={item.name}
+                  />
 
-              <div className="mt-auto flex items-center justify-between">
-                <span className="font-bebas text-xl text-foreground">{item.price}</span>
-                <Link
-                  to="/viewprofile"
-                  className="inline-flex items-center justify-center rounded-xl border border-border bg-[#ff8211] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#e97108] hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                >
-                  {item.buttonText}
-                </Link>
-              </div>
+                  {/* Overlay Gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 transition-opacity group-hover:opacity-40" />
+
+                  {/* Service Location Badge */}
+                  <div className="absolute left-4 top-4 flex flex-wrap gap-2">
+                    {item.specializations?.slice(0, 1).map((s, idx) => (
+                      <span key={idx} className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium backdrop-blur-md 
+                        ${s.service_location.toLowerCase() === 'online' ? 'bg-green-500/90 text-white' :
+                          s.service_location.toLowerCase() === 'offline' ? 'bg-blue-500/90 text-white' :
+                            'bg-purple-500/90 text-white'}`}>
+                        {s.service_location === 'both' ? 'Hybrid' : s.service_location}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bebas text-2xl tracking-wide text-gray-900 group-hover:text-[#ff8211] transition-colors">
+                        {item.name}
+                      </h3>
+                      <div className="flex items-center gap-1 text-sm font-bold text-[#ff8211]">
+                        {price}
+                        <span className="text-xs font-normal text-gray-400">/hr</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                      {item.specializations?.slice(0, 3).map((s, i) => (
+                        <span key={i} className="rounded-md bg-gray-50 px-2 py-1 border border-gray-100 text-gray-600">
+                          {s.name || "Trainer"}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className="mb-6 line-clamp-2 text-sm text-gray-500 leading-relaxed">
+                    {item.bio || "Certified personal trainer dedicated to helping you achieve your fitness goals through personalized programs."}
+                  </p>
+
+                  <div className="mt-auto">
+                    <Link
+                      to={`/trainer-profile/${item.id}`}
+                      className="group/btn flex w-full items-center justify-center gap-2 rounded-xl bg-gray-900 py-3 text-sm font-bold text-white transition-all hover:bg-[#ff8211]"
+                    >
+                      View Profile
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            );
+          })
+        ) : (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
+            <div className="rounded-full bg-gray-50 p-6">
+              <MapPin className="h-10 w-10 text-gray-300" />
             </div>
-          </article>
-        ))}
+            <h3 className="mt-4 text-lg font-medium text-gray-900">No trainers found</h3>
+            <p className="mt-2 text-gray-500">Try adjusting your filters to find what you're looking for.</p>
+          </div>
+        )}
       </div>
     </section>
   );

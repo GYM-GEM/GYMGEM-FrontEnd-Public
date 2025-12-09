@@ -32,20 +32,18 @@ function HeroSc() {
 
         <div className="relative z-10 mx-auto flex w-full max-w-4xl flex-col items-center gap-8 px-4 py-20 text-center sm:px-6">
           <h1
-            className={`font-bebas text-4xl tracking-tight text-foreground transition-all duration-1000 ease-out sm:text-5xl lg:text-6xl ${
-              isVisible
+            className={`font-bebas text-4xl tracking-tight text-foreground transition-all duration-1000 ease-out sm:text-5xl lg:text-6xl ${isVisible
                 ? "translate-y-0 opacity-100"
                 : "-translate-y-8 opacity-0"
-            }`}
+              }`}
           >
             Your fitness network starts here
           </h1>
           <p
-            className={`max-w-2xl text-base text-muted-foreground transition-all duration-1000 delay-200 ease-out sm:text-lg ${
-              isVisible
+            className={`max-w-2xl text-base text-muted-foreground transition-all duration-1000 delay-200 ease-out sm:text-lg ${isVisible
                 ? "translate-y-0 opacity-100"
                 : "-translate-y-8 opacity-0"
-            }`}
+              }`}
           >
             Find certified personal trainers, book classes, and stay accountable
             to your goals with a calm all-in-one experience designed for
@@ -53,11 +51,10 @@ function HeroSc() {
           </p>
 
           <div
-            className={`flex flex-col items-center gap-3 transition-all duration-1000 delay-300 ease-out sm:flex-row ${
-              isVisible
+            className={`flex flex-col items-center gap-3 transition-all duration-1000 delay-300 ease-out sm:flex-row ${isVisible
                 ? "translate-y-0 opacity-100"
                 : "-translate-y-8 opacity-0"
-            }`}
+              }`}
           >
             <button
               onClick={() => navigate("/Trainers")}
@@ -66,7 +63,10 @@ function HeroSc() {
               Find a trainer
             </button>
             <button
-              onClick={() => navigate("/signup")}
+              onClick={() => {
+                const user = localStorage.getItem("user");
+                navigate(user ? "/role" : "/signup");
+              }}
               className="inline-flex h-12 min-w-[180px] items-center justify-center bg-gradient-to-r from-white to-gray-100 rounded-xl border-2 border-[#ff8211] px-6 text-sm font-semibold text-[#ff8211] shadow-md transition-all duration-300 hover:scale-110 hover:from-orange-50 hover:to-orange-100 hover:shadow-lg hover:text-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Join as a trainer

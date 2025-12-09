@@ -219,12 +219,18 @@ function Navbar() {
             </div>
           )}
 
-          <NavLink to="/stores" className={navLinkClasses}>
+          <div className="relative px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed flex items-center gap-2">
             Store
-          </NavLink>
+            <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
+          </div>
 
-          <NavLink to="/gym" className={navLinkClasses}>
+          <div className="relative px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed flex items-center gap-2">
             Gym
+            <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
+          </div>
+
+          <NavLink to="/community" className={navLinkClasses}>
+            Community
           </NavLink>
 
           <NavLink to="/about" className={navLinkClasses}>
@@ -324,12 +330,14 @@ function Navbar() {
               </div>
             )}
 
-            <NavLink to="/stores" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
+            <div className="flex items-center justify-between px-4 py-2 text-base font-medium text-gray-400 cursor-not-allowed rounded-md">
               Store
-            </NavLink>
-            <NavLink to="/gym" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
+            </div>
+            <div className="flex items-center justify-between px-4 py-2 text-base font-medium text-gray-400 cursor-not-allowed rounded-md">
               Gym
-            </NavLink>
+              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
+            </div>
             <NavLink to="/about" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
               About
             </NavLink>

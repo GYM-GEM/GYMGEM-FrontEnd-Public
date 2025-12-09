@@ -29,6 +29,7 @@ const roles = [
     description:
       "Manage facilities, trainers, and memberships from one calm dashboard.",
     icon: gymIcon,
+    comingSoon: true,
   },
   {
     id: "store",
@@ -36,13 +37,7 @@ const roles = [
     description:
       "Showcase verified products, supplements, and gear to the GymGem community.",
     icon: storeIcon,
-  },
-  {
-    id: "nutrition",
-    title: "Nutrition Specialist",
-    description:
-      "Offer meal plans and ongoing nutrition support to motivated clients.",
-    icon: nutritionIcon,
+    comingSoon: true,
   },
 ];
 
@@ -121,15 +116,15 @@ const Selectrole = () => {
           {
             roles.map((role) => {
               const isSelected = role.id === selectedRole;
-              const isActive = !userProfileTypes.includes(role.id);
+              const isActive = !userProfileTypes.includes(role.id) && !role.comingSoon;
               console.log(`Role: ${role.id}, isActive: ${isActive}`);
               return (
                 <button
                   key={role.id}
                   type="button"
                   disabled={!isActive}
-                  onClick={() => setSelectedRole(role.id)}
-                  className={`group flex h-full flex-col justify-between rounded-3xl border border-border bg-card/80 p-6 text-left shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${!isActive ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:-translate-y-1 hover:shadow-md hover:bg-[#ff8211] hover:text-white"
+                  onClick={() => !role.comingSoon && isActive && setSelectedRole(role.id)}
+                  className={`group relative flex h-full flex-col justify-between rounded-3xl border border-border bg-card/80 p-6 text-left shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${!isActive || role.comingSoon ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:-translate-y-1 hover:shadow-md hover:bg-[#ff8211] hover:text-white"
                     } ${isSelected && isActive ? "bg-[#ff8211] text-white" : ""
                     }`}
                 >
@@ -142,9 +137,16 @@ const Selectrole = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <h2 className="font-bebas text-2xl text-foreground">
-                        {role.title}
-                      </h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-bebas text-2xl text-foreground">
+                          {role.title}
+                        </h2>
+                        {role.comingSoon && (
+                          <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">
+                            Soon
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground">
                         {role.description}
                       </p>
@@ -152,8 +154,8 @@ const Selectrole = () => {
                   </div>
                   <span
                     className={`pt-4 text-sm font-semibold transition ${isSelected && isActive
-                        ? "text-primary"
-                        : "text-muted-foreground group-hover:text-primary"
+                      ? "text-primary"
+                      : "text-muted-foreground group-hover:text-primary"
                       }`}
                   >
                     {isSelected && isActive ? "Selected" : "Select"} →

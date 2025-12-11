@@ -36,7 +36,7 @@ function Footer() {
           <div>
             <h3 className="font-bebas text-xl text-white mb-6 tracking-wide">Explore</h3>
             <ul className="space-y-3 text-sm">
-              {['Programs', 'Trainers', 'Gyms', 'Store'].map((item) => (
+              {['Courses', 'Trainers', 'Gyms', 'Store'].map((item) => (
                 <li key={item}>
                   <a href="#" className="hover:text-orange-500 transition-colors">{item}</a>
                 </li>

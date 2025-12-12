@@ -4,6 +4,7 @@ import FooterDash from "../FooterDash.jsx";
 import { StoreContext } from "../../../context/StoreContext.jsx";
 import { IoIosTrash } from "react-icons/io";
 import { MdOutlineEdit } from "react-icons/md";
+import UploadImage from "../../UploadImage.jsx";
 
 const StoreProdact = () => {
   const { products, addProduct, updateProduct, deleteProduct } = useContext(StoreContext);
@@ -211,14 +212,19 @@ const StoreProdact = () => {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1 text-slate-700">Image URL</label>
-                    <input
-                      name="image"
-                      value={formData.image}
-                      onChange={handleChange}
-                      className="w-full border border-slate-200 rounded-lg p-2.5 focus:border-[#ff8211] outline-none transition"
-                      placeholder="https://example.com/image.jpg"
+                    <label className="block text-sm font-medium mb-1 text-slate-700">Product Image</label>
+                    <UploadImage 
+                      acceptTypes="image/*"
+                      onUpload={(url) => {
+                        setFormData(prev => ({ ...prev, image: url }));
+                      }}
                     />
+                    {formData.image && (
+                      <div className="mt-2">
+                        <p className="text-xs text-slate-600 mb-1">Current Image:</p>
+                        <p className="text-xs text-slate-500 break-all">{formData.image}</p>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-1 text-slate-700">Description</label>

@@ -23,6 +23,7 @@ const NavTraineDash = () => {
     { to: "/trainee/courses", label: "Courses" },
     { to: "/trainee/favorite", label: "Favorite" },
     { to: "/trainee/settings", label: "Profile Settings" },
+    { to: "/my-orders", label: "My Orders" },
   ];
 
   const [showFullName, setShowFullName] = useState(false);

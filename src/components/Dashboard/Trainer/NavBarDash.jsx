@@ -24,6 +24,7 @@ const NavBarDash = () => {
     { to: "/trainer", label: "Dashboard" },
     { to: "/trainer/courses", label: "Courses" },
     { to: "/trainer/clients", label: "Clients" },
+    { to: "/my-orders", label: "My Orders" },
   ];
 
   const [showFullName, setShowFullName] = useState(false);

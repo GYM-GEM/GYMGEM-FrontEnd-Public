@@ -16,6 +16,7 @@ import Community from "./pages/Community.jsx";
 import Coursedetails from "./components/courses/CourseDetails.jsx";
 import Viewprofile from "./components/Viewprofile.jsx";
 import Store from "./pages/Store.jsx";
+import ProductDetails from "./pages/ProductDetails.jsx";
 
 // forms
 import Selectrole from "./components/SelectRole";
@@ -54,6 +55,11 @@ import CourseEnroll from "./components/courses/CourseEnroll.jsx";
 // Checkout components
 import Checkout from "./components/BuyNow/Checkout.jsx";
 import OrderSuccess from "./components/BuyNow/OrderSuccess.jsx";
+// Store components
+import CartPage from "./components/Store/CartPage.jsx";
+import StoreCheckout from "./components/Store/StoreCheckout.jsx";
+import StoreOrderSuccess from "./components/Store/StoreOrderSuccess.jsx";
+import OrderTracking from "./components/Store/OrderTracking.jsx";
 // dashboard gym
 import GymDashboard from "./components/Dashboard/GYM/GymDashboard.jsx";
 import GymMember from "./components/Dashboard/GYM/GymMember.jsx";
@@ -101,9 +107,17 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="/courses/:id/learn" element={<CourseEnroll />} />
           <Route path="checkout" element={<Checkout />} />
-          <Route path="order-success/:orderId" element={<OrderSuccess />} />
+          <Route path="store-order-success" element={<StoreOrderSuccess />} />
           <Route path="*" element={<NotFound />} />
-          <Route path="/stores" element={<Store />} />
+          {/* ---------------------------------------------------------------- */}
+          {/* Store Routes */}
+          <Route path="stores" element={<Store />} />
+          <Route path="store/product/:id" element={<ProductDetails />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="store-checkout" element={<StoreCheckout />} />
+          <Route path="store-order-success" element={<StoreOrderSuccess />} />
+          <Route path="my-orders" element={<OrderTracking />} />
+
         </Route>
 
         {/* -------------------- TRAINER DASHBOARD -------------------- */}

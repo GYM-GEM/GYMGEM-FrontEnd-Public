@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 export const StoreContext = createContext();
 
 export const StoreProvider = ({ children }) => {
+  // Products State
   const [products, setProducts] = useState(() => {
     const savedProducts = localStorage.getItem('products');
     return savedProducts ? JSON.parse(savedProducts) : [
@@ -15,6 +16,7 @@ export const StoreProvider = ({ children }) => {
     ];
   });
 
+  // Orders State
   const [orders, setOrders] = useState(() => {
     const savedOrders = localStorage.getItem('orders');
     return savedOrders ? JSON.parse(savedOrders) : [
@@ -24,6 +26,13 @@ export const StoreProvider = ({ children }) => {
     ];
   });
 
+  // Cart State - Persisted to localStorage
+  const [cart, setCart] = useState(() => {
+    const savedCart = localStorage.getItem('store_cart');
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  // Persist to localStorage
   useEffect(() => {
     localStorage.setItem('products', JSON.stringify(products));
   }, [products]);
@@ -32,7 +41,14 @@ export const StoreProvider = ({ children }) => {
     localStorage.setItem('orders', JSON.stringify(orders));
   }, [orders]);
 
-  // Product Actions
+  useEffect(() => {
+    localStorage.setItem('store_cart', JSON.stringify(cart));
+  }, [cart]);
+
+  // ============================================================================
+  // PRODUCT ACTIONS
+  // ============================================================================
+
   const addProduct = (product) => {
     const newProduct = { ...product, id: uuidv4(), dateAdded: new Date().toISOString() };
     setProducts([newProduct, ...products]);
@@ -46,14 +62,12 @@ export const StoreProvider = ({ children }) => {
     setProducts(products.filter(p => p.id !== id));
   };
 
-  // Order Actions
-  const addOrder = (order) => {
-    const newOrder = { ...order, id: uuidv4(), date: new Date().toISOString(), status: "Pending" };
-    setOrders([newOrder, ...orders]);
-  };
+  // ============================================================================
+  // ORDER ACTIONS
+  // ============================================================================
 
-  const updateOrderStatus = (id, status) => {
-    setOrders(orders.map(o => o.id === id ? { ...o, status } : o));
+  const addOrder = (newOrder) => {
+    setOrders([...orders, { ...newOrder, id: uuidv4(), date: new Date().toISOString() }]);
   };
 
   const updateOrder = (id, updatedOrder) => {
@@ -64,17 +78,111 @@ export const StoreProvider = ({ children }) => {
     setOrders(orders.filter(o => o.id !== id));
   };
 
+  const updateOrderStatus = (id, newStatus) => {
+    setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
+  };
+
+  // ============================================================================
+  // CART ACTIONS
+  // ============================================================================
+
+  /**
+   * Add a product to the cart
+   * If product already exists, increment quantity
+   * @param {Object} product - Product to add
+   * @param {number} quantityToAdd - Quantity to add (default: 1)
+   */
+  const addToCart = (product, quantityToAdd = 1) => {
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.id === product.id);
+      
+      if (existingItem) {
+        // Increment quantity if item already in cart
+        return prevCart.map(item =>
+          item.id === product.id
+            ? { ...item, cartQuantity: item.cartQuantity + quantityToAdd }
+            : item
+        );
+      } else {
+        // Add new item to cart
+        return [...prevCart, { ...product, cartQuantity: quantityToAdd }];
+      }
+    });
+  };
+
+  /**
+   * Remove a product from the cart completely
+   * @param {string} productId - ID of product to remove
+   */
+  const removeFromCart = (productId) => {
+    setCart(prevCart => prevCart.filter(item => item.id !== productId));
+  };
+
+  /**
+   * Update the quantity of a product in the cart
+   * @param {string} productId - ID of product to update
+   * @param {number} newQuantity - New quantity (removes item if <= 0)
+   */
+  const updateCartQuantity = (productId, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+    
+    setCart(prevCart =>
+      prevCart.map(item =>
+        item.id === productId
+          ? { ...item, cartQuantity: newQuantity }
+          : item
+      )
+    );
+  };
+
+  /**
+   * Clear all items from the cart
+   */
+  const clearCart = () => {
+    setCart([]);
+  };
+
+  /**
+   * Get total number of items in cart
+   * @returns {number} Total item count
+   */
+  const getCartItemCount = () => {
+    return cart.reduce((total, item) => total + item.cartQuantity, 0);
+  };
+
+  /**
+   * Get total price of all items in cart
+   * @returns {number} Total price
+   */
+  const getCartTotal = () => {
+    return cart.reduce((total, item) => total + (item.price * item.cartQuantity), 0);
+  };
+
   return (
     <StoreContext.Provider value={{
+      // State
       products,
       orders,
+      cart,
+      // Product Actions
       addProduct,
       updateProduct,
       deleteProduct,
+      // Order Actions
       addOrder,
       updateOrderStatus,
       updateOrder,
-      deleteOrder
+      deleteOrder,
+      // Cart Actions
+      addToCart,
+      removeFromCart,
+      updateCartQuantity,
+      clearCart,
+      getCartItemCount,
+      getCartTotal
     }}>
       {children}
     </StoreContext.Provider>

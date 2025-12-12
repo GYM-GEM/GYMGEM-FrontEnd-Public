@@ -50,7 +50,9 @@ const NavBarDashStore = () => {
     { to: "/store/dashboard", label: "Dashboard" },
     { to: "/store/order", label: "Order" },
     { to: "/store/product", label: "Product" },
+    { to: "/my-orders", label: "My Orders" },
   ];
+
 
   const [showFullName, setShowFullName] = useState(false);
   const [showGG, setShowGG] = useState(true);

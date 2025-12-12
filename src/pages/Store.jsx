@@ -1,12 +1,16 @@
 import { useContext, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { StoreContext } from "../context/StoreContext.jsx";
-import NavBar from "../components/NavBar.jsx";
+import NavBar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
+import { ShoppingCart } from "lucide-react";
 
 const Store = () => {
-  const { products } = useContext(StoreContext);
+  const navigate = useNavigate();
+  const { products, addToCart, getCartItemCount } = useContext(StoreContext);
   const [selectedFilter, setSelectedFilter] = useState("All Products");
-
+  const [addedToCart, setAddedToCart] = useState(null); // For visual feedback
+  
   const filterOptions = [
     {
       label: "All Products",
@@ -56,9 +60,40 @@ const Store = () => {
     return isPublished && matchesCategory;
   });
 
+  // Handle Add to Cart
+  const handleAddToCart = (product) => {
+    if (product.quantity > 0) {
+      addToCart(product, 1);
+      // Show feedback
+      setAddedToCart(product.id);
+      setTimeout(() => setAddedToCart(null), 2000);
+    }
+  };
+
+  const cartItemCount = getCartItemCount();
+
   return (
     <div className="bg-background text-foreground">
       <NavBar />
+
+      {/* FLOATING CART BUTTON */}
+      {cartItemCount > 0 && (
+        <button
+          onClick={() => navigate('/cart')}
+          className="fixed bottom-8 right-8 z-50 bg-[#ff8211] text-white w-16 h-16 rounded-full shadow-lg hover:bg-[#e67300] transition flex items-center justify-center group"
+          aria-label="View cart"
+        >
+          <ShoppingCart className="w-6 h-6" />
+          <span className="absolute -top-2 -right-2 bg-slate-900 text-white w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold">
+            {cartItemCount}
+          </span>
+          {/* Tooltip */}
+          <span className="absolute bottom-full right-0 mb-2 px-3 py-1 bg-slate-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+            View Cart ({cartItemCount} {cartItemCount === 1 ? 'item' : 'items'})
+          </span>
+        </button>
+      )}
+
       <section className="w-full bg-background">
         <div className="mx-auto flex w-[80%] flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
           
@@ -106,34 +141,48 @@ const Store = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
             {filteredProducts.map(p => (
               <div key={p.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition group border border-slate-100">
-                <div className="h-48 bg-slate-200 overflow-hidden relative">
-                  {p.image ? (
-                    <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-400">No Image</div>
-                  )}
-                  {p.quantity < 5 && p.quantity > 0 && (
-                    <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
-                      Low Stock
-                    </span>
-                  )}
-                  {p.quantity === 0 && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold tracking-wider">
-                      SOLD OUT
-                    </div>
-                  )}
-                </div>
+                {/* Product Image - Clickable */}
+                <Link to={`/store/product/${p.id}`} className="block">
+                  <div className="h-48 bg-slate-200 overflow-hidden relative">
+                    {p.image ? (
+                      <img src={p.image} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-400">No Image</div>
+                    )}
+                    {p.quantity < 5 && p.quantity > 0 && (
+                      <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                        Low Stock
+                      </span>
+                    )}
+                    {p.quantity === 0 && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white font-bold tracking-wider">
+                        SOLD OUT
+                      </div>
+                    )}
+                  </div>
+                </Link>
+                
                 <div className="p-4">
                   <p className="text-xs text-[#ff8211] font-semibold uppercase mb-1">{p.category}</p>
-                  <h3 className="font-bold text-slate-900 mb-1 truncate">{p.name}</h3>
+                  {/* Product Title - Clickable */}
+                  <Link to={`/store/product/${p.id}`}>
+                    <h3 className="font-bold text-slate-900 mb-1 truncate hover:text-[#ff8211] transition cursor-pointer">
+                      {p.name}
+                    </h3>
+                  </Link>
                   <p className="text-sm text-slate-500 line-clamp-2 mb-3 h-10">{p.description}</p>
                   <div className="flex items-center justify-between mt-auto">
                     <span className="text-lg font-bold text-slate-900">${p.price}</span>
                     <button 
                       disabled={p.quantity === 0}
-                      className="bg-slate-900 text-white px-3 py-1.5 rounded text-sm hover:bg-[#ff8211] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => handleAddToCart(p)}
+                      className={`px-3 py-1.5 rounded text-sm transition font-medium ${
+                        addedToCart === p.id
+                          ? 'bg-green-600 text-white'
+                          : 'bg-slate-900 text-white hover:bg-[#ff8211]'
+                      } disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      Add to Cart
+                      {addedToCart === p.id ? '✓ Added!' : 'Add to Cart'}
                     </button>
                   </div>
                 </div>

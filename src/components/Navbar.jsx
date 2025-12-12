@@ -219,10 +219,11 @@ function Navbar() {
             </div>
           )}
 
-          <div className="relative px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed flex items-center gap-2">
+          <NavLink to="/stores" className={navLinkClasses}>
             Store
-            <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
-          </div>
+          </NavLink>
+
+
 
           <div className="relative px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed flex items-center gap-2">
             Gym
@@ -330,10 +331,16 @@ function Navbar() {
               </div>
             )}
 
-            <div className="flex items-center justify-between px-4 py-2 text-base font-medium text-gray-400 cursor-not-allowed rounded-md">
+            <NavLink to="/stores" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
               Store
-              <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
-            </div>
+            </NavLink>
+
+            {user && (
+              <NavLink to="/my-orders" onClick={() => setIsOpen(false)} className={mobileLinkClasses}>
+                My Orders
+              </NavLink>
+            )}
+
             <div className="flex items-center justify-between px-4 py-2 text-base font-medium text-gray-400 cursor-not-allowed rounded-md">
               Gym
               <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>

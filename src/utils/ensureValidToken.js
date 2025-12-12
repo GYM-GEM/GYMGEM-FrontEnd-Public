@@ -109,13 +109,16 @@ export const ensureValidToken = async () => {
 
         try {
             // Call refresh endpoint
+            // Call refresh endpoint with token in BODY
+            // Sending both keys to handle different backend configurations
             const response = await axios.post(
                 "http://127.0.0.1:8000/api/auth/refresh-token",
-                {},
                 {
-                    headers: {
-                        refresh: refreshToken,
-                    },
+                    refresh: refreshToken,
+                    refresh_token: refreshToken
+                },
+                {
+                    headers: { "Content-Type": "application/json" }
                 }
             );
 

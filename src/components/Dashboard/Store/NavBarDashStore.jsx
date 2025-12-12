@@ -50,7 +50,7 @@ const NavBarDashStore = () => {
     { to: "/store/dashboard", label: "Dashboard" },
     { to: "/store/order", label: "Order" },
     { to: "/store/product", label: "Product" },
-    { to: "/my-orders", label: "My Orders" },
+    // { to: "/my-orders", label: "My Orders" },
   ];
 
 
@@ -104,8 +104,8 @@ const NavBarDashStore = () => {
               <span className="relative h-6 w-32 overflow-hidden">
                 <span
                   className={`absolute inset-0 font-bebas text-2xl transition-all text-[#ff8211] duration-500 ${showGG
-                      ? "translate-y-0 opacity-100"
-                      : "-translate-y-4 opacity-0"
+                    ? "translate-y-0 opacity-100"
+                    : "-translate-y-4 opacity-0"
                     }`}
                 >
                   GG
@@ -120,8 +120,8 @@ const NavBarDashStore = () => {
                         key={char + index}
                         style={{ transitionDelay: `${delay}s` }}
                         className={`transition-all duration-300 ${showFullName
-                            ? "translate-y-0 opacity-100"
-                            : "translate-y-4 opacity-0"
+                          ? "translate-y-0 opacity-100"
+                          : "translate-y-4 opacity-0"
                           }`}
                       >
                         {char}

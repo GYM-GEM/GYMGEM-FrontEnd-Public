@@ -1,6 +1,6 @@
 import NavBarDash from "./NavBarDash";
 import FooterDash from "../FooterDash";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import testimg from "../../../assets/cardCo1.png";
 import { IoIosTrash } from "react-icons/io";
 import { IoMdSearch } from "react-icons/io";
@@ -15,6 +15,8 @@ import {
   Star,
   MessageSquareText,
   Trophy,
+  Video,
+  Play
 } from "lucide-react";
 
 const rows = [
@@ -59,6 +61,7 @@ const rows = [
 
 // --------------------------------------------
 const ClientTrainerDash = () => {
+  const navigate = useNavigate();
   const [isSearching, setIsSearching] = useState(false);
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
@@ -74,6 +77,21 @@ const ClientTrainerDash = () => {
     setSelected(client);
     setOpen(true);
   };
+
+  // SESSION MODAL STATE
+  const [openSession, setOpenSession] = useState(false);
+  const [sessionName, setSessionName] = useState("");
+
+  const handleStartSession = (e) => {
+    e.preventDefault();
+    if (!sessionName.trim()) return;
+
+    // Navigate to Session with ID (using name or random ID)
+    // In real app, you'd create session via API first
+    const sessionId = Math.floor(Math.random() * 10000);
+    navigate(`/session/${sessionId}`, { state: { sessionName } });
+  };
+
 
   // filters
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -136,12 +154,25 @@ const ClientTrainerDash = () => {
       <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900 py-12">
         <section>
           <div className="max-w-6xl mx-auto px-4">
-            <div className="flex items-center">
-              <span className="flex-1 h-px bg-slate-200" />
-              <div className="px-4">
-                <h2 className="font-bebas text-4xl text-center text-slate-900">Overview</h2>
+            <div className="flex items-center justify-between">
+
+              <div className="flex items-center flex-1">
+                <span className="flex-1 h-px bg-slate-200" />
+                <div className="px-4">
+                  <h2 className="font-bebas text-4xl text-center text-slate-900">Overview</h2>
+                </div>
+                <span className="flex-1 h-px bg-slate-200" />
               </div>
-              <span className="flex-1 h-px bg-slate-200" />
+
+              {/* CREATE SESSION BUTTON */}
+              <button
+                onClick={() => setOpenSession(true)}
+                className="ml-4 flex items-center gap-2 bg-[#ff8211] hover:bg-[#ff8211]/90 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-orange-500/30 transition-all hover:scale-105 active:scale-95"
+              >
+                <Video className="w-5 h-5" />
+                Create Session
+              </button>
+
             </div>
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -313,11 +344,22 @@ const ClientTrainerDash = () => {
                     </tbody>
                   </table>
                 </div>
+                {/* DETAILS MODAL */}
                 <DetailsModal
                   open={open}
                   onClose={() => setOpen(false)}
                   row={selected}
                 />
+
+                {/* CREATE SESSION MODAL */}
+                <CreateSessionModal
+                  open={openSession}
+                  onClose={() => setOpenSession(false)}
+                  sessionName={sessionName}
+                  setSessionName={setSessionName}
+                  onStart={handleStartSession}
+                />
+
               </div>
               <div className="py-6 text-center">
                 <div className="inline-flex items-center gap-2">
@@ -346,6 +388,74 @@ const ClientTrainerDash = () => {
     </>
   );
 };
+
+// ============================================
+// CREATE SESSION MODAL
+// ============================================
+function CreateSessionModal({ open, onClose, sessionName, setSessionName, onStart }) {
+  const backdropRef = useRef(null);
+
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && onClose();
+    if (open) document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      ref={backdropRef}
+      onClick={(e) => e.target === backdropRef.current && onClose()}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in"
+      role="dialog"
+      aria-modal="true"
+    >
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-white/20">
+        <div className="flex items-center justify-between px-6 py-4 border-b bg-[#ff8211]/5">
+          <h2 className="text-xl font-bebas tracking-wide text-[#ff8211] flex items-center gap-2">
+            <Video className="w-5 h-5" /> Start New Session
+          </h2>
+          <button
+            className="p-1 hover:bg-black/5 rounded-full transition-colors"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <X className="h-5 w-5 text-slate-500" />
+          </button>
+        </div>
+
+        <form onSubmit={onStart} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Session Name</label>
+            <input
+              type="text"
+              value={sessionName}
+              onChange={(e) => setSessionName(e.target.value)}
+              placeholder="Ex: HIIT Cardio with Sarah"
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ff8211]/50 focus:border-[#ff8211]"
+              autoFocus
+            />
+          </div>
+
+          <div className="bg-blue-50 p-4 rounded-xl text-xs text-blue-700 font-medium">
+            <p>💡 This will create a live session room. Share the Session ID with your trainees so they can join!</p>
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={!sessionName.trim()}
+              className="w-full bg-[#ff8211] text-white py-3 rounded-xl font-bold hover:bg-[#e06900] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
+            >
+              <Play className="w-5 h-5 fill-current" /> GO LIVE NOW
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
 
 function DetailsModal({ open, onClose, row }) {
   const backdropRef = useRef(null);

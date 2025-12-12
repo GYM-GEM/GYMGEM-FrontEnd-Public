@@ -20,9 +20,9 @@ export const StoreProvider = ({ children }) => {
   const [orders, setOrders] = useState(() => {
     const savedOrders = localStorage.getItem('orders');
     return savedOrders ? JSON.parse(savedOrders) : [
-      { id: uuidv4(), productId: "1", productName: "Whey Protein Isolate", quantity: 1, customerName: "John Doe", status: "Completed", date: new Date().toISOString() },
-      { id: uuidv4(), productId: "2", productName: "Yoga Mat Premium", quantity: 2, customerName: "Jane Smith", status: "Pending", date: new Date(Date.now() - 3600000).toISOString() },
-      { id: uuidv4(), productId: "3", productName: "Dumbbell Set (20kg)", quantity: 1, customerName: "Mike Johnson", status: "Processing", date: new Date(Date.now() - 7200000).toISOString() },
+      { id: uuidv4(), productId: "1", productName: "Whey Protein Isolate", quantity: 1, customerName: "John Doe", status: "Completed", date: new Date().toISOString(), price: 89.99, totalPrice: 89.99 },
+      { id: uuidv4(), productId: "2", productName: "Yoga Mat Premium", quantity: 2, customerName: "Jane Smith", status: "Pending", date: new Date(Date.now() - 3600000).toISOString(), price: 29.99, totalPrice: 59.98 },
+      { id: uuidv4(), productId: "3", productName: "Dumbbell Set (20kg)", quantity: 1, customerName: "Mike Johnson", status: "Processing", date: new Date(Date.now() - 7200000).toISOString(), price: 149.99, totalPrice: 149.99 },
     ];
   });
 
@@ -30,6 +30,12 @@ export const StoreProvider = ({ children }) => {
   const [cart, setCart] = useState(() => {
     const savedCart = localStorage.getItem('store_cart');
     return savedCart ? JSON.parse(savedCart) : [];
+  });
+
+  // Wishlist State - Persisted to localStorage
+  const [wishlist, setWishlist] = useState(() => {
+    const savedWishlist = localStorage.getItem('store_wishlist');
+    return savedWishlist ? JSON.parse(savedWishlist) : [];
   });
 
   // Persist to localStorage
@@ -44,6 +50,10 @@ export const StoreProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('store_cart', JSON.stringify(cart));
   }, [cart]);
+
+  useEffect(() => {
+    localStorage.setItem('store_wishlist', JSON.stringify(wishlist));
+  }, [wishlist]);
 
   // ============================================================================
   // PRODUCT ACTIONS
@@ -95,7 +105,7 @@ export const StoreProvider = ({ children }) => {
   const addToCart = (product, quantityToAdd = 1) => {
     setCart(prevCart => {
       const existingItem = prevCart.find(item => item.id === product.id);
-      
+
       if (existingItem) {
         // Increment quantity if item already in cart
         return prevCart.map(item =>
@@ -128,7 +138,7 @@ export const StoreProvider = ({ children }) => {
       removeFromCart(productId);
       return;
     }
-    
+
     setCart(prevCart =>
       prevCart.map(item =>
         item.id === productId
@@ -161,12 +171,61 @@ export const StoreProvider = ({ children }) => {
     return cart.reduce((total, item) => total + (item.price * item.cartQuantity), 0);
   };
 
+  // ============================================================================
+  // WISHLIST ACTIONS
+  // ============================================================================
+
+  /**
+   * Add a product to the wishlist
+   * @param {Object} product - Product to add
+   */
+  const addToWishlist = (product) => {
+    setWishlist(prevWishlist => {
+      const exists = prevWishlist.find(item => item.id === product.id);
+      if (!exists) {
+        return [...prevWishlist, product];
+      }
+      return prevWishlist;
+    });
+  };
+
+  /**
+   * Remove a product from the wishlist
+   * @param {string} productId - ID of product to remove
+   */
+  const removeFromWishlist = (productId) => {
+    setWishlist(prevWishlist => prevWishlist.filter(item => item.id !== productId));
+  };
+
+  /**
+   * Toggle a product in/out of wishlist
+   * @param {Object} product - Product to toggle
+   */
+  const toggleWishlist = (product) => {
+    const exists = wishlist.find(item => item.id === product.id);
+    if (exists) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist(product);
+    }
+  };
+
+  /**
+   * Check if a product is in the wishlist
+   * @param {string} productId - ID of product to check
+   * @returns {boolean} True if product is in wishlist
+   */
+  const isInWishlist = (productId) => {
+    return wishlist.some(item => item.id === productId);
+  };
+
   return (
     <StoreContext.Provider value={{
       // State
       products,
       orders,
       cart,
+      wishlist,
       // Product Actions
       addProduct,
       updateProduct,
@@ -182,7 +241,12 @@ export const StoreProvider = ({ children }) => {
       updateCartQuantity,
       clearCart,
       getCartItemCount,
-      getCartTotal
+      getCartTotal,
+      // Wishlist Actions
+      addToWishlist,
+      removeFromWishlist,
+      toggleWishlist,
+      isInWishlist
     }}>
       {children}
     </StoreContext.Provider>

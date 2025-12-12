@@ -17,6 +17,7 @@ import Coursedetails from "./components/courses/CourseDetails.jsx";
 import Viewprofile from "./components/Viewprofile.jsx";
 import Store from "./pages/Store.jsx";
 import ProductDetails from "./pages/ProductDetails.jsx";
+import SessionLayout from "./components/Session/SessionLayout.jsx";
 
 // forms
 import Selectrole from "./components/SelectRole";
@@ -25,6 +26,8 @@ import TrainerSpecialization from "./components/Forms/Trainer/TrainerSpecializat
 import TrainerExperience from "./components/Forms/Trainer/TrainerExperience.jsx";
 import Traineeform from "./components/Forms/Trainee/TraineeForm.jsx";
 import TraineeRecord from "./components/Forms/Trainee/TraineeRecord.jsx";
+import Storeform from "./components/Forms/Store/StoreForm.jsx";
+import StoreBranchForm from "./components/Forms/Store/StoreBranchForm.jsx";
 
 // layout
 import RootLayout from "./Layout/Rootlayout";
@@ -51,6 +54,7 @@ import CourseDetails from "./components/courses/CourseDetails.jsx";
 import Settings from "./components/Settings.jsx";
 import PublicTrainerProfile from "./components/PublicTrainerProfile.jsx";
 import Favorite from "./components/Dashboard/Traine/Favorite.jsx";
+import MySessions from "./components/Dashboard/Traine/MySessions.jsx";
 import CourseEnroll from "./components/courses/CourseEnroll.jsx";
 // Checkout components
 import Checkout from "./components/BuyNow/Checkout.jsx";
@@ -74,15 +78,35 @@ import StoreProduct from "./components/Dashboard/Store/StoreProduct.jsx";
 import StoreOrder from "./components/Dashboard/Store/StoreOrder.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import useAuthCheck from "./hooks/useAuthCheck.js";
-
-
-
+import { useEffect } from "react";
+import { refreshSession } from "./utils/axiosConfig.js";
+import { verifyRefreshFlow } from "./utils/testAuth.js"; // Import test function
 
 function App() {
   const location = useLocation();
 
+  // // Expose test function to window for easy console debugging
+  // useEffect(() => {
+  //   window.verifyRefresh = verifyRefreshFlow;
+  // }, []);
 
-  useAuthCheck();
+  // useEffect(() => {
+  //   // Attempt to refresh token on app load/refresh to validate session
+  //   const validateSession = async () => {
+  //     const refreshToken = localStorage.getItem("refresh");
+  //     if (refreshToken) {
+  //       try {
+  //         await refreshSession();
+  //       } catch (error) {
+  //         // If refresh fails, interceptor handles logout, but we can catch here too
+  //         console.warn("Session validation failed:", error);
+  //       }
+  //     }
+  //   };
+  //   validateSession();
+  // }, []);
+
+  // useAuthCheck();
 
   return (
     <AnimatePresence mode="wait">
@@ -98,7 +122,8 @@ function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="requestdetails" element={<RequestDetails />} />
 
-
+          <Route path="session" element={<SessionLayout />} />
+          <Route path="session/:id" element={<SessionLayout />} />
           <Route path="community" element={<Community />} />
           <Route path="/courses/:id" element={<CourseDetails />} />
           <Route path="/trainer-profile/:id" element={<PublicTrainerProfile />} />
@@ -141,6 +166,7 @@ function App() {
           <Route path="courses" element={<ProtectedRoute requiredProfile="trainee"><CoursesTraineDash /></ProtectedRoute>} />
           <Route path="courses/:id" element={<ProtectedRoute requiredProfile="trainee"><CourseDetails /></ProtectedRoute>} />
           <Route path="favorite" element={<ProtectedRoute requiredProfile="trainee"><Favorite /></ProtectedRoute>} />
+          <Route path="sessions" element={<ProtectedRoute requiredProfile="trainee"><MySessions /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute requiredProfile="trainee"><SettingsTrainee /></ProtectedRoute>} />
         </Route>
         {/* -------------------- GYM DASHBOARD -------------------- */}
@@ -176,6 +202,10 @@ function App() {
         {/* -------------------- Tarinee Form -------------------- */}
         <Route path="/traineeform" element={<Traineeform />} />
         <Route path="/traineerecord" element={<TraineeRecord />} />
+        {/* -------------------- Store Form -------------------- */}
+        <Route path="/storeform" element={<Storeform />} />
+        <Route path="/storebranch" element={<StoreBranchForm />} />
+
 
         {/* -------------------- CATCH ALL -------------------- */}
         <Route path="*" element={<NotFound />} />

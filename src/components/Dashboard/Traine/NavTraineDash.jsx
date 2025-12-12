@@ -22,6 +22,7 @@ const NavTraineDash = () => {
     { to: "/trainee", label: "Dashboard" },
     { to: "/trainee/courses", label: "Courses" },
     { to: "/trainee/favorite", label: "Favorite" },
+    { to: "/trainee/sessions", label: "My Sessions" },
     { to: "/trainee/settings", label: "Profile Settings" },
     { to: "/my-orders", label: "My Orders" },
   ];

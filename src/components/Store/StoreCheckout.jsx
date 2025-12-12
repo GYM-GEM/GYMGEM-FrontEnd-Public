@@ -18,10 +18,13 @@ const StoreCheckout = () => {
   const [error, setError] = useState("");
 
   // Form state
+  // Get user info for pre-fill
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const [formData, setFormData] = useState({
     // Shipping Information
-    fullName: "",
-    email: "",
+    fullName: user?.username || "",
+    email: user?.email || "",
     phone: "",
     address: "",
     city: "",
@@ -126,6 +129,8 @@ const StoreCheckout = () => {
           productId: item.id,
           productName: item.name,
           quantity: item.cartQuantity,
+          price: item.price, // Saving price at time of purchase
+          totalPrice: item.price * item.cartQuantity, // Saving calculated total for convenience
           customerName: formData.fullName,
           customerEmail: formData.email,
           customerPhone: formData.phone,
@@ -146,7 +151,7 @@ const StoreCheckout = () => {
 
       // Navigate to success page
       navigate('/store-order-success', {
-        state: { 
+        state: {
           orders: createdOrders,
           total: total,
           customerName: formData.fullName
@@ -165,7 +170,7 @@ const StoreCheckout = () => {
 
       <section className="w-full bg-background pt-24 pb-16">
         <div className="mx-auto w-[90%] max-w-7xl px-4 sm:px-6 lg:px-8">
-          
+
           {/* HEADER */}
           <div className="mb-8">
             <button
@@ -184,10 +189,10 @@ const StoreCheckout = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             {/* CHECKOUT FORM */}
             <div className="lg:col-span-2 space-y-6">
-              
+
               {/* SHIPPING INFORMATION */}
               <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                 <h2 className="font-bebas text-2xl text-slate-900 mb-6 flex items-center gap-2">
@@ -330,11 +335,10 @@ const StoreCheckout = () => {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, paymentMethod: "credit_card" })}
-                      className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${
-                        formData.paymentMethod === "credit_card"
-                          ? "border-[#ff8211] bg-[#ff8211]/5"
-                          : "border-slate-200 hover:border-slate-300"
-                      }`}
+                      className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${formData.paymentMethod === "credit_card"
+                        ? "border-[#ff8211] bg-[#ff8211]/5"
+                        : "border-slate-200 hover:border-slate-300"
+                        }`}
                     >
                       <CreditCard className={`w-6 h-6 ${formData.paymentMethod === "credit_card" ? "text-[#ff8211]" : "text-slate-600"}`} />
                       <span className="text-sm font-medium">Credit Card</span>
@@ -342,11 +346,10 @@ const StoreCheckout = () => {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, paymentMethod: "paypal" })}
-                      className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${
-                        formData.paymentMethod === "paypal"
-                          ? "border-[#ff8211] bg-[#ff8211]/5"
-                          : "border-slate-200 hover:border-slate-300"
-                      }`}
+                      className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${formData.paymentMethod === "paypal"
+                        ? "border-[#ff8211] bg-[#ff8211]/5"
+                        : "border-slate-200 hover:border-slate-300"
+                        }`}
                     >
                       <span className="text-xl">💳</span>
                       <span className="text-sm font-medium">PayPal</span>
@@ -354,11 +357,10 @@ const StoreCheckout = () => {
                     <button
                       type="button"
                       onClick={() => setFormData({ ...formData, paymentMethod: "bank" })}
-                      className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${
-                        formData.paymentMethod === "bank"
-                          ? "border-[#ff8211] bg-[#ff8211]/5"
-                          : "border-slate-200 hover:border-slate-300"
-                      }`}
+                      className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${formData.paymentMethod === "bank"
+                        ? "border-[#ff8211] bg-[#ff8211]/5"
+                        : "border-slate-200 hover:border-slate-300"
+                        }`}
                     >
                       <span className="text-xl">🏦</span>
                       <span className="text-sm font-medium">Bank</span>

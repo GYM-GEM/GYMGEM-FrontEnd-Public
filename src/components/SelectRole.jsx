@@ -37,7 +37,7 @@ const roles = [
     description:
       "Showcase verified products, supplements, and gear to the GymGem community.",
     icon: storeIcon,
-    comingSoon: true,
+    comingSoon: false,
   },
 ];
 
@@ -87,10 +87,12 @@ const Selectrole = () => {
 
       if (selectedRole === "trainer") navigate("/trainerform");
       else if (selectedRole === "trainee") navigate("/traineeform");
+      else if (selectedRole === "store") navigate("/store/dashboard");
       else navigate("/");
     } catch (error) {
       console.error("Error during registration:", error);
-      showToast("Failed. Please try again.", { type: "error" });
+      const errorMessage = error.response?.data?.message || error.response?.data?.detail || "Failed to create profile. Please try again.";
+      showToast(errorMessage, { type: "error" });
     }
   };
 

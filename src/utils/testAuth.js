@@ -82,7 +82,7 @@ export const addProfile = (type, id) => {
 
   const user = JSON.parse(userStr);
   if (!user.profiles) user.profiles = [];
-  
+
   user.profiles.push({ type, id });
   localStorage.setItem("user", JSON.stringify(user));
   console.log(`✅ Added ${type} profile with id ${id}`);
@@ -98,7 +98,7 @@ export const switchProfile = (profileId) => {
 
   const user = JSON.parse(userStr);
   const profile = user.profiles?.find(p => p.id === profileId);
-  
+
   if (!profile) {
     console.error(`❌ Profile with ID ${profileId} not found`);
     return;
@@ -120,4 +120,51 @@ export const viewUser = () => {
   const user = JSON.parse(userStr);
   console.log("📋 Current User:", user);
   return user;
+};
+
+// ==========================================
+// NEW: Test Refresh Flow
+// ==========================================
+import { refreshSession } from "./axiosConfig";
+
+export const verifyRefreshFlow = async () => {
+  console.group("🧪 Testing Token Refresh Flow");
+
+  const originalAccess = localStorage.getItem("access");
+  const originalRefresh = localStorage.getItem("refresh");
+
+  if (!originalRefresh) {
+    console.error("❌ No refresh token found! Login first.");
+    console.groupEnd();
+    return;
+  }
+
+  console.log("1️⃣ Current Access Token:", originalAccess ? "Present" : "Missing");
+  console.log("2️⃣ Current Refresh Token:", originalRefresh ? "Present" : "Missing");
+
+  // Simulate corruption
+  console.log("3️⃣ Simulating corrupted access token...");
+  localStorage.setItem("access", "INVALID_TEST_TOKEN_" + Date.now());
+
+  try {
+    console.log("4️⃣ Attempting refresh...");
+    const newToken = await refreshSession();
+
+    console.log("✅ Refresh SUCCESS!");
+    console.log("Old Token:", originalAccess?.substring(0, 10) + "...");
+    console.log("New Token:", newToken?.substring(0, 10) + "...");
+
+    if (newToken !== originalAccess && newToken !== "INVALID_TEST_TOKEN") {
+      console.log("🎉 Verification PASSED: Token was actually updated!");
+    } else {
+      console.warn("⚠️ Warning: Token might be same as before (if server returned same token)");
+    }
+
+  } catch (error) {
+    console.error("❌ Refresh FAILED:", error);
+    console.log("Restoring original token...");
+    if (originalAccess) localStorage.setItem("access", originalAccess);
+  }
+
+  console.groupEnd();
 };

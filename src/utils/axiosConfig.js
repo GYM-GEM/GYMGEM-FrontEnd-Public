@@ -1,12 +1,14 @@
 import axios from "axios";
 import { getTokenTimeRemaining, decodeToken } from "./auth.js";
 
+const baseURL = import.meta.env.VITE_API_URL;
+
 // ============================================================================
 // AXIOS INSTANCE CONFIGURATION
 // ============================================================================
 const axiosInstance = axios.create({
-    baseURL: "http://127.0.0.1:8000",
-    timeout: 10000,
+    baseURL: baseURL,
+    timeout: 50000,
     headers: {
         "Content-Type": "application/json",
     },

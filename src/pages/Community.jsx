@@ -5,6 +5,7 @@ import { useToast } from "../context/ToastContext";
 import { Heart, MessageCircle, Send, Trash2, Edit2, MoreVertical, Upload, X, FileText, Search, Hash, TrendingUp, Users } from "lucide-react";
 import axiosInstance from "../utils/axiosConfig";
 import UploadImage from "../components/UploadImage";
+import { Link } from "react-router-dom";
 
 function Community() {
   const user = JSON.parse(localStorage.getItem("user")) || null;
@@ -12,6 +13,8 @@ function Community() {
 
   // State
   const [posts, setPosts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isCreatingPost, setIsCreatingPost] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [newPostTitle, setNewPostTitle] = useState("");
   const [newPostContent, setNewPostContent] = useState("");
@@ -33,18 +36,8 @@ function Community() {
   const [showCommentLikes, setShowCommentLikes] = useState(null);
   const [postLikes, setPostLikes] = useState({});
   const [commentLikes, setCommentLikes] = useState({});
-  const [trendingHashtags, setTrendingHashtags] = useState([
-    { tag: "#FitnessGoals", count: 1250 },
-    { tag: "#WorkoutMotivation", count: 980 },
-    { tag: "#HealthyLifestyle", count: 756 },
-    { tag: "#GymLife", count: 642 },
-    { tag: "#Transformation", count: 530 }
-  ]);
-  const [topProfiles, setTopProfiles] = useState([
-    { name: "Alex Johnson", posts: 45, avatar: null },
-    { name: "Maria Garcia", posts: 38, avatar: null },
-    { name: "Chris Lee", posts: 32, avatar: null }
-  ]);
+  const [trendingHashtags, setTrendingHashtags] = useState([]);
+  const [topProfiles, setTopProfiles] = useState([]);
 
   // Fetch all posts with optional search
   const fetchPosts = async (search = "") => {
@@ -54,7 +47,9 @@ function Community() {
       setPosts(response.data);
     } catch (error) {
       console.error("Error fetching posts:", error);
-      showToast("Failed to load posts", { type: "error" });
+      // showToast("Failed to load posts", { type: "error" });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -65,6 +60,24 @@ function Community() {
       setComments(prev => ({ ...prev, [postId]: response.data }));
     } catch (error) {
       console.error("Error fetching comments:", error);
+    }
+  };
+
+  // Fetch trending hashtags and top trainers
+  const fetchTrendingData = async () => {
+    try {
+      const response = await axiosInstance.get("/api/community/posts/trending-hashtags");
+
+      // Transform trending_hashtags from [["#tag", count], ...] to [{ tag: "#tag", count: num }, ...]
+      const formattedHashtags = response.data.trending_hashtags.map(([tag, count]) => ({
+        tag,
+        count
+      }));
+
+      setTrendingHashtags(formattedHashtags);
+      setTopProfiles(response.data.top_trainers);
+    } catch (error) {
+      console.error("Error fetching trending data:", error);
     }
   };
 
@@ -87,6 +100,7 @@ function Community() {
       return;
     }
 
+    setIsCreatingPost(true);
     try {
       const postData = {
         title: newPostTitle,
@@ -110,6 +124,8 @@ function Community() {
     } catch (error) {
       console.error("Error creating post:", error);
       showToast("Failed to create post", { type: "error" });
+    } finally {
+      setIsCreatingPost(false);
     }
   };
 
@@ -311,6 +327,7 @@ function Community() {
   // Initial load
   useEffect(() => {
     fetchPosts();
+    fetchTrendingData();
   }, []);
 
   // Parse content and make hashtags clickable
@@ -331,6 +348,35 @@ function Community() {
       return <span key={index}>{part}</span>;
     });
   };
+
+  // Skeleton Loader Component
+  const PostSkeleton = () => (
+    <article className="bg-white rounded-2xl shadow-sm border border-gray-100 animate-pulse">
+      <div className="p-6 pb-4">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 rounded-full bg-gray-200"></div>
+            <div>
+              <div className="h-4 w-32 bg-gray-200 rounded mb-2"></div>
+              <div className="h-3 w-24 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-3">
+          <div className="h-6 w-3/4 bg-gray-200 rounded"></div>
+          <div className="h-4 w-full bg-gray-200 rounded"></div>
+          <div className="h-4 w-full bg-gray-200 rounded"></div>
+          <div className="h-4 w-2/3 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+      <div className="px-6 pb-4">
+        <div className="flex items-center gap-6 pt-3 border-t border-gray-100">
+          <div className="h-5 w-16 bg-gray-200 rounded"></div>
+          <div className="h-5 w-16 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    </article>
+  );
 
   return (
     <>
@@ -467,10 +513,16 @@ function Community() {
                         </button>
                         <button
                           onClick={handleCreatePost}
-                          disabled={!newPostTitle.trim() || !newPostContent.trim()}
-                          className="rounded-lg bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-2.5 text-sm font-bold text-white hover:from-orange-700 hover:to-orange-600 disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-sm hover:shadow-md"
+                          disabled={!newPostTitle.trim() || !newPostContent.trim() || isCreatingPost}
+                          className="rounded-lg bg-gradient-to-r from-orange-600 to-orange-500 px-6 py-2.5 text-sm font-bold text-white hover:from-orange-700 hover:to-orange-600 disabled:cursor-not-allowed disabled:opacity-50 transition-all shadow-sm hover:shadow-md flex items-center gap-2"
                         >
-                          Post
+                          {isCreatingPost && (
+                            <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                          )}
+                          {isCreatingPost ? "Posting..." : "Post"}
                         </button>
                       </div>
                     </div>
@@ -480,7 +532,14 @@ function Community() {
 
               {/* Posts Feed */}
               <div className="space-y-4">
-                {posts.length === 0 ? (
+                {isLoading ? (
+                  // Show skeleton loaders while loading
+                  <>
+                    <PostSkeleton />
+                    <PostSkeleton />
+                    <PostSkeleton />
+                  </>
+                ) : posts.length === 0 ? (
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
                     <p className="text-gray-500">No posts yet. Be the first to share!</p>
                   </div>
@@ -855,20 +914,36 @@ function Community() {
               <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sticky top-24">
                 <div className="flex items-center gap-2 mb-4">
                   <Users className="h-5 w-5 text-orange-600" />
-                  <h3 className="font-bebas text-xl tracking-wide text-gray-900">TOP MEMBERS</h3>
+                  <h3 className="font-bebas text-xl tracking-wide text-gray-900">TOP TRAINERS</h3>
                 </div>
                 <div className="space-y-4">
-                  {topProfiles.map((profile, idx) => (
-                    <div key={idx} className="flex items-center gap-3 pb-3 border-b border-gray-100 last:border-b-0">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold">
-                        {profile.name.charAt(0)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-gray-900 truncate">{profile.name}</p>
-                        <p className="text-xs text-gray-500">{profile.posts} posts</p>
-                      </div>
-                    </div>
-                  ))}
+                  {topProfiles.length > 0 ? (
+                    topProfiles.map((profile, idx) => (
+                      profile.trainer_name && (
+                        <div key={idx} className="flex items-center gap-3 pb-3 border-b border-gray-100 last:border-b-0">
+                          {profile.profile_picture ? (
+                            <img
+                              src={profile.profile_picture}
+                              alt={profile.trainer_name}
+                              className="h-10 w-10 rounded-full object-cover border-2 border-orange-500"
+                            />
+                          ) : (
+                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center text-white font-bold">
+                              {profile.trainer_name.charAt(0)}
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <Link to={`/trainer-profile/${profile.author_id}`} className="inline-block hover:opacity-90 transition">
+                              <p className="font-semibold text-sm text-gray-900 truncate cursor-pointer hover:underline">{profile.trainer_name.split(' ')[0]}</p>
+                            </Link>
+                            <p className="text-xs text-gray-500">{profile.post_count} posts</p>
+                          </div>
+                        </div>
+                      )
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500 text-center py-4">No top trainers yet</p>
+                  )}
                 </div>
               </div>
             </aside>

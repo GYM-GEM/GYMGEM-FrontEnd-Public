@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 import {
   MapPin,
   Mail,
@@ -68,7 +68,7 @@ const PublicTrainerProfile = () => {
     // Fetch Categories for mapping
     const getCategories = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/utils/categories');
+        const response = await axiosInstance.get('/api/utils/categories');
         setCategories(response.data.results);
         console.log("categories:", response.data.results);
       } catch (error) {
@@ -82,12 +82,7 @@ const PublicTrainerProfile = () => {
     const fetchTrainerProfile = async () => {
       setIsLoading(true);
       try {
-        const token = localStorage.getItem('access');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-        const response = await axios.get(`http://localhost:8000/api/trainers/create?profile_id=${id}`, {
-          headers
-        });
+        const response = await axiosInstance.get(`/api/trainers/create?profile_id=${id}`);
 
         // Map API response to component state structure
         const apiData = response.data;
@@ -131,16 +126,8 @@ const PublicTrainerProfile = () => {
     };
 
     const fetchCourses = async () => {
-      const token = localStorage.getItem('access');
-
       try {
-        const response = await axios.get(`http://localhost:8000/api/courses/courses/for-trainees?trainer_profile=${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            },
-          }
-        );
+        const response = await axiosInstance.get(`/api/courses/courses/for-trainees?trainer_profile=${id}`);
 
         const data = response.data;
 

@@ -128,7 +128,7 @@ const Traineeform = () => {
                 </label>
                 <input
                   id="name"
-                  placeholder="Enter your name"
+                  placeholder="Enter Your Full Name"
                   {...register("name", {
                     required: "Name is required",
                     minLength: {
@@ -199,7 +199,7 @@ const Traineeform = () => {
                 <input
                   id="phone"
                   type="tel"
-                  placeholder="Enter your phone number"
+                  placeholder="Enter Your Phone Number"
                   {...register("phone", {
                     required: "Phone number is required",
                     pattern: {
@@ -246,7 +246,7 @@ const Traineeform = () => {
               {/* ZIP Code */}
               <div className="space-y-2">
                 <label htmlFor="zip" className="text-sm font-medium text-foreground">
-                  ZIP Code
+                  ZIP / Postal code
                 </label>
                 <input
                   id="zip"
@@ -270,7 +270,7 @@ const Traineeform = () => {
 
             <button
               type="submit"
-              className="mt-4 inline-flex h-11 items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-[#ff8211]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-[#ff8211]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
             >
               Submit & Next
             </button>

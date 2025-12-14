@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
 
@@ -23,10 +23,10 @@ const TrainerSpecialization = () => {
     const token = localStorage.getItem('access')
     try {
       // Send POST request to backend
-      const response = await axios.post("http://127.0.0.1:8000/api/trainers/specializations", payload,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+      // Send POST request to backend
+      const response = await axiosInstance.post(
+        "/api/trainers/specializations",
+        payload
       );
       console.log("Response:", response.data);
       showToast("trainer successful!", { type: "success" });

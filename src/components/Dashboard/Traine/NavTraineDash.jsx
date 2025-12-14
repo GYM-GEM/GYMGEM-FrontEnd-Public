@@ -51,17 +51,13 @@ const NavTraineDash = () => {
         }
       );
 
-      localStorage.removeItem("user");
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
+      localStorage.clear();
 
       showToast("Logout successful!", { type: "success" });
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
-      localStorage.removeItem("user");
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
+      localStorage.clear();
       showToast("Logged out", { type: "info" });
       navigate("/login");
     }

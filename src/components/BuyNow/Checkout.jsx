@@ -3,7 +3,7 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import { CreditCard, Lock, ShieldCheck, ArrowLeft } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosConfig";
 
 // ============================================================================
 // ORDER MANAGEMENT LOGIC
@@ -36,13 +36,8 @@ const getAllOrders = () => {
 
 
 const getEnrolledCourses = () => {
-  const token = localStorage.getItem("access");
   try {
-    const response = axios.get("http://127.0.0.1:8000/api/courses/enrollments/my-enrollments", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = axiosInstance.get("/api/courses/enrollments/my-enrollments");
     return response.data;
   } catch (error) {
     console.error('Error reading enrollments:', error);
@@ -300,16 +295,10 @@ const Checkout = () => {
 
       if (paymentResult.success) {
         // Enroll user in course via API
-        const token = localStorage.getItem("access");
         try {
-          const enrollmentResponse = await axios.post(
-            `http://127.0.0.1:8000/api/courses/enrollments/${course.id}/enroll/`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+          const enrollmentResponse = await axiosInstance.post(
+            `/api/courses/enrollments/${course.id}/enroll/`,
+            {}
           );
           console.log("Enrollment successful:", enrollmentResponse.data);
         } catch (enrollError) {

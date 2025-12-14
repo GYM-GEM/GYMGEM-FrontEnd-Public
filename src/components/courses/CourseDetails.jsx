@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosConfig";
 
 
 const CourseDetails = () => {
@@ -47,15 +47,8 @@ const CourseDetails = () => {
   const [copied, setCopied] = useState(false);
 
   const getCourseById = async (id) => {
-    const token = localStorage.getItem('access');
     try {
-      const course = await axios.get(`http://localhost:8000/api/courses/courses/${id}/detail/`
-        , {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const course = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
       setCourse(course.data);
     } catch (error) {
       console.error("Error fetching course by ID:", error);
@@ -63,13 +56,8 @@ const CourseDetails = () => {
   };
 
   const getTrainerById = async (trainerId) => {
-    const token = localStorage.getItem('access');
     try {
-      const response = await axios.get(`http://localhost:8000/api/trainers/create?profile_id=${trainerId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await axiosInstance.get(`/api/trainers/create?profile_id=${trainerId}`);
       setTrainer(response.data.trainer);
     } catch (error) {
       console.error("Error fetching trainer by ID:", error);
@@ -217,23 +205,10 @@ const CourseDetails = () => {
 
   const handleToggleFavorite = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
-    const token = localStorage.getItem('access');
-
-    if (!user || !token) {
-      navigate('/login');
-      return;
-    }
-
     try {
-      setIsWishlistLoading(true);
-      await axios.post(
-        `http://localhost:8000/api/courses/enrollments/${course.id}/add-to-wishlist/`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      await axiosInstance.post(
+        `/api/courses/enrollments/${course.id}/add-to-wishlist/`,
+        {}
       );
 
       // Update local state based on successful toggle (assuming backend toggles)

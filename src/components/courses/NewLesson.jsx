@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useLocation, useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosConfig";
+import UploadImage from "../UploadImage";
 
 const NewLeason = () => {
   const location = useLocation();
@@ -13,6 +14,7 @@ const NewLeason = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -44,48 +46,6 @@ const NewLeason = () => {
       console.log(error);
     }
 
-    // const newLesson = {
-    //   id: Date.now(),
-    //   ...lessonData,
-    //   courseId: course.id,
-    //   sections: [], // Initialize empty sections array
-    //   status: lessonData.status || "draft",
-    // };
-
-    // // Save to localStorage
-    // const savedCourses = JSON.parse(localStorage.getItem("courses")) || [];
-    // let updatedCourses;
-
-    // // Check if course exists in localStorage
-    // const courseExists = savedCourses.some(c => c.id === course.id);
-
-    // if (courseExists) {
-    //   // Update existing course
-    //   updatedCourses = savedCourses.map((c) =>
-    //     c.id === course.id
-    //       ? { ...c, lessons: [...(c.lessons || []), newLesson] }
-    //       : c
-    //   );
-    // } else {
-    //   // Add new course from API response + new lesson
-    //   const courseWithLesson = {
-    //     ...course,
-    //     lessons: [newLesson]
-    //   };
-    //   updatedCourses = [...savedCourses, courseWithLesson];
-    // }
-
-    // localStorage.setItem("courses", JSON.stringify(updatedCourses));
-
-    // // Navigate to AddSection page to add sections to this lesson
-    // const updatedCourse = updatedCourses.find((c) => c.id === course.id);
-
-    // navigate("/addsection", { 
-    //   state: { 
-    //     course: updatedCourse, 
-    //     lesson: newLesson 
-    //   } 
-    // });
   };
   return (
     <>
@@ -144,7 +104,7 @@ const NewLeason = () => {
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <div>
                   <label className="poppins-medium text-[1rem]">
                     Cover URL
@@ -162,6 +122,26 @@ const NewLeason = () => {
                     This field is required
                   </p>
                 )}
+              </div> */}
+              <div>
+                <div className="pb-[0.25rem]">
+                  <label className="poppins-medium text-[1rem]">
+                    Cover Image
+                  </label>
+                </div>
+                <div className="border rounded-md p-[10px] border-[#FF8211]">
+                  <UploadImage onUpload={(url) => setValue("cover", url)} />
+                  {/* Hidden input to register the field validation if needed, or just let handleSubmit pick up the value if setValue registered it effectively? 
+                      useForm requires register for validation usually, but setValue with {shouldValidate: true} works too if we register it manually or use a hidden input.
+                      Using hidden input is safer for 'required' validation. 
+                  */}
+                  <input type="hidden" {...register("cover", { required: true })} />
+                  {errors.cover && (
+                    <p className="text-red-500 text-sm mt-1">
+                      Cover image is required
+                    </p>
+                  )}
+                </div>
               </div>
 
               <div>

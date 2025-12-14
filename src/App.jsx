@@ -84,6 +84,7 @@ import useAuthCheck from "./hooks/useAuthCheck.js";
 import { useEffect } from "react";
 import { refreshSession } from "./utils/axiosConfig.js";
 import { verifyRefreshFlow } from "./utils/testAuth.js"; // Import test function
+import GlobalLoader from "./components/GlobalLoader.jsx";
 
 function App() {
   const location = useLocation();
@@ -112,7 +113,9 @@ function App() {
   // useAuthCheck();
 
   return (
-    <AnimatePresence mode="wait">
+    <>
+      <GlobalLoader />
+      <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* -------------------- PUBLIC + LAYOUT -------------------- */}
         <Route path="/" element={<RootLayout />}>
@@ -218,7 +221,8 @@ function App() {
         {/* -------------------- CATCH ALL -------------------- */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   );
 }
 

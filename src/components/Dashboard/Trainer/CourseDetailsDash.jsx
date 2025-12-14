@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import NavBarDash from "./NavBarDash";
 import FooterDash from "../FooterDash";
+import axiosInstance from "../../../utils/axiosConfig";
 
 const CourseDetailsDash = () => {
   const { id } = useParams();
@@ -41,31 +42,39 @@ const CourseDetailsDash = () => {
   const [learnForm, setLearnForm] = useState([]);
 
   useEffect(() => {
-    // Load course from localStorage
-    const courses = JSON.parse(localStorage.getItem("courses")) || [];
-    const foundCourse = courses.find((c) => String(c.id) === id);
-    if (foundCourse) {
-      // Ensure whatYouLearn exists
-      if (!foundCourse.whatYouLearn) {
-        foundCourse.whatYouLearn = [
-          "Master the fundamentals of strength training",
-          "Create personalized workout routines",
-          "Understand proper form and technique",
-          "Learn nutrition strategies for muscle building",
-          "Prevent common injuries and setbacks",
-          "Track progress and set achievable goals",
-        ];
+    const fetchCourse = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
+        const foundCourse = response.data;
+        
+        // Ensure whatYouLearn exists (if backend doesn't provide it, keep default or empty)
+        if (!foundCourse.whatYouLearn) {
+          foundCourse.whatYouLearn = [
+            "Master the fundamentals of strength training",
+            "Create personalized workout routines",
+            "Understand proper form and technique",
+            "Learn nutrition strategies for muscle building",
+            "Prevent common injuries and setbacks",
+            "Track progress and set achievable goals",
+          ];
+        }
+        setCourse(foundCourse);
+        setInfoForm({
+          title: foundCourse.title,
+          price: foundCourse.price,
+          category: foundCourse.category,
+          level: foundCourse.level,
+          language: foundCourse.language,
+        });
+        setDescForm(foundCourse.description || "");
+        setLearnForm(foundCourse.whatYouLearn);
+      } catch (error) {
+        console.error("Failed to fetch course details:", error);
       }
-      setCourse(foundCourse);
-      setInfoForm({
-        title: foundCourse.title,
-        price: foundCourse.price,
-        category: foundCourse.category,
-        level: foundCourse.level,
-        language: foundCourse.language,
-      });
-      setDescForm(foundCourse.description || "");
-      setLearnForm(foundCourse.whatYouLearn);
+    };
+
+    if (id) {
+      fetchCourse();
     }
   }, [id]);
 
@@ -91,16 +100,20 @@ const CourseDetailsDash = () => {
   };
 
   const getContentIcon = (type) => {
-    switch (type) {
-      case "Video":
+    const t = type?.toLowerCase();
+    switch (t) {
+      case "video":
         return <Video className="w-4 h-4" />;
-      case "Article":
+      case "article":
+      case "text":
         return <FileText className="w-4 h-4" />;
-      case "PDF":
-      case "DOC":
+      case "pdf":
+      case "doc":
         return <FileIcon className="w-4 h-4" />;
-      case "Image":
+      case "image":
         return <ImageIcon className="w-4 h-4" />;
+      case "audio":
+         return <PlayCircle className="w-4 h-4" />;
       default:
         return <PlayCircle className="w-4 h-4" />;
     }
@@ -231,7 +244,7 @@ const CourseDetailsDash = () => {
               {/* Course Image */}
               <div className="md:col-span-1">
                 <img
-                  src={course.img || "https://via.placeholder.com/400x300"}
+                  src={course.cover || "https://via.placeholder.com/400x300"}
                   alt={course.title}
                   className="w-full h-64 md:h-full object-cover"
                 />
@@ -372,12 +385,12 @@ const CourseDetailsDash = () => {
                         </span>
                         <span
                           className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium poppins-regular ${
-                            course.status === "Published"
+                            course.status?.toLowerCase() === "published"
                               ? "bg-green-100 text-green-700"
                               : "bg-yellow-100 text-yellow-700"
                           }`}
                         >
-                          {course.status === "Published" ? (
+                          {course.status?.toLowerCase() === "published" ? (
                             <Eye className="w-4 h-4 mr-1" />
                           ) : (
                             <EyeOff className="w-4 h-4 mr-1" />
@@ -390,7 +403,7 @@ const CourseDetailsDash = () => {
                           Students
                         </span>
                         <span className="text-xl font-semibold text-foreground poppins-medium">
-                          {course.client || 0}
+                          {course.students_enrolled || 0}
                         </span>
                       </div>
                     </div>
@@ -451,87 +464,7 @@ const CourseDetailsDash = () => {
             )}
           </div>
 
-          {/* What You Will Learn Section */}
-          {/* <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-foreground bebas-regular">
-                What You'll Learn
-              </h2>
-              {!isEditingLearn && (
-                <button
-                  onClick={() => setIsEditingLearn(true)}
-                  className="px-4 py-2 bg-[#FF8211] text-white rounded-lg hover:bg-[#ff7906] transition-colors poppins-regular text-sm flex items-center gap-2"
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit List
-                </button>
-              )}
-            </div>
 
-            {isEditingLearn ? (
-              <div className="space-y-4">
-                {learnForm.map((item, idx) => (
-                  <div key={idx} className="flex gap-2">
-                    <input
-                      type="text"
-                      value={item}
-                      onChange={(e) => handleLearnItemChange(idx, e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8211]"
-                      placeholder="Enter learning point..."
-                    />
-                    <button
-                      onClick={() => handleRemoveLearnItem(idx)}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-md"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={handleAddLearnItem}
-                  className="text-[#FF8211] hover:text-[#ff7906] text-sm font-medium flex items-center gap-1"
-                >
-                  <Plus className="w-4 h-4" /> Add Item
-                </button>
-                <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-100">
-                  <button
-                    onClick={() => {
-                      setIsEditingLearn(false);
-                      setLearnForm(course.whatYouLearn || []);
-                    }}
-                    className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md flex items-center gap-1"
-                  >
-                    <X className="w-4 h-4" /> Cancel
-                  </button>
-                  <button
-                    onClick={handleSaveLearn}
-                    className="px-4 py-2 bg-[#FF8211] text-white rounded-md hover:bg-[#ff7906] flex items-center gap-1"
-                  >
-                    <Save className="w-4 h-4" /> Save Changes
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {course.whatYouLearn && course.whatYouLearn.length > 0 ? (
-                  course.whatYouLearn.map((item, idx) => (
-                    <div key={idx} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full bg-[#86ac55]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <div className="w-2 h-2 rounded-full bg-[#86ac55]" />
-                      </div>
-                      <span className="text-muted-foreground poppins-regular text-sm">
-                        {item}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 text-sm italic">
-                    No learning points added yet.
-                  </p>
-                )}
-              </div>
-            )}
-          </div> */}
 
           {/* Curriculum Section */}
           <div className="bg-card rounded-lg shadow-sm border border-border p-6 mb-8">
@@ -541,7 +474,7 @@ const CourseDetailsDash = () => {
               </h2>
               <div className="flex gap-2">
                 <Link
-                  to="/addlesson"
+                  to="/trainer/addlesson"
                   state={{ course }}
                   className="px-4 py-2 bg-[#FF8211] text-white rounded-lg hover:bg-[#ff7906] transition-colors poppins-regular text-sm flex items-center gap-2"
                 >
@@ -551,9 +484,9 @@ const CourseDetailsDash = () => {
               </div>
             </div>
 
-            {course.lessons && course.lessons.length > 0 ? (
+            {(course.lessons_details || course.lessons) && (course.lessons_details || course.lessons).length > 0 ? (
               <div className="space-y-2">
-                {course.lessons.map((lesson, lessonIndex) => (
+                {(course.lessons_details || course.lessons).map((lesson, lessonIndex) => (
                   <div
                     key={lessonIndex}
                     className="border border-border rounded-lg overflow-hidden"
@@ -593,7 +526,7 @@ const CourseDetailsDash = () => {
                             >
                               <div className="flex items-center gap-3">
                                 <div className="text-muted-foreground">
-                                  {getContentIcon(section.contentType)}
+                                  {getContentIcon(section.content_type || section.contentType)}
                                 </div>
                                 <span className="text-sm text-foreground poppins-regular">
                                   {section.title}
@@ -616,7 +549,7 @@ const CourseDetailsDash = () => {
                         )}
                         <div className="px-4 py-3 border-t border-border">
                           <Link
-                            to="/addsection"
+                            to="/trainer/addsection"
                             state={{ course, lesson }}
                             className="text-[#FF8211] hover:text-[#ff7906] poppins-regular text-sm flex items-center gap-1"
                           >
@@ -635,7 +568,7 @@ const CourseDetailsDash = () => {
                   No lessons added yet
                 </p>
                 <Link
-                  to="/addlesson"
+                  to="/trainer/addlesson"
                   state={{ course }}
                   className="inline-flex items-center px-4 py-2 bg-[#FF8211] text-white rounded-lg hover:bg-[#ff7906] transition-colors poppins-regular text-sm gap-2"
                 >
@@ -701,12 +634,12 @@ const CourseDetailsDash = () => {
             <button
               onClick={handlePublishToggle}
               className={`px-6 py-3 rounded-lg transition-colors poppins-medium flex items-center gap-2 ${
-                course.status === "Published"
+                course.status?.toLowerCase() === "published"
                   ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
                   : "bg-[#86ac55] text-white hover:bg-[#86ac55]/90"
               }`}
             >
-              {course.status === "Published" ? (
+              {course.status?.toLowerCase() === "published" ? (
                 <>
                   <EyeOff className="w-5 h-5" />
                   Unpublish

@@ -206,7 +206,7 @@ const NewLeason = () => {
               <div className="flex  w-full mt-[41px]">
                 <div className="w-full ">
                   <Link
-                    to="/addcourse"
+                    to={`/trainer/courses/${course?.id}`}
                     className=" text-[#FF8211] poppins-regular text-[14px] hover:text-[#FFAB63]   transition duration-300 "
                   >
                     ← Back to Course Details

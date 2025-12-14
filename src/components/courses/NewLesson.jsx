@@ -131,10 +131,6 @@ const NewLeason = () => {
                 </div>
                 <div className="border rounded-md p-[10px] border-[#FF8211]">
                   <UploadImage onUpload={(url) => setValue("cover", url)} />
-                  {/* Hidden input to register the field validation if needed, or just let handleSubmit pick up the value if setValue registered it effectively? 
-                      useForm requires register for validation usually, but setValue with {shouldValidate: true} works too if we register it manually or use a hidden input.
-                      Using hidden input is safer for 'required' validation. 
-                  */}
                   <input type="hidden" {...register("cover", { required: true })} />
                   {errors.cover && (
                     <p className="text-red-500 text-sm mt-1">

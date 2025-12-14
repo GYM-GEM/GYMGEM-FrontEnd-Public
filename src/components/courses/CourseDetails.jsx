@@ -480,7 +480,7 @@ const CourseDetails = () => {
                 ) : (
                   <button
                     onClick={handleBuyNow}
-                    className="cursor-pointer flex-1 px-8 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-sm"
+                    className="flex-1 px-8 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] cursor-pointer transition-colors shadow-sm"
                   >
                     Buy Now - ${courseData.price}
                   </button>

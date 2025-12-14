@@ -6,6 +6,7 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { useToast } from "../../context/ToastContext";
 import axiosInstance from "../../utils/axiosConfig";
+import UploadImage from "../../components/UploadImage";
 
 const AddSection = () => {
   const location = useLocation();
@@ -18,6 +19,7 @@ const AddSection = () => {
   const {
     register,
     handleSubmit,
+    setValue,
     reset,
     formState: { errors },
   } = useForm();
@@ -42,11 +44,11 @@ const AddSection = () => {
     // ✅ Using axiosInstance - no manual token needed!
     try {
       const res = await axiosInstance.post(`/api/courses/sections/create/`, payload);
-      console.log(res.data)
+
       return res.data;
 
     } catch (error) {
-      console.log(error)
+
       showToast("Error saving section", { type: "error" });
     }
 
@@ -60,7 +62,7 @@ const AddSection = () => {
       showToast("Section created successfully!", { type: "success" });
       reset();
     } catch (err) {
-      console.log(err)
+
       showToast("Error saving section", { type: "error" });
     }
     setIsSubmitting(false);
@@ -196,7 +198,7 @@ const AddSection = () => {
                   )}
                 </div>
 
-                <div>
+                {/* <div>
                   <label className="poppins-medium text-[1rem] block mb-1">
                     Content URL
                   </label>
@@ -205,7 +207,42 @@ const AddSection = () => {
                     placeholder="https://example.com/video.mp4"
                     className="w-full border rounded-md p-[10px] text-[#000] poppins-extralight"
                   />
+                </div> */}
+                              <div>
+                <div className="pb-[0.25rem]">
+                  <label className="poppins-medium text-[1rem]">
+                    Content URL
+                  </label>
                 </div>
+                <div className="border rounded-md p-[10px] border-[#FF8211]">
+                  <UploadImage 
+                    onUpload={(url, type) => {
+                      setValue("contentUrl", url, { shouldValidate: true });
+                      if (type === 'video' || type === 'image') {
+                        setValue("contentType", type, { shouldValidate: true });
+                      }
+                    }} 
+                  />
+                  
+                  <div className="relative flex py-2 items-center">
+                    <div className="flex-grow border-t border-gray-300"></div>
+                    <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">Or enter URL manually</span>
+                    <div className="flex-grow border-t border-gray-300"></div>
+                  </div>
+
+                  <input 
+                    type="text" 
+                    {...register("contentUrl", { required: "Content URL is required" })} 
+                    placeholder="Paste video URL (YouTube, Vimeo) or file URL here"
+                    className="w-full border rounded-md p-[10px] text-[#000] poppins-extralight"
+                  />
+                  {errors.contentUrl && (
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.contentUrl.message}
+                    </p>
+                  )}
+                </div>
+              </div>
 
                 <div>
                   <label className="poppins-medium text-[1rem] block mb-1">

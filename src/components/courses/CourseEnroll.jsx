@@ -22,6 +22,44 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import axiosInstance from "../../utils/axiosConfig";
 
+const VideoPlayer = ({ url }) => {
+  const [videoError, setVideoError] = useState(false);
+
+  useEffect(() => {
+    setVideoError(false);
+  }, [url]);
+
+  return (
+    <div className="w-full h-[500px] bg-black flex items-center justify-center relative">
+       {/* ReactPlayer handles both file paths and YouTube/Vimeo URLs */}
+       {!videoError && url ? (
+         <ReactPlayer
+           key={url}
+           url={url}
+           controls={true}
+           width="100%"
+           height="100%"
+           className="react-player"
+           config={{
+             youtube: {
+               playerVars: { origin: window.location.origin },
+             },
+           }}
+           onError={(e) => {
+             console.error("Video Error:", e);
+             setVideoError(true);
+           }}
+         />
+       ) : (
+         <div className="text-white flex flex-col items-center gap-2">
+            <Video className="w-12 h-12 opacity-50" />
+            <p>{videoError ? "Unable to play video. Format may be unsupported." : "No video URL provided"}</p>
+         </div>
+       )}
+    </div>
+  );
+};
+
 const CourseEnroll = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
@@ -148,32 +186,7 @@ const CourseEnroll = () => {
     const url = section.content_url || section.file; // Handle both potential keys
 
     if (type === "video") {
-      return (
-        <div className="w-full h-[500px] bg-black flex items-center justify-center relative">
-           {/* ReactPlayer handles both file paths and YouTube/Vimeo URLs */}
-           {url ? (
-             <ReactPlayer
-               key={url}
-               url={url}
-               controls={true}
-               width="100%"
-               height="100%"
-               className="react-player"
-               config={{
-                 youtube: {
-                   playerVars: { origin: window.location.origin },
-                 },
-               }}
-               onError={(e) => {
-                 console.error("Video Error:", e);
-                 // You could set a state here to show a visual error
-               }}
-             />
-           ) : (
-             <div className="text-white">No video URL provided</div>
-           )}
-        </div>
-      );
+      return <VideoPlayer url={url} />;
     }
 
     if (type === "pdf") {

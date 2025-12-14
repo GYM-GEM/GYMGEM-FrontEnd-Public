@@ -362,7 +362,7 @@ const CourseDetails = () => {
 
 
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     // Check if user is logged in
     const user = JSON.parse(localStorage.getItem("user"));
 
@@ -378,13 +378,32 @@ const CourseDetails = () => {
       return;
     }
 
-    // Navigate to checkout with course data
-    navigate('/checkout', {
-      state: {
-        course: course,
-        user: user
-      }
-    });
+    try {
+      // Call payment start endpoint
+      const token = localStorage.getItem('access');
+      const response = await axios.post(
+        'http://localhost:8000/api/payment/start/',
+        { amount: parseFloat(course.price) || 49.99 },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // Navigate to checkout with course data and iframe URL
+      navigate('/checkout', {
+        state: {
+          course: course,
+          user: user,
+          iframeUrl: response.data.iframe_url,
+          paymentId: response.data.payment_id
+        }
+      });
+    } catch (error) {
+      console.error('Error starting payment:', error);
+      alert('Failed to start payment process. Please try again.');
+    }
   };
 
   return (

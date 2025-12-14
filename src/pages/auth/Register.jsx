@@ -25,7 +25,7 @@ const SignUpPage = () => {
     try {
       // Send POST request to backend
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/accounts/",
+        "http://127.0.0.1:8000/api/accounts/create",
         data
       );
       console.log("Response:", response.data);

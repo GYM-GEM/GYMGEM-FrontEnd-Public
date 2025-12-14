@@ -81,10 +81,10 @@ export const createOrder = (userId, courseData, paymentInfo) => {
     const orders = getAllOrders();
     orders.push(order);
     localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
-    
+
     // Also enroll user in course
     enrollUserInCourse(userId, courseData.id, courseData);
-    
+
     return order;
   } catch (error) {
     console.error('Error creating order:', error);
@@ -132,17 +132,17 @@ export const getOrderById = (orderId) => {
 export const enrollUserInCourse = (userId, courseId, courseData) => {
   try {
     const enrollments = getEnrolledCourses();
-    
+
     // Check if already enrolled
     const isAlreadyEnrolled = enrollments.some(
       enrollment => enrollment.userId === userId && enrollment.courseId === courseId
     );
-    
+
     if (isAlreadyEnrolled) {
       console.log('User already enrolled in this course');
       return true;
     }
-    
+
     // Add enrollment
     enrollments.push({
       userId,
@@ -151,7 +151,7 @@ export const enrollUserInCourse = (userId, courseId, courseData) => {
       enrolledAt: new Date().toISOString(),
       progress: 0,
     });
-    
+
     localStorage.setItem(ENROLLED_COURSES_KEY, JSON.stringify(enrollments));
     return true;
   } catch (error) {
@@ -204,7 +204,7 @@ export const processPayment = async (paymentData) => {
   // Simulate API call delay (1.5-2.5 seconds)
   const delay = 1500 + Math.random() * 1000;
   await new Promise(resolve => setTimeout(resolve, delay));
-  
+
   // Simulate 95% success rate
   if (Math.random() > 0.05) {
     return {
@@ -213,7 +213,7 @@ export const processPayment = async (paymentData) => {
       message: 'Payment processed successfully',
     };
   }
-  
+
   // Simulate failure
   throw new Error('Payment declined. Please check your payment details and try again.');
 };
@@ -221,7 +221,7 @@ export const processPayment = async (paymentData) => {
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { course, user } = location.state || {};
+  const { course, user, iframeUrl, paymentId } = location.state || {};
 
   const [paymentMethod, setPaymentMethod] = useState("credit_card");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -337,7 +337,7 @@ const Checkout = () => {
   return (
     <>
       <Navbar />
-      
+
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -359,12 +359,12 @@ const Checkout = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Order Summary */}
-            <div className="lg:col-span-2">
+            <div className={iframeUrl ? "lg:col-span-3" : "lg:col-span-2"}>
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
                 <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
                   Order Summary
                 </h2>
-                
+
                 <div className="flex gap-4 mb-6">
                   <img
                     src={course.img || "https://via.placeholder.com/200x112"}
@@ -399,196 +399,220 @@ const Checkout = () => {
 
               {/* Payment Form */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
-                  Payment Information
-                </h2>
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Payment Method Selection */}
-                  <div>
-                    <label className="text-sm font-medium text-gray-900 poppins-medium mb-3 block">
-                      Payment Method
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod("credit_card")}
-                        className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${
-                          paymentMethod === "credit_card"
-                            ? "border-[#FF8211] bg-[#FF8211]/5"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        <CreditCard className={`w-6 h-6 ${paymentMethod === "credit_card" ? "text-[#FF8211]" : "text-gray-600"}`} />
-                        <span className="text-sm poppins-medium">Credit Card</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod("paypal")}
-                        className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${
-                          paymentMethod === "paypal"
-                            ? "border-[#FF8211] bg-[#FF8211]/5"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        <span className="text-xl">💳</span>
-                        <span className="text-sm poppins-medium">PayPal</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod("bank")}
-                        className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${
-                          paymentMethod === "bank"
-                            ? "border-[#FF8211] bg-[#FF8211]/5"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        <span className="text-xl">🏦</span>
-                        <span className="text-sm poppins-medium">Bank</span>
-                      </button>
+                {iframeUrl ? (
+                  // Display payment iframe
+                  <>
+                    <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
+                      Complete Your Payment
+                    </h2>
+                    <div className="w-full overflow-hidden rounded-lg" style={{ height: '750px' }}>
+                      <iframe
+                        src={iframeUrl}
+                        className="w-full h-full border-0"
+                        title="Payment Gateway"
+                        allow="payment"
+                        scrolling="no"
+                      />
                     </div>
-                  </div>
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-600 poppins-regular mt-4">
+                      <ShieldCheck className="w-4 h-4 text-green-600" />
+                      <span>Secure payment powered by Paymob</span>
+                    </div>
+                  </>
+                ) : (
+                  // Display traditional payment form
+                  <>
+                    <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
+                      Payment Information
+                    </h2>
 
-                  {/* Credit Card Form */}
-                  {paymentMethod === "credit_card" && (
-                    <div className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                      {/* Payment Method Selection */}
                       <div>
-                        <label className="text-sm font-medium text-gray-900 p oppins-medium mb-2 block">
-                          Card Number
+                        <label className="text-sm font-medium text-gray-900 poppins-medium mb-3 block">
+                          Payment Method
                         </label>
-                        <input
-                          type="text"
-                          name="cardNumber"
-                          value={formData.cardNumber}
-                          onChange={handleInputChange}
-                          placeholder="1234 5678 9012 3456"
-                          maxLength="16"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
-                          Cardholder Name
-                        </label>
-                        <input
-                          type="text"
-                          name="cardName"
-                          value={formData.cardName}
-                          onChange={handleInputChange}
-                          placeholder="John Doe"
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
-                            Expiry Date
-                          </label>
-                          <input
-                            type="text"
-                            name="expiryDate"
-                            value={formData.expiryDate}
-                            onChange={handleInputChange}
-                            placeholder="MM/YY"
-                            maxLength="5"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
-                            CVV
-                          </label>
-                          <input
-                            type="text"
-                            name="cvv"
-                            value={formData.cvv}
-                            onChange={handleInputChange}
-                            placeholder="123"
-                            maxLength="4"
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
-                          />
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("credit_card")}
+                            className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${paymentMethod === "credit_card"
+                              ? "border-[#FF8211] bg-[#FF8211]/5"
+                              : "border-gray-200 hover:border-gray-300"
+                              }`}
+                          >
+                            <CreditCard className={`w-6 h-6 ${paymentMethod === "credit_card" ? "text-[#FF8211]" : "text-gray-600"}`} />
+                            <span className="text-sm poppins-medium">Credit Card</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("paypal")}
+                            className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${paymentMethod === "paypal"
+                              ? "border-[#FF8211] bg-[#FF8211]/5"
+                              : "border-gray-200 hover:border-gray-300"
+                              }`}
+                          >
+                            <span className="text-xl">💳</span>
+                            <span className="text-sm poppins-medium">PayPal</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPaymentMethod("bank")}
+                            className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${paymentMethod === "bank"
+                              ? "border-[#FF8211] bg-[#FF8211]/5"
+                              : "border-gray-200 hover:border-gray-300"
+                              }`}
+                          >
+                            <span className="text-xl">🏦</span>
+                            <span className="text-sm poppins-medium">Bank</span>
+                          </button>
                         </div>
                       </div>
-                    </div>
-                  )}
 
-                  {/* Other Payment Methods Message */}
-                  {paymentMethod !== "credit_card" && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-sm text-blue-800 poppins-regular">
-                        You will be redirected to complete your payment securely with {paymentMethod === "paypal" ? "PayPal" : "your bank"}.
-                      </p>
-                    </div>
-                  )}
+                      {/* Credit Card Form */}
+                      {paymentMethod === "credit_card" && (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
+                              Card Number
+                            </label>
+                            <input
+                              type="text"
+                              name="cardNumber"
+                              value={formData.cardNumber}
+                              onChange={handleInputChange}
+                              placeholder="1234 5678 9012 3456"
+                              maxLength="16"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
+                            />
+                          </div>
 
-                  {/* Error Message */}
-                  {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                      <p className="text-sm text-red-800 poppins-regular">{error}</p>
-                    </div>
-                  )}
+                          <div>
+                            <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
+                              Cardholder Name
+                            </label>
+                            <input
+                              type="text"
+                              name="cardName"
+                              value={formData.cardName}
+                              onChange={handleInputChange}
+                              placeholder="John Doe"
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
+                            />
+                          </div>
 
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={isProcessing}
-                    onClick={handleSubmit}
-                    className="w-full px-6 py-4 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-5 h-5" />
-                        Complete Purchase - ${total.toFixed(2)}
-                      </>
-                    )}
-                  </button>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
+                                Expiry Date
+                              </label>
+                              <input
+                                type="text"
+                                name="expiryDate"
+                                value={formData.expiryDate}
+                                onChange={handleInputChange}
+                                placeholder="MM/YY"
+                                maxLength="5"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
+                              />
+                            </div>
+                            <div>
+                              <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
+                                CVV
+                              </label>
+                              <input
+                                type="text"
+                                name="cvv"
+                                value={formData.cvv}
+                                onChange={handleInputChange}
+                                placeholder="123"
+                                maxLength="4"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
-                  {/* Security Badge */}
-                  <div className="flex items-center justify-center gap-2 text-sm text-gray-600 poppins-regular">
-                    <ShieldCheck className="w-4 h-4 text-green-600" />
-                    <span>Secure 256-bit SSL encryption</span>
-                  </div>
-                </form>
+                      {/* Other Payment Methods Message */}
+                      {paymentMethod !== "credit_card" && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <p className="text-sm text-blue-800 poppins-regular">
+                            You will be redirected to complete your payment securely with {paymentMethod === "paypal" ? "PayPal" : "your bank"}.
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Error Message */}
+                      {error && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <p className="text-sm text-red-800 poppins-regular">{error}</p>
+                        </div>
+                      )}
+
+                      {/* Submit Button */}
+                      <button
+                        type="submit"
+                        disabled={isProcessing}
+                        onClick={handleSubmit}
+                        className="w-full px-6 py-4 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {isProcessing ? (
+                          <>
+                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="w-5 h-5" />
+                            Complete Purchase - ${total.toFixed(2)}
+                          </>
+                        )}
+                      </button>
+
+                      {/* Security Badge */}
+                      <div className="flex items-center justify-center gap-2 text-sm text-gray-600 poppins-regular">
+                        <ShieldCheck className="w-4 h-4 text-green-600" />
+                        <span>Secure 256-bit SSL encryption</span>
+                      </div>
+                    </form>
+                  </>
+                )}
               </div>
             </div>
 
             {/* Sidebar Info */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
-                <h3 className="text-lg font-bold text-gray-900 bebas-regular mb-4">
-                  What's Included
-                </h3>
-                <ul className="space-y-3 text-sm text-gray-700 poppins-regular">
-                  <li className="flex items-start gap-2">
-                    <span className="text-[#86ac55]">✓</span>
-                    <span>Lifetime access to course content</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-[#86ac55]">✓</span>
-                    <span>Certificate of completion</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-[#86ac55]">✓</span>
-                    <span>Downloadable resources</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-[#86ac55]">✓</span>
-                    <span>Direct trainer support</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-[#86ac55]">✓</span>
-                    <span>30-day money-back guarantee</span>
-                  </li>
-                </ul>
+            {!iframeUrl && (
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-24">
+                  <h3 className="text-lg font-bold text-gray-900 bebas-regular mb-4">
+                    What's Included
+                  </h3>
+                  <ul className="space-y-3 text-sm text-gray-700 poppins-regular">
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#86ac55]">✓</span>
+                      <span>Lifetime access to course content</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#86ac55]">✓</span>
+                      <span>Certificate of completion</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#86ac55]">✓</span>
+                      <span>Downloadable resources</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#86ac55]">✓</span>
+                      <span>Direct trainer support</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-[#86ac55]">✓</span>
+                      <span>30-day money-back guarantee</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

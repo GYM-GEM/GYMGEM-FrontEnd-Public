@@ -34,7 +34,7 @@ const TraineeRecordForm = () => {
 
         <div className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-10">
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
-            
+
             <div className="grid gap-4 sm:grid-cols-2">
               {/* Record Date */}
               <div className="space-y-2">
@@ -210,7 +210,7 @@ const TraineeRecordForm = () => {
               {/* Skip Button */}
               <button
                 type="button"
-                onClick={() => navigate("/traine/profile")}
+                onClick={() => navigate("/")}
                 className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-input bg-background px-6 text-sm font-medium transition hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 Skip

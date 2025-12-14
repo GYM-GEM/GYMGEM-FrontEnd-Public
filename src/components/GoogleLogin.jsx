@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../utils/axiosConfig";
+import axios from "axios";
 import { useToast } from "../context/ToastContext";
 
 export default function GoogleLogin({ signType, onStart, onComplete }) {
@@ -36,8 +36,8 @@ export default function GoogleLogin({ signType, onStart, onComplete }) {
 			try {
 				const id_token = response.credential;
 				// POST id_token to your custom accounts/google/login/ endpoint (backend should verify)
-				const res = await axiosInstance.post(
-					"/api/auth/social/google/login/",
+				const res = await axios.post(
+					"http://127.0.0.1:8000/api/auth/social/google/login/",
 					{ id_token },
 					{ headers: { "Content-Type": "application/json" } }
 				);

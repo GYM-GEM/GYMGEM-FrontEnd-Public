@@ -139,6 +139,7 @@ function App() {
           <Route path="/courses/:id/learn" element={<CourseEnroll />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="store-order-success" element={<StoreOrderSuccess />} />
+          
           <Route path="*" element={<NotFound />} />
           {/* ---------------------------------------------------------------- */}
           {/* Store Routes */}

@@ -107,8 +107,10 @@ import { loaderState } from "./loaderState";
 // ============================================================================
 axiosInstance.interceptors.request.use(
     async (config) => {
-        // Show loader for every request
-        loaderState.showLoader();
+        // Show loader unless skipped
+        if (!config.skipGlobalLoader) {
+            loaderState.showLoader();
+        }
 
         let token = localStorage.getItem("access");
 
@@ -146,7 +148,9 @@ axiosInstance.interceptors.request.use(
 // ============================================================================
 axiosInstance.interceptors.response.use(
     (response) => {
-        loaderState.hideLoader(); // Hide on success
+        if (!response.config.skipGlobalLoader) {
+            loaderState.hideLoader();
+        }
         return response;
     },
 
@@ -155,7 +159,9 @@ axiosInstance.interceptors.response.use(
 
         // Skip if error has no response (network error)
         if (!error.response) {
-            loaderState.hideLoader(); // Hide on network error
+            if (!originalRequest.skipGlobalLoader) {
+                loaderState.hideLoader(); // Hide on network error
+            }
             return Promise.reject(error);
         }
 
@@ -173,12 +179,12 @@ axiosInstance.interceptors.response.use(
                 // Actually, let's keep it shown implicitly or manage it carefully.
                 // Simplest strategy: The loader counter is still incremented from the original request.
                 // We haven't called hideLoader() for the original request yet in this path.
-                
+
                 const newToken = await refreshAccessToken();
 
                 // Update header and retry original request
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                
+
                 // When we retry, axiosInstance is called again -> ShowLoader called again.
                 // So we have 2 shows.
                 // We need to match the hides. 
@@ -190,9 +196,9 @@ axiosInstance.interceptors.response.use(
                 // Then we return Request 2 result to caller of Request 1.
                 // The caller of Request 1 receives response. 
                 // Wait, the interceptor stack is tricky.
-                
+
                 // Let's just be safe: hide the loader for the *current* failed request before retrying.
-                loaderState.hideLoader(); 
+                loaderState.hideLoader();
 
                 return axiosInstance(originalRequest);
 
@@ -203,7 +209,9 @@ axiosInstance.interceptors.response.use(
             }
         }
 
-        loaderState.hideLoader(); // Hide on other errors
+        if (!originalRequest.skipGlobalLoader) {
+            loaderState.hideLoader(); // Hide on other errors
+        }
         return Promise.reject(error);
     }
 );

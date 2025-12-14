@@ -42,16 +42,14 @@ const ProtectedRoute = ({ children, requiredProfile }) => {
 
     if (!accessToken || !refreshToken) {
         // Tokens are missing - user deleted them or they were never set
-        console.warn("🔒 Tokens missing. Clearing session and redirecting to login.");
+        console.warn("Token is missing. Clearing session and redirecting to login.");
 
         // Clean up localStorage (remove stale user data)
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
-        localStorage.removeItem("user");
+        localStorage.clear();
 
         // Show message to user
         if (!toastShownRef.current) {
-            showToast("Your session has expired. Please login again.", { type: "warning" });
+            showToast("Your session has been expired. Please, login again.", { type: "warning" });
             toastShownRef.current = true;
         }
 
@@ -67,7 +65,6 @@ const ProtectedRoute = ({ children, requiredProfile }) => {
         accessValid = isAccessTokenValid();
     } catch (error) {
         // Access token corrupted - that's OK if refresh is valid!
-        console.log("⚠️ ProtectedRoute: Access token invalid/corrupted");
         accessValid = false;
     }
 
@@ -75,19 +72,16 @@ const ProtectedRoute = ({ children, requiredProfile }) => {
         refreshValid = isRefreshTokenValid();
     } catch (error) {
         // Refresh token corrupted - BAD!
-        console.error("🔒 ProtectedRoute: Refresh token invalid/corrupted");
         refreshValid = false;
     }
 
     // ONLY logout if BOTH tokens are invalid
     if (!accessValid && !refreshValid) {
         // Both tokens expired - user session is completely dead
-        console.warn("🔒 Both tokens expired. Clearing session and redirecting to login.");
+        console.warn("Both tokens expired. Clearing session and redirecting to login.");
 
         // Clean up localStorage
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
-        localStorage.removeItem("user");
+        localStorage.clear();
 
         // Show message to user
         if (!toastShownRef.current) {
@@ -110,11 +104,9 @@ const ProtectedRoute = ({ children, requiredProfile }) => {
     // Check 3: User data must exist
     if (!user) {
         // Tokens exist but no user data? Inconsistent state - clear everything
-        console.warn("🔒 User data missing but tokens exist. Clearing session.");
+        console.warn("User data missing but tokens exist. Clearing session.");
 
-        localStorage.removeItem("access");
-        localStorage.removeItem("refresh");
-        localStorage.removeItem("user");
+        localStorage.clear();
 
         return <Navigate to="/login" state={{ from: location }} replace />;
     }

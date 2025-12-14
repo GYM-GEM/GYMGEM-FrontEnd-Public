@@ -45,6 +45,7 @@ import CoursesTrainerDash from "./components/Dashboard/Trainer/CoursesTrainerDas
 import ClientTrainerDash from "./components/Dashboard/Trainer/ClientTrainerDash.jsx";
 import TrainerprofileDash from "./components/Dashboard/Trainer/TrainerprofileDash.jsx";
 import CourseDetailsDash from "./components/Dashboard/Trainer/CourseDetailsDash.jsx";
+import OrderTrackingTR from "./components/Dashboard/Trainer/OrderTrackingTR.jsx";
 
 // dashboard trainee
 import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
@@ -56,6 +57,8 @@ import PublicTrainerProfile from "./components/PublicTrainerProfile.jsx";
 import Favorite from "./components/Dashboard/Traine/Favorite.jsx";
 import MySessions from "./components/Dashboard/Traine/MySessions.jsx";
 import CourseEnroll from "./components/courses/CourseEnroll.jsx";
+import Message from "./components/Dashboard/Traine/Message.jsx";
+import OrderTrackingTE from "./components/Dashboard/Traine/OrderTrackingTE.jsx";
 // Checkout components
 import Checkout from "./components/BuyNow/Checkout.jsx";
 import OrderSuccess from "./components/BuyNow/OrderSuccess.jsx";
@@ -63,7 +66,7 @@ import OrderSuccess from "./components/BuyNow/OrderSuccess.jsx";
 import CartPage from "./components/Store/CartPage.jsx";
 import StoreCheckout from "./components/Store/StoreCheckout.jsx";
 import StoreOrderSuccess from "./components/Store/StoreOrderSuccess.jsx";
-import OrderTracking from "./components/Store/OrderTracking.jsx";
+// import OrderTracking from "./components/Store/OrderTracking.jsx";
 // dashboard gym
 import GymDashboard from "./components/Dashboard/GYM/GymDashboard.jsx";
 import GymMember from "./components/Dashboard/GYM/GymMember.jsx";
@@ -81,6 +84,7 @@ import useAuthCheck from "./hooks/useAuthCheck.js";
 import { useEffect } from "react";
 import { refreshSession } from "./utils/axiosConfig.js";
 import { verifyRefreshFlow } from "./utils/testAuth.js"; // Import test function
+import GlobalLoader from "./components/GlobalLoader.jsx";
 
 function App() {
   const location = useLocation();
@@ -109,7 +113,9 @@ function App() {
   // useAuthCheck();
 
   return (
-    <AnimatePresence mode="wait">
+    <>
+      <GlobalLoader />
+      <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
         {/* -------------------- PUBLIC + LAYOUT -------------------- */}
         <Route path="/" element={<RootLayout />}>
@@ -133,6 +139,8 @@ function App() {
           <Route path="/courses/:id/learn" element={<CourseEnroll />} />
           <Route path="checkout" element={<Checkout />} />
           <Route path="store-order-success" element={<StoreOrderSuccess />} />
+          <Route path="order-success/:orderId" element={<OrderSuccess />} />AnimatedRoutes
+          
           <Route path="*" element={<NotFound />} />
           {/* ---------------------------------------------------------------- */}
           {/* Store Routes */}
@@ -141,7 +149,7 @@ function App() {
           <Route path="cart" element={<CartPage />} />
           <Route path="store-checkout" element={<StoreCheckout />} />
           <Route path="store-order-success" element={<StoreOrderSuccess />} />
-          <Route path="my-orders" element={<OrderTracking />} />
+          {/* <Route path="my-orders" element={<OrderTracking />} />  */}
 
         </Route>
 
@@ -157,6 +165,8 @@ function App() {
           <Route path="addsection" element={<ProtectedRoute requiredProfile="trainer"><AddSection /></ProtectedRoute>} />
           <Route path="addcourse" element={<ProtectedRoute requiredProfile="trainer"><AddCourse /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute requiredProfile="trainer"><SettingsTrainee /></ProtectedRoute>} />
+          <Route path="message" element={<ProtectedRoute requiredProfile="trainer"><Message /></ProtectedRoute>} />
+          <Route path="myorder" element={<ProtectedRoute requiredProfile="trainer"><OrderTrackingTR /></ProtectedRoute>} />
         </Route>
 
         {/* -------------------- TRAINEE DASHBOARD -------------------- */}
@@ -168,6 +178,8 @@ function App() {
           <Route path="favorite" element={<ProtectedRoute requiredProfile="trainee"><Favorite /></ProtectedRoute>} />
           <Route path="sessions" element={<ProtectedRoute requiredProfile="trainee"><MySessions /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute requiredProfile="trainee"><SettingsTrainee /></ProtectedRoute>} />
+          <Route path="message" element={<ProtectedRoute requiredProfile="trainee"><Message /></ProtectedRoute>} />
+          <Route path="myorder" element={<ProtectedRoute requiredProfile="trainee"><OrderTrackingTE /></ProtectedRoute>} />
         </Route>
         {/* -------------------- GYM DASHBOARD -------------------- */}
         <Route path="gym">
@@ -188,6 +200,7 @@ function App() {
           <Route path="order" element={<ProtectedRoute requiredProfile="store"><StoreOrder /></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
+          <Route path="message" element={<ProtectedRoute requiredProfile="store"><Message /></ProtectedRoute>} />
         </Route>
 
         {/* -------------------- AUTH + FORMS -------------------- */}
@@ -210,7 +223,8 @@ function App() {
         {/* -------------------- CATCH ALL -------------------- */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-    </AnimatePresence>
+      </AnimatePresence>
+    </>
   );
 }
 

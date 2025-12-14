@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, Star, Award, Globe, ShoppingBag, CheckCircle, ArrowRight, Loader2 } from "lucide-react";
 import NavTraineDash from "../../Dashboard/Traine/NavTraineDash";
 import { isUserEnrolled } from "../../BuyNow/Checkout";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 
 // Helpers for mapping IDs to names
 const getCategoryName = (id) => {
@@ -93,11 +93,7 @@ const Favorite = () => {
   const getFavorites = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`http://localhost:8000/api/courses/enrollments/my-wishlist/`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('access')}`,
-        },
-      });
+      const response = await axiosInstance.get(`/api/courses/enrollments/my-wishlist/`);
       // Expected response: array of objects { id, enrollment_date, status, course_details: {...}, ... }
       setFavorites(response.data);
       setRemovedIds(new Set()); // Reset on refresh
@@ -129,14 +125,9 @@ const Favorite = () => {
     });
 
     try {
-      await axios.post(
-        `http://localhost:8000/api/courses/enrollments/${courseId}/add-to-wishlist/`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      await axiosInstance.post(
+        `/api/courses/enrollments/${courseId}/add-to-wishlist/`,
+        {}
       );
 
       // Update legacy local storage if needed

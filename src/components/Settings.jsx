@@ -4,7 +4,7 @@ import { Lock, CreditCard, X, UserPlus, Trash2, ChevronRight } from "lucide-reac
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import { useToast } from "../context/ToastContext";
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 
@@ -58,14 +58,13 @@ const Settings = () => {
     // try {
     const token = localStorage.getItem('access');
     // Send POST request to backend to change password
-    await axios.post(`${VITE_API_URL}/api/accounts/change-password`,
+    // Send POST request to backend to change password
+    await axiosInstance.post(
+      "/api/accounts/change-password",
       {
         currentPassword: formData.changePassword.currentPassword,
         newPassword: formData.changePassword.newPassword,
         confirmPassword: formData.changePassword.confirmPassword,
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` }
       }
     );
     closeModal("changePassword");
@@ -127,15 +126,9 @@ const Settings = () => {
 
     const token = localStorage.getItem('access');
     try {
-      const resp = await axios.delete(
-        `${VITE_API_URL}/api/accounts/detail`,
-        {
-          data: { password },
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const resp = await axiosInstance.delete("/api/accounts/detail", {
+        data: { password },
+      });
 
       if (resp.status === 204) {
         closeModal("deleteAccount");

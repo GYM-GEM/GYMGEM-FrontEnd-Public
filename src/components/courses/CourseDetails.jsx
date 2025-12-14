@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosConfig";
 
 
 const CourseDetails = () => {
@@ -45,17 +45,17 @@ const CourseDetails = () => {
   const [isWishlistLoading, setIsWishlistLoading] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [activeContent, setActiveContent] = useState(null);
+
+  const handleSectionClick = (section) => {
+    setActiveContent(section);
+    // Scroll to top to see content
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const getCourseById = async (id) => {
-    const token = localStorage.getItem('access');
     try {
-      const course = await axios.get(`http://localhost:8000/api/courses/courses/${id}/detail/`
-        , {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
+      const course = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
       setCourse(course.data);
     } catch (error) {
       console.error("Error fetching course by ID:", error);
@@ -63,13 +63,8 @@ const CourseDetails = () => {
   };
 
   const getTrainerById = async (trainerId) => {
-    const token = localStorage.getItem('access');
     try {
-      const response = await axios.get(`http://localhost:8000/api/trainers/create?profile_id=${trainerId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await axiosInstance.get(`/api/trainers/create?profile_id=${trainerId}`);
       setTrainer(response.data.trainer);
     } catch (error) {
       console.error("Error fetching trainer by ID:", error);
@@ -217,23 +212,10 @@ const CourseDetails = () => {
 
   const handleToggleFavorite = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
-    const token = localStorage.getItem('access');
-
-    if (!user || !token) {
-      navigate('/login');
-      return;
-    }
-
     try {
-      setIsWishlistLoading(true);
-      await axios.post(
-        `http://localhost:8000/api/courses/enrollments/${course.id}/add-to-wishlist/`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      await axiosInstance.post(
+        `/api/courses/enrollments/${course.id}/add-to-wishlist/`,
+        {}
       );
 
       // Update local state based on successful toggle (assuming backend toggles)
@@ -510,21 +492,57 @@ const CourseDetails = () => {
 
             {/* Course Preview (Desktop) */}
             <div className="lg:col-span-1">
-              <div className="relative rounded-xl overflow-hidden shadow-lg border border-gray-200">
-                <img
-                  src={courseData.cover}
-                  alt={courseData.title}
-                  className="w-full aspect-video object-cover"
-                />
-                {!isEnrolled && (
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <div className="text-center">
-                      <Lock className="w-16 h-16 text-white mx-auto mb-3 opacity-90" />
-                      <p className="text-white poppins-medium text-sm px-4">
-                        🔒 You must enroll before accessing this course
-                      </p>
+              <div className="relative rounded-xl overflow-hidden shadow-lg border border-gray-200 bg-black aspect-video">
+                {activeContent ? (
+                  activeContent.content_type === "video" ? (
+                    <video
+                      key={activeContent.id} // Force re-render on change
+                      controls
+                      autoPlay
+                      className="w-full h-full object-contain"
+                      src={activeContent.file}
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : activeContent.content_type === "pdf" ? (
+                    <iframe
+                      key={activeContent.id}
+                      src={activeContent.file}
+                      className="w-full h-full"
+                      title={activeContent.title}
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-white p-4 text-center">
+                      <FileText className="w-12 h-12 mb-2 opacity-80" />
+                      <p className="font-medium">{activeContent.title}</p>
+                      <a
+                        href={activeContent.file}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-4 px-4 py-2 bg-[#FF8211] rounded hover:bg-[#ff7906] transition-colors text-sm"
+                      >
+                        Download/View Content
+                      </a>
                     </div>
-                  </div>
+                  )
+                ) : (
+                  <>
+                    <img
+                      src={courseData.cover}
+                      alt={courseData.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {!isEnrolled && (
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                        <div className="text-center">
+                          <Lock className="w-16 h-16 text-white mx-auto mb-3 opacity-90" />
+                          <p className="text-white poppins-medium text-sm px-4">
+                            🔒 You must enroll before accessing this course
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
@@ -592,9 +610,9 @@ const CourseDetails = () => {
                             lesson.sections.map((section) => (
                               <button
                                 key={section.id}
-                                onClick={isEnrolled ? null : handleLockedLessonClick}
-                                className={`w-full px-4 py-3 border-t border-gray-100 transition-colors flex items-center justify-between group ${isEnrolled ? "cursor-default" : "hover:bg-gray-50 cursor-pointer"
-                                  }`}
+                                onClick={() => isEnrolled ? handleSectionClick(section) : handleLockedLessonClick()}
+                                className={`w-full px-4 py-3 border-t border-gray-100 transition-colors flex items-center justify-between group ${isEnrolled ? "hover:bg-[#FF8211]/5 cursor-pointer" : "hover:bg-gray-50 cursor-pointer"
+                                  } ${activeContent?.id === section.id ? "bg-[#FF8211]/10" : ""}`}
                               >
                                 <div className="flex items-center gap-3">
                                   <div className={isEnrolled ? "text-gray-600" : "text-gray-400"}>

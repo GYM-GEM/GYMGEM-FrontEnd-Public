@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { FaGem, FaUserCircle } from "react-icons/fa";
 import { ChevronDown, Menu, X } from "lucide-react";
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 import { useToast } from "../context/ToastContext";
 import UserDropdown from "./UserDropdown";
 
@@ -28,26 +28,22 @@ function Navbar() {
     const token = localStorage.getItem('refresh');
     const access = localStorage.getItem('access');
     try {
-      await axios.post(
-        "http://127.0.0.1:8000/api/auth/logout",
+      await axiosInstance.post(
+        "/api/auth/logout",
         {},
         {
-          headers: { Authorization: `Bearer ${access} `, refresh: token },
+          headers: { refresh: token },
         }
       );
 
-      localStorage.removeItem("user");
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
+      localStorage.clear();
 
       showToast("Logout successful!", { type: "success" });
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
       // Force logout on error just in case
-      localStorage.removeItem("user");
-      localStorage.removeItem("access");
-      localStorage.removeItem("refresh");
+      localStorage.clear();
       showToast("Logged out.", { type: "info" });
       navigate("/login");
     }

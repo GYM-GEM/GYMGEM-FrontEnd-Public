@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import UploadImage from "../../UploadImage";
-import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
 
@@ -12,8 +13,62 @@ const Trainerform = () => {
     setValue,
     formState: { errors },
   } = useForm({ mode: "onChange" });
-
   const { showToast } = useToast();
+
+  const [selectedCountry, setSelectedCountry] = useState("");
+
+  const countries = {
+    Egypt: [
+      "Cairo",
+      "Giza",
+      "Alexandria",
+      "Mansoura",
+      "Aswan",
+      "Luxor",
+      "Tanta",
+    ],
+    SaudiArabia: ["Riyadh", "Jeddah", "Dammam", "Mecca", "Medina", "Khobar"],
+    UAE: ["Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Fujairah"],
+    USA: [
+      "California",
+      "Texas",
+      "Florida",
+      "New York",
+      "Illinois",
+      "Washington",
+      "Ohio",
+    ],
+    Canada: ["Ontario", "Quebec", "British Columbia", "Alberta", "Manitoba"],
+    UK: ["England", "Scotland", "Wales", "Northern Ireland"],
+    France: [
+      "Île-de-France",
+      "Provence-Alpes-Côte d’Azur",
+      "Normandy",
+      "Brittany",
+    ],
+    Germany: ["Bavaria", "Berlin", "Hamburg", "Hesse", "Saxony"],
+    Italy: ["Lombardy", "Rome", "Sicily", "Veneto", "Tuscany"],
+    Spain: ["Madrid", "Barcelona", "Valencia", "Andalusia", "Galicia"],
+    India: ["Delhi", "Mumbai", "Karnataka", "Tamil Nadu", "Gujarat"],
+    China: ["Beijing", "Shanghai", "Guangdong", "Zhejiang", "Sichuan"],
+    Japan: ["Tokyo", "Osaka", "Hokkaido", "Kyoto", "Fukuoka"],
+    Australia: [
+      "New South Wales",
+      "Victoria",
+      "Queensland",
+      "Western Australia",
+    ],
+    Brazil: ["São Paulo", "Rio de Janeiro", "Bahia", "Minas Gerais"],
+    Mexico: ["Mexico City", "Jalisco", "Nuevo León", "Yucatán"],
+    SouthAfrica: ["Gauteng", "Western Cape", "KwaZulu-Natal", "Limpopo"],
+    Nigeria: ["Lagos", "Abuja", "Kano", "Rivers", "Ogun"],
+    Turkey: ["Istanbul", "Ankara", "Izmir", "Bursa", "Antalya"],
+    Indonesia: ["Jakarta", "Bali", "Surabaya", "Bandung", "Medan"],
+    Russia: ["Moscow", "Saint Petersburg", "Novosibirsk", "Kazan"],
+    Argentina: ["Buenos Aires", "Córdoba", "Santa Fe", "Mendoza"],
+    SouthKorea: ["Seoul", "Busan", "Incheon", "Daegu"],
+    Pakistan: ["Karachi", "Lahore", "Islamabad", "Rawalpindi"],
+  };
 
   const onSubmit = async (data) => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -22,12 +77,10 @@ const Trainerform = () => {
     const token = localStorage.getItem('access');
     try {
       // Send POST request to backend
-      const response = await axios.post(
-        "http://127.0.0.1:8000/api/trainers/create",
-        payload,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      // Send POST request to backend
+      const response = await axiosInstance.post(
+        "/api/trainers/create",
+        payload
       );
       console.log("Response:", response.data);
       showToast("trainer successful!", { type: "success" });
@@ -75,7 +128,7 @@ const Trainerform = () => {
                 </label>
                 <input
                   id="name"
-                  placeholder="Enter your full name"
+                  placeholder="Enter Your Full Name"
                   {...register("name", {
                     required: "Name is required",
                     minLength: {
@@ -124,7 +177,7 @@ const Trainerform = () => {
                   htmlFor="dob"
                   className="text-sm font-medium text-foreground"
                 >
-                  Date of birth
+                  Date of Birth
                 </label>
                 <input
                   id="dob"
@@ -146,12 +199,12 @@ const Trainerform = () => {
                   htmlFor="phone"
                   className="text-sm font-medium text-foreground"
                 >
-                  Phone number
+                  Phone Number
                 </label>
                 <input
                   id="phone"
                   type="tel"
-                  placeholder="Enter your phone number"
+                  placeholder="Enter Your Phone Number"
                   {...register("phone", {
                     required: "Phone number is required",
                     pattern: {
@@ -171,18 +224,22 @@ const Trainerform = () => {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <label
-                  htmlFor="country"
-                  className="text-sm font-medium text-foreground"
-                >
+                <label htmlFor="country" className="text-sm font-medium text-foreground">
                   Country
                 </label>
-                <input
+                <select
                   id="country"
-                  placeholder="Where are you based?"
                   {...register("country", { required: "Country is required" })}
-                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
-                />
+                  onChange={(e) => setSelectedCountry(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  <option value="">Select Country</option>
+                  {Object.keys(countries).map((country) => (
+                    <option key={country} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
                 {errors.country && (
                   <p className="text-xs text-destructive">
                     {errors.country.message}

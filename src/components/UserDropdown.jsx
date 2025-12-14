@@ -45,7 +45,8 @@ const UserDropdown = ({
       // ✅ Using axiosInstance - automatic 401 handling and token refresh!
       const response = await axiosInstance.post(
         '/api/auth/switch-profile',
-        { profile_id }
+        { profile_id },
+        { skipGlobalLoader: true }
       );
 
       localStorage.setItem('access', response.data.access);

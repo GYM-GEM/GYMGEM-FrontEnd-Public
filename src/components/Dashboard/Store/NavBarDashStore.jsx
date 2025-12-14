@@ -1,20 +1,40 @@
-import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import { FaGem, FaUserCircle } from "react-icons/fa";
-import { MdOutlineNotificationsActive } from "react-icons/md";
+import { useEffect, useState, useRef } from "react";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { FaGem } from "react-icons/fa";
+import { MdOutlineNotificationsActive, MdKeyboardArrowDown } from "react-icons/md";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
-
-import { useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
+import { ShoppingCart, Package, MessageSquare } from "lucide-react";
 
 const NavBarDashStore = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
   const [open, setOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [managementDropdownOpen, setManagementDropdownOpen] = useState(false);
+  const userRef = useRef(null);
+  const managementRef = useRef(null);
   const user = JSON.parse(localStorage.getItem("user"));
+
+  // Main Navigation Links
+  const mainLinks = [
+    { to: "/store/dashboard", label: "Dashboard" },
+    { to: "/store/profile", label: "Profile" },
+    { to: "/store/message", label: "Messages", icon: <MessageSquare size={18} /> },
+  ];
+
+  // Management Dropdown Links
+  const managementLinks = [
+    { to: "/store/product", label: "Products", icon: <Package size={18} /> },
+    { to: "/store/order", label: "Orders", icon: <ShoppingCart size={18} /> },
+  ];
+
+  const [showFullName, setShowFullName] = useState(false);
+  const [showGG, setShowGG] = useState(true);
 
   const logout = async (e) => {
     e.preventDefault();
@@ -44,18 +64,23 @@ const NavBarDashStore = () => {
     }
   };
 
-  const links = [
-    { to: "/", label: "Home" },
-    { to: "/store/profile", label: "Profile" },
-    { to: "/store/dashboard", label: "Dashboard" },
-    { to: "/store/order", label: "Order" },
-    { to: "/store/product", label: "Product" },
-    // { to: "/my-orders", label: "My Orders" },
-  ];
+  // Click outside handler for menus
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userRef.current && !userRef.current.contains(event.target)) {
+        setUserMenuOpen(false);
+      }
+      if (managementRef.current && !managementRef.current.contains(event.target)) {
+        setManagementDropdownOpen(false);
+      }
+    };
 
+    if (userMenuOpen || managementDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [userMenuOpen, managementDropdownOpen]);
 
-  const [showFullName, setShowFullName] = useState(false);
-  const [showGG, setShowGG] = useState(true);
 
   useEffect(() => {
     let interval;
@@ -82,16 +107,18 @@ const NavBarDashStore = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const isManagementActive = managementLinks.some(link => location.pathname.startsWith(link.to));
+
   return (
     <>
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className="fixed w-full top-0 left-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm"
+        className="fixed w-full top-0 left-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100 shadow-sm"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 md:h-20">
             {/* LOGO */}
             <Link
               to="/"
@@ -133,44 +160,81 @@ const NavBarDashStore = () => {
             </Link>
 
             {/* DESKTOP LINKS */}
-            <div className="hidden md:flex flex-1 justify-center">
-              <div className="flex items-center space-x-1 bg-slate-50/50 px-2 py-1 rounded-full border border-slate-100">
-                {links.map((l) => (
+            <div className="hidden md:flex flex-1 justify-center items-center gap-2">
+              <div className="flex items-center space-x-1 p-1.5 bg-gray-100/50 rounded-full border border-gray-200/50">
+                <Link
+                  to="/"
+                  className="px-4 py-2 rounded-full text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white transition-all"
+                >
+                  Home
+                </Link>
+
+                {mainLinks.map((l) => (
                   <NavLink
                     key={l.to}
                     to={l.to}
-                    end
+                    end={l.to === '/store/dashboard'}
                     className={({ isActive }) =>
-                      `relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 ${isActive ? "text-[#ff8211]" : "text-slate-600 hover:text-[#ff8211]"
+                      `relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 ${isActive ? "text-[#ff8211] bg-white shadow-sm ring-1 ring-gray-100" : "text-gray-600 hover:text-[#ff8211] hover:bg-white/50"
                       }`
                     }
                   >
-                    {({ isActive }) => (
-                      <>
-                        {isActive && (
-                          <motion.div
-                            layoutId="navbar-active"
-                            className="absolute inset-0 bg-orange-50 rounded-full -z-10"
-                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                          />
-                        )}
-                        {l.label}
-                      </>
-                    )}
+                    {l.icon}
+                    {l.label}
                   </NavLink>
                 ))}
+
+                {/* Management Dropdown */}
+                <div className="relative" ref={managementRef}>
+                  <button
+                    onClick={() => setManagementDropdownOpen(!managementDropdownOpen)}
+                    className={`relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-1 group outline-none
+                                            ${isManagementActive || managementDropdownOpen ? "text-[#ff8211] bg-white shadow-sm ring-1 ring-gray-100" : "text-gray-600 hover:text-[#ff8211] hover:bg-white/50"}`}
+                  >
+                    Management
+                    <MdKeyboardArrowDown className={`transition-transform duration-300 ${managementDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {managementDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                        className="absolute top-full right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden py-2 z-50"
+                      >
+                        {managementLinks.map((link) => (
+                          <NavLink
+                            key={link.to}
+                            to={link.to}
+                            onClick={() => setManagementDropdownOpen(false)}
+                            className={({ isActive }) => `
+                                                            flex items-center gap-3 px-4 py-3 text-sm font-medium transition-colors
+                                                            ${isActive ? "text-[#ff8211] bg-orange-50" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}
+                                                        `}
+                          >
+                            {link.icon}
+                            {link.label}
+                          </NavLink>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
             </div>
 
             {/* RIGHT ICONS */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 md:gap-5">
               <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
                 <NavLink
                   to="/notifications"
-                  className="text-xl text-slate-500 hover:text-[#ff8211] transition-colors p-2 rounded-full hover:bg-slate-50 block"
+                  className="relative text-gray-400 hover:text-[#ff8211] transition-colors p-2.5 rounded-full hover:bg-gray-100 block group"
                   aria-label="Notifications"
                 >
-                  <MdOutlineNotificationsActive />
+                  <MdOutlineNotificationsActive size={22} className="group-hover:animate-pulse" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                 </NavLink>
               </motion.div>
 
@@ -183,14 +247,14 @@ const NavBarDashStore = () => {
 
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                className="md:hidden p-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 hover:bg-slate-100 transition"
+                className="md:hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
                 onClick={() => setOpen((s) => !s)}
                 aria-label="Toggle menu"
               >
                 {open ? (
-                  <HiOutlineX className="h-5 w-5" />
+                  <HiOutlineX className="h-6 w-6" />
                 ) : (
-                  <HiOutlineMenu className="h-5 w-5" />
+                  <HiOutlineMenu className="h-6 w-6" />
                 )}
               </motion.button>
             </div>
@@ -205,24 +269,51 @@ const NavBarDashStore = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden bg-white border-t border-slate-100"
+              className="md:hidden overflow-hidden bg-white border-t border-gray-100 shadow-xl"
             >
-              <div className="px-4 py-4 space-y-2">
-                {links.map((l) => (
-                  <NavLink
-                    key={l.to}
-                    to={l.to}
-                    onClick={() => setOpen(false)}
-                    className={({ isActive }) =>
-                      `block px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
-                        ? "bg-orange-50 text-[#ff8211] shadow-sm"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                      }`
-                    }
-                  >
-                    {l.label}
-                  </NavLink>
-                ))}
+              <div className="px-4 py-6 space-y-4">
+                <div className="space-y-1">
+                  <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Menu</p>
+                  <Link to="/" onClick={() => setOpen(false)} className="block px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">
+                    Home
+                  </Link>
+                  {[...mainLinks].map((l) => (
+                    <NavLink
+                      key={l.to}
+                      to={l.to}
+                      onClick={() => setOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
+                          ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`
+                      }
+                    >
+                      {l.icon && <span className="opacity-80">{l.icon}</span>}
+                      {l.label}
+                    </NavLink>
+                  ))}
+                </div>
+
+                <div className="pt-4 border-t border-gray-100 space-y-1">
+                  <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Management</p>
+                  {managementLinks.map((l) => (
+                    <NavLink
+                      key={l.to}
+                      to={l.to}
+                      onClick={() => setOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
+                          ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                        }`
+                      }
+                    >
+                      {l.icon && <span className="opacity-80">{l.icon}</span>}
+                      {l.label}
+                    </NavLink>
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}
@@ -230,7 +321,7 @@ const NavBarDashStore = () => {
       </motion.nav>
 
       {/* Spacer */}
-      <div className="h-16" />
+      <div className="h-16 md:h-20" />
     </>
   );
 };

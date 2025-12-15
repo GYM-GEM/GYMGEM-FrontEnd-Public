@@ -5,8 +5,6 @@ import {
     Send,
     Paperclip,
     MoreVertical,
-    Phone,
-    Video,
     Info,
     X,
     Check,
@@ -21,7 +19,7 @@ import {
     Image as ImageIconIcon // Renaming to avoid conflict if I use Image constructor, though not needed really.
 } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
-import NavTraineeDash from "./NavTraineDash";
+import NavStoreDash from "./NavBarDashStore";
 import axiosInstance from "../../../utils/axiosConfig";
 import { getUser, getCurrentProfileId } from "../../../utils/auth";
 import { useToast } from "../../../context/ToastContext"; // Assuming toast context exists based on TraineeDash
@@ -686,13 +684,7 @@ const Message = () => {
         }
     };
 
-    const handlePhoneCall = () => {
-        if (showToast) showToast("Phone calling feature coming soon!", { type: "info" });
-    };
 
-    const handleVideoCall = () => {
-        if (showToast) showToast("Video calling feature coming soon!", { type: "info" });
-    };
 
     const filteredConversations = conversations.filter(c => {
         const matchesSearch = c.participants.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -702,7 +694,7 @@ const Message = () => {
 
     return (
         <>
-            <NavTraineeDash />
+            <NavStoreDash />
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-[calc(100vh-80px)] p-4 md:p-6 lg:p-8">
                 <NewConversationModal
                     isOpen={isNewChatOpen}
@@ -832,18 +824,7 @@ const Message = () => {
                                 </div>
 
                                 <div className="flex items-center gap-1 md:gap-2 text-gray-500">
-                                    <button
-                                        onClick={handlePhoneCall}
-                                        className="p-2.5 hover:bg-gray-100 rounded-full transition-colors hidden sm:block text-gray-600"
-                                    >
-                                        <Phone size={20} />
-                                    </button>
-                                    <button
-                                        onClick={handleVideoCall}
-                                        className="p-2.5 hover:bg-gray-100 rounded-full transition-colors hidden sm:block text-gray-600"
-                                    >
-                                        <Video size={20} />
-                                    </button>
+
                                     <button
                                         onClick={() => setShowProfilePanel(!showProfilePanel)}
                                         className={`p-2.5 rounded-full transition-colors ${showProfilePanel ? 'bg-[#ff8211]/10 text-[#ff8211]' : 'hover:bg-gray-100 text-gray-600'}`}

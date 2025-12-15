@@ -8,6 +8,7 @@ import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
 import { BookOpen, Users, ClipboardList, MessageSquare } from "lucide-react";
+import NotificationDropdown from "../../NotificationDropdown";
 
 const NavBarDash = () => {
   const navigate = useNavigate();
@@ -228,16 +229,7 @@ const NavBarDash = () => {
 
             {/* RIGHT ICONS */}
             <div className="flex items-center gap-3 md:gap-5">
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
-                <NavLink
-                  to="/notifications"
-                  className="relative text-gray-400 hover:text-[#ff8211] transition-colors p-2.5 rounded-full hover:bg-gray-100 block group"
-                  aria-label="Notifications"
-                >
-                  <MdOutlineNotificationsActive size={22} className="group-hover:animate-pulse" />
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
-                </NavLink>
-              </motion.div>
+              <NotificationDropdown />
 
               <UserDropdown
                 user={user}

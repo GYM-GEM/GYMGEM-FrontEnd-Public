@@ -37,6 +37,8 @@ const SessionLayout = () => {
         startTime: new Date(Date.now() - 1000 * 60 * 5), // Started 5 mins ago
     });
 
+    const [isScreenSharing, setIsScreenSharing] = useState(false);
+
     const [messages, setMessages] = useState([
         { id: 1, userId: "system", sender: "System", text: "Session started", type: "system", time: "10:00 AM" },
         { id: 2, userId: "user_2", sender: "Sarah (Trainee)", role: "trainee", text: "Ready to sweat! 😅", time: "10:01 AM" },
@@ -132,11 +134,14 @@ const SessionLayout = () => {
                 {/* Main Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px]">
 
-                    {/* Left Panel: Video & Chat (8 cols) */}
-                    <div className="lg:col-span-8 flex flex-col gap-4">
+                    {/* Left Panel: Video & Chat */}
+                    <div className={`flex flex-col gap-4 transition-all duration-500 ease-in-out ${isScreenSharing ? 'lg:col-span-9' : 'lg:col-span-8'}`}>
                         {/* VIDEO CALL AREA */}
                         <div className="w-full">
-                            <VideoCall isTrainer={userRole === "trainer"} />
+                            <VideoCall
+                                isTrainer={userRole === "trainer"}
+                                onScreenShareChange={setIsScreenSharing}
+                            />
                         </div>
 
                         {/* CHAT AREA */}
@@ -149,8 +154,8 @@ const SessionLayout = () => {
                         </div>
                     </div>
 
-                    {/* Right Panel: Tasks & Tools (4 cols) */}
-                    <div className="lg:col-span-4 flex flex-col gap-6 overflow-y-auto pb-4 h-full">
+                    {/* Right Panel: Tasks & Tools */}
+                    <div className={`flex flex-col gap-6 overflow-y-auto pb-4 h-full transition-all duration-500 ease-in-out ${isScreenSharing ? 'lg:col-span-3' : 'lg:col-span-4'}`}>
                         {/* Tasks are visible to everyone */}
                         <TasksPanel
                             tasks={tasks}

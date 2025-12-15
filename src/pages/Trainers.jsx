@@ -2,7 +2,7 @@ import CardForTrainers from "../components/Trainee/CardForTrainers";
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 import { Search, Filter, X } from "lucide-react";
 
 function Trainers() {
@@ -21,7 +21,7 @@ function Trainers() {
   const fetchSpecializations = async () => {
     try {
       // Ensure the URL is correct based on your backend Setup
-      const response = await axios.get(`http://localhost:8000/api/utils/specializations`);
+      const response = await axiosInstance.get(`/api/utils/specializations`);
       setSpecializationsList(response.data.results);
     } catch (error) {
       console.error("Error fetching specializations:", error);
@@ -29,8 +29,6 @@ function Trainers() {
   };
 
   const fetchTrainers = async () => {
-    const token = localStorage.getItem('access');
-
     // Build Query Parameters
     const params = new URLSearchParams();
     if (searchQuery) params.append('search', searchQuery);
@@ -41,11 +39,7 @@ function Trainers() {
     if (maxPrice) params.append('max_price', maxPrice);
 
     try {
-      const response = await axios.get(`http://localhost:8000/api/trainers/list?${params.toString()}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      const response = await axiosInstance.get(`/api/trainers/list?${params.toString()}`);
       setTrainers(response.data);
     } catch (error) {
       console.error("Error fetching trainers:", error);

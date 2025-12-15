@@ -2,7 +2,7 @@ import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../utils/axiosConfig";
 import { Loader2, Search, X, SlidersHorizontal, ArrowUpDown, ChevronDown } from "lucide-react";
 import CourseCard from "../components/CourseCard";
 
@@ -52,7 +52,7 @@ function Courses() {
 
   const getCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/utils/categories');
+      const response = await axiosInstance.get('/api/utils/categories');
       setCategories(response.data.results);
     } catch (error) {
       console.log("Failed to load categories");
@@ -61,7 +61,6 @@ function Courses() {
 
   const fetchCourses = async (page = 1, append = false) => {
     if (!append) setIsLoading(true);
-    const token = localStorage.getItem('access');
 
     try {
       // Clean params
@@ -70,11 +69,8 @@ function Courses() {
         if (filters[key]) params[key] = filters[key];
       });
 
-      const response = await axios.get('http://localhost:8000/api/courses/courses/for-trainees',
+      const response = await axiosInstance.get('/api/courses/courses/for-trainees',
         {
-          headers: {
-            Authorization: `Bearer ${token}`
-          },
           params: params
         }
       );

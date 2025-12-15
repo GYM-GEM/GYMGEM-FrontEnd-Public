@@ -22,8 +22,6 @@ const AddCourse = () => {
   const onSubmit = async (data) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      // ✅ No manual token handling needed!
-
       const payload = {
         title: data.title,
         price: data.price,
@@ -56,54 +54,58 @@ const AddCourse = () => {
   return (
     <>
       <Navbar />
-      <section className="w-full flex items-center pt-[2rem] pb-[2rem]">
-        <div className="w-[80%] m-auto flex justify-center items-center gap-[11px] flex-wrap mb-[2rem]">
-          <div className="flex flex-col justify-center max-w-md w-[100%] pt-[2rem] pb-[3rem]">
-            <div className="">
-              <h1 className="text-[#FF8211] text-[4rem] bebas-medium">
-                Add course
-              </h1>
-            </div>
-            <div className="mt-[6px]">
-              <p className="text-[#555555] text-[1rem] poppins-regular">
-                Fill out the details below to create your course
-              </p>
-            </div>
-          </div>
-          {/* -------------------------------------------------------------- */}
-          <div className="flex flex-col justify-center items-center w-[100%]">
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="w-full max-w-md flex flex-col gap-4"
-            >
-              <div>
-                <div className="pb-[0.25rem]">
-                  <label className="poppins-medium  text-[1rem]">
-                    Course Title
-                  </label>
+      <section className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-10">
+          {/* Header */}
+          <header className="text-center">
+            <h2 className="font-bebas text-4xl tracking-tight text-[#ff8211]">
+              Add Course
+            </h2>
+            <p className="mt-3 text-sm text-muted-foreground sm:text-base text-[#555555]">
+              Fill out the details below to create your course.
+            </p>
+          </header>
+
+          {/* Form Card */}
+          <div className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-10">
+            <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
+
+              {/* Cover Image */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Cover Image</label>
+                <div className="flex flex-col items-center sm:items-start gap-4 p-4 border rounded-xl bg-gray-50/50">
+                  <UploadImage onUpload={(url) => setValue("coverUrl", url)} />
+                  <input type="hidden" {...register("coverUrl", { required: "Cover image is required" })} />
                 </div>
-                <div>
-                  <input
-                    {...register("title", { required: true })}
-                    placeholder="Strength Training for Beginners"
-                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
-                  />
-                </div>
+                {errors.coverUrl && (
+                  <p className="text-xs text-destructive text-red-500">{errors.coverUrl.message}</p>
+                )}
+              </div>
+
+              {/* Title */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Course Title
+                </label>
+                <input
+                  {...register("title", { required: "Title is required" })}
+                  placeholder="Strength Training for Beginners"
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                />
                 {errors.title && (
-                  <p className="text-red-500 text-sm mt-1">
-                    This field is required
+                  <p className="text-xs text-destructive text-red-500">
+                    {errors.title.message}
                   </p>
                 )}
               </div>
 
-              <div>
-                <div className="pb-[0.25rem]">
-                  <label className="poppins-medium text-[1rem]">Category</label>
-                </div>
-                <div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Category */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Category</label>
                   <select
-                    {...register("category", { required: true })}
-                    className="w-full border rounded-md p-[10px] text-[#000] poppins-extralight"
+                    {...register("category", { required: "Category is required" })}
+                    className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     <option value="">Select Category</option>
                     <option value={1}>Strength Training</option>
@@ -122,81 +124,49 @@ const AddCourse = () => {
                     <option value={14}>Sport-Specific Training</option>
                     <option value={15}>Equipment Specific</option>
                   </select>
+                  {errors.category && (
+                    <p className="text-xs text-destructive text-red-500">{errors.category.message}</p>
+                  )}
+                </div>
+
+                {/* Level */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Level</label>
+                  <select
+                    {...register("level", { required: "Level is required" })}
+                    className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                  >
+                    <option value="">Select Level</option>
+                    <option value={1}>Beginner</option>
+                    <option value={2}>Intermediate</option>
+                    <option value={3}>Advanced</option>
+                  </select>
+                  {errors.level && (
+                    <p className="text-xs text-destructive text-red-500">{errors.level.message}</p>
+                  )}
                 </div>
               </div>
 
-              <div>
-                <div className="pb-[0.25rem]">
-                  <label className="poppins-medium text-[1rem]">Level</label>
-                </div>
-                <div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {/* Language */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Language</label>
                   <select
-                    {...register("level", { required: true })}
-                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
+                    {...register("language", { required: "Language is required" })}
+                    className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value=""
-                    >
-                      Select Level
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value={1}
-                    >
-                      Beginner
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value={2}
-                    >
-                      Intermediate
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value={3}
-                    >
-                      Advanced
-                    </option>
+                    <option value="">Select Language</option>
+                    <option value="AR">Arabic</option>
+                    <option value="EN">English</option>
                   </select>
+                  {errors.language && (
+                    <p className="text-xs text-destructive text-red-500">{errors.language.message}</p>
+                  )}
                 </div>
-              </div>
 
-              <div>
-                <div className="pb-[0.25rem]">
-                  <label className="poppins-medium text-[1rem]">Language</label>
-                </div>
-                <div>
-                  <select
-                    {...register("language", { required: true })}
-                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
-                  >
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value=""
-                    >
-                      Select Language
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="AR"
-                    >
-                      Arabic
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="EN"
-                    >
-                      English
-                    </option>
-                  </select>
-                </div>
-              </div>
-              <div>
-                <div className="pb-[0.25rem]">
-                  <label className="poppins-medium text-[1rem]">Price</label>
-                </div>
-                <div>
+                {/* Price */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Price</label>
                   <input
                     {...register("price", {
                       required: "Price is required",
@@ -206,107 +176,64 @@ const AddCourse = () => {
                       },
                     })}
                     placeholder="99.99"
-                    className="w-full border rounded-md p-[10px] text-[#000] poppins-extralight"
+                    className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
                   />
-                </div>
-                {errors.price && (
-                  <p className="text-red-500 text-sm mt-1">
-                    {errors.price.message}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <div className="pb-[0.25rem]">
-                  <label className="poppins-medium text-[1rem]">
-                    Cover Image
-                  </label>
-                </div>
-                <div className="border rounded-md p-[10px] border-[#FF8211]">
-                  <UploadImage onUpload={(url) => setValue("coverUrl", url)} />
-                  {/* Hidden input to register the field validation if needed, or just let handleSubmit pick up the value if setValue registered it effectively? 
-                      useForm requires register for validation usually, but setValue with {shouldValidate: true} works too if we register it manually or use a hidden input.
-                      Using hidden input is safer for 'required' validation. 
-                  */}
-                  <input type="hidden" {...register("coverUrl", { required: true })} />
-                  {errors.coverUrl && (
-                    <p className="text-red-500 text-sm mt-1">
-                      Cover image is required
-                    </p>
+                  {errors.price && (
+                    <p className="text-xs text-destructive text-red-500">{errors.price.message}</p>
                   )}
                 </div>
               </div>
 
-              <div>
-                <div className="pb-[0.25rem]">
-                  <label className="poppins-medium text-[1rem]">
-                    Preview Video URL
-                  </label>
-                </div>
-                <div>
-                  <input
-                    {...register("previewUrl")}
-                    placeholder="Paste your course preview video link"
-                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
-                  />
-                </div>
+
+
+              {/* Preview Video */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Preview Video URL</label>
+                <input
+                  {...register("previewUrl")}
+                  placeholder="Paste your course preview video link"
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                />
               </div>
 
-              <div>
-                <div className="pb-[0.25rem]">
-                  <label className="poppins-medium text-[1rem]">
-                    Description
-                  </label>
-                </div>
-                <div>
-                  {" "}
-                  <textarea
-                    {...register("description", { required: true })}
-                    placeholder="Write a short description about your course"
-                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight h-[125px]"
-                    rows={4}
-                  ></textarea>
-                </div>
+              {/* Description */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Description</label>
+                <textarea
+                  {...register("description", { required: "Description is required" })}
+                  placeholder="Write a short description about your course"
+                  className="w-full rounded-xl border border-border bg-background/80 px-3 py-2 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground min-h-[120px]"
+                  rows={4}
+                ></textarea>
+                {errors.description && (
+                  <p className="text-xs text-destructive text-red-500">{errors.description.message}</p>
+                )}
               </div>
 
-              <div>
-                <div className="pb-[0.25rem]">
-                  <label className="poppins-medium text-[1rem]">Status</label>
-                </div>
-                <div>
-                  <select
-                    {...register("status", { required: true })}
-                    className="w-full border rounded-md p-[10px]  text-[#000] poppins-extralight"
-                  >
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value=""
-                    >
-                      Select Status
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="draft"
-                    >
-                      Draft
-                    </option>
-                    <option
-                      className=" p-[10px]  text-[#000] poppins-extralight"
-                      value="published"
-                    >
-                      Published
-                    </option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex justify-start w-full pt-[1.5rem]">
-                <button
-                  type="submit"
-                  className="bg-[#FF8211] text-white text-[18px] items-center h-[32px] w-[121px] rounded-full  shadow-md transition duration-150 ease-in-out hover:opacity-80 focus:opacity-90 active:opacity-100 bebas-regular"
+              {/* Status */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Status</label>
+                <select
+                  {...register("status", { required: "Status is required" })}
+                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
-                  NEXT
-                </button>
+                  <option value="">Select Status</option>
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
+                {errors.status && (
+                  <p className="text-xs text-destructive text-red-500">{errors.status.message}</p>
+                )}
               </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-[#ff8211]/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              >
+                Next
+              </button>
+
             </form>
           </div>
         </div>

@@ -81,6 +81,9 @@ const ClientTrainerDash = () => {
   // SESSION MODAL STATE
   const [openSession, setOpenSession] = useState(false);
   const [sessionName, setSessionName] = useState("");
+  const [sessionDate, setSessionDate] = useState("");
+  const [sessionStartTime, setSessionStartTime] = useState("");
+  const [sessionEndTime, setSessionEndTime] = useState("");
 
   const handleStartSession = (e) => {
     e.preventDefault();
@@ -89,7 +92,14 @@ const ClientTrainerDash = () => {
     // Navigate to Session with ID (using name or random ID)
     // In real app, you'd create session via API first
     const sessionId = Math.floor(Math.random() * 10000);
-    navigate(`/session/${sessionId}`, { state: { sessionName } });
+    navigate(`/session/${sessionId}`, {
+      state: {
+        sessionName,
+        sessionDate,
+        sessionStartTime,
+        sessionEndTime
+      }
+    });
   };
 
 
@@ -357,6 +367,12 @@ const ClientTrainerDash = () => {
                   onClose={() => setOpenSession(false)}
                   sessionName={sessionName}
                   setSessionName={setSessionName}
+                  sessionDate={sessionDate}
+                  setSessionDate={setSessionDate}
+                  sessionStartTime={sessionStartTime}
+                  setSessionStartTime={setSessionStartTime}
+                  sessionEndTime={sessionEndTime}
+                  setSessionEndTime={setSessionEndTime}
                   onStart={handleStartSession}
                 />
 
@@ -392,7 +408,19 @@ const ClientTrainerDash = () => {
 // ============================================
 // CREATE SESSION MODAL
 // ============================================
-function CreateSessionModal({ open, onClose, sessionName, setSessionName, onStart }) {
+function CreateSessionModal({
+  open,
+  onClose,
+  sessionName,
+  setSessionName,
+  sessionDate,
+  setSessionDate,
+  sessionStartTime,
+  setSessionStartTime,
+  sessionEndTime,
+  setSessionEndTime,
+  onStart
+}) {
   const backdropRef = useRef(null);
 
   useEffect(() => {
@@ -438,6 +466,37 @@ function CreateSessionModal({ open, onClose, sessionName, setSessionName, onStar
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Date</label>
+              <input
+                type="date"
+                value={sessionDate}
+                onChange={(e) => setSessionDate(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ff8211]/50 focus:border-[#ff8211]"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Start Time</label>
+              <input
+                type="time"
+                value={sessionStartTime}
+                onChange={(e) => setSessionStartTime(e.target.value)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ff8211]/50 focus:border-[#ff8211]"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">End Time</label>
+            <input
+              type="time"
+              value={sessionEndTime}
+              onChange={(e) => setSessionEndTime(e.target.value)}
+              className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#ff8211]/50 focus:border-[#ff8211]"
+            />
+          </div>
+
           <div className="bg-blue-50 p-4 rounded-xl text-xs text-blue-700 font-medium">
             <p>💡 This will create a live session room. Share the Session ID with your trainees so they can join!</p>
           </div>
@@ -445,7 +504,7 @@ function CreateSessionModal({ open, onClose, sessionName, setSessionName, onStar
           <div className="pt-2">
             <button
               type="submit"
-              disabled={!sessionName.trim()}
+              disabled={!sessionName.trim() || !sessionDate || !sessionStartTime || !sessionEndTime}
               className="w-full bg-[#ff8211] text-white py-3 rounded-xl font-bold hover:bg-[#e06900] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md active:scale-95 flex items-center justify-center gap-2"
             >
               <Play className="w-5 h-5 fill-current" /> GO LIVE NOW

@@ -46,6 +46,7 @@ import ClientTrainerDash from "./components/Dashboard/Trainer/ClientTrainerDash.
 import TrainerprofileDash from "./components/Dashboard/Trainer/TrainerprofileDash.jsx";
 import CourseDetailsDash from "./components/Dashboard/Trainer/CourseDetailsDash.jsx";
 import OrderTrackingTR from "./components/Dashboard/Trainer/OrderTrackingTR.jsx";
+import MessageTR from "./components/Dashboard/Trainer/Message.jsx";
 
 // dashboard trainee
 import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
@@ -57,7 +58,7 @@ import PublicTrainerProfile from "./components/PublicTrainerProfile.jsx";
 import Favorite from "./components/Dashboard/Traine/Favorite.jsx";
 import MySessions from "./components/Dashboard/Traine/MySessions.jsx";
 import CourseEnroll from "./components/courses/CourseEnroll.jsx";
-import Message from "./components/Dashboard/Traine/Message.jsx";
+import MessageTE from "./components/Dashboard/Traine/Message.jsx";
 import OrderTrackingTE from "./components/Dashboard/Traine/OrderTrackingTE.jsx";
 // Checkout components
 import Checkout from "./components/BuyNow/Checkout.jsx";
@@ -79,6 +80,7 @@ import StoreDashboard from "./components/Dashboard/Store/StoreDashboard.jsx";
 import Storeprofile from "./components/Dashboard/Store/Storeprofile.jsx";
 import StoreProduct from "./components/Dashboard/Store/StoreProduct.jsx";
 import StoreOrder from "./components/Dashboard/Store/StoreOrder.jsx";
+import MessageST from "./components/Dashboard/Store/Message.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import useAuthCheck from "./hooks/useAuthCheck.js";
 import { useEffect } from "react";
@@ -165,7 +167,7 @@ function App() {
           <Route path="addsection" element={<ProtectedRoute requiredProfile="trainer"><AddSection /></ProtectedRoute>} />
           <Route path="addcourse" element={<ProtectedRoute requiredProfile="trainer"><AddCourse /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute requiredProfile="trainer"><SettingsTrainee /></ProtectedRoute>} />
-          <Route path="message" element={<ProtectedRoute requiredProfile="trainer"><Message /></ProtectedRoute>} />
+          <Route path="message" element={<ProtectedRoute requiredProfile="trainer"><MessageTR /></ProtectedRoute>} />
           <Route path="myorder" element={<ProtectedRoute requiredProfile="trainer"><OrderTrackingTR /></ProtectedRoute>} />
         </Route>
 
@@ -178,7 +180,7 @@ function App() {
           <Route path="favorite" element={<ProtectedRoute requiredProfile="trainee"><Favorite /></ProtectedRoute>} />
           <Route path="sessions" element={<ProtectedRoute requiredProfile="trainee"><MySessions /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute requiredProfile="trainee"><SettingsTrainee /></ProtectedRoute>} />
-          <Route path="message" element={<ProtectedRoute requiredProfile="trainee"><Message /></ProtectedRoute>} />
+          <Route path="message" element={<ProtectedRoute requiredProfile="trainee"><MessageTE /></ProtectedRoute>} />
           <Route path="myorder" element={<ProtectedRoute requiredProfile="trainee"><OrderTrackingTE /></ProtectedRoute>} />
         </Route>
         {/* -------------------- GYM DASHBOARD -------------------- */}
@@ -200,7 +202,7 @@ function App() {
           <Route path="order" element={<ProtectedRoute requiredProfile="store"><StoreOrder /></ProtectedRoute>} />
           <Route path="profile" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
           <Route path="settings" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
-          <Route path="message" element={<ProtectedRoute requiredProfile="store"><Message /></ProtectedRoute>} />
+          <Route path="message" element={<ProtectedRoute requiredProfile="store"><MessageST /></ProtectedRoute>} />
         </Route>
 
         {/* -------------------- AUTH + FORMS -------------------- */}

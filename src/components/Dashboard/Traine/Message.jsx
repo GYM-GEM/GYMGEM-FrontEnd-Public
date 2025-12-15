@@ -5,8 +5,6 @@ import {
     Send,
     Paperclip,
     MoreVertical,
-    Phone,
-    Video,
     Info,
     X,
     Check,
@@ -686,13 +684,7 @@ const Message = () => {
         }
     };
 
-    const handlePhoneCall = () => {
-        if (showToast) showToast("Phone calling feature coming soon!", { type: "info" });
-    };
 
-    const handleVideoCall = () => {
-        if (showToast) showToast("Video calling feature coming soon!", { type: "info" });
-    };
 
     const filteredConversations = conversations.filter(c => {
         const matchesSearch = c.participants.some(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -832,18 +824,7 @@ const Message = () => {
                                 </div>
 
                                 <div className="flex items-center gap-1 md:gap-2 text-gray-500">
-                                    <button
-                                        onClick={handlePhoneCall}
-                                        className="p-2.5 hover:bg-gray-100 rounded-full transition-colors hidden sm:block text-gray-600"
-                                    >
-                                        <Phone size={20} />
-                                    </button>
-                                    <button
-                                        onClick={handleVideoCall}
-                                        className="p-2.5 hover:bg-gray-100 rounded-full transition-colors hidden sm:block text-gray-600"
-                                    >
-                                        <Video size={20} />
-                                    </button>
+
                                     <button
                                         onClick={() => setShowProfilePanel(!showProfilePanel)}
                                         className={`p-2.5 rounded-full transition-colors ${showProfilePanel ? 'bg-[#ff8211]/10 text-[#ff8211]' : 'hover:bg-gray-100 text-gray-600'}`}

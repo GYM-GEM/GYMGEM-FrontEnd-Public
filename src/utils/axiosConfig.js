@@ -167,7 +167,12 @@ axiosInstance.interceptors.response.use(
 
         // Handle 401 Unauthorized
         if (error.response.status === 401 && !originalRequest._retry) {
-            console.warn("⚠️ 401 Unauthorized detected. Attempting to refresh...");
+            console.warn("⚠️ 401 Unauthorized detected. URL:", originalRequest.url);
+            console.log("Details:", { 
+                status: error.response.status, 
+                url: originalRequest.url, 
+                retry: originalRequest._retry 
+            });
             originalRequest._retry = true;
 
             try {
@@ -180,7 +185,9 @@ axiosInstance.interceptors.response.use(
                 // Simplest strategy: The loader counter is still incremented from the original request.
                 // We haven't called hideLoader() for the original request yet in this path.
 
+                console.log("🔄 Calling refreshAccessToken()...");
                 const newToken = await refreshAccessToken();
+                console.log("✅ refreshAccessToken() returned:", newToken ? "TOKEN OK" : "NO TOKEN");
 
                 // Update header and retry original request
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
@@ -203,6 +210,7 @@ axiosInstance.interceptors.response.use(
                 return axiosInstance(originalRequest);
 
             } catch (refreshError) {
+                console.error("❌ refreshAccessToken() failed details:", refreshError);
                 // Refresh failed (and logged out), reject the original request
                 loaderState.hideLoader(); // Ensure we hide if refresh fails
                 return Promise.reject(refreshError);

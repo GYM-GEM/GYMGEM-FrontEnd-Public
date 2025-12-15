@@ -6,7 +6,7 @@ import { Mic, MicOff, Video, VideoOff, MonitorUp } from "lucide-react";
  * Handles local camera feed, toggling, and Screen Sharing.
  * Default: Camera and Mic OFF on join.
  */
-const VideoCall = ({ isTrainer }) => {
+const VideoCall = ({ isTrainer, onScreenShareChange }) => {
     const localVideoRef = useRef(null);
     const [stream, setStream] = useState(null); // Webcam stream
     const [screenStream, setScreenStream] = useState(null); // Screen share stream
@@ -144,17 +144,20 @@ const VideoCall = ({ isTrainer }) => {
                 setScreenStream(null);
             }
             setIsScreenSharing(false);
+            if (onScreenShareChange) onScreenShareChange(false);
         } else {
             // START Sharing
             try {
                 const displayStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
                 setScreenStream(displayStream);
                 setIsScreenSharing(true);
+                if (onScreenShareChange) onScreenShareChange(true);
 
                 // Handle "Stop sharing" from browser UI (the little floating bar)
                 displayStream.getVideoTracks()[0].onended = () => {
                     setScreenStream(null);
                     setIsScreenSharing(false);
+                    if (onScreenShareChange) onScreenShareChange(false);
                 };
             } catch (err) {
                 console.error("Error sharing screen:", err);
@@ -164,9 +167,10 @@ const VideoCall = ({ isTrainer }) => {
     };
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2 h-[300px] md:h-[400px]">
-            {/* Remote Video (Mock) */}
-            <div className="relative rounded-2xl overflow-hidden bg-black shadow-lg group">
+        <div className={`grid gap-4 mb-2 transition-all duration-500 ease-in-out ${isScreenSharing ? 'grid-cols-1 h-[600px]' : 'grid-cols-1 md:grid-cols-2 h-[300px] md:h-[400px]'}`}>
+            {/* Remote Video (Mock) - PIP when sharing */}
+            <div className={`relative rounded-2xl overflow-hidden bg-black shadow-lg group transition-all duration-500
+                ${isScreenSharing ? 'absolute top-4 right-4 z-20 w-48 h-36 shadow-2xl border-2 border-white/20' : 'relative w-full h-full'}`}>
                 <img
                     src={isTrainer
                         ? "https://images.pexels.com/photos/4162451/pexels-photo-4162451.jpeg?auto=compress&cs=tinysrgb&w=800"

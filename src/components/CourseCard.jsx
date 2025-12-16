@@ -101,7 +101,7 @@ const CourseCard = ({ course, categoryTheme }) => {
 
                     {/* Action Button */}
                     <Link
-                        to={`/courses/${id}`}
+                        to={`/trainee/courses/${id}`}
                         className="group/btn relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg active:scale-95"
                     >
                         <span>View Details</span>

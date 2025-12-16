@@ -155,7 +155,7 @@ const CoursesTraineDash = () => {
 
                       {/* Action Button */}
                       <Link
-                        to={`/courses/${course.course_details.id}/learn`}
+                        to={`/trainee/courses/${course.course_details.id}/learn`}
                         className="w-full px-4 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-sm flex items-center justify-center gap-2"
                       >
                         Continue Learning

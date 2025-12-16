@@ -4,6 +4,7 @@ import { CreditCard, Lock, ShieldCheck, ArrowLeft } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 import axios from "axios";
+import PaymentPage from "./PaymentPage";
 
 // ============================================================================
 // ORDER MANAGEMENT LOGIC
@@ -398,187 +399,13 @@ const Checkout = () => {
               </div>
 
               {/* Payment Form */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                {iframeUrl ? (
-                  // Display payment iframe
-                  <>
-                    <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
-                      Complete Your Payment
-                    </h2>
-                    <div className="w-full overflow-hidden rounded-lg" style={{ height: '750px' }}>
-                      <iframe
-                        src={iframeUrl}
-                        className="w-full h-full border-0"
-                        title="Payment Gateway"
-                        allow="payment"
-                        scrolling="no"
-                      />
-                    </div>
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-600 poppins-regular mt-4">
-                      <ShieldCheck className="w-4 h-4 text-green-600" />
-                      <span>Secure payment powered by Paymob</span>
-                    </div>
-                  </>
-                ) : (
-                  // Display traditional payment form
-                  <>
-                    <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
-                      Payment Information
-                    </h2>
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                      {/* Payment Method Selection */}
-                      <div>
-                        <label className="text-sm font-medium text-gray-900 poppins-medium mb-3 block">
-                          Payment Method
-                        </label>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMethod("credit_card")}
-                            className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${paymentMethod === "credit_card"
-                              ? "border-[#FF8211] bg-[#FF8211]/5"
-                              : "border-gray-200 hover:border-gray-300"
-                              }`}
-                          >
-                            <CreditCard className={`w-6 h-6 ${paymentMethod === "credit_card" ? "text-[#FF8211]" : "text-gray-600"}`} />
-                            <span className="text-sm poppins-medium">Credit Card</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMethod("paypal")}
-                            className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${paymentMethod === "paypal"
-                              ? "border-[#FF8211] bg-[#FF8211]/5"
-                              : "border-gray-200 hover:border-gray-300"
-                              }`}
-                          >
-                            <span className="text-xl">💳</span>
-                            <span className="text-sm poppins-medium">PayPal</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setPaymentMethod("bank")}
-                            className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${paymentMethod === "bank"
-                              ? "border-[#FF8211] bg-[#FF8211]/5"
-                              : "border-gray-200 hover:border-gray-300"
-                              }`}
-                          >
-                            <span className="text-xl">🏦</span>
-                            <span className="text-sm poppins-medium">Bank</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Credit Card Form */}
-                      {paymentMethod === "credit_card" && (
-                        <div className="space-y-4">
-                          <div>
-                            <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
-                              Card Number
-                            </label>
-                            <input
-                              type="text"
-                              name="cardNumber"
-                              value={formData.cardNumber}
-                              onChange={handleInputChange}
-                              placeholder="1234 5678 9012 3456"
-                              maxLength="16"
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
-                              Cardholder Name
-                            </label>
-                            <input
-                              type="text"
-                              name="cardName"
-                              value={formData.cardName}
-                              onChange={handleInputChange}
-                              placeholder="John Doe"
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
-                                Expiry Date
-                              </label>
-                              <input
-                                type="text"
-                                name="expiryDate"
-                                value={formData.expiryDate}
-                                onChange={handleInputChange}
-                                placeholder="MM/YY"
-                                maxLength="5"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
-                              />
-                            </div>
-                            <div>
-                              <label className="text-sm font-medium text-gray-900 poppins-medium mb-2 block">
-                                CVV
-                              </label>
-                              <input
-                                type="text"
-                                name="cvv"
-                                value={formData.cvv}
-                                onChange={handleInputChange}
-                                placeholder="123"
-                                maxLength="4"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FF8211] focus:border-[#FF8211] poppins-regular"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Other Payment Methods Message */}
-                      {paymentMethod !== "credit_card" && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <p className="text-sm text-blue-800 poppins-regular">
-                            You will be redirected to complete your payment securely with {paymentMethod === "paypal" ? "PayPal" : "your bank"}.
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Error Message */}
-                      {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                          <p className="text-sm text-red-800 poppins-regular">{error}</p>
-                        </div>
-                      )}
-
-                      {/* Submit Button */}
-                      <button
-                        type="submit"
-                        disabled={isProcessing}
-                        onClick={handleSubmit}
-                        className="w-full px-6 py-4 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                      >
-                        {isProcessing ? (
-                          <>
-                            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                            Processing...
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="w-5 h-5" />
-                            Complete Purchase - ${total.toFixed(2)}
-                          </>
-                        )}
-                      </button>
-
-                      {/* Security Badge */}
-                      <div className="flex items-center justify-center gap-2 text-sm text-gray-600 poppins-regular">
-                        <ShieldCheck className="w-4 h-4 text-green-600" />
-                        <span>Secure 256-bit SSL encryption</span>
-                      </div>
-                    </form>
-                  </>
-                )}
-              </div>
+              <PaymentPage
+                total={total}
+                iframeUrl={iframeUrl}
+                paymentId={paymentId}
+                course={course}
+                user={user}
+              />
             </div>
 
             {/* Sidebar Info */}

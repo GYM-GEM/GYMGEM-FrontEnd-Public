@@ -47,6 +47,7 @@ const CourseDetails = () => {
   const [showShareModal, setShowShareModal] = useState(false);
   const [copied, setCopied] = useState(false);
   const [activeContent, setActiveContent] = useState(null);
+  const [isEnrolling, setIsEnrolling] = useState(false);
 
   const handleSectionClick = (section) => {
     setActiveContent(section);
@@ -361,12 +362,17 @@ const CourseDetails = () => {
       return;
     }
 
+    // Prevent multiple clicks
+    if (isEnrolling) return;
+
     try {
+      setIsEnrolling(true);
+
       // Call payment start endpoint
       const token = localStorage.getItem('access');
       const response = await axios.post(
         'http://localhost:8000/api/payment/start/',
-        { amount: parseFloat(course.price) || 49.99 },
+        { amount: parseFloat(course.price), course_id: course.id },
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -386,6 +392,8 @@ const CourseDetails = () => {
     } catch (error) {
       console.error('Error starting payment:', error);
       alert('Failed to start payment process. Please try again.');
+    } finally {
+      setIsEnrolling(false);
     }
   };
 
@@ -480,9 +488,18 @@ const CourseDetails = () => {
                 ) : (
                   <button
                     onClick={handleBuyNow}
-                    className="flex-1 px-8 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] cursor-pointer transition-colors shadow-sm"
+                    disabled={isEnrolling}
+                    className={`flex-1 px-8 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg transition-colors shadow-sm flex items-center justify-center gap-2 ${isEnrolling ? "opacity-70 cursor-not-allowed" : "hover:bg-[#ff7906] cursor-pointer"
+                      }`}
                   >
-                    Buy Now - ${courseData.price}
+                    {isEnrolling ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      `Buy Now - $${courseData.price}`
+                    )}
                   </button>
                 )}
                 <button className="px-6 py-3 border-2 border-[#FF8211] text-[#FF8211] rounded-lg hover:bg-[#FF8211]/10 transition-colors flex items-center gap-2">
@@ -806,9 +823,18 @@ const CourseDetails = () => {
                   ) : (
                     <button
                       onClick={handleBuyNow}
-                      className="w-full px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-[#ff7906] transition-colors shadow-sm"
+                      disabled={isEnrolling}
+                      className={`w-full px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg transition-colors shadow-sm flex items-center justify-center gap-2 ${isEnrolling ? "opacity-70 cursor-not-allowed" : "hover:bg-[#ff7906]"
+                        }`}
                     >
-                      Enroll Now
+                      {isEnrolling ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        "Enroll Now"
+                      )}
                     </button>
                   )}
                   <button

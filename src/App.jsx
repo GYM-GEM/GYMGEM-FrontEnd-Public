@@ -38,6 +38,8 @@ import AddCourse from "./components/courses/AddCourse.jsx";
 import NewLeason from "./components/courses/NewLesson.jsx";
 import AddSection from "./components/courses/AddSection.jsx";
 import Goodbye from "./pages/Goodbye.jsx";
+import AiTrainerPage from "./pages/AiTrainer.jsx";
+import WorkoutHistory from "./components/ai/WorkoutHistory.jsx";
 
 // dashboard trainer
 import DashboardTrainer from "./components/Dashboard/Trainer/DashboardTrainer.jsx";
@@ -138,6 +140,8 @@ function App() {
             <Route path="viewprofile" element={<Viewprofile />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="ai-trainer" element={<AiTrainerPage />} />
+            <Route path="workout-history" element={<WorkoutHistory />} />
             <Route path="checkout" element={<Checkout />} />
             <Route path="payment-status" element={<PaymentStatus />} />
             <Route path="store-order-success" element={<StoreOrderSuccess />} />

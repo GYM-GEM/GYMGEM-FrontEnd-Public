@@ -162,4 +162,11 @@
 .offers-swiper .swiper-pagination-bullet-active {
   background: #ff8211;
   opacity: 1;
-} */
+}
+
+/* Animation Keyframes */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

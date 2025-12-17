@@ -269,8 +269,10 @@ const CourseDetails = () => {
     return categories[categoryId] || "Fitness";
   };
 
-  // Check if user is enrolled in the course
-  const isEnrolled = course?.enrollment === "in_progress";
+  // Check enrollment states
+  const isEnrolledOrCompleted = course?.enrollment === "in_progress" || course?.enrollment === "completed";
+  const isDropped = course?.enrollment === "dropped";
+  const isWishlisted = course?.enrollment === "wishlist";
 
   // Get lessons from either lessons_details (with sections) or lessons (basic info)
   const lessonsData = course?.lessons_details?.length > 0 ? course.lessons_details : course?.lessons || [];
@@ -484,34 +486,57 @@ const CourseDetails = () => {
               </div>
 
               {/* CTA Buttons (Mobile) */}
-              <div className="flex flex-wrap items-center gap-4 lg:hidden mb-6">
-                {isEnrolled ? (
-                  <button
-                    disabled
-                    className="flex-1 px-8 py-3 bg-gray-400 text-white rounded-lg font-semibold bebas-regular text-lg cursor-not-allowed shadow-sm"
-                  >
-                    Already Enrolled
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleBuyNow}
-                    disabled={isEnrolling}
-                    className={`flex-1 px-8 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg transition-colors shadow-sm flex items-center justify-center gap-2 ${isEnrolling ? "opacity-70 cursor-not-allowed" : "hover:bg-[#ff7906] cursor-pointer"
+              <div className="flex flex-col gap-3 lg:hidden mb-6">
+                <div className="flex items-center gap-4">
+                  {isEnrolledOrCompleted ? (
+                    <button
+                      disabled
+                      className="flex-1 px-8 py-3 bg-gray-400 text-white rounded-lg font-semibold bebas-regular text-lg cursor-not-allowed shadow-sm"
+                    >
+                      {course.enrollment === "completed" ? "Completed" : "Already Enrolled"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleBuyNow}
+                      disabled={isEnrolling || isDropped}
+                      className={`flex-1 px-8 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg transition-colors shadow-sm flex items-center justify-center gap-2 ${
+                        isEnrolling || isDropped ? "opacity-70 cursor-not-allowed" : "hover:bg-[#ff7906] cursor-pointer"
                       }`}
-                  >
-                    {isEnrolling ? (
-                      <>
+                    >
+                      {isEnrolling ? (
+                        <>
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        `Buy Now - $${courseData.price}`
+                      )}
+                    </button>
+                  )}
+                  
+                  {!isEnrolledOrCompleted && (
+                    <button 
+                      onClick={handleToggleFavorite}
+                      disabled={isWishlistLoading || isDropped}
+                      className={`px-6 py-3 border-2 rounded-lg transition-colors flex items-center gap-2 ${
+                        isWishlisted 
+                          ? "bg-[#FF8211] border-[#FF8211] text-white" 
+                          : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
+                      } ${isWishlistLoading || isDropped ? "opacity-70 cursor-not-allowed" : ""}`}
+                    >
+                      {isWishlistLoading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      `Buy Now - $${courseData.price}`
-                    )}
-                  </button>
+                      ) : (
+                        <Heart className={`w-5 h-5 ${isWishlisted ? "fill-white" : ""}`} />
+                      )}
+                    </button>
+                  )}
+                </div>
+                {isDropped && (
+                  <p className="text-red-600 text-sm poppins-medium animate-pulse">
+                    You are blocked from this course
+                  </p>
                 )}
-                <button className="px-6 py-3 border-2 border-[#FF8211] text-[#FF8211] rounded-lg hover:bg-[#FF8211]/10 transition-colors flex items-center gap-2">
-                  <Heart className="w-5 h-5" />
-                </button>
               </div>
             </div>
 
@@ -557,7 +582,7 @@ const CourseDetails = () => {
                       alt={courseData.title}
                       className="w-full h-full object-cover"
                     />
-                    {!isEnrolled && (
+                    {!isEnrolledOrCompleted && (
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                         <div className="text-center">
                           <Lock className="w-16 h-16 text-white mx-auto mb-3 opacity-90" />
@@ -645,7 +670,7 @@ const CourseDetails = () => {
                                     {section.title}
                                   </span>
                                 </div>
-                                {!isEnrolled && <Lock className="w-4 h-4 text-gray-400" />}
+                                {!isEnrolledOrCompleted && <Lock className="w-4 h-4 text-gray-400" />}
                               </div>
                             ))
                           ) : (
@@ -809,12 +834,12 @@ const CourseDetails = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {isEnrolled ? (
+                  {isEnrolledOrCompleted ? (
                     <button
                       disabled
                       className="w-full px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold bebas-regular text-lg cursor-not-allowed shadow-sm"
                     >
-                      Already Enrolled
+                      {course.enrollment === "completed" ? "Completed" : "Already Enrolled"}
                     </button>
                   ) : isPurchased ? (
                     <Link
@@ -827,9 +852,10 @@ const CourseDetails = () => {
                   ) : (
                     <button
                       onClick={handleBuyNow}
-                      disabled={isEnrolling}
-                      className={`w-full px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg transition-colors shadow-sm flex items-center justify-center gap-2 ${isEnrolling ? "opacity-70 cursor-not-allowed" : "hover:bg-[#ff7906]"
-                        }`}
+                      disabled={isEnrolling || isDropped}
+                      className={`w-full px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular text-lg transition-colors shadow-sm flex items-center justify-center gap-2 ${
+                        isEnrolling || isDropped ? "opacity-70 cursor-not-allowed" : "hover:bg-[#ff7906]"
+                      }`}
                     >
                       {isEnrolling ? (
                         <>
@@ -841,22 +867,30 @@ const CourseDetails = () => {
                       )}
                     </button>
                   )}
-                  {/* Only show wishlist button if not enrolled */}
-                  {!isEnrolled && (
+                  
+                  {isDropped && (
+                    <p className="text-red-600 text-sm poppins-medium text-center animate-pulse">
+                      You are blocked from this course
+                    </p>
+                  )}
+
+                  {/* Only show wishlist button if not enrolled or completed */}
+                  {!isEnrolledOrCompleted && (
                     <button
                       onClick={handleToggleFavorite}
-                      disabled={isWishlistLoading}
-                      className={`w-full px-6 py-3 border-2 rounded-lg font-semibold bebas-regular text-lg transition-colors flex items-center justify-center gap-2 ${isFavoriteCourse
-                        ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]"
-                        : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
-                        } ${isWishlistLoading ? "opacity-70 cursor-not-allowed" : ""}`}
+                      disabled={isWishlistLoading || isDropped}
+                      className={`w-full px-6 py-3 border-2 rounded-lg font-semibold bebas-regular text-lg transition-colors flex items-center justify-center gap-2 ${
+                        isWishlisted
+                          ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]"
+                          : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
+                      } ${isWishlistLoading || isDropped ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       {isWishlistLoading ? (
                         <Loader2 className="w-5 h-5 animate-spin" />
                       ) : (
-                        <Heart className={`w-5 h-5 ${isFavoriteCourse ? "fill-white" : ""}`} />
+                        <Heart className={`w-5 h-5 ${isWishlisted ? "fill-white" : ""}`} />
                       )}
-                      {isFavoriteCourse ? "Remove from Wishlist" : "Add to Wishlist"}
+                      {isWishlisted ? "Remove from Wishlist" : "Add to Wishlist"}
                     </button>
                   )}
                   <button
@@ -892,44 +926,64 @@ const CourseDetails = () => {
 
       {/* Mobile Sticky CTA */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
-        <div className="flex items-center gap-4">
-          <div>
-            <span className="text-2xl font-bold text-[#FF8211] bebas-regular">
-              ${courseData.price}
-            </span>
-          </div>
-          <button
-            onClick={handleToggleFavorite}
-            className={`p-3 border-2 rounded-lg transition-colors ${isFavoriteCourse
-              ? "bg-[#FF8211] border-[#FF8211] text-white"
-              : "border-[#FF8211] text-[#FF8211] bg-white"
-              }`}
-          >
-            <Heart className={`w-6 h-6 ${isFavoriteCourse ? "fill-white" : ""}`} />
-          </button>
-          {isEnrolled ? (
-            <button
-              disabled
-              className="flex-1 px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold bebas-regular cursor-not-allowed shadow-sm"
-            >
-              Already Enrolled
-            </button>
-          ) : isPurchased ? (
-            <Link
-              to={`/courses/${course.id}/learn`}
-              className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2"
-            >
-              <PlayCircle className="w-5 h-5" />
-              Start Learning
-            </Link>
-          ) : (
-            <button
-              onClick={handleBuyNow}
-              className="flex-1 px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular hover:bg-[#ff7906] transition-colors shadow-sm"
-            >
-              Buy Now
-            </button>
+        <div className="flex flex-col gap-2">
+          {isDropped && (
+            <p className="text-red-600 text-xs poppins-medium animate-pulse px-2">
+              You are blocked from this course
+            </p>
           )}
+          <div className="flex items-center gap-4">
+            <div>
+              <span className="text-2xl font-bold text-[#FF8211] bebas-regular">
+                ${courseData.price}
+              </span>
+            </div>
+            
+            {!isEnrolledOrCompleted && (
+              <button
+                onClick={handleToggleFavorite}
+                disabled={isWishlistLoading || isDropped}
+                className={`p-3 border-2 rounded-lg transition-colors ${
+                  isWishlisted
+                    ? "bg-[#FF8211] border-[#FF8211] text-white"
+                    : "border-[#FF8211] text-[#FF8211] bg-white"
+                } ${isWishlistLoading || isDropped ? "opacity-70 cursor-not-allowed" : ""}`}
+              >
+                {isWishlistLoading ? (
+                  <Loader2 className="w-6 h-6 animate-spin" />
+                ) : (
+                  <Heart className={`w-6 h-6 ${isWishlisted ? "fill-white" : ""}`} />
+                )}
+              </button>
+            )}
+
+            {isEnrolledOrCompleted ? (
+              <button
+                disabled
+                className="flex-1 px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold bebas-regular cursor-not-allowed shadow-sm"
+              >
+                {course.enrollment === "completed" ? "Completed" : "Already Enrolled"}
+              </button>
+            ) : isPurchased ? (
+              <Link
+                to={`/courses/${course.id}/learn`}
+                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold bebas-regular text-lg hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2"
+              >
+                <PlayCircle className="w-5 h-5" />
+                Start Learning
+              </Link>
+            ) : (
+              <button
+                onClick={handleBuyNow}
+                disabled={isEnrolling || isDropped}
+                className={`flex-1 px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular transition-colors shadow-sm ${
+                  isEnrolling || isDropped ? "opacity-70 cursor-not-allowed" : "hover:bg-[#ff7906]"
+                }`}
+              >
+                Buy Now
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

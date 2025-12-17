@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
+import NotificationDropdown from "../../NotificationDropdown";
 import { BookOpen, Users, ClipboardList, MessageSquare } from "lucide-react";
 
 const NavBarDash = () => {
@@ -229,7 +230,7 @@ const NavBarDash = () => {
             {/* RIGHT ICONS */}
             <div className="flex items-center gap-3 md:gap-5">
              
-
+              <NotificationDropdown />
               <UserDropdown
                 user={user}
                 logout={logout}

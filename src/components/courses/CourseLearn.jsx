@@ -16,6 +16,8 @@ import {
   Video,
   File,
   Image as ImageIcon,
+  Globe,
+  TrendingUp,
 } from "lucide-react";
 import ReactPlayer from "react-player";
 import Navbar from "../Navbar";
@@ -31,36 +33,36 @@ const VideoPlayer = ({ url }) => {
 
   return (
     <div className="w-full h-[500px] bg-black flex items-center justify-center relative">
-       {/* ReactPlayer handles both file paths and YouTube/Vimeo URLs */}
-       {!videoError && url ? (
-         <ReactPlayer
-           key={url}
-           url={url}
-           controls={true}
-           width="100%"
-           height="100%"
-           className="react-player"
-           config={{
-             youtube: {
-               playerVars: { origin: window.location.origin },
-             },
-           }}
-           onError={(e) => {
-             console.error("Video Error:", e);
-             setVideoError(true);
-           }}
-         />
-       ) : (
-         <div className="text-white flex flex-col items-center gap-2">
-            <Video className="w-12 h-12 opacity-50" />
-            <p>{videoError ? "Unable to play video. Format may be unsupported." : "No video URL provided"}</p>
-         </div>
-       )}
+      {/* ReactPlayer handles both file paths and YouTube/Vimeo URLs */}
+      {!videoError && url ? (
+        <ReactPlayer
+          key={url}
+          url={url}
+          controls={true}
+          width="100%"
+          height="100%"
+          className="react-player"
+          config={{
+            youtube: {
+              playerVars: { origin: window.location.origin },
+            },
+          }}
+          onError={(e) => {
+            console.error("Video Error:", e);
+            setVideoError(true);
+          }}
+        />
+      ) : (
+        <div className="text-white flex flex-col items-center gap-2">
+          <Video className="w-12 h-12 opacity-50" />
+          <p>{videoError ? "Unable to play video. Format may be unsupported." : "No video URL provided"}</p>
+        </div>
+      )}
     </div>
   );
 };
 
-const CourseEnroll = () => {
+const CourseLearn = () => {
   const { id } = useParams();
   const [course, setCourse] = useState(null);
   const [expandedSections, setExpandedSections] = useState(new Set([0]));
@@ -192,33 +194,33 @@ const CourseEnroll = () => {
     if (type === "pdf") {
       return (
         <div className="h-[600px] bg-gray-100 flex items-center justify-center">
-             {url ? (
-               <iframe src={url} className="w-full h-full" title="PDF Viewer" />
-             ) : (
-                <div className="text-gray-500">No PDF URL provided</div>
-             )}
+          {url ? (
+            <iframe src={url} className="w-full h-full" title="PDF Viewer" />
+          ) : (
+            <div className="text-gray-500">No PDF URL provided</div>
+          )}
         </div>
       );
     }
-    
+
     if (type === "image") {
-        return (
-            <div className="flex justify-center bg-gray-100 p-4">
-                <img src={url} alt={section.title} className="max-h-[600px] object-contain" />
-            </div>
-        )
+      return (
+        <div className="flex justify-center bg-gray-100 p-4">
+          <img src={url} alt={section.title} className="max-h-[600px] object-contain" />
+        </div>
+      )
     }
 
     if (type === "audio") {
       return (
         <div className="w-full p-6 bg-gray-50 flex items-center justify-center">
-             {url ? (
-               <audio controls className="w-full" src={url}>
-                  Your browser does not support the audio element.
-               </audio>
-             ) : (
-                <div className="text-gray-500">No audio URL provided</div>
-             )}
+          {url ? (
+            <audio controls className="w-full" src={url}>
+              Your browser does not support the audio element.
+            </audio>
+          ) : (
+            <div className="text-gray-500">No audio URL provided</div>
+          )}
         </div>
       );
     }
@@ -226,39 +228,54 @@ const CourseEnroll = () => {
     // Default: Article/Text
     return (
       <div className="p-6 bg-white">
-         {section.content_text && (
-             <div className="prose max-w-none text-gray-800 poppins-regular whitespace-pre-wrap">
-                 {section.content_text}
-             </div>
-         )}
-         {url && (type !== 'video' && type !== 'pdf' && type !== 'image') && (
-            <div className="mt-4">
-                <a href={url} target="_blank" rel="noopener noreferrer" className="text-[#FF8211] hover:underline flex items-center gap-2">
-                    <Download className="w-4 h-4" /> Open Attachment
-                </a>
-            </div>
-         )}
+        {section.content_text && (
+          <div className="prose max-w-none text-gray-800 poppins-regular whitespace-pre-wrap">
+            {section.content_text}
+          </div>
+        )}
+        {url && (type !== 'video' && type !== 'pdf' && type !== 'image') && (
+          <div className="mt-4">
+            <a href={url} target="_blank" rel="noopener noreferrer" className="text-[#FF8211] hover:underline flex items-center gap-2">
+              <Download className="w-4 h-4" /> Open Attachment
+            </a>
+          </div>
+        )}
       </div>
     );
   };
 
   if (!course) {
-     // Start loading state handled by GlobalLoader, but we can return null or a skeleton here if preferred
-     // Returning mostly empty structure to avoid flash
-     return (
-        <>
-            <Navbar />
-            <div className="min-h-screen flex items-center justify-center">
-                
-            </div>
-            <Footer />
-        </>
-     )
+    // Start loading state handled by GlobalLoader, but we can return null or a skeleton here if preferred
+    // Returning mostly empty structure to avoid flash
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center">
+
+        </div>
+        <Footer />
+      </>
+    )
   }
-  
+
   // Calculations
   const totalSections = (course.lessons_details || course.lessons)?.reduce((acc, lesson) => acc + (lesson.sections?.length || 0), 0) || 0;
   const completionPercentage = totalSections > 0 ? Math.round((completedSections.size / totalSections) * 100) : 0;
+
+  // Format total duration
+  const formatDuration = (seconds) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  };
+
+  // Get rating display
+  const averageRating = course.ratings?.average_rating;
+  const totalRatings = course.ratings?.total_ratings || 0;
+  const displayRating = averageRating ? averageRating.toFixed(1) : "NEW";
 
 
   return (
@@ -284,24 +301,62 @@ const CourseEnroll = () => {
           </p>
 
           <div className="flex flex-wrap items-center gap-3 mb-6">
-            <span className="px-3 py-1 bg-[#FF8211]/10 text-[#FF8211] rounded-full text-sm font-medium poppins-regular">
-              {course.category || "General"}
-            </span>
-             <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium poppins-regular flex items-center gap-1">
+            <span className="px-3 py-1 bg-[#FF8211]/10 text-[#FF8211] rounded-full text-sm font-medium poppins-regular flex items-center gap-1">
               <Award className="w-4 h-4" />
               {course.level || "All Levels"}
             </span>
+            {course.language && (
+              <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium poppins-regular flex items-center gap-1">
+                <Globe className="w-4 h-4" />
+                {course.language}
+              </span>
+            )}
+            {course.enrollment && (
+              <span className={`px-3 py-1 rounded-full text-sm font-medium poppins-regular ${course.enrollment === 'completed' ? 'bg-[#86ac55]/10 text-[#86ac55]' :
+                  course.enrollment === 'in_progress' ? 'bg-blue-50 text-blue-600' :
+                    'bg-gray-100 text-gray-600'
+                }`}>
+                {course.enrollment === 'in_progress' ? 'In Progress' :
+                  course.enrollment === 'completed' ? 'Completed' : course.enrollment}
+              </span>
+            )}
           </div>
-          
-           {/* Stats */}
-           <div className="flex flex-wrap items-center gap-6 mb-6">
-             <div className="flex items-center gap-2 text-gray-600 poppins-regular">
-               <Users className="w-5 h-5" />
-               <span className="text-sm">
-                 {course.enrolled_count || 0} students enrolled
-               </span>
-             </div>
-           </div>
+
+          {/* Stats */}
+          <div className="flex flex-wrap items-center gap-6 mb-6">
+            <div className="flex items-center gap-2 text-gray-600 poppins-regular">
+              <Users className="w-5 h-5" />
+              <span className="text-sm">
+                {course.students_enrolled || 0} students enrolled
+              </span>
+            </div>
+
+            {averageRating ? (
+              <div className="flex items-center gap-2 text-gray-600 poppins-regular">
+                <Star className="w-5 h-5 fill-[#FF8211] text-[#FF8211]" />
+                <span className="text-sm font-medium text-gray-900">
+                  {displayRating}
+                </span>
+                <span className="text-sm">
+                  ({totalRatings} {totalRatings === 1 ? 'rating' : 'ratings'})
+                </span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-gray-600 poppins-regular">
+                <Star className="w-5 h-5 text-gray-400" />
+                <span className="text-sm">New Course</span>
+              </div>
+            )}
+
+            {course.total_duration && (
+              <div className="flex items-center gap-2 text-gray-600 poppins-regular">
+                <Clock className="w-5 h-5" />
+                <span className="text-sm">
+                  {formatDuration(course.total_duration)} total
+                </span>
+              </div>
+            )}
+          </div>
 
         </div>
       </div>
@@ -311,39 +366,91 @@ const CourseEnroll = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            
+
             {/* Player / Content Viewer */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                {/* Header for content */}
-                {currentSection && (
-                    <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                        <h2 className="text-xl font-bold text-gray-900 bebas-regular">{currentSection.title}</h2>
-                         <button
-                            onClick={toggleComplete}
-                            className={`px-4 py-2 rounded-lg font-medium poppins-regular text-sm flex items-center gap-2 transition-colors ${
-                              completedSections.has(currentSection.id)
-                                ? "bg-[#86ac55] text-white"
-                                : "bg-[#FF8211] text-white hover:bg-[#ff7906]"
-                            }`}
-                        >
-                            <CheckCircle2 className="w-4 h-4" />
-                            {completedSections.has(currentSection.id) ? "Completed" : "Mark Complete"}
-                        </button>
-                    </div>
-                )}
-                
-                {/* Content Render */}
-                {renderContent(currentSection)}
+              {/* Header for content */}
+              {currentSection && (
+                <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                  <h2 className="text-xl font-bold text-gray-900 bebas-regular">{currentSection.title}</h2>
+                  <button
+                    onClick={toggleComplete}
+                    className={`px-4 py-2 rounded-lg font-medium poppins-regular text-sm flex items-center gap-2 transition-colors ${completedSections.has(currentSection.id)
+                      ? "bg-[#86ac55] text-white"
+                      : "bg-[#FF8211] text-white hover:bg-[#ff7906]"
+                      }`}
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    {completedSections.has(currentSection.id) ? "Completed" : "Mark Complete"}
+                  </button>
+                </div>
+              )}
+
+              {/* Content Render */}
+              {renderContent(currentSection)}
 
             </div>
-            
-             {/* Description Card (if displaying simple content, maybe redundant, but good for lesson details) */}
-             {currentSection && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                   <h3 className="text-lg font-semibold mb-2">About this lesson</h3>
-                   <p className="text-gray-600">{currentSection.description || currentSection.content_text || "No specific description available."}</p>
+
+            {/* Description Card (if displaying simple content, maybe redundant, but good for lesson details) */}
+            {currentSection && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold mb-2">About this lesson</h3>
+                <p className="text-gray-600">{currentSection.description || currentSection.content_text || "No specific description available."}</p>
+              </div>
+            )}
+
+            {/* Preview Video Section (if available and different from current content) */}
+            {course.preview_video && course.preview_video !== 'http://example.com' && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="p-4 border-b border-gray-200 bg-gray-50">
+                  <h3 className="text-xl font-bold text-gray-900 bebas-regular flex items-center gap-2">
+                    <PlayCircle className="w-5 h-5 text-[#FF8211]" />
+                    Course Preview
+                  </h3>
                 </div>
-             )}
+                <VideoPlayer url={course.preview_video} />
+              </div>
+            )}
+
+            {/* Reviews Section */}
+            {course.reviews && course.reviews.length > 0 && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-xl font-bold text-gray-900 bebas-regular mb-4 flex items-center gap-2">
+                  <Star className="w-5 h-5 text-[#FF8211]" />
+                  Student Reviews ({course.reviews.length})
+                </h3>
+                <div className="space-y-4">
+                  {course.reviews.map((review, index) => (
+                    <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${i < (review.rating || 0)
+                                  ? 'fill-[#FF8211] text-[#FF8211]'
+                                  : 'text-gray-300'
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 poppins-medium">
+                          {review.user_name || 'Anonymous'}
+                        </span>
+                        {review.created_at && (
+                          <span className="text-xs text-gray-500">
+                            {new Date(review.created_at).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                      {review.comment && (
+                        <p className="text-sm text-gray-700 poppins-regular">{review.comment}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Comments Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -446,8 +553,8 @@ const CourseEnroll = () => {
 
                 <div className="space-y-2">
                   {(() => {
-                     const lessonsToUse = course.lessons_details || course.lessons;
-                     return lessonsToUse && lessonsToUse.length > 0 ? (
+                    const lessonsToUse = course.lessons_details || course.lessons;
+                    return lessonsToUse && lessonsToUse.length > 0 ? (
                       lessonsToUse.map((lesson, lessonIndex) => (
                         <div key={lesson.id || lessonIndex} className="border border-gray-200 rounded-lg overflow-hidden">
                           <button
@@ -460,7 +567,13 @@ const CourseEnroll = () => {
                                 {lesson.title}
                               </span>
                             </div>
-                    
+                            {lesson.duration && (
+                              <span className="text-xs text-gray-500 poppins-regular flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {lesson.duration}
+                              </span>
+                            )}
+
                           </button>
 
                           {expandedSections.has(lessonIndex) && (
@@ -470,11 +583,10 @@ const CourseEnroll = () => {
                                   <button
                                     key={section.id}
                                     onClick={() => handleSectionClick(section)}
-                                    className={`w-full px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors flex items-center justify-between group ${
-                                      currentSection?.id === section.id
-                                        ? "bg-[#FF8211]/5 border-l-4 border-l-[#FF8211]"
-                                        : ""
-                                    }`}
+                                    className={`w-full px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors flex items-center justify-between group ${currentSection?.id === section.id
+                                      ? "bg-[#FF8211]/5 border-l-4 border-l-[#FF8211]"
+                                      : ""
+                                      }`}
                                   >
                                     <div className="flex items-center gap-3">
                                       <div className="text-gray-500 group-hover:text-[#FF8211] transition-colors">
@@ -504,25 +616,58 @@ const CourseEnroll = () => {
                       <div className="text-center py-4 text-gray-500">No content available</div>
                     );
                   })()}
+                </div>
               </div>
-            </div>
 
-               {/* Instructor (Using course data if available, else simple layout) */}
-               {course.trainer_profile && (
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                        <h3 className="font-bold text-gray-900 bebas-regular text-xl mb-4">Instructor</h3>
-                        {/* Instructor details would typically require another fetch or be included in course detail. 
-                            If not in detail, we skip or show what's available. 
-                            Assuming basic trainer info might be embedded or we skip deep details. 
-                        */}
-                         <Link
-                            to={`/trainer-profile/${course.trainer_profile}`}
-                            className="block w-full text-center px-4 py-2 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-semibold bebas-regular hover:bg-[#FF8211]/10 transition-colors"
-                        >
-                            View Instructor Profile
-                        </Link>
+              {/* Course Info Card */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="font-bold text-gray-900 bebas-regular text-xl mb-4">Course Details</h3>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 poppins-regular">Total Lessons</span>
+                    <span className="font-medium text-gray-900 poppins-medium">
+                      {(course.lessons_details || course.lessons)?.length || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 poppins-regular">Total Sections</span>
+                    <span className="font-medium text-gray-900 poppins-medium">{totalSections}</span>
+                  </div>
+                  {course.total_duration && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600 poppins-regular">Total Duration</span>
+                      <span className="font-medium text-gray-900 poppins-medium">
+                        {formatDuration(course.total_duration)}
+                      </span>
                     </div>
-               )}
+                  )}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 poppins-regular">Language</span>
+                    <span className="font-medium text-gray-900 poppins-medium">
+                      {course.language || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 poppins-regular">Price</span>
+                    <span className="font-medium text-[#FF8211] poppins-medium">
+                      ${course.price || '0'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Instructor */}
+              {course.trainer_profile && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h3 className="font-bold text-gray-900 bebas-regular text-xl mb-4">Instructor</h3>
+                  <Link
+                    to={`/trainer-profile/${course.trainer_profile}`}
+                    className="block w-full text-center px-4 py-2 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-semibold bebas-regular hover:bg-[#FF8211]/10 transition-colors"
+                  >
+                    View Instructor Profile
+                  </Link>
+                </div>
+              )}
 
             </div>
           </div>
@@ -534,4 +679,4 @@ const CourseEnroll = () => {
   );
 };
 
-export default CourseEnroll;
+export default CourseLearn;

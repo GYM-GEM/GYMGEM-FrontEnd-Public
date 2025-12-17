@@ -57,12 +57,13 @@ import Settings from "./components/Settings.jsx";
 import PublicTrainerProfile from "./components/PublicTrainerProfile.jsx";
 import Favorite from "./components/Dashboard/Traine/Favorite.jsx";
 import MySessions from "./components/Dashboard/Traine/MySessions.jsx";
-import CourseEnroll from "./components/courses/CourseEnroll.jsx";
+import CourseLearn from "./components/courses/CourseLearn.jsx";
 import MessageTE from "./components/Dashboard/Traine/Message.jsx";
 import OrderTrackingTE from "./components/Dashboard/Traine/OrderTrackingTE.jsx";
 // Checkout components
 import Checkout from "./components/BuyNow/Checkout.jsx";
 import OrderSuccess from "./components/BuyNow/OrderSuccess.jsx";
+import PaymentStatus from "./components/BuyNow/PaymentStatus.jsx";
 // Store components
 import CartPage from "./components/Store/CartPage.jsx";
 import StoreCheckout from "./components/Store/StoreCheckout.jsx";
@@ -138,6 +139,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="settings" element={<Settings />} />
             <Route path="checkout" element={<Checkout />} />
+            <Route path="payment-status" element={<PaymentStatus />} />
             <Route path="store-order-success" element={<StoreOrderSuccess />} />
             <Route path="order-success/:orderId" element={<OrderSuccess />} />AnimatedRoutes
 
@@ -175,7 +177,7 @@ function App() {
             <Route path="dashboard" element={<ProtectedRoute requiredProfile="trainee"><TraineeDash /></ProtectedRoute>} />
             <Route path="courses" element={<ProtectedRoute requiredProfile="trainee"><CoursesTraineDash /></ProtectedRoute>} />
             <Route path="courses/:id" element={<ProtectedRoute requiredProfile="trainee"><CourseDetails /></ProtectedRoute>} />
-            <Route path="courses/:id/learn" element={<ProtectedRoute requiredProfile="trainee"><CourseEnroll /></ProtectedRoute>} />
+            <Route path="courses/:id/learn" element={<ProtectedRoute requiredProfile="trainee"><CourseLearn /></ProtectedRoute>} />
             <Route path="favorite" element={<ProtectedRoute requiredProfile="trainee"><Favorite /></ProtectedRoute>} />
             <Route path="sessions" element={<ProtectedRoute requiredProfile="trainee"><MySessions /></ProtectedRoute>} />
             <Route path="settings" element={<ProtectedRoute requiredProfile="trainee"><SettingsTrainee /></ProtectedRoute>} />

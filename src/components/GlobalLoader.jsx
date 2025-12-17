@@ -17,9 +17,9 @@ const GlobalLoader = () => {
     <div className="fixed inset-0 z-[40] flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="relative flex flex-col items-center justify-center">
         {/* Animated Rings */}
-        <div className="absolute h-24 w-24 rounded-full border-4 border-[#ff8211]/20 animate-[spin_3s_linear_infinite]"></div>
+        {/* <div className="absolute h-24 w-24 rounded-full border-4 border-[#ff8211]/20 animate-[spin_3s_linear_infinite]"></div>
         <div className="absolute h-20 w-20 rounded-full border-4 border-[#ff8211]/40 border-t-transparent animate-[spin_2s_linear_infinite_reverse]"></div>
-        <div className="absolute h-16 w-16 rounded-full border-4 border-[#ff8211] border-l-transparent animate-spin"></div>
+        <div className="absolute h-16 w-16 rounded-full border-4 border-[#ff8211] border-l-transparent animate-spin"></div> */}
 
         {/* Center Logo */}
         <div className="z-10 bg-white p-2 rounded-full shadow-lg">
@@ -27,11 +27,11 @@ const GlobalLoader = () => {
         </div>
 
         {/* Text */}
-        <div className="mt-16">
+        {/* <div className="mt-16">
           <span className="font-bebas text-2xl text-white tracking-widest animate-pulse">
             LOADING...
           </span>
-        </div>
+        </div> */}
       </div>
     </div>
   );

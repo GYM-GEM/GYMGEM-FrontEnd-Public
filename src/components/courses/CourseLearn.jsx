@@ -24,45 +24,7 @@ import ReactPlayer from "react-player";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 import axiosInstance from "../../utils/axiosConfig";
-
-const VideoPlayer = ({ url }) => {
-  const [videoError, setVideoError] = useState(false);
-
-  useEffect(() => {
-    setVideoError(false);
-  }, [url]);
-
-  return (
-    <div className="w-full aspect-video bg-gradient-to-br from-gray-900 to-black flex items-center justify-center relative rounded-xl overflow-hidden">
-      {!videoError && url ? (
-        <ReactPlayer
-          key={url}
-          url={url}
-          controls={true}
-          width="100%"
-          height="100%"
-          className="react-player"
-          config={{
-            youtube: {
-              playerVars: { origin: window.location.origin },
-            },
-          }}
-          onError={(e) => {
-            console.error("Video Error:", e);
-            setVideoError(true);
-          }}
-        />
-      ) : (
-        <div className="text-white flex flex-col items-center gap-3">
-          <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center">
-            <Video className="w-8 h-8 opacity-50" />
-          </div>
-          <p className="text-sm">{videoError ? "Unable to play video" : "No video available"}</p>
-        </div>
-      )}
-    </div>
-  );
-};
+import VideoPlayer from "./VideoPlayer";
 
 const CourseLearn = () => {
   const { id } = useParams();
@@ -189,6 +151,8 @@ const CourseLearn = () => {
 
     const type = section.content_type?.toLowerCase();
     const url = section.content_url || section.file;
+
+    console.log(`Rendering content for section: ${section.title}`, { type, url, section });
 
     if (type === "video") {
       return <VideoPlayer url={url} />;

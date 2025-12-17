@@ -10,14 +10,15 @@ import {
   PlayCircle,
   Users,
   CheckCircle2,
-  Lock,
-  MessageCircle,
   FileText,
   Video,
   File,
   Image as ImageIcon,
   Globe,
-  TrendingUp,
+  Target,
+  Flame,
+  Zap,
+  Loader2,
 } from "lucide-react";
 import ReactPlayer from "react-player";
 import Navbar from "../Navbar";
@@ -32,8 +33,7 @@ const VideoPlayer = ({ url }) => {
   }, [url]);
 
   return (
-    <div className="w-full h-[500px] bg-black flex items-center justify-center relative">
-      {/* ReactPlayer handles both file paths and YouTube/Vimeo URLs */}
+    <div className="w-full aspect-video bg-gradient-to-br from-gray-900 to-black flex items-center justify-center relative rounded-xl overflow-hidden">
       {!videoError && url ? (
         <ReactPlayer
           key={url}
@@ -53,9 +53,11 @@ const VideoPlayer = ({ url }) => {
           }}
         />
       ) : (
-        <div className="text-white flex flex-col items-center gap-2">
-          <Video className="w-12 h-12 opacity-50" />
-          <p>{videoError ? "Unable to play video. Format may be unsupported." : "No video URL provided"}</p>
+        <div className="text-white flex flex-col items-center gap-3">
+          <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center">
+            <Video className="w-8 h-8 opacity-50" />
+          </div>
+          <p className="text-sm">{videoError ? "Unable to play video" : "No video available"}</p>
         </div>
       )}
     </div>
@@ -68,15 +70,12 @@ const CourseLearn = () => {
   const [expandedSections, setExpandedSections] = useState(new Set([0]));
   const [currentSection, setCurrentSection] = useState(null);
   const [completedSections, setCompletedSections] = useState(new Set());
-  const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState("");
-  const [currentUser, setCurrentUser] = useState(null);
+  const [updatingSectionId, setUpdatingSectionId] = useState(null);
 
   // Fetch course details
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        // Use axiosInstance for global loader support
         const response = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
         setCourse(response.data);
       } catch (error) {
@@ -88,26 +87,10 @@ const CourseLearn = () => {
     }
   }, [id]);
 
-  // Load user, comments, and progress on mount
+  // Load progress on mount
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    setCurrentUser(user);
-
-    // Load progress
     const savedProgress = JSON.parse(localStorage.getItem(`course_progress_${id}`)) || [];
     setCompletedSections(new Set(savedProgress));
-
-    // Load comments
-    const storedComments = JSON.parse(localStorage.getItem(`course_comments_${id}`)) || [];
-    if (storedComments.length === 0) {
-      // Mock comments if none
-      const mockComments = [
-        { id: 1, user: "John Doe", avatar: "JD", avatarColor: "bg-[#FF8211]", text: "Great content!", time: "2 days ago" },
-      ];
-      setComments(mockComments);
-    } else {
-      setComments(storedComments);
-    }
   }, [id]);
 
   // Set initial current section once course is loaded
@@ -115,7 +98,6 @@ const CourseLearn = () => {
     if (course && !currentSection) {
       const lessonsToUse = course.lessons_details || course.lessons;
       if (lessonsToUse && lessonsToUse.length > 0) {
-        // Try to find the first section of the first lesson
         const firstLesson = lessonsToUse[0];
         if (firstLesson.sections && firstLesson.sections.length > 0) {
           setCurrentSection(firstLesson.sections[0]);
@@ -123,22 +105,6 @@ const CourseLearn = () => {
       }
     }
   }, [course, currentSection]);
-
-  const handlePostComment = () => {
-    if (!newComment.trim()) return;
-    const comment = {
-      id: Date.now(),
-      user: currentUser?.name || "Guest User",
-      avatar: currentUser?.name ? currentUser.name.substring(0, 2).toUpperCase() : "GU",
-      avatarColor: "bg-[#FF8211]",
-      text: newComment,
-      time: "Just now"
-    };
-    const updatedComments = [comment, ...comments];
-    setComments(updatedComments);
-    setNewComment("");
-    localStorage.setItem(`course_comments_${id}`, JSON.stringify(updatedComments));
-  };
 
   const toggleSection = (index) => {
     setExpandedSections((prev) => {
@@ -151,23 +117,51 @@ const CourseLearn = () => {
 
   const handleSectionClick = (section) => {
     setCurrentSection(section);
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const toggleComplete = () => {
+  const toggleComplete = async () => {
     if (currentSection) {
+      if (updatingSectionId === currentSection.id) return; // Prevent double clicks
+
+      const isCompleted = completedSections.has(currentSection.id);
+
+      // Set loading state
+      setUpdatingSectionId(currentSection.id);
+
+      // Optimistically update UI
       setCompletedSections((prev) => {
         const newSet = new Set(prev);
-        if (newSet.has(currentSection.id)) {
+        if (isCompleted) {
           newSet.delete(currentSection.id);
         } else {
           newSet.add(currentSection.id);
         }
-        // Save to local storage
         localStorage.setItem(`course_progress_${id}`, JSON.stringify([...newSet]));
         return newSet;
       });
+
+      // If we are marking as completed, call the API
+      if (!isCompleted) {
+        try {
+          await axiosInstance.put(
+            `/api/courses/sections/${currentSection.id}/mark-as-done/`,
+            {},
+            { skipGlobalLoader: true }
+          );
+        } catch (error) {
+          console.error("Failed to mark section as done:", error);
+          // Revert on error
+          setCompletedSections((prev) => {
+            const newSet = new Set(prev);
+            newSet.delete(currentSection.id);
+            localStorage.setItem(`course_progress_${id}`, JSON.stringify([...newSet]));
+            return newSet;
+          });
+        }
+      }
+
+      setUpdatingSectionId(null);
     }
   };
 
@@ -182,10 +176,19 @@ const CourseLearn = () => {
 
   // Render the active content based on type
   const renderContent = (section) => {
-    if (!section) return <div className="p-8 text-center text-gray-500">Select a lesson to view content</div>;
+    if (!section) {
+      return (
+        <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center rounded-xl border-2 border-dashed border-gray-300">
+          <div className="text-center">
+            <PlayCircle className="w-16 h-16 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-500 poppins-regular">Select a lesson to begin</p>
+          </div>
+        </div>
+      );
+    }
 
     const type = section.content_type?.toLowerCase();
-    const url = section.content_url || section.file; // Handle both potential keys
+    const url = section.content_url || section.file;
 
     if (type === "video") {
       return <VideoPlayer url={url} />;
@@ -193,11 +196,11 @@ const CourseLearn = () => {
 
     if (type === "pdf") {
       return (
-        <div className="h-[600px] bg-gray-100 flex items-center justify-center">
+        <div className="aspect-video bg-gray-100 flex items-center justify-center rounded-xl overflow-hidden">
           {url ? (
             <iframe src={url} className="w-full h-full" title="PDF Viewer" />
           ) : (
-            <div className="text-gray-500">No PDF URL provided</div>
+            <div className="text-gray-500">No PDF available</div>
           )}
         </div>
       );
@@ -205,21 +208,21 @@ const CourseLearn = () => {
 
     if (type === "image") {
       return (
-        <div className="flex justify-center bg-gray-100 p-4">
-          <img src={url} alt={section.title} className="max-h-[600px] object-contain" />
+        <div className="flex justify-center bg-gray-50 p-8 rounded-xl">
+          <img src={url} alt={section.title} className="max-h-[600px] object-contain rounded-lg shadow-lg" />
         </div>
-      )
+      );
     }
 
     if (type === "audio") {
       return (
-        <div className="w-full p-6 bg-gray-50 flex items-center justify-center">
+        <div className="w-full p-8 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl flex items-center justify-center">
           {url ? (
-            <audio controls className="w-full" src={url}>
+            <audio controls className="w-full max-w-2xl" src={url}>
               Your browser does not support the audio element.
             </audio>
           ) : (
-            <div className="text-gray-500">No audio URL provided</div>
+            <div className="text-gray-500">No audio available</div>
           )}
         </div>
       );
@@ -227,16 +230,16 @@ const CourseLearn = () => {
 
     // Default: Article/Text
     return (
-      <div className="p-6 bg-white">
+      <div className="p-8 bg-white rounded-xl border border-gray-200">
         {section.content_text && (
-          <div className="prose max-w-none text-gray-800 poppins-regular whitespace-pre-wrap">
+          <div className="prose max-w-none text-gray-800 poppins-regular whitespace-pre-wrap leading-relaxed">
             {section.content_text}
           </div>
         )}
         {url && (type !== 'video' && type !== 'pdf' && type !== 'image') && (
-          <div className="mt-4">
-            <a href={url} target="_blank" rel="noopener noreferrer" className="text-[#FF8211] hover:underline flex items-center gap-2">
-              <Download className="w-4 h-4" /> Open Attachment
+          <div className="mt-6">
+            <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-[#FF8211] hover:text-[#ff7906] font-medium transition-colors">
+              <File className="w-4 h-4" /> Download Resource
             </a>
           </div>
         )}
@@ -245,310 +248,309 @@ const CourseLearn = () => {
   };
 
   if (!course) {
-    // Start loading state handled by GlobalLoader, but we can return null or a skeleton here if preferred
-    // Returning mostly empty structure to avoid flash
     return (
       <>
         <Navbar />
-        <div className="min-h-screen flex items-center justify-center">
-
-        </div>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50"></div>
         <Footer />
       </>
-    )
+    );
   }
 
   // Calculations
   const totalSections = (course.lessons_details || course.lessons)?.reduce((acc, lesson) => acc + (lesson.sections?.length || 0), 0) || 0;
   const completionPercentage = totalSections > 0 ? Math.round((completedSections.size / totalSections) * 100) : 0;
 
-  // Format total duration
   const formatDuration = (seconds) => {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
+    if (hours > 0) return `${hours}h ${minutes}m`;
     return `${minutes}m`;
   };
 
-  // Get rating display
   const averageRating = course.ratings?.average_rating;
   const totalRatings = course.ratings?.total_ratings || 0;
   const displayRating = averageRating ? averageRating.toFixed(1) : "NEW";
 
+  // Get motivational message based on progress
+  const getProgressMessage = () => {
+    if (completionPercentage === 0) return "Let's start your fitness journey!";
+    if (completionPercentage < 25) return "Great start! Keep going!";
+    if (completionPercentage < 50) return "You're making progress!";
+    if (completionPercentage < 75) return "Over halfway there! Stay strong!";
+    if (completionPercentage < 100) return "Almost done! Finish strong!";
+    return "Course completed! Amazing work!";
+  };
 
   return (
     <>
       <Navbar />
 
-      {/* Hero Header */}
-      <div className="w-full bg-gradient-to-r from-[#FF8211]/10 to-[#86ac55]/10 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+      {/* Compact Hero Header with Course Info */}
+      <div className="w-full bg-gradient-to-br from-[#FF8211]/5 via-[#86ac55]/5 to-gray-50 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <Link
-            to="/courses"
-            className="text-[#FF8211] text-sm font-medium hover:underline poppins-regular inline-flex items-center gap-1 mb-4"
+            to="/trainee/courses"
+            className="text-[#FF8211] text-sm font-medium hover:underline poppins-regular inline-flex items-center gap-1 mb-3"
           >
-            ← Back to courses
+            ← Back to My Courses
           </Link>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 bebas-regular mb-3">
-            {course.title}
-          </h1>
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex-1 min-w-[300px]">
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 bebas-regular mb-2">
+                {course.title}
+              </h1>
 
-          <p className="text-lg text-gray-600 poppins-regular max-w-3xl mb-6">
-            {course.description}
-          </p>
+              <div className="flex flex-wrap items-center gap-3 mb-3">
+                {course.category_name && (
+                  <span className="px-2.5 py-1 bg-[#FF8211]/10 text-[#FF8211] rounded-full text-xs font-medium poppins-regular">
+                    {course.category_name}
+                  </span>
+                )}
+                <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium poppins-regular flex items-center gap-1">
+                  <Award className="w-3.5 h-3.5" />
+                  {course.level_name || course.level || "All Levels"}
+                </span>
+                {course.language && (
+                  <span className="px-2.5 py-1 bg-gray-50 text-gray-600 rounded-full text-xs font-medium poppins-regular flex items-center gap-1">
+                    <Globe className="w-3.5 h-3.5" />
+                    {course.language}
+                  </span>
+                )}
+              </div>
 
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <span className="px-3 py-1 bg-[#FF8211]/10 text-[#FF8211] rounded-full text-sm font-medium poppins-regular flex items-center gap-1">
-              <Award className="w-4 h-4" />
-              {course.level || "All Levels"}
-            </span>
-            {course.language && (
-              <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium poppins-regular flex items-center gap-1">
-                <Globe className="w-4 h-4" />
-                {course.language}
-              </span>
-            )}
-            {course.enrollment && (
-              <span className={`px-3 py-1 rounded-full text-sm font-medium poppins-regular ${course.enrollment === 'completed' ? 'bg-[#86ac55]/10 text-[#86ac55]' :
-                  course.enrollment === 'in_progress' ? 'bg-blue-50 text-blue-600' :
-                    'bg-gray-100 text-gray-600'
-                }`}>
-                {course.enrollment === 'in_progress' ? 'In Progress' :
-                  course.enrollment === 'completed' ? 'Completed' : course.enrollment}
-              </span>
-            )}
-          </div>
-
-          {/* Stats */}
-          <div className="flex flex-wrap items-center gap-6 mb-6">
-            <div className="flex items-center gap-2 text-gray-600 poppins-regular">
-              <Users className="w-5 h-5" />
-              <span className="text-sm">
-                {course.students_enrolled || 0} students enrolled
-              </span>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 poppins-regular">
+                {averageRating && (
+                  <div className="flex items-center gap-1.5">
+                    <Star className="w-4 h-4 fill-[#FF8211] text-[#FF8211]" />
+                    <span className="font-medium text-gray-900">{displayRating}</span>
+                    <span className="text-xs">({totalRatings})</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-1.5">
+                  <Users className="w-4 h-4" />
+                  <span>{course.students_enrolled || 0} students</span>
+                </div>
+                {course.total_duration && (
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" />
+                    <span>{formatDuration(course.total_duration)}</span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {averageRating ? (
-              <div className="flex items-center gap-2 text-gray-600 poppins-regular">
-                <Star className="w-5 h-5 fill-[#FF8211] text-[#FF8211]" />
-                <span className="text-sm font-medium text-gray-900">
-                  {displayRating}
-                </span>
-                <span className="text-sm">
-                  ({totalRatings} {totalRatings === 1 ? 'rating' : 'ratings'})
-                </span>
+            {/* Progress Badge */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 min-w-[180px]">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-[#FF8211] bebas-regular mb-1">
+                  {completionPercentage}%
+                </div>
+                <div className="text-xs text-gray-600 poppins-regular mb-2">Course Progress</div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-gradient-to-r from-[#FF8211] to-[#86ac55] h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${completionPercentage}%` }}
+                  />
+                </div>
               </div>
-            ) : (
-              <div className="flex items-center gap-2 text-gray-600 poppins-regular">
-                <Star className="w-5 h-5 text-gray-400" />
-                <span className="text-sm">New Course</span>
-              </div>
-            )}
-
-            {course.total_duration && (
-              <div className="flex items-center gap-2 text-gray-600 poppins-regular">
-                <Clock className="w-5 h-5" />
-                <span className="text-sm">
-                  {formatDuration(course.total_duration)} total
-                </span>
-              </div>
-            )}
+            </div>
           </div>
-
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-            {/* Player / Content Viewer */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              {/* Header for content */}
+          {/* Main Content Area - Left Side */}
+          <div className="lg:col-span-8 space-y-6">
+            {/* Video/Content Player */}
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
               {currentSection && (
-                <div className="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
-                  <h2 className="text-xl font-bold text-gray-900 bebas-regular">{currentSection.title}</h2>
+                <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white flex justify-between items-center">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 bebas-regular">{currentSection.title}</h2>
+                    <p className="text-sm text-gray-600 poppins-regular mt-0.5">
+                      {currentSection.content_type && (
+                        <span className="capitalize">{currentSection.content_type}</span>
+                      )}
+                    </p>
+                  </div>
                   <button
                     onClick={toggleComplete}
-                    className={`px-4 py-2 rounded-lg font-medium poppins-regular text-sm flex items-center gap-2 transition-colors ${completedSections.has(currentSection.id)
-                      ? "bg-[#86ac55] text-white"
+                    disabled={updatingSectionId === currentSection.id}
+                    className={`px-5 py-2.5 rounded-lg font-medium poppins-medium text-sm flex items-center gap-2 transition-all ${completedSections.has(currentSection.id)
+                      ? "bg-[#86ac55] text-white hover:bg-[#7a9b4d]"
                       : "bg-[#FF8211] text-white hover:bg-[#ff7906]"
-                      }`}
+                      } ${updatingSectionId === currentSection.id ? "opacity-75 cursor-not-allowed" : ""}`}
                   >
-                    <CheckCircle2 className="w-4 h-4" />
-                    {completedSections.has(currentSection.id) ? "Completed" : "Mark Complete"}
+                    {updatingSectionId === currentSection.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4" />
+                    )}
+                    {updatingSectionId === currentSection.id
+                      ? "Updating..."
+                      : completedSections.has(currentSection.id) ? "Completed" : "Mark Complete"
+                    }
                   </button>
                 </div>
               )}
 
-              {/* Content Render */}
-              {renderContent(currentSection)}
+              <div className="p-6">
+                {renderContent(currentSection)}
+              </div>
 
+              {/* Lesson Description */}
+              {currentSection && currentSection.description && (
+                <div className="p-6 border-t border-gray-100 bg-gray-50">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-[#FF8211]" />
+                    About This Lesson
+                  </h3>
+                  <p className="text-sm text-gray-700 poppins-regular leading-relaxed">
+                    {currentSection.description || currentSection.content_text || "No additional details available."}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Description Card (if displaying simple content, maybe redundant, but good for lesson details) */}
-            {currentSection && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold mb-2">About this lesson</h3>
-                <p className="text-gray-600">{currentSection.description || currentSection.content_text || "No specific description available."}</p>
-              </div>
-            )}
-
-            {/* Preview Video Section (if available and different from current content) */}
-            {course.preview_video && course.preview_video !== 'http://example.com' && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="p-4 border-b border-gray-200 bg-gray-50">
-                  <h3 className="text-xl font-bold text-gray-900 bebas-regular flex items-center gap-2">
-                    <PlayCircle className="w-5 h-5 text-[#FF8211]" />
-                    Course Preview
-                  </h3>
+            {/* Motivational Progress Card */}
+            <div className="bg-gradient-to-br from-[#FF8211] to-[#ff9933] rounded-2xl shadow-lg p-6 text-white">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                  <Flame className="w-8 h-8" />
                 </div>
-                <VideoPlayer url={course.preview_video} />
+                <div className="flex-1">
+                  <h3 className="text-xl font-bold bebas-regular mb-1">{getProgressMessage()}</h3>
+                  <p className="text-white/90 text-sm poppins-regular">
+                    {completedSections.size} of {totalSections} lessons completed
+                  </p>
+                </div>
+                <div className="text-right hidden sm:block">
+                  <div className="text-4xl font-bold bebas-regular">{completionPercentage}%</div>
+                </div>
               </div>
-            )}
+            </div>
 
             {/* Reviews Section */}
             {course.reviews && course.reviews.length > 0 && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="text-xl font-bold text-gray-900 bebas-regular mb-4 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-[#FF8211]" />
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-2xl font-bold text-gray-900 bebas-regular mb-4 flex items-center gap-2">
+                  <Star className="w-6 h-6 text-[#FF8211]" />
                   Student Reviews ({course.reviews.length})
                 </h3>
                 <div className="space-y-4">
                   {course.reviews.map((review, index) => (
-                    <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`w-4 h-4 ${i < (review.rating || 0)
+                    <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                      <div className="flex items-start gap-3 mb-2">
+                        {/* Profile Picture */}
+                        {review.profile_picture ? (
+                          <img
+                            src={review.profile_picture}
+                            alt={review.username || 'Anonymous'}
+                            className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#FF8211] to-[#ff9933] flex items-center justify-center text-white font-semibold text-sm">
+                            {review.username ? review.username.charAt(0).toUpperCase() : 'A'}
+                          </div>
+                        )}
+
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-semibold text-gray-900 poppins-semibold">
+                              {review.username || 'Anonymous Student'}
+                            </span>
+                            {review.review_date && (
+                              <span className="text-xs text-gray-500">
+                                · {new Date(review.review_date).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Star Rating */}
+                          <div className="flex items-center gap-1 mb-2">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`w-4 h-4 ${i < (review.rating || 0)
                                   ? 'fill-[#FF8211] text-[#FF8211]'
                                   : 'text-gray-300'
-                                }`}
-                            />
-                          ))}
+                                  }`}
+                              />
+                            ))}
+                          </div>
+
+                          {/* Review Text */}
+                          {review.review && (
+                            <p className="text-sm text-gray-700 poppins-regular leading-relaxed">
+                              {review.review}
+                            </p>
+                          )}
                         </div>
-                        <span className="text-sm font-medium text-gray-900 poppins-medium">
-                          {review.user_name || 'Anonymous'}
-                        </span>
-                        {review.created_at && (
-                          <span className="text-xs text-gray-500">
-                            {new Date(review.created_at).toLocaleDateString()}
-                          </span>
-                        )}
                       </div>
-                      {review.comment && (
-                        <p className="text-sm text-gray-700 poppins-regular">{review.comment}</p>
-                      )}
                     </div>
                   ))}
                 </div>
               </div>
             )}
-
-            {/* Comments Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-xl font-bold text-gray-900 bebas-regular mb-4 flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-[#FF8211]" />
-                Discussion
-              </h3>
-
-              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-                {comments.length > 0 ? (
-                  comments.map((comment) => (
-                    <div key={comment.id} className="flex gap-4">
-                      <div className={`w-10 h-10 rounded-full ${comment.avatarColor} flex items-center justify-center text-white font-semibold shrink-0`}>
-                        {comment.avatar}
-                      </div>
-                      <div className="flex-1">
-                        <div className="bg-gray-50 rounded-lg p-4">
-                          <p className="font-semibold text-gray-900 text-sm poppins-medium mb-1">
-                            {comment.user}
-                          </p>
-                          <p className="text-gray-700 text-sm poppins-regular">
-                            {comment.text}
-                          </p>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1 poppins-regular">{comment.time}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-gray-500 poppins-regular py-4">No comments yet. Be the first to start the discussion!</p>
-                )}
-              </div>
-
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <textarea
-                  placeholder={currentUser ? "Add your comment..." : "Please log in to comment"}
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  disabled={!currentUser}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#FF8211] focus:border-transparent poppins-regular text-sm resize-none disabled:bg-gray-50 disabled:cursor-not-allowed"
-                  rows={3}
-                />
-                <button
-                  onClick={handlePostComment}
-                  disabled={!currentUser || !newComment.trim()}
-                  className="mt-3 px-6 py-2 bg-[#FF8211] text-white rounded-lg font-medium bebas-regular hover:bg-[#ff7906] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Post Comment
-                </button>
-              </div>
-            </div>
           </div>
 
-          {/* Right Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 space-y-6">
-              {/* Progress Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="font-bold text-gray-900 bebas-regular text-xl mb-4">
-                  Your Progress
-                </h3>
-                <div className="relative w-32 h-32 mx-auto mb-4">
-                  <svg className="w-full h-full transform -rotate-90">
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      stroke="#f3f4f6"
-                      strokeWidth="8"
-                      fill="none"
-                    />
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      stroke="#FF8211"
-                      strokeWidth="8"
-                      fill="none"
-                      strokeDasharray={`${2 * Math.PI * 56}`}
-                      strokeDashoffset={`${2 * Math.PI * 56 * (1 - completionPercentage / 100)}`}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-3xl font-bold text-[#FF8211] bebas-regular">
-                      {completionPercentage}%
+          {/* Sidebar - Right Side */}
+          <div className="lg:col-span-4">
+            <div className="sticky top-20 space-y-6">
+
+              {/* Course Stats Card */}
+              <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-sm border border-gray-200 p-5 overflow-hidden relative">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF8211]/5 rounded-full -mr-16 -mt-16"></div>
+                <h3 className="font-bold text-gray-900 bebas-regular text-xl mb-4 relative">Course Overview</h3>
+                <div className="space-y-3 relative">
+                  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 bg-[#FF8211]/10 rounded-lg flex items-center justify-center">
+                        <BookOpen className="w-4 h-4 text-[#FF8211]" />
+                      </div>
+                      <span className="text-sm text-gray-600 poppins-regular">Lessons</span>
+                    </div>
+                    <span className="font-semibold text-gray-900 poppins-semibold">
+                      {(course.lessons_details || course.lessons)?.length || 0}
                     </span>
                   </div>
+
+                  <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 bg-[#86ac55]/10 rounded-lg flex items-center justify-center">
+                        <Target className="w-4 h-4 text-[#86ac55]" />
+                      </div>
+                      <span className="text-sm text-gray-600 poppins-regular">Sections</span>
+                    </div>
+                    <span className="font-semibold text-gray-900 poppins-semibold">{totalSections}</span>
+                  </div>
+
+                  {course.total_duration && (
+                    <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                          <Clock className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <span className="text-sm text-gray-600 poppins-regular">Duration</span>
+                      </div>
+                      <span className="font-semibold text-gray-900 poppins-semibold">
+                        {formatDuration(course.total_duration)}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <p className="text-center text-sm text-gray-600 poppins-regular">
-                  {completedSections.size} of {totalSections} lessons completed
-                </p>
               </div>
 
               {/* Curriculum */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="font-bold text-gray-900 bebas-regular text-xl mb-4">
-                  Course Curriculum
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5">
+                <h3 className="font-bold text-gray-900 bebas-regular text-xl mb-4 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-[#FF8211]" />
+                  Curriculum
                 </h3>
 
                 <div className="space-y-2">
@@ -556,24 +558,28 @@ const CourseLearn = () => {
                     const lessonsToUse = course.lessons_details || course.lessons;
                     return lessonsToUse && lessonsToUse.length > 0 ? (
                       lessonsToUse.map((lesson, lessonIndex) => (
-                        <div key={lesson.id || lessonIndex} className="border border-gray-200 rounded-lg overflow-hidden">
+                        <div key={lesson.id || lessonIndex} className="border border-gray-200 rounded-xl overflow-hidden hover:border-[#FF8211]/50 transition-colors">
                           <button
                             onClick={() => toggleSection(lessonIndex)}
-                            className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between"
+                            className="w-full px-4 py-3 bg-gradient-to-r from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 transition-all flex items-center justify-between"
                           >
-                            <div className="flex items-center gap-2">
-                              {expandedSections.has(lessonIndex) ? <ChevronDown className="w-4 h-4 text-gray-600" /> : <ChevronRight className="w-4 h-4 text-gray-600" />}
-                              <span className="font-semibold text-gray-900 text-sm poppins-medium text-left">
+                            <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                              <div className="shrink-0">
+                                {expandedSections.has(lessonIndex) ?
+                                  <ChevronDown className="w-4 h-4 text-[#FF8211]" /> :
+                                  <ChevronRight className="w-4 h-4 text-gray-400" />
+                                }
+                              </div>
+                              <span className="font-semibold text-gray-900 text-sm poppins-semibold text-left truncate">
                                 {lesson.title}
                               </span>
                             </div>
                             {lesson.duration && (
-                              <span className="text-xs text-gray-500 poppins-regular flex items-center gap-1">
+                              <span className="text-xs text-gray-500 poppins-regular flex items-center gap-1 ml-2 shrink-0">
                                 <Clock className="w-3 h-3" />
                                 {lesson.duration}
                               </span>
                             )}
-
                           </button>
 
                           {expandedSections.has(lessonIndex) && (
@@ -583,29 +589,27 @@ const CourseLearn = () => {
                                   <button
                                     key={section.id}
                                     onClick={() => handleSectionClick(section)}
-                                    className={`w-full px-4 py-3 border-t border-gray-100 hover:bg-gray-50 transition-colors flex items-center justify-between group ${currentSection?.id === section.id
-                                      ? "bg-[#FF8211]/5 border-l-4 border-l-[#FF8211]"
+                                    className={`w-full px-4 py-3 border-t border-gray-100 hover:bg-gradient-to-r hover:from-[#FF8211]/5 hover:to-transparent transition-all flex items-center justify-between group ${currentSection?.id === section.id
+                                      ? "bg-gradient-to-r from-[#FF8211]/10 to-transparent border-l-4 border-l-[#FF8211]"
                                       : ""
                                       }`}
                                   >
-                                    <div className="flex items-center gap-3">
-                                      <div className="text-gray-500 group-hover:text-[#FF8211] transition-colors">
+                                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                                      <div className="text-gray-400 group-hover:text-[#FF8211] transition-colors shrink-0">
                                         {getContentIcon(section.content_type)}
                                       </div>
-                                      <span className="text-sm text-gray-700 poppins-regular text-left">
+                                      <span className="text-sm text-gray-700 poppins-regular text-left truncate">
                                         {section.title}
                                       </span>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                      {completedSections.has(section.id) && (
-                                        <CheckCircle2 className="w-4 h-4 text-[#86ac55]" />
-                                      )}
-                                    </div>
+                                    {completedSections.has(section.id) && (
+                                      <CheckCircle2 className="w-4 h-4 text-[#86ac55] shrink-0" />
+                                    )}
                                   </button>
                                 ))
                               ) : (
-                                <div className="px-4 py-3 border-t border-gray-100 text-sm text-gray-500 poppins-regular">
-                                  — No sections —
+                                <div className="px-4 py-3 border-t border-gray-100 text-sm text-gray-500 poppins-regular text-center">
+                                  No sections available
                                 </div>
                               )}
                             </div>
@@ -613,62 +617,45 @@ const CourseLearn = () => {
                         </div>
                       ))
                     ) : (
-                      <div className="text-center py-4 text-gray-500">No content available</div>
+                      <div className="text-center py-8 text-gray-500 text-sm">No content available</div>
                     );
                   })()}
                 </div>
               </div>
 
-              {/* Course Info Card */}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="font-bold text-gray-900 bebas-regular text-xl mb-4">Course Details</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 poppins-regular">Total Lessons</span>
-                    <span className="font-medium text-gray-900 poppins-medium">
-                      {(course.lessons_details || course.lessons)?.length || 0}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 poppins-regular">Total Sections</span>
-                    <span className="font-medium text-gray-900 poppins-medium">{totalSections}</span>
-                  </div>
-                  {course.total_duration && (
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-600 poppins-regular">Total Duration</span>
-                      <span className="font-medium text-gray-900 poppins-medium">
-                        {formatDuration(course.total_duration)}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 poppins-regular">Language</span>
-                    <span className="font-medium text-gray-900 poppins-medium">
-                      {course.language || 'N/A'}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-600 poppins-regular">Price</span>
-                    <span className="font-medium text-[#FF8211] poppins-medium">
-                      ${course.price || '0'}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              {/* Instructor Card */}
+              {course.trainer_data && (
+                <div className="bg-gradient-to-br from-[#86ac55] to-[#6d8c44] rounded-2xl shadow-lg p-5 text-white">
+                  <h3 className="font-bold bebas-regular text-xl mb-3">Your Instructor</h3>
 
-              {/* Instructor */}
-              {course.trainer_profile && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <h3 className="font-bold text-gray-900 bebas-regular text-xl mb-4">Instructor</h3>
+                  <div className="flex items-center gap-3 mb-4">
+                    {course.trainer_data.profile_picture ? (
+                      <img
+                        src={course.trainer_data.profile_picture}
+                        alt={course.trainer_data.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-white/30"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white font-bold text-lg">
+                        {course.trainer_data.name?.charAt(0).toUpperCase() || 'T'}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-semibold text-white poppins-semibold">
+                        {course.trainer_data.name || 'Trainer'}
+                      </p>
+                      <p className="text-white/80 text-xs poppins-regular">Course Instructor</p>
+                    </div>
+                  </div>
+
                   <Link
-                    to={`/trainer-profile/${course.trainer_profile}`}
-                    className="block w-full text-center px-4 py-2 border-2 border-[#FF8211] text-[#FF8211] rounded-lg font-semibold bebas-regular hover:bg-[#FF8211]/10 transition-colors"
+                    to={`/trainer-profile/${course.trainer_data.id || course.trainer_profile}`}
+                    className="block w-full text-center px-4 py-2.5 bg-white text-[#86ac55] rounded-lg font-semibold bebas-regular hover:bg-gray-50 transition-colors text-lg"
                   >
-                    View Instructor Profile
+                    View Profile
                   </Link>
                 </div>
               )}
-
             </div>
           </div>
         </div>

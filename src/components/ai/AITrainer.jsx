@@ -5,6 +5,7 @@ import SessionSummary from './SessionSummary';
 import { useWebcam } from '../../hooks/useWebcam';
 import { usePoseTracker } from '../../hooks/usePoseTracker';
 import { EXERCISES } from '../../config/exercises'; 
+import FooterDash from '../Dashboard/FooterDash';
 
 const AITrainer = () => {
   // 1. User State & Persistence (Authenticated User)
@@ -86,6 +87,7 @@ const AITrainer = () => {
   };
 
   return (
+    <>
     <div className="w-full max-w-7xl mx-auto px-4 py-6">
       
       {/* Main Grid Layout */}
@@ -177,6 +179,9 @@ const AITrainer = () => {
       </div>
 
     </div>
+    <FooterDash />
+    </>
+    
   );
 };
 

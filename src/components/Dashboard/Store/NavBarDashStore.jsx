@@ -229,7 +229,7 @@ const NavBarDashStore = () => {
             {/* RIGHT ICONS */}
             <div className="flex items-center gap-3 md:gap-5">
 
-              <NotificationDropdown />
+              {/* <NotificationDropdown /> */}
               <UserDropdown
                 user={user}
                 logout={logout}

@@ -288,7 +288,7 @@ function Navbar() {
             <div className="hidden md:flex md:items-center md:gap-4">
               {user ? (
                 <div className="flex items-center gap-3">
-                  <NotificationDropdown />
+                  {/* <NotificationDropdown /> */}
                   <UserDropdown
                     user={user}
                     logout={logout}

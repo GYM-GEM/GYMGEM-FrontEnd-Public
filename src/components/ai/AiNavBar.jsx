@@ -221,7 +221,7 @@ function AiNavBar() {
               {user ? (
                 <>
                   {/* User Dropdown Menu */}
-                  <NotificationDropdown />
+                  {/* <NotificationDropdown /> */}
                   <UserDropdown
                     user={user}
                     logout={logout}

@@ -226,7 +226,6 @@ const NavTraineDash = () => {
 
             {/* RIGHT ICONS */}
             <div className="flex items-center gap-3 md:gap-5">
-              <NotificationDropdown />
 
               {/* User Dropdown Menu */}
               <UserDropdown

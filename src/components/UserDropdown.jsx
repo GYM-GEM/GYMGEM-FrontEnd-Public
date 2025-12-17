@@ -137,12 +137,7 @@ const UserDropdown = ({
       icon: FaUserTie,
       colorClass: "bg-purple-100 text-purple-600"
     },
-    {
-      type: "Gym",
-      path: "/gym",
-      icon: FaBuilding,
-      colorClass: "bg-orange-100 text-orange-600"
-    },
+   
     {
       type: "Store",
       path: "/store",

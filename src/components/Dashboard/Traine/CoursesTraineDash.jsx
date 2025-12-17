@@ -10,14 +10,32 @@ const CoursesTraineDash = () => {
   const [enrolledCourses, setEnrolledCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Helper function to format duration from minutes to hours
-  const formatDuration = (minutes) => {
-    if (!minutes || minutes === 0) return "--";
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    if (hours > 0 && mins > 0) return `${hours}h ${mins}m`;
-    if (hours > 0) return `${hours}h`;
-    return `${mins}m`;
+  // Helper function to format duration from seconds
+  const formatDuration = (seconds) => {
+    if (!seconds || seconds === 0) return "--";
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    // If duration is less than 60 seconds, show only seconds
+    if (seconds < 60) {
+      return `${secs}s`;
+    }
+
+    // If duration is less than 60 minutes (3600 seconds), show minutes and seconds
+    if (seconds < 3600) {
+      if (secs > 0) {
+        return `${minutes}m ${secs}s`;
+      }
+      return `${minutes}m`;
+    }
+
+    // If duration is 60 minutes or more, show hours and minutes
+    if (minutes > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${hours}h`;
   };
 
   // Helper function to get category name (you might need to adjust based on your categories)
@@ -130,13 +148,13 @@ const CoursesTraineDash = () => {
                             Progress
                           </span>
                           <span className="text-xs font-medium text-[#FF8211] poppins-regular">
-                            0%
+                            {Math.round(course.course_details.progress || 0)}%
                           </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div
                             className="bg-[#FF8211] h-2 rounded-full transition-all"
-                            style={{ width: "0%" }}
+                            style={{ width: `${course.course_details.progress || 0}%` }}
                           ></div>
                         </div>
                       </div>

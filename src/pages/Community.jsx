@@ -43,7 +43,7 @@ function Community() {
   const fetchPosts = async (search = "") => {
     try {
       const url = search ? `/api/community/posts/?search=${encodeURIComponent(search)}` : "/api/community/posts/";
-      const response = await axiosInstance.get(url);
+      const response = await axiosInstance.get(url, { skipGlobalLoader: true });
       setPosts(response.data);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -66,7 +66,7 @@ function Community() {
   // Fetch trending hashtags and top trainers
   const fetchTrendingData = async () => {
     try {
-      const response = await axiosInstance.get("/api/community/posts/trending-hashtags");
+      const response = await axiosInstance.get("/api/community/posts/trending-hashtags", { skipGlobalLoader: true });
 
       // Transform trending_hashtags from [["#tag", count], ...] to [{ tag: "#tag", count: num }, ...]
       const formattedHashtags = response.data.trending_hashtags.map(([tag, count]) => ({

@@ -35,6 +35,10 @@ const CourseDetailsDash = () => {
   const [isEditingInfo, setIsEditingInfo] = useState(false);
   const [isEditingDesc, setIsEditingDesc] = useState(false);
   const [isEditingLearn, setIsEditingLearn] = useState(false);
+  const [isEditingSection, setIsEditingSection] = useState(false);
+  const [editingSectionData, setEditingSectionData] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingSectionData, setDeletingSectionData] = useState(null);
 
   // Form States
   const [infoForm, setInfoForm] = useState({});
@@ -46,7 +50,7 @@ const CourseDetailsDash = () => {
       try {
         const response = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
         const foundCourse = response.data;
-        
+
         // Ensure whatYouLearn exists (if backend doesn't provide it, keep default or empty)
         if (!foundCourse.whatYouLearn) {
           foundCourse.whatYouLearn = [
@@ -113,7 +117,7 @@ const CourseDetailsDash = () => {
       case "image":
         return <ImageIcon className="w-4 h-4" />;
       case "audio":
-         return <PlayCircle className="w-4 h-4" />;
+        return <PlayCircle className="w-4 h-4" />;
       default:
         return <PlayCircle className="w-4 h-4" />;
     }
@@ -172,6 +176,80 @@ const CourseDetailsDash = () => {
     const newItems = [...learnForm];
     newItems[index] = value;
     setLearnForm(newItems);
+  };
+
+  // Section Handlers
+  const handleEditSection = (section, lessonIndex) => {
+    setEditingSectionData({ ...section, lessonIndex });
+    setIsEditingSection(true);
+  };
+
+  const handleDeleteSection = (sectionId, lessonIndex) => {
+    setDeletingSectionData({ sectionId, lessonIndex });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteSection = async () => {
+    if (!deletingSectionData) return;
+
+    const { sectionId, lessonIndex } = deletingSectionData;
+
+    try {
+      // Call backend to delete section
+      await axiosInstance.delete(`/api/courses/sections/${sectionId}/`);
+
+      // Update local state
+      const updatedCourse = { ...course };
+      const lessons = updatedCourse.lessons_details || updatedCourse.lessons;
+      if (lessons && lessons[lessonIndex]) {
+        lessons[lessonIndex].sections = lessons[lessonIndex].sections.filter(
+          (s) => s.id !== sectionId
+        );
+      }
+      setCourse(updatedCourse);
+      setShowDeleteModal(false);
+      setDeletingSectionData(null);
+      alert("Section deleted successfully!");
+    } catch (error) {
+      console.error("Failed to delete section:", error);
+      alert("Failed to delete section. Please try again.");
+    }
+  };
+
+  const handleSaveSection = async () => {
+    if (!editingSectionData) return;
+
+    try {
+      // Call backend to update section
+      const response = await axiosInstance.patch(
+        `/api/courses/sections/${editingSectionData.id}/`,
+        {
+          title: editingSectionData.title,
+          content_type: editingSectionData.content_type,
+          content_url: editingSectionData.content_url,
+          content_text: editingSectionData.content_text,
+        }
+      );
+
+      // Update local state
+      const updatedCourse = { ...course };
+      const lessons = updatedCourse.lessons_details || updatedCourse.lessons;
+      if (lessons && lessons[editingSectionData.lessonIndex]) {
+        const sectionIndex = lessons[editingSectionData.lessonIndex].sections.findIndex(
+          (s) => s.id === editingSectionData.id
+        );
+        if (sectionIndex !== -1) {
+          lessons[editingSectionData.lessonIndex].sections[sectionIndex] = response.data;
+        }
+      }
+      setCourse(updatedCourse);
+      setIsEditingSection(false);
+      setEditingSectionData(null);
+      alert("Section updated successfully!");
+    } catch (error) {
+      console.error("Failed to update section:", error);
+      alert("Failed to update section. Please try again.");
+    }
   };
 
   if (!course) {
@@ -384,11 +462,10 @@ const CourseDetailsDash = () => {
                           Status
                         </span>
                         <span
-                          className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium poppins-regular ${
-                            course.status?.toLowerCase() === "published"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-yellow-100 text-yellow-700"
-                          }`}
+                          className={`inline-flex items-center px-3 py-1 rounded-lg text-sm font-medium poppins-regular ${course.status?.toLowerCase() === "published"
+                            ? "bg-green-100 text-green-700"
+                            : "bg-yellow-100 text-yellow-700"
+                            }`}
                         >
                           {course.status?.toLowerCase() === "published" ? (
                             <Eye className="w-4 h-4 mr-1" />
@@ -533,10 +610,18 @@ const CourseDetailsDash = () => {
                                 </span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <button className="text-[#FF8211] hover:text-[#ff7906] p-1">
+                                <button
+                                  onClick={() => handleEditSection(section, lessonIndex)}
+                                  className="text-[#FF8211] hover:text-[#ff7906] p-1 cursor-pointer"
+                                  title="Edit section"
+                                >
                                   <Edit className="w-4 h-4" />
                                 </button>
-                                <button className="text-red-600 hover:text-red-700 p-1">
+                                <button
+                                  onClick={() => handleDeleteSection(section.id, lessonIndex)}
+                                  className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
+                                  title="Delete section"
+                                >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
@@ -626,18 +711,17 @@ const CourseDetailsDash = () => {
           <div className="flex flex-wrap gap-4 justify-end">
             <button
               onClick={() => setIsEditingInfo(true)}
-              className="px-6 py-3 border-2 border-[#FF8211] text-[#FF8211] rounded-lg hover:bg-[#FF8211]/10 transition-colors poppins-medium flex items-center gap-2"
+              className="px-6 py-3 border-2 border-[#FF8211] text-[#FF8211] rounded-lg hover:bg-[#FF8211]/10 transition-colors poppins-medium flex items-center gap-2 cursor-pointer"
             >
               <Edit className="w-5 h-5" />
               Edit Course
             </button>
             <button
               onClick={handlePublishToggle}
-              className={`px-6 py-3 rounded-lg transition-colors poppins-medium flex items-center gap-2 ${
-                course.status?.toLowerCase() === "published"
-                  ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-                  : "bg-[#86ac55] text-white hover:bg-[#86ac55]/90"
-              }`}
+              className={`px-6 py-3 rounded-lg transition-colors poppins-medium flex items-center gap-2 cursor-pointer ${course.status?.toLowerCase() === "published"
+                ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
+                : "bg-[#86ac55] text-white hover:bg-[#86ac55]/90"
+                }`}
             >
               {course.status?.toLowerCase() === "published" ? (
                 <>
@@ -653,7 +737,7 @@ const CourseDetailsDash = () => {
             </button>
             <button
               onClick={handleDeleteCourse}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors poppins-medium flex items-center gap-2"
+              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors poppins-medium flex items-center gap-2 cursor-pointer"
             >
               <Trash2 className="w-5 h-5" />
               Delete Course
@@ -661,6 +745,168 @@ const CourseDetailsDash = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Section Modal */}
+      {isEditingSection && editingSectionData && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold text-foreground bebas-regular">
+                  Edit Section
+                </h3>
+                <button
+                  onClick={() => {
+                    setIsEditingSection(false);
+                    setEditingSectionData(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Section Title
+                  </label>
+                  <input
+                    type="text"
+                    value={editingSectionData.title}
+                    onChange={(e) =>
+                      setEditingSectionData({
+                        ...editingSectionData,
+                        title: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8211]"
+                    placeholder="Enter section title"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Content Type
+                  </label>
+                  <select
+                    value={editingSectionData.content_type}
+                    onChange={(e) =>
+                      setEditingSectionData({
+                        ...editingSectionData,
+                        content_type: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8211]"
+                  >
+                    <option value="video">Video</option>
+                    <option value="article">Article</option>
+                    <option value="pdf">PDF</option>
+                    <option value="image">Image</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Content URL
+                  </label>
+                  <input
+                    type="url"
+                    value={editingSectionData.content_url || ""}
+                    onChange={(e) =>
+                      setEditingSectionData({
+                        ...editingSectionData,
+                        content_url: e.target.value,
+                      })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8211]"
+                    placeholder="https://..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Content Description
+                  </label>
+                  <textarea
+                    value={editingSectionData.content_text || ""}
+                    onChange={(e) =>
+                      setEditingSectionData({
+                        ...editingSectionData,
+                        content_text: e.target.value,
+                      })
+                    }
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8211]"
+                    placeholder="Enter section description..."
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  onClick={() => {
+                    setIsEditingSection(false);
+                    setEditingSectionData(null);
+                  }}
+                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveSection}
+                  className="px-4 py-2 bg-[#FF8211] text-white rounded-md hover:bg-[#ff7906] transition-colors flex items-center gap-2 cursor-pointer"
+                >
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                  <Trash2 className="w-6 h-6 text-red-600" />
+                </div>
+              </div>
+
+              <h3 className="text-xl font-bold text-center text-gray-900 mb-2">
+                Delete Section
+              </h3>
+
+              <p className="text-center text-gray-600 mb-6">
+                Are you sure you want to delete this section? This action cannot be undone.
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeletingSectionData(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors font-medium cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDeleteSection}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <FooterDash />
     </>
   );

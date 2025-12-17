@@ -40,7 +40,7 @@ const VideoPlayer = ({ url }) => {
         );
     }
 
-    // Determine if URL is a direct file (MP4, WebM, etc.) vs streaming platform
+    
     const isDirectFile = url && (
         url.includes('.mp4') ||
         url.includes('.webm') ||

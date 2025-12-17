@@ -8,7 +8,6 @@ import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
 import { ShoppingCart, Package, MessageSquare } from "lucide-react";
-import NotificationDropdown from "../../NotificationDropdown";
 
 const NavBarDashStore = () => {
   const navigate = useNavigate();
@@ -228,7 +227,6 @@ const NavBarDashStore = () => {
 
             {/* RIGHT ICONS */}
             <div className="flex items-center gap-3 md:gap-5">
-              <NotificationDropdown />
 
               <UserDropdown
                 user={user}

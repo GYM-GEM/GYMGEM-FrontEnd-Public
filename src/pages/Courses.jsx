@@ -52,7 +52,9 @@ function Courses() {
 
   const getCategories = async () => {
     try {
-      const response = await axiosInstance.get('/api/utils/categories');
+      const response = await axiosInstance.get('/api/utils/categories', {
+        skipGlobalLoader: true
+      });
       setCategories(response.data.results);
     } catch (error) {
       console.log("Failed to load categories");
@@ -71,7 +73,8 @@ function Courses() {
 
       const response = await axiosInstance.get('/api/courses/courses/for-trainees',
         {
-          params: params
+          params: params,
+          skipGlobalLoader: true
         }
       );
 

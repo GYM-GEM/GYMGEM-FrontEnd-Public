@@ -14,11 +14,11 @@ const cards = [
     title: "Classes",
     desc: "Join live or online fitness sessions led by top certified coaches.",
   },
-  {
-    img: card3,
-    title: "Gyms",
-    desc: "Find top gyms near you and compare facilities easily.",
-  },
+  // {
+  //   img: card3,
+  //   title: "Gyms",
+  //   desc: "Find top gyms near you and compare facilities easily.",
+  // },
   {
     img: card4,
     title: "Nutrition Plans",

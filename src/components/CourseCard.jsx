@@ -16,7 +16,8 @@ const CourseCard = ({ course, categoryTheme }) => {
         price,
         category,
         average_rating,
-        level
+        level,
+        enrolled
     } = course;
 
     // Default theme if none provided
@@ -27,7 +28,10 @@ const CourseCard = ({ course, categoryTheme }) => {
     };
 
     return (
-        <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-primary/20">
+        <article className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${enrolled
+                ? 'border-green-500 border-2 shadow-green-200 shadow-lg hover:shadow-green-300 hover:border-green-600'
+                : 'border-border/50 hover:border-primary/20'
+            }`}>
             {/* Image Container */}
             <div className="relative aspect-[4/3] w-full overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 z-10 transition-opacity group-hover:opacity-40" />
@@ -43,6 +47,16 @@ const CourseCard = ({ course, categoryTheme }) => {
                     <span>{theme.icon}</span>
                     <span className="uppercase tracking-wide">{theme.name || "Course"}</span>
                 </div>
+
+                {/* Enrolled Badge - shows when user is enrolled */}
+                {enrolled && (
+                    <div className="absolute left-3 top-14 z-20 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold backdrop-blur-md bg-green-500 text-white shadow-md">
+                        <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <span className="uppercase tracking-wide">Enrolled</span>
+                    </div>
+                )}
 
                 {/* Rating Badge or New Badge */}
                 {average_rating ? (

@@ -21,7 +21,7 @@ import {
   Loader2,
 } from "lucide-react";
 import ReactPlayer from "react-player";
-import Navbar from "../Navbar";
+import NavTraineeDash from "../Dashboard/Traine/NavTraineDash";
 import Footer from "../Footer";
 import axiosInstance from "../../utils/axiosConfig";
 import VideoPlayer from "./VideoPlayer";
@@ -34,12 +34,36 @@ const CourseLearn = () => {
   const [completedSections, setCompletedSections] = useState(new Set());
   const [updatingSectionId, setUpdatingSectionId] = useState(null);
 
+  // Review modal states
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
   // Fetch course details
   useEffect(() => {
     const fetchCourse = async () => {
       try {
         const response = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
         setCourse(response.data);
+
+        // Initialize completed sections from backend is_done property
+        const completedIds = [];
+        const lessonsToUse = response.data.lessons_details || response.data.lessons;
+        if (lessonsToUse) {
+          lessonsToUse.forEach(lesson => {
+            if (lesson.sections) {
+              lesson.sections.forEach(section => {
+                if (section.is_done) {
+                  completedIds.push(section.id);
+                }
+              });
+            }
+          });
+        }
+        setCompletedSections(new Set(completedIds));
+        localStorage.setItem(`course_progress_${id}`, JSON.stringify(completedIds));
       } catch (error) {
         console.error("Failed to fetch course:", error);
       }
@@ -47,12 +71,6 @@ const CourseLearn = () => {
     if (id) {
       fetchCourse();
     }
-  }, [id]);
-
-  // Load progress on mount
-  useEffect(() => {
-    const savedProgress = JSON.parse(localStorage.getItem(`course_progress_${id}`)) || [];
-    setCompletedSections(new Set(savedProgress));
   }, [id]);
 
   // Set initial current section once course is loaded
@@ -88,42 +106,78 @@ const CourseLearn = () => {
 
       const isCompleted = completedSections.has(currentSection.id);
 
+      // Don't allow un-completing - one-way operation only
+      if (isCompleted) return;
+
       // Set loading state
       setUpdatingSectionId(currentSection.id);
 
       // Optimistically update UI
       setCompletedSections((prev) => {
         const newSet = new Set(prev);
-        if (isCompleted) {
-          newSet.delete(currentSection.id);
-        } else {
-          newSet.add(currentSection.id);
-        }
+        newSet.add(currentSection.id);
         localStorage.setItem(`course_progress_${id}`, JSON.stringify([...newSet]));
         return newSet;
       });
 
-      // If we are marking as completed, call the API
-      if (!isCompleted) {
-        try {
-          await axiosInstance.put(
-            `/api/courses/sections/${currentSection.id}/mark-as-done/`,
-            {},
-            { skipGlobalLoader: true }
-          );
-        } catch (error) {
-          console.error("Failed to mark section as done:", error);
-          // Revert on error
-          setCompletedSections((prev) => {
-            const newSet = new Set(prev);
-            newSet.delete(currentSection.id);
-            localStorage.setItem(`course_progress_${id}`, JSON.stringify([...newSet]));
-            return newSet;
-          });
-        }
+      // Call the API to mark as completed
+      try {
+        await axiosInstance.put(
+          `/api/courses/sections/${currentSection.id}/mark-as-done/`,
+          {},
+          { skipGlobalLoader: true }
+        );
+      } catch (error) {
+        console.error("Failed to mark section as done:", error);
+        // Revert on error
+        setCompletedSections((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(currentSection.id);
+          localStorage.setItem(`course_progress_${id}`, JSON.stringify([...newSet]));
+          return newSet;
+        });
       }
 
       setUpdatingSectionId(null);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (rating === 0) {
+      alert("Please select a rating");
+      return;
+    }
+
+    if (!reviewText.trim()) {
+      alert("Please write a review");
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    try {
+      await axiosInstance.post(
+        `/api/courses/courses/${id}/reviews/`,
+        {
+          rating: rating,
+          review: reviewText
+        },
+        { skipGlobalLoader: true }
+      );
+
+      // Success - close modal and reset
+      setShowReviewModal(false);
+      setRating(0);
+      setReviewText("");
+      alert("Thank you for your review!");
+
+      // Optionally refresh course data to show new review
+      const response = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
+      setCourse(response.data);
+    } catch (error) {
+      console.error("Failed to submit review:", error);
+      alert("Failed to submit review. Please try again.");
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 
@@ -214,7 +268,7 @@ const CourseLearn = () => {
   if (!course) {
     return (
       <>
-        <Navbar />
+        <NavTraineeDash />
         <div className="min-h-screen flex items-center justify-center bg-gray-50"></div>
         <Footer />
       </>
@@ -248,7 +302,7 @@ const CourseLearn = () => {
 
   return (
     <>
-      <Navbar />
+      <NavTraineeDash />
 
       {/* Compact Hero Header with Course Info */}
       <div className="w-full bg-gradient-to-br from-[#FF8211]/5 via-[#86ac55]/5 to-gray-50 border-b border-gray-200">
@@ -344,9 +398,9 @@ const CourseLearn = () => {
                   </div>
                   <button
                     onClick={toggleComplete}
-                    disabled={updatingSectionId === currentSection.id}
+                    disabled={updatingSectionId === currentSection.id || completedSections.has(currentSection.id)}
                     className={`px-5 py-2.5 rounded-lg font-medium poppins-medium text-sm flex items-center gap-2 transition-all ${completedSections.has(currentSection.id)
-                      ? "bg-[#86ac55] text-white hover:bg-[#7a9b4d]"
+                      ? "bg-[#86ac55] text-white cursor-not-allowed"
                       : "bg-[#FF8211] text-white hover:bg-[#ff7906]"
                       } ${updatingSectionId === currentSection.id ? "opacity-75 cursor-not-allowed" : ""}`}
                   >
@@ -398,6 +452,132 @@ const CourseLearn = () => {
                 </div>
               </div>
             </div>
+
+            {/* Review Course Button - Appears at 100% completion */}
+            {completionPercentage === 100 && (
+              <div className="bg-gradient-to-br from-[#86ac55] to-[#6d8c44] rounded-2xl shadow-lg p-6 text-white">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Star className="w-6 h-6 fill-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold bebas-regular">Congratulations! 🎉</h3>
+                      <p className="text-white/90 text-sm poppins-regular">Share your experience with others</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowReviewModal(true)}
+                    className="px-6 py-3 bg-white text-[#86ac55] rounded-lg font-bold bebas-regular text-lg hover:bg-gray-50 transition-all shadow-md hover:shadow-lg active:scale-95"
+                  >
+                    Review Course
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Review Modal */}
+            {showReviewModal && (
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowReviewModal(false)}>
+                <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+                  <div className="sticky top-0 bg-gradient-to-r from-[#FF8211] to-[#ff9933] text-white p-6 rounded-t-2xl">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-2xl font-bold bebas-regular">Review This Course</h2>
+                        <p className="text-white/90 text-sm poppins-regular mt-1">{course.title}</p>
+                      </div>
+                      <button
+                        onClick={() => setShowReviewModal(false)}
+                        className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-6 space-y-6">
+                    {/* Star Rating */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-3 poppins-semibold">
+                        Rate Your Experience
+                      </label>
+                      <div className="flex items-center gap-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setRating(star)}
+                            onMouseEnter={() => setHoverRating(star)}
+                            onMouseLeave={() => setHoverRating(0)}
+                            className="transition-all transform hover:scale-110 active:scale-95"
+                          >
+                            <Star
+                              className={`w-10 h-10 ${star <= (hoverRating || rating)
+                                  ? 'fill-[#FF8211] text-[#FF8211]'
+                                  : 'text-gray-300'
+                                }`}
+                            />
+                          </button>
+                        ))}
+                        {rating > 0 && (
+                          <span className="ml-3 text-sm font-medium text-gray-600 poppins-medium">
+                            {rating} {rating === 1 ? 'star' : 'stars'}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Review Text */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-900 mb-3 poppins-semibold">
+                        Share Your Thoughts
+                      </label>
+                      <textarea
+                        value={reviewText}
+                        onChange={(e) => setReviewText(e.target.value)}
+                        placeholder="Tell us about your experience with this course..."
+                        rows={6}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-[#FF8211] focus:outline-none resize-none poppins-regular text-gray-900 placeholder-gray-400"
+                      />
+                      <p className="text-xs text-gray-500 mt-2 poppins-regular">
+                        {reviewText.length} characters
+                      </p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 pt-4 border-t border-gray-200">
+                      <button
+                        onClick={() => {
+                          setShowReviewModal(false);
+                          setRating(0);
+                          setReviewText("");
+                        }}
+                        className="flex-1 px-6 py-3 rounded-xl border-2 border-gray-200 text-gray-700 font-semibold poppins-semibold hover:bg-gray-50 transition-colors"
+                        disabled={isSubmittingReview}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSubmitReview}
+                        disabled={isSubmittingReview || rating === 0 || !reviewText.trim()}
+                        className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-[#FF8211] to-[#ff9933] text-white font-bold bebas-regular text-lg hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 flex items-center justify-center gap-2"
+                      >
+                        {isSubmittingReview ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            Submitting...
+                          </>
+                        ) : (
+                          'Submit Review'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Reviews Section */}
             {course.reviews && course.reviews.length > 0 && (

@@ -57,7 +57,9 @@ const CourseDetails = () => {
 
   const getCourseById = async (id) => {
     try {
-      const course = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
+      const course = await axiosInstance.get(`/api/courses/courses/${id}/detail/`, {
+        skipGlobalLoader: true
+      });
       setCourse(course.data);
     } catch (error) {
       console.error("Error fetching course by ID:", error);
@@ -66,7 +68,9 @@ const CourseDetails = () => {
 
   const getTrainerById = async (trainerId) => {
     try {
-      const response = await axiosInstance.get(`/api/trainers/create?profile_id=${trainerId}`);
+      const response = await axiosInstance.get(`/api/trainers/create?profile_id=${trainerId}`, {
+        skipGlobalLoader: true
+      });
       setTrainer(response.data.trainer);
     } catch (error) {
       console.error("Error fetching trainer by ID:", error);
@@ -268,6 +272,9 @@ const CourseDetails = () => {
   // Check if user is enrolled in the course
   const isEnrolled = course?.enrollment === "in_progress";
 
+  // Get lessons from either lessons_details (with sections) or lessons (basic info)
+  const lessonsData = course?.lessons_details?.length > 0 ? course.lessons_details : course?.lessons || [];
+
   // Course data - mixed from backend and dummy data
   const courseData = {
     // Backend data
@@ -282,7 +289,7 @@ const CourseDetails = () => {
     createdAt: course.created_at,
     updatedAt: course.updated_at,
     trainerProfileId: course.trainer_profile,
-    totalLessons: course.lessons?.length || 0,
+    totalLessons: (course.lessons_details?.length > 0 ? course.lessons_details?.length : course.lessons?.length) || 0,
     enrolledCount: course.students_enrolled,
     rating: course.ratings.average_rating,
     totalRatings: course.ratings.total_ratings,
@@ -303,7 +310,7 @@ const CourseDetails = () => {
     ],
     includes: [
       { icon: Video, text: `${course.total_duration / 3600} hours of on-demand video` },
-      { icon: FileText, text: `${course.lessons?.length || 0} lessons` },
+      { icon: FileText, text: `${(course.lessons_details?.length > 0 ? course.lessons_details?.length : course.lessons?.length) || 0} lessons` },
       { icon: Download, text: "Downloadable resources" },
       { icon: Award, text: "Certificate of completion" },
     ],
@@ -595,13 +602,13 @@ const CourseDetails = () => {
                   Course Curriculum
                 </h2>
                 <span className="text-sm text-gray-500 poppins-regular">
-                  {course.lessons?.length || 0} Lessons
+                  {lessonsData?.length || 0} Lessons
                 </span>
               </div>
 
               <div className="space-y-2">
-                {course.lessons && course.lessons.length > 0 ? (
-                  course.lessons.map((lesson, lessonIndex) => (
+                {lessonsData && lessonsData.length > 0 ? (
+                  lessonsData.map((lesson, lessonIndex) => (
                     <div key={lessonIndex} className="border border-gray-200 rounded-lg overflow-hidden">
                       <button
                         onClick={() => toggleSection(lessonIndex)}
@@ -626,23 +633,20 @@ const CourseDetails = () => {
                         <div className="bg-white">
                           {lesson.sections && lesson.sections.length > 0 ? (
                             lesson.sections.map((section) => (
-                              <button
+                              <div
                                 key={section.id}
-                                onClick={() => isEnrolled ? handleSectionClick(section) : handleLockedLessonClick()}
-                                className={`w-full px-4 py-3 border-t border-gray-100 transition-colors flex items-center justify-between group ${isEnrolled ? "hover:bg-[#FF8211]/5 cursor-pointer" : "hover:bg-gray-50 cursor-pointer"
-                                  } ${activeContent?.id === section.id ? "bg-[#FF8211]/10" : ""}`}
+                                className="w-full px-4 py-3 border-t border-gray-100 flex items-center justify-between"
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className={isEnrolled ? "text-gray-600" : "text-gray-400"}>
+                                  <div className="text-gray-600">
                                     {getContentIcon(section.content_type)}
                                   </div>
-                                  <span className={`text-sm poppins-regular text-left ${isEnrolled ? "text-gray-900" : "text-gray-700"
-                                    }`}>
+                                  <span className="text-sm poppins-regular text-left text-gray-900">
                                     {section.title}
                                   </span>
                                 </div>
                                 {!isEnrolled && <Lock className="w-4 h-4 text-gray-400" />}
-                              </button>
+                              </div>
                             ))
                           ) : (
                             <div className="px-4 py-3 border-t border-gray-100 text-sm text-gray-500 poppins-regular">
@@ -837,21 +841,24 @@ const CourseDetails = () => {
                       )}
                     </button>
                   )}
-                  <button
-                    onClick={handleToggleFavorite}
-                    disabled={isWishlistLoading}
-                    className={`w-full px-6 py-3 border-2 rounded-lg font-semibold bebas-regular text-lg transition-colors flex items-center justify-center gap-2 ${isFavoriteCourse
-                      ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]"
-                      : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
-                      } ${isWishlistLoading ? "opacity-70 cursor-not-allowed" : ""}`}
-                  >
-                    {isWishlistLoading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Heart className={`w-5 h-5 ${isFavoriteCourse ? "fill-white" : ""}`} />
-                    )}
-                    {isFavoriteCourse ? "Remove from Wishlist" : "Add to Wishlist"}
-                  </button>
+                  {/* Only show wishlist button if not enrolled */}
+                  {!isEnrolled && (
+                    <button
+                      onClick={handleToggleFavorite}
+                      disabled={isWishlistLoading}
+                      className={`w-full px-6 py-3 border-2 rounded-lg font-semibold bebas-regular text-lg transition-colors flex items-center justify-center gap-2 ${isFavoriteCourse
+                        ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]"
+                        : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
+                        } ${isWishlistLoading ? "opacity-70 cursor-not-allowed" : ""}`}
+                    >
+                      {isWishlistLoading ? (
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                      ) : (
+                        <Heart className={`w-5 h-5 ${isFavoriteCourse ? "fill-white" : ""}`} />
+                      )}
+                      {isFavoriteCourse ? "Remove from Wishlist" : "Add to Wishlist"}
+                    </button>
+                  )}
                   <button
                     onClick={handleShare}
                     className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium poppins-regular hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"

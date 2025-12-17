@@ -24,14 +24,6 @@ const roles = [
     icon: trainerIcon,
   },
   {
-    id: "gym",
-    title: "Gym",
-    description:
-      "Manage facilities, trainers, and memberships from one calm dashboard.",
-    icon: gymIcon,
-    comingSoon: true,
-  },
-  {
     id: "store",
     title: "Store",
     description:

@@ -118,10 +118,7 @@ function Navbar() {
 
   return (
     <>
-      <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20 }}
+      <nav
         className="fixed w-full top-0 left-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-100 shadow-sm"
       >
         <div className="mx-auto flex h-16 md:h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -229,10 +226,10 @@ function Navbar() {
             </NavLink>
 
             {/* Gym - Soon */}
-            <div className="relative px-5 py-2 text-sm font-medium text-gray-400 cursor-not-allowed flex items-center gap-2 hover:bg-white/50 rounded-full transition-colors">
+            {/* <div className="relative px-5 py-2 text-sm font-medium text-gray-400 cursor-not-allowed flex items-center gap-2 hover:bg-white/50 rounded-full transition-colors">
               Gym
               <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
-            </div>
+            </div> */}
 
             {/* Community */}
             <NavLink
@@ -474,7 +471,7 @@ function Navbar() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.nav>
+      </nav>
 
       {/* Spacer to prevent content from going under fixed navbar */}
       <div className="h-16 md:h-20" />

@@ -1,5 +1,6 @@
 import { Check, Clock, Dumbbell } from "lucide-react";
 import traineesImg2 from "../../assets/333333333333333333.jpg";
+import { Link } from "react-router-dom";
 import { useScrollAnimation } from "../../hooks/useScrollAnimation";
 
 function ForTrainers() {
@@ -109,8 +110,8 @@ function ForTrainers() {
                 : "translate-x-4 opacity-0"
             }`}
           >
-            <a
-              href="#"
+            <Link
+              to="/role"
               className="inline-flex items-center text-[#FF8211] gap-2 text-sm font-semibold text-primary transition-all duration-300 hover:gap-3 hover:text-primary/80"
             >
               Become a coach today
@@ -120,7 +121,7 @@ function ForTrainers() {
               >
                 →
               </span>
-            </a>
+            </Link>
           </div>
         </div>
       </div>

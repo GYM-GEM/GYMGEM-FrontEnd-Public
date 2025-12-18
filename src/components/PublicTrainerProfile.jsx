@@ -28,20 +28,21 @@ const PublicTrainerProfile = () => {
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
 
-  // Dummy Availability Data
-  const [selectedDate, setSelectedDate] = useState(null);
+  // Availability Data
+  const [availableEvents, setAvailableEvents] = useState([]);
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   // Generate next 7 days
   const getNext7Days = () => {
     const dates = [];
+    const today = new Date();
     for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
       dates.push({
         day: weekDays[d.getDay()],
         date: d.getDate(),
-        fullDate: d.toISOString().split('T')[0],
+        fullDate: d, // Keep object for comparison
         isToday: i === 0
       });
     }
@@ -51,18 +52,142 @@ const PublicTrainerProfile = () => {
   const next7Days = getNext7Days();
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
-  // Dummy slots for each day
-  const dummySlots = {
-    0: ["09:00 AM", "10:00 AM", "02:00 PM", "04:00 PM"], // Today
-    1: ["09:00 AM", "11:00 AM", "03:00 PM"],
-    2: ["10:00 AM", "12:00 PM", "05:00 PM"],
-    3: [], // No availability
-    4: ["08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM"],
-    5: ["01:00 PM", "02:00 PM"],
-    6: ["10:00 AM", "11:00 AM"],
+  // Fetch Trainer's Calendar Events from LocalStorage
+  // NOTE: In a real app, this would be an API call. 
+  // ensuring we are on the same machine/browser for the demo to work.
+  useEffect(() => {
+    if (id) {
+      try {
+        const specificKey = `wc_events_16`;
+        console.log(`PublicTrainerProfile: Trying specific key: ${specificKey}`);
+
+        let savedEvents = localStorage.getItem(specificKey);
+
+        // Fallback for debugging/legacy
+        if (!savedEvents) {
+          console.log(`PublicTrainerProfile: Specific key not found. Trying fallback: wc_events_v1`);
+          savedEvents = localStorage.getItem("wc_events_v1");
+        }
+
+        console.log("PublicTrainerProfile: savedEvents raw:", savedEvents);
+
+        if (savedEvents) {
+          setAvailableEvents(JSON.parse(savedEvents));
+        } else {
+          setAvailableEvents([]);
+        }
+      } catch (e) {
+        console.error("Failed to load trainer schedule", e);
+      }
+    }
+  }, [id]);
+
+  // Derive slots for the currently selected day
+  const getCurrentSlots = () => {
+    if (!availableEvents.length) return [];
+
+    const selectedDayDate = next7Days[activeDayIndex].fullDate;
+    const startOfDay = new Date(selectedDayDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // Use local date string for comparison (YYYY-MM-DD)
+    const targetDateStr = next7Days[activeDayIndex].fullDate.toLocaleDateString('en-CA');
+
+    // Debug Filter
+    console.log("Filtering for Date (Local String):", targetDateStr);
+
+    return availableEvents
+      .filter(ev => {
+        if (!ev.start) return false;
+        const eventStart = new Date(ev.start);
+        const eventDateStr = eventStart.toLocaleDateString('en-CA');
+
+        const match = eventDateStr === targetDateStr;
+        // console.log(`Checking Event: ${ev.title} (${eventDateStr}) vs ${targetDateStr} => ${match}`);
+        return match;
+      })
+      .sort((a, b) => new Date(a.start) - new Date(b.start))
+      .map(ev => {
+        // Format time: "02:00 PM"
+        return {
+          id: ev.id,
+          time: new Date(ev.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
+          status: ev.status || 'available'
+        };
+      });
   };
 
-  const currentSlots = dummySlots[activeDayIndex] || [];
+  const currentSlots = getCurrentSlots();
+  const [selectedSlotId, setSelectedSlotId] = useState(null);
+
+  const [user] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
+
+  const handleConfirmBooking = () => {
+    if (!selectedSlotId) {
+      alert("Please select a time slot first.");
+      return;
+    }
+
+    if (!user || !user.id) {
+      alert("You must be logged in to book a session.");
+      return;
+    }
+
+    try {
+      const specificKey = `wc_events_16`; // Or fallback to 'wc_events_16' as user hardcoded
+      const savedEventsStr = localStorage.getItem(specificKey) || localStorage.getItem("wc_events_v1");
+
+      if (!savedEventsStr) return;
+
+      let events = JSON.parse(savedEventsStr);
+      let bookedEvent = null;
+
+      // Find and update event for TRAINER
+      const updatedEvents = events.map(ev => {
+        if (ev.id === selectedSlotId) {
+          bookedEvent = { ...ev }; // Copy for Trainee
+          return {
+            ...ev,
+            title: `Session: ${user.username || "Trainee"}`, // Trainer sees Trainee Name
+            status: "pending",
+            color: "#F59E0B", // Amber for pending
+            traineeId: user.id,
+            traineeName: user.username || "Trainee"
+          };
+        }
+        return ev;
+      });
+
+      // Save to TRAINER storage
+      localStorage.setItem(specificKey, JSON.stringify(updatedEvents));
+
+      // Save to TRAINEE storage
+      if (bookedEvent) {
+        const traineeKey = `trainee_bookings_${user.id}`;
+        const traineeEvents = JSON.parse(localStorage.getItem(traineeKey) || "[]");
+
+        const traineeVersion = {
+          ...bookedEvent,
+          title: `Session with ${profileData?.profile?.name || "Trainer"}`, // Trainee sees Trainer Name
+          status: "pending", // Pending initially
+          color: "#F59E0B",
+          trainerId: id
+        };
+
+        traineeEvents.push(traineeVersion);
+        localStorage.setItem(traineeKey, JSON.stringify(traineeEvents));
+      }
+
+      // Update local state to reflect change
+      setAvailableEvents(updatedEvents);
+      setSelectedSlotId(null);
+      alert("Booking request sent! Check your My Sessions page.");
+
+    } catch (e) {
+      console.error("Booking failed", e);
+      alert("Failed to book session.");
+    }
+  };
 
   useEffect(() => {
     // Fetch Categories for mapping
@@ -440,14 +565,25 @@ const PublicTrainerProfile = () => {
                     <div className="space-y-3">
                       <h4 className="text-sm font-semibold text-gray-900 flex justify-between">
                         Available Slots
-                        <span className="text-gray-400 font-normal text-xs">{currentSlots.length} slots</span>
+                        <span className="text-gray-400 font-normal text-xs">{currentSlots.length} slots (Loaded: {availableEvents.length})</span>
                       </h4>
 
                       {currentSlots.length > 0 ? (
                         <div className="grid grid-cols-2 gap-2">
-                          {currentSlots.map((slot, idx) => (
-                            <button key={idx} className="py-2.5 px-3 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 hover:border-[#FF8211] hover:text-[#FF8211] hover:bg-orange-50 transition-all text-center">
-                              {slot}
+                          {currentSlots.map((slot) => (
+                            <button
+                              key={slot.id}
+                              onClick={() => setSelectedSlotId(slot.id)}
+                              disabled={slot.status !== 'available'}
+                              className={`py-2.5 px-3 rounded-lg border text-sm font-medium transition-all text-center
+                                    ${selectedSlotId === slot.id
+                                  ? "border-[#FF8211] bg-[#FF8211] text-white shadow-md"
+                                  : "border-gray-200 text-gray-700 hover:border-[#FF8211] hover:text-[#FF8211] hover:bg-orange-50"}
+                                    ${slot.status !== 'available' ? 'opacity-50 cursor-not-allowed bg-gray-100 border-gray-100 text-gray-400' : ''}
+                                `}
+                            >
+                              {slot.time}
+                              {slot.status === 'pending' && <span className="block text-[10px] lowercase">(Pending)</span>}
                             </button>
                           ))}
                         </div>
@@ -458,7 +594,14 @@ const PublicTrainerProfile = () => {
                       )}
                     </div>
 
-                    <button className="w-full mt-6 bg-gray-900 text-white font-bold py-3.5 rounded-xl hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 group">
+                    <button
+                      onClick={handleConfirmBooking}
+                      disabled={!selectedSlotId}
+                      className={`w-full mt-6 font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 group
+                            ${selectedSlotId
+                          ? "bg-gray-900 text-white hover:bg-gray-800 shadow-lg"
+                          : "bg-gray-200 text-gray-400 cursor-not-allowed"}
+                        `}>
                       Confirm Booking
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>

@@ -26,6 +26,7 @@ const NavTraineDash = () => {
   const mainLinks = [
     { to: "/trainee", label: "Dashboard" },
     { to: "/trainee/courses", label: "Courses" },
+    { to: "/trainee/calendar", label: "Calendar", icon: <Calendar size={18} /> },
     { to: "/trainee/message", label: "Messages", icon: <MessageSquare size={18} /> },
   ];
 

@@ -26,7 +26,7 @@ const AddCourse = () => {
         title: data.title,
         price: data.price,
         cover: data.coverUrl || "http://example.com",
-        status: data.status || "draft",
+        // status: data.status || "draft",                         
         description: data.description,
         preview_video: data.previewUrl || "http://example.com",
         trainer_profile: user?.id || 0,

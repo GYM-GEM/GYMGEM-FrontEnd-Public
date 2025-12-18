@@ -49,6 +49,7 @@ import TrainerprofileDash from "./components/Dashboard/Trainer/TrainerprofileDas
 import CourseDetailsDash from "./components/Dashboard/Trainer/CourseDetailsDash.jsx";
 import OrderTrackingTR from "./components/Dashboard/Trainer/OrderTrackingTR.jsx";
 import MessageTR from "./components/Dashboard/Trainer/Message.jsx";
+import WeekCalendar from "./components/Dashboard/Trainer/WeekCalendar.jsx";
 
 // dashboard trainee
 import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
@@ -60,6 +61,7 @@ import PublicTrainerProfile from "./components/PublicTrainerProfile.jsx";
 import Favorite from "./components/Dashboard/Traine/Favorite.jsx";
 import MySessions from "./components/Dashboard/Traine/MySessions.jsx";
 import CourseLearn from "./components/courses/CourseLearn.jsx";
+import WeekCalendarTrainee from "./components/Dashboard/Traine/WeekCalendar.jsx";
 import MessageTE from "./components/Dashboard/Traine/Message.jsx";
 import OrderTrackingTE from "./components/Dashboard/Traine/OrderTrackingTE.jsx";
 // Checkout components
@@ -172,6 +174,7 @@ function App() {
             <Route path="addcourse" element={<ProtectedRoute requiredProfile="trainer"><AddCourse /></ProtectedRoute>} />
             <Route path="settings" element={<ProtectedRoute requiredProfile="trainer"><SettingsTrainee /></ProtectedRoute>} />
             <Route path="message" element={<ProtectedRoute requiredProfile="trainer"><MessageTR /></ProtectedRoute>} />
+            <Route path="calendar" element={<ProtectedRoute requiredProfile="trainer"><WeekCalendar /></ProtectedRoute>} />
             <Route path="myorder" element={<ProtectedRoute requiredProfile="trainer"><OrderTrackingTR /></ProtectedRoute>} />
           </Route>
 
@@ -185,6 +188,7 @@ function App() {
             <Route path="favorite" element={<ProtectedRoute requiredProfile="trainee"><Favorite /></ProtectedRoute>} />
             <Route path="sessions" element={<ProtectedRoute requiredProfile="trainee"><MySessions /></ProtectedRoute>} />
             <Route path="settings" element={<ProtectedRoute requiredProfile="trainee"><SettingsTrainee /></ProtectedRoute>} />
+            <Route path="calendar" element={<ProtectedRoute requiredProfile="trainee"><WeekCalendarTrainee /></ProtectedRoute>} />
             <Route path="message" element={<ProtectedRoute requiredProfile="trainee"><MessageTE /></ProtectedRoute>} />
             <Route path="myorder" element={<ProtectedRoute requiredProfile="trainee"><OrderTrackingTE /></ProtectedRoute>} />
           </Route>

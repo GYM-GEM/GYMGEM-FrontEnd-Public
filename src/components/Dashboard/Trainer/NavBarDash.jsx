@@ -8,7 +8,7 @@ import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
 import NotificationDropdown from "../../NotificationDropdown";
-import { BookOpen, Users, ClipboardList, MessageSquare } from "lucide-react";
+import { BookOpen, Users, ClipboardList, MessageSquare, Calendar } from "lucide-react";
 
 const NavBarDash = () => {
   const navigate = useNavigate();
@@ -26,6 +26,7 @@ const NavBarDash = () => {
     { to: "/trainer", label: "Dashboard" },
     { to: "/trainer/profile", label: "Profile" },
     { to: "/trainer/message", label: "Messages", icon: <MessageSquare size={18} /> },
+    { to: "/trainer/calendar", label: "My Calendar", icon: <Calendar size={18} /> },
   ];
 
   // Management Dropdown Links
@@ -229,7 +230,7 @@ const NavBarDash = () => {
 
             {/* RIGHT ICONS */}
             <div className="flex items-center gap-3 md:gap-5">
-             
+
               {/* <NotificationDropdown /> */}
               <UserDropdown
                 user={user}

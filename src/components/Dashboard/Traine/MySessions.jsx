@@ -1,18 +1,93 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import NavTraineDash from "./NavTraineDash";
 import FooterDash from "../FooterDash";
-import { Video, Play, Calendar, Search } from "lucide-react";
+import { Video, Play, Calendar, Search, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import PaymentPage from "../../BuyNow/PaymentPage";
 
 const MySessions = () => {
     const navigate = useNavigate();
     const [sessionId, setSessionId] = useState("");
+    const [paymentSession, setPaymentSession] = useState(null);
 
     // MOCK DATA
-    const upcomingSessions = [
-        { id: 101, title: "Morning Yoga Flow", trainer: "Sarah Coach", time: "10:00 AM Today", status: "Live" },
-        { id: 102, title: "HIIT Cardio Blast", trainer: "Mike Trainer", time: "2:00 PM Tomorrow", status: "Scheduled" },
-    ];
+    // Get user from local storage
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+    // MOCK DATA
+    const upcomingSessions = () => {
+        try {
+            if (!user.id) return [];
+
+            const traineeKey = `trainee_bookings_${user.id}`;
+            const traineeEventsStr = localStorage.getItem(traineeKey);
+            if (!traineeEventsStr) return [];
+
+            // Master list from trainer (to check for deletions)
+            const trainerKey = `wc_events_16`; // Primary key used in WeekCalendar
+            const masterEventsStr = localStorage.getItem(trainerKey) || localStorage.getItem("wc_events_v1") || "[]";
+            const masterEvents = JSON.parse(masterEventsStr);
+
+            // Parse trainee events
+            const events = JSON.parse(traineeEventsStr);
+
+            // Check payments
+            const orders = JSON.parse(localStorage.getItem('user_orders') || "[]");
+            const myOrders = orders.filter(o => o.userId === user.id);
+
+            return events
+                .filter(ev => {
+                    // Check if event still exists in master list
+                    // If event has trainerId, it MUST exist in master list.
+                    if (ev.trainerId) {
+                        return masterEvents.some(m => m.id === ev.id);
+                    }
+                    return true;
+                })
+                .map(ev => {
+                    const isPaid = myOrders.some(o => o.course.id === ev.id);
+                    return { ...ev, isPaid };
+                });
+        } catch (error) {
+            console.error("Error fetching events:", error);
+            return [];
+        }
+    };
+
+    const handlePayNow = async (session) => {
+        try {
+            const token = localStorage.getItem("access");
+            // Optimistically open modal or show loading? 
+            // Better to fetch then open, or open with loading state. 
+            // We'll fetch then open to ensure we have the URL if possible.
+
+            const res = await fetch(`http://localhost:4040/api/payment/start/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    course_id: session.id,
+                    payment_method: "credit_card",
+                }),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setPaymentSession({ ...session, iframeUrl: data.iframe_url });
+                // Also track locally
+                localStorage.setItem("pending_session_id", session.id);
+            } else {
+                // Fallback to form if API fails
+                console.error("Payment init failed");
+                setPaymentSession(session);
+            }
+        } catch (error) {
+            console.error("Error starting payment:", error);
+            setPaymentSession(session);
+        }
+    };
 
     const handleJoin = (e) => {
         e.preventDefault();
@@ -59,7 +134,7 @@ const MySessions = () => {
                     {/* UPCOMING LIST */}
                     <div className="space-y-4">
                         <h3 className="font-bebas text-2xl text-slate-700">Upcoming Sessions</h3>
-                        {upcomingSessions.map(session => (
+                        {upcomingSessions().map(session => (
                             <div key={session.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center justify-between hover:shadow-md transition-shadow">
                                 <div className="flex items-start gap-4">
                                     <div className="bg-orange-50 p-3 rounded-lg text-[#ff8211]">
@@ -69,28 +144,90 @@ const MySessions = () => {
                                         <h4 className="font-bold text-lg text-slate-800">{session.title}</h4>
                                         <p className="text-sm text-slate-500">with {session.trainer}</p>
                                         <div className="mt-2 text-xs font-semibold bg-slate-100 inline-block px-2 py-1 rounded">
-                                            {session.time}
+                                            {new Date(session.start).toLocaleDateString('en-GB')}
+                                            <span className="mx-2 text-slate-300">|</span>
+                                            {new Date(session.start).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
                                         </div>
                                     </div>
                                 </div>
 
-                                {session.status === "Live" ? (
-                                    <button
-                                        onClick={() => navigate(`/session/${session.id}`, { state: { sessionName: session.title } })}
-                                        className="bg-green-500 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition-colors animate-pulse"
-                                    >
-                                        JOIN LIVE
-                                    </button>
-                                ) : (
-                                    <button disabled className="bg-slate-100 text-slate-400 px-6 py-2 rounded-lg font-bold text-sm cursor-not-allowed">
-                                        Wait
-                                    </button>
-                                )}
+                                {(() => {
+                                    const start = new Date(session.start);
+                                    const now = new Date();
+                                    const diffMs = start - now;
+                                    const diffHours = diffMs / (1000 * 60 * 60);
+
+                                    // Conditions
+                                    const showPay = !session.isPaid && diffHours <= 6;
+                                    const isLive = diffMs <= 0;
+
+                                    return (
+                                        <div className="flex gap-3">
+                                            {showPay && (
+                                                <button
+                                                    onClick={() => handlePayNow(session)}
+                                                    className="bg-[#ff8211] text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-[#e06900] transition-colors shadow-sm flex items-center gap-2"
+                                                >
+                                                    <span className="text-lg">💳</span> Pay Now
+                                                </button>
+                                            )}
+
+                                            {isLive ? (
+                                                <button
+                                                    onClick={() => navigate(`/session/${session.id}`, { state: { sessionName: session.title } })}
+                                                    className="bg-green-500 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-green-600 transition-colors animate-pulse"
+                                                >
+                                                    JOIN LIVE
+                                                </button>
+                                            ) : (
+                                                !showPay && (
+                                                    <button disabled className="bg-slate-100 text-slate-400 px-6 py-2 rounded-lg font-bold text-sm cursor-not-allowed">
+                                                        Wait
+                                                    </button>
+                                                )
+                                            )}
+                                        </div>
+                                    );
+                                })()}
                             </div>
                         ))}
                     </div>
 
                 </div>
+
+                {/* PAYMENT MODAL */}
+                {paymentSession && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                        <div className="relative bg-white w-full max-w-2xl rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in duration-200">
+
+                            {/* Modal Header */}
+                            <div className="sticky top-0 bg-white z-10 flex justify-between items-center p-6 border-b border-gray-100">
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-800 font-bebas">Complete Your Booking</h3>
+                                    <p className="text-sm text-slate-500">Session: {paymentSession.title}</p>
+                                </div>
+                                <button
+                                    onClick={() => setPaymentSession(null)}
+                                    className="p-2 hover:bg-slate-100 rounded-full transition-colors text-slate-500 hover:text-red-500"
+                                >
+                                    <X className="w-6 h-6" />
+                                </button>
+                            </div>
+
+                            {/* Modal Content */}
+                            <div className="p-6">
+                                {/* Payment Form */}
+                                <PaymentPage
+                                    total={paymentSession.price}
+                                    iframeUrl={paymentSession.iframeUrl}
+                                    paymentId={paymentSession.id}
+                                    course={paymentSession}
+                                    user={user}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
             <FooterDash />
         </>

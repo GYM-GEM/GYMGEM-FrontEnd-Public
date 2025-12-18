@@ -25,6 +25,7 @@ import NavTraineeDash from "../Dashboard/Traine/NavTraineDash";
 import Footer from "../Footer";
 import axiosInstance from "../../utils/axiosConfig";
 import VideoPlayer from "./VideoPlayer";
+import axios from "axios";
 
 const CourseLearn = () => {
   const { id } = useParams();
@@ -41,6 +42,12 @@ const CourseLearn = () => {
   const [reviewText, setReviewText] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
+  // Debug: Log completed sections changes
+  useEffect(() => {
+    console.log("CompletedSections changed:", Array.from(completedSections));
+  }, [completedSections]);
+
+
   // Fetch course details
   useEffect(() => {
     const fetchCourse = async () => {
@@ -48,22 +55,66 @@ const CourseLearn = () => {
         const response = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
         setCourse(response.data);
 
-        // Initialize completed sections from backend is_done property
-        const completedIds = [];
-        const lessonsToUse = response.data.lessons_details || response.data.lessons;
-        if (lessonsToUse) {
-          lessonsToUse.forEach(lesson => {
-            if (lesson.sections) {
+        // Initialize completed sections from backend
+        let completedIds = [];
+        let sectionIdType = 'number'; // Default assumption
+
+        // Detect section ID type from the first available section
+        const lessons = response.data.lessons_details || response.data.lessons;
+
+        if (lessons && lessons.length > 0) {
+          // Detect Type
+          for (const lesson of lessons) {
+            if (lesson.sections && lesson.sections.length > 0) {
+              sectionIdType = typeof lesson.sections[0].id;
+              console.log("Detected section ID type:", sectionIdType);
+              break;
+            }
+          }
+        }
+
+        // Helper to normalize ID to the detected type
+        const normalizeId = (id) => {
+          if (sectionIdType === 'string') return String(id);
+          return Number(id);
+        };
+
+        // Extract completed sections from each lesson
+        if (lessons && lessons.length > 0) {
+          lessons.forEach(lesson => {
+            // Check if lesson has completed_section_ids array
+            if (lesson.completed_section_ids && Array.isArray(lesson.completed_section_ids)) {
+              console.log(`Found completed IDs in lesson ${lesson.id || lesson.title}:`, lesson.completed_section_ids);
+              const lessonCompletedIds = lesson.completed_section_ids.map(normalizeId);
+              completedIds = [...completedIds, ...lessonCompletedIds];
+            }
+            // Fallback: Check is_done on sections if no completed_section_ids
+            else if (lesson.sections) {
               lesson.sections.forEach(section => {
                 if (section.is_done) {
-                  completedIds.push(section.id);
+                  completedIds.push(normalizeId(section.id));
                 }
               });
             }
           });
         }
-        setCompletedSections(new Set(completedIds));
-        localStorage.setItem(`course_progress_${id}`, JSON.stringify(completedIds));
+
+        // Also check root level just in case (for backward compatibility or different API structure)
+        if (response.data.completed_section_ids && Array.isArray(response.data.completed_section_ids)) {
+          console.log("Found root level completed_section_ids:", response.data.completed_section_ids);
+          const rootIds = response.data.completed_section_ids.map(normalizeId);
+          completedIds = [...completedIds, ...rootIds];
+        }
+
+        // Deduplicate IDs (backend may return duplicates across lessons or within arrays)
+        const uniqueCompletedIds = [...new Set(completedIds)];
+        console.log("Final unique completed sections:", uniqueCompletedIds);
+
+        const completedSet = new Set(uniqueCompletedIds);
+        setCompletedSections(completedSet);
+        localStorage.setItem(`course_progress_${id}`, JSON.stringify(uniqueCompletedIds));
+
+        console.log("CompletedSections state after initialization:", completedSet);
       } catch (error) {
         console.error("Failed to fetch course:", error);
       }
@@ -102,9 +153,12 @@ const CourseLearn = () => {
 
   const toggleComplete = async () => {
     if (currentSection) {
+      console.log("Toggling completion for section:", currentSection.id, "(Type:", typeof currentSection.id, ")");
+
       if (updatingSectionId === currentSection.id) return; // Prevent double clicks
 
       const isCompleted = completedSections.has(currentSection.id);
+      console.log("Is already completed?", isCompleted);
 
       // Don't allow un-completing - one-way operation only
       if (isCompleted) return;
@@ -113,6 +167,7 @@ const CourseLearn = () => {
       setUpdatingSectionId(currentSection.id);
 
       // Optimistically update UI
+      const previousState = new Set(completedSections);
       setCompletedSections((prev) => {
         const newSet = new Set(prev);
         newSet.add(currentSection.id);
@@ -122,64 +177,88 @@ const CourseLearn = () => {
 
       // Call the API to mark as completed
       try {
-        await axiosInstance.put(
-          `/api/courses/sections/${currentSection.id}/mark-as-done/`,
+        const response = await axiosInstance.post(
+          `/api/courses/progress/${currentSection.id}/mark-section-completed/`,
           {},
           { skipGlobalLoader: true }
         );
+
+        // Update with the actual completed sections from backend response
+        if (response.data && response.data.completed_section_ids) {
+          const completedIds = response.data.completed_section_ids;
+          // Deduplicate IDs (backend may return duplicates)
+          const uniqueCompletedIds = [...new Set(completedIds)];
+          setCompletedSections(new Set(uniqueCompletedIds));
+          localStorage.setItem(`course_progress_${id}`, JSON.stringify(uniqueCompletedIds));
+          console.log("Updated completed sections from backend (raw):", completedIds);
+          console.log("Unique completed sections:", uniqueCompletedIds);
+        }
       } catch (error) {
         console.error("Failed to mark section as done:", error);
         // Revert on error
-        setCompletedSections((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(currentSection.id);
-          localStorage.setItem(`course_progress_${id}`, JSON.stringify([...newSet]));
-          return newSet;
-        });
+        setCompletedSections(previousState);
+        localStorage.setItem(`course_progress_${id}`, JSON.stringify([...previousState]));
+      } finally {
+        setUpdatingSectionId(null);
       }
-
-      setUpdatingSectionId(null);
     }
   };
 
   const handleSubmitReview = async () => {
-    if (rating === 0) {
-      alert("Please select a rating");
-      return;
-    }
+    const payload = {
+      rating,
+      review: reviewText
 
-    if (!reviewText.trim()) {
-      alert("Please write a review");
-      return;
     }
-
-    setIsSubmittingReview(true);
     try {
-      await axiosInstance.post(
-        `/api/courses/courses/${id}/reviews/`,
-        {
-          rating: rating,
-          review: reviewText
-        },
-        { skipGlobalLoader: true }
-      );
-
-      // Success - close modal and reset
+      const res = await axiosInstance.post(`/api/courses/enrollments/${course.id}/review-and-complete-enrollment/`, payload)
+      console.log(res)
       setShowReviewModal(false);
       setRating(0);
       setReviewText("");
       alert("Thank you for your review!");
-
-      // Optionally refresh course data to show new review
-      const response = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
-      setCourse(response.data);
     } catch (error) {
       console.error("Failed to submit review:", error);
       alert("Failed to submit review. Please try again.");
-    } finally {
-      setIsSubmittingReview(false);
     }
-  };
+  }
+  //   if (rating === 0) {
+  //     alert("Please select a rating");
+  //     return;
+  //   }
+
+  //   if (!reviewText.trim()) {
+  //     alert("Please write a review");
+  //     return;
+  //   }
+
+  //   setIsSubmittingReview(true);
+  //   try {
+  //     await axiosInstance.post(
+  //       `/api/courses/courses/${id}/reviews/`,
+  //       {
+  //         rating: rating,
+  //         review: reviewText
+  //       },
+  //       { skipGlobalLoader: true }
+  //     );
+
+  //     // Success - close modal and reset
+  //     setShowReviewModal(false);
+  //     setRating(0);
+  //     setReviewText("");
+  //     alert("Thank you for your review!");
+
+  //     // Optionally refresh course data to show new review
+  //     const response = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
+  //     setCourse(response.data);
+  //   } catch (error) {
+  //     console.error("Failed to submit review:", error);
+  //     alert("Failed to submit review. Please try again.");
+  //   } finally {
+  //     setIsSubmittingReview(false);
+  //   }
+  // };
 
   const getContentIcon = (type) => {
     const t = type?.toLowerCase();
@@ -515,8 +594,8 @@ const CourseLearn = () => {
                           >
                             <Star
                               className={`w-10 h-10 ${star <= (hoverRating || rating)
-                                  ? 'fill-[#FF8211] text-[#FF8211]'
-                                  : 'text-gray-300'
+                                ? 'fill-[#FF8211] text-[#FF8211]'
+                                : 'text-gray-300'
                                 }`}
                             />
                           </button>

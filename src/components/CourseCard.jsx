@@ -27,6 +27,34 @@ const CourseCard = ({ course, categoryTheme }) => {
         icon: "🎓"
     };
 
+
+     const formatDuration = (seconds) => {
+    if (!seconds || seconds === 0) return "--";
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+
+    // If duration is less than 60 seconds, show only seconds
+    if (seconds < 60) {
+      return `${secs}s`;
+    }
+
+    // If duration is less than 60 minutes (3600 seconds), show minutes and seconds
+    if (seconds < 3600) {
+      if (secs > 0) {
+        return `${minutes}m ${secs}s`;
+      }
+      return `${minutes}m`;
+    }
+
+    // If duration is 60 minutes or more, show hours and minutes
+    if (minutes > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${hours}h`;
+  };
+
     return (
         <article className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${enrolled
                 ? 'border-green-500 border-2 shadow-green-200 shadow-lg hover:shadow-green-300 hover:border-green-600'
@@ -102,7 +130,7 @@ const CourseCard = ({ course, categoryTheme }) => {
                         </div>
                         <div className="flex items-center gap-1.5">
                             <Clock className="h-3.5 w-3.5 text-primary" />
-                            <span>{Math.ceil(total_duration / 3600)} Hours</span>
+                            <span>{formatDuration(total_duration)}</span>
                         </div>
                     </div>
 

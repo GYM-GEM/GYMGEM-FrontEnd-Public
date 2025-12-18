@@ -2,7 +2,7 @@ import React, { forwardRef } from 'react';
 
 const CameraCanvas = forwardRef(({ videoRef }, canvasRef) => {
   return (
-    <div className="relative w-full max-w-4xl mx-auto aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
+    <div className="relative w-full h-full bg-gray-900 rounded-2xl overflow-hidden shadow-2xl border border-gray-800">
       {/* Hidden Video Element */}
       <video
         ref={videoRef}

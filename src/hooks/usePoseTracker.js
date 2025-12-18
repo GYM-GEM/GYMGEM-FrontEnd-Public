@@ -107,14 +107,16 @@ export const usePoseTracker = (videoRef, isCameraActive, activeExerciseId) => {
              const s = 'left'; // Default left
              if (joint === 'knee') return [map[`${s}_hip`], map[`${s}_knee`], map[`${s}_ankle`]];
              if (joint === 'elbow') return [map[`${s}_shoulder`], map[`${s}_elbow`], map[`${s}_wrist`]];
+             if (joint === 'shoulder') return [map[`${s}_elbow`], map[`${s}_shoulder`], map[`${s}_hip`]];
+             if (joint === 'hip') return [map[`${s}_shoulder`], map[`${s}_hip`], map[`${s}_knee`]];
              return [map[`${s}_hip`], map[`${s}_knee`], map[`${s}_ankle`]];
         };
         const idxs = getPts(exercise.primaryJoint);
+        const lastAnglesPrev = logicState.current.lastAngles.primary;
         if (smoothed[idxs[0]] && smoothed[idxs[1]] && smoothed[idxs[2]]) {
             const ang = calculateAngle(smoothed[idxs[0]], smoothed[idxs[1]], smoothed[idxs[2]]);
-            const last = logicState.current.lastAngles.primary || ang;
+            const last = lastAnglesPrev || ang;
             if (Math.abs(ang - last) > 6) validMovement = true;
-            isDirectionValid = checkDirection(logicState.current.currentState, ang, last);
             logicState.current.lastAngles.primary = ang;
         }
 
@@ -132,7 +134,13 @@ export const usePoseTracker = (videoRef, isCameraActive, activeExerciseId) => {
         if (exercise.type === 'reps') {
             // Strict: Must move to change state, or be waiting
             if (validMovement || prevState === MOVEMENT_PHASES.WAITING) {
-                newState = updateExerciseState(prevState, valRes, exercise.type, isDirectionValid);
+                const primaryAngleName = `left_${exercise.primaryJoint}`;
+                const waitingRule = exercise.angleRules.waiting[primaryAngleName];
+                const bottomRule = exercise.angleRules.bottom[primaryAngleName];
+                const isIncreasingExpected = bottomRule.min > waitingRule.min;
+                
+                const currentIsDirectionValid = checkDirection(prevState, logicState.current.lastAngles.primary, lastAnglesPrev, isIncreasingExpected);
+                newState = updateExerciseState(prevState, valRes, exercise.type, currentIsDirectionValid);
             }
         } else {
             newState = updateExerciseState(prevState, valRes, exercise.type, true);

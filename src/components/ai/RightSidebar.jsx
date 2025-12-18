@@ -53,7 +53,7 @@ const RightSidebar = ({
       </div>
 
       {/* 2. Big Stat Card (Counter) */}
-      <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm flex flex-col items-center justify-center py-12">
+      <div className="bg-white rounded-3xl p-6 md:p-8 border border-gray-100 shadow-sm flex flex-col items-center justify-center py-8 md:py-12">
         <span className="text-gray-400 font-medium text-sm uppercase tracking-widest mb-2">
             {activeExercise?.type === 'reps' ? 'Reps Count' : 'Duration'}
         </span>

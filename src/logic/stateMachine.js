@@ -77,46 +77,22 @@ export const updateExerciseState = (currentState, validationResults, exerciseTyp
  * @param {string} primaryJoint - e.g. 'knee', 'elbow'
  * @returns {boolean}
  */
-export const checkDirection = (currentState, currentAngle, lastAngle) => {
-    // If no angle change, return true (static is effectively valid for direction check, treated as no-op elsewhere)
-    // Actually prompt says "Static poses must never progress state" -> handled by Movement Threshold.
-    // This function checks DIRECTION only.
-    
-    // We need to know if angle is increasing or decreasing.
-    // For Squat: DOWN = Angle Decreasing (180 -> 90). UP = Increasing (90 -> 180).
-    // For Pushup: DOWN = Angle Decreasing. UP = Increasing.
-    // For Jumping Jack: BOTTOM (Arms Up) = Angle Increasing (0 -> 180). 
-    // Wait. "Bottom" is the target. For Jack, "Bottom" is actually 180 deg?
-    // Let's standardize: 
-    // "Eccentric" (Start -> Target)
-    // "Concentric" (Target -> Start)
-    
-    // Most exercises: Start ~180, Target ~90. (Squat, Pushup, Lunge, Press)
-    // Jacks: Start ~0, Target ~180.
-    
-    // Assuming standard Squat-like behavior (Start High -> Target Low)
-    // DOWN = Decreasing
-    // UP = Increasing
-    
-    // Exception for exercises where Target is Higher than Start? 
-    // We should probably rely on the Exercise Config to define "Concentric Direction"?
-    // For now, let's implement the standard logic and assume standard exercises.
-    
+export const checkDirection = (currentState, currentAngle, lastAngle, isIncreasingExpected = false) => {
     const delta = currentAngle - lastAngle; // + = Increasing, - = Decreasing
-    
+    if (Math.abs(delta) < 0.1) return true; // Static is valid for direction check (neutral)
+
+    const isDecreasing = delta < 0;
+    const isIncreasing = delta > 0;
+
     switch (currentState) {
         case MOVEMENT_PHASES.WAITING:
-            // Can go DOWN (Decrease)
-            return delta <= 0; 
         case MOVEMENT_PHASES.DOWN:
-             // MUST be Decreasing
-             return delta <= 0;
+             // Expected direction for eccentric phase
+             return isIncreasingExpected ? isIncreasing : isDecreasing;
         case MOVEMENT_PHASES.BOTTOM:
-             // Can go UP (Increase)
-             return delta >= 0;
         case MOVEMENT_PHASES.UP:
-             // MUST be Increasing
-             return delta >= 0;
+             // Expected direction for concentric phase
+             return isIncreasingExpected ? isDecreasing : isIncreasing;
         default:
              return true;
     }

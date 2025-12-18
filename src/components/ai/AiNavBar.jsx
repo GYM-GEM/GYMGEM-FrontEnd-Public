@@ -275,7 +275,7 @@ function AiNavBar() {
             >
               <div className="px-4 py-6 space-y-4">
                 <div className="space-y-1">
-                  <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Menu</p>
+                  <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">AI Menu</p>
 
                   <NavLink
                     to="/"
@@ -289,7 +289,33 @@ function AiNavBar() {
                     Home
                   </NavLink>
 
-                  {/* Mobile Training Dropdown */}
+                  <NavLink
+                    to="/ai-trainer"
+                    onClick={() => setIsOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-all ${isActive
+                        ? "bg-[#ff8211] text-white shadow-md shadow-orange-500/20"
+                        : "text-gray-600 hover:bg-orange-50 hover:text-[#ff8211]"}`
+                    }
+                  >
+                    <FaGem size={18} />
+                    AI Coach
+                  </NavLink>
+
+                  <NavLink
+                    to="/workout-history"
+                    onClick={() => setIsOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
+                        ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
+                    }
+                  >
+                    <Clock size={18} />
+                    History
+                  </NavLink>
+
+                  {/* Mobile Training Dropdown (Optional but kept for consistency) */}
                   {!isTrainer() && (
                     <div className="space-y-1">
                       <button
@@ -328,11 +354,6 @@ function AiNavBar() {
                       </AnimatePresence>
                     </div>
                   )}
-
-
-
-
-
                 </div>
 
                 {/* Mobile Auth/User Section */}

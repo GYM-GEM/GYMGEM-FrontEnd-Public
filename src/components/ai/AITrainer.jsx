@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import CameraCanvas from './CameraCanvas';
 import RightSidebar from './RightSidebar';
 import SessionSummary from './SessionSummary';
@@ -6,10 +6,17 @@ import { useWebcam } from '../../hooks/useWebcam';
 import { usePoseTracker } from '../../hooks/usePoseTracker';
 import { EXERCISES } from '../../config/exercises'; 
 import FooterDash from '../Dashboard/FooterDash';
+import AiNavBar from './AiNavBar';
+import StatusOverlay from './StatusOverlay';
 
 const AITrainer = () => {
   // 1. User State & Persistence (Authenticated User)
   const [username, setUsername] = useState('Guest');
+  
+  // Refs for tracking changes and avoiding duplicate speech
+  const lastRepRef = useRef(0);
+  const lastFeedbackRef = useRef('');
+  const voiceEnabled = useRef(true); // Can be linked to a UI toggle later
   
   useEffect(() => {
       const storedUser = localStorage.getItem('user');
@@ -83,15 +90,52 @@ const AITrainer = () => {
   const handleStart = () => {
     setSessionFinished(false);
     setLastSessionStats(null);
+    lastRepRef.current = 0;
+    lastFeedbackRef.current = 'Ready';
     startCamera();
   };
 
+  // Voice Feedback Logic
+  useEffect(() => {
+    if (!isCameraActive || !voiceEnabled.current) return;
+
+    const speak = (text) => {
+      // Create a new utterance
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.2; // Slightly faster for real-time response
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+
+      // Cancel any ongoing speech to prioritize the most recent (e.g., immediate feedback)
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utterance);
+    };
+
+    // 1. Speak Rep Count
+    if (trackerState.stats.reps > 0 && trackerState.stats.reps !== lastRepRef.current) {
+        speak(trackerState.stats.reps.toString());
+        lastRepRef.current = trackerState.stats.reps;
+    }
+
+    // 2. Speak Feedback (e.g., "Go Lower", "Good job!")
+    const currentFB = trackerState.feedback;
+    if (currentFB && currentFB !== lastFeedbackRef.current) {
+      // Don't speak generic "Ready" or "Waiting" to avoid noise
+      const genericMessages = ['Ready', 'Waiting for person...', 'Ready!'];
+      if (!genericMessages.includes(currentFB)) {
+          speak(currentFB);
+      }
+      lastFeedbackRef.current = currentFB;
+    }
+  }, [trackerState.stats.reps, trackerState.feedback, isCameraActive]);
+
   return (
     <>
+    <AiNavBar />
     <div className="w-full max-w-7xl mx-auto px-4 py-6">
       
       {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-140px)] min-h-[600px]">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:h-[calc(100vh-140px)] lg:min-h-[600px]">
         
         {/* Left Column: Camera Feed (Span 2) */}
         <div className="lg:col-span-2 flex flex-col gap-4">
@@ -115,22 +159,40 @@ const AITrainer = () => {
   `}
 >
   <CameraCanvas videoRef={videoRef} ref={canvasRef} />
-{/* camera off */}
+  
+  {/* Status Overlay - Visible when camera is active */}
+  {isCameraActive && (
+    <StatusOverlay 
+      stats={trackerState.stats}
+      feedback={trackerState.feedback}
+      status={trackerState.status}
+      countdown={trackerState.countdown}
+      exerciseType={activeExercise.type}
+    />
+  )}
+
+  {/* Action Button Overlays - Shown when camera is off */}
   {!isCameraActive && (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-gray-400 bg-white">
-      <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-xl">
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-gray-400 bg-white/95 backdrop-blur-sm p-6 z-30">
+      <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-2xl animate-bounce">
         📷
       </div>
-      <p className="text-lg text-gray-600">الكاميرا متوقفة</p>
-      <p className="text-lg text-gray-600">اضغط Start New Session للبدء</p>
-    </div>
-  )}
-{/* countdown */}
-  {isCameraActive && trackerState.countdown > 0 && (
-    <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50">
-      <span className="text-8xl font-extrabold text-[#ff8211]">
-        {trackerState.countdown}
-      </span>
+      <div className="text-center space-y-1">
+        <p className="text-xl font-bold text-gray-800">
+          {sessionFinished ? "Great Session!" : "Ready to train?"}
+        </p>
+        <p className="text-gray-500">
+          {sessionFinished 
+            ? `You completed ${lastSessionStats?.reps || 0} reps. Start again?` 
+            : "Tap the button below to start"}
+        </p>
+      </div>
+      
+      {error && (
+        <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">
+          ⚠️ {error}
+        </div>
+      )}
     </div>
   )}
 </div>
@@ -141,10 +203,10 @@ const AITrainer = () => {
     onClick={isCameraActive ? handleStop : handleStart}
     className={`w-full py-4 rounded-2xl text-lg font-bold
       transition-all duration-300
-      shadow-xl
+      shadow-xl active:scale-95
       ${
         isCameraActive
-          ? 'bg-[#F2310F] hover:bg-[#e6760f] text-white '
+          ? 'bg-[#F2310F] hover:bg-[#d12a0d] text-white '
           : 'bg-[#ff8211] hover:bg-[#e6760f] text-white '
       }
     `}

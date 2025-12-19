@@ -173,26 +173,43 @@ const AITrainer = () => {
 
   {/* Action Button Overlays - Shown when camera is off */}
   {!isCameraActive && (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-gray-400 bg-white/95 backdrop-blur-sm p-6 z-30">
-      <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center text-2xl animate-bounce">
-        📷
-      </div>
-      <div className="text-center space-y-1">
-        <p className="text-xl font-bold text-gray-800">
-          {sessionFinished ? "Great Session!" : "Ready to train?"}
-        </p>
-        <p className="text-gray-500">
-          {sessionFinished 
-            ? `You completed ${lastSessionStats?.reps || 0} reps. Start again?` 
-            : "Tap the button below to start"}
-        </p>
-      </div>
-      
-      {error && (
-        <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100">
-          ⚠️ {error}
+    <div className="absolute inset-0 bg-white z-30 flex flex-col">
+      {/* Tutorial / Preview Section */}
+      <div className="flex-1 relative overflow-hidden group">
+        <img 
+          src={activeExercise.gifUrl} 
+          alt={activeExercise.name} 
+          className="w-full h-full object-contain bg-gray-50"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+        
+        {/* Play Icon Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 backdrop-blur-[2px]">
+           <div className="w-20 h-20 rounded-full bg-white/90 flex items-center justify-center shadow-2xl scale-90 group-hover:scale-100 transition-transform duration-300">
+              <div className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-[#ff8211] border-b-[12px] border-b-transparent ml-2"></div>
+           </div>
         </div>
-      )}
+      </div>
+
+      {/* Info Bar */}
+      <div className="p-6 bg-white border-t border-gray-100 flex items-center justify-between">
+        <div className="space-y-1">
+          <p className="text-2xl font-black text-gray-900 uppercase tracking-tighter">
+            {sessionFinished ? "Great Session!" : activeExercise.name}
+          </p>
+          <p className="text-gray-500 font-medium">
+            {sessionFinished 
+              ? `You completed ${lastSessionStats?.reps || 0} reps. Start again?` 
+              : `Tutorial: Follow this form to count your ${activeExercise.id}s`}
+          </p>
+        </div>
+        
+        {error && (
+          <div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-100 animate-pulse">
+            ⚠️ {error}
+          </div>
+        )}
+      </div>
     </div>
   )}
 </div>
@@ -219,7 +236,7 @@ const AITrainer = () => {
         </div>
 
         {/* Right Column: Sidebar (Span 1) */}
-        <div className="lg:col-span-1 h-full">
+        <div className="lg:col-span-1 h-full overflow-y-auto pr-1 custom-scrollbar">
             <RightSidebar 
                 activeExerciseId={activeExerciseId}
                 onSelectExercise={setActiveExerciseId}

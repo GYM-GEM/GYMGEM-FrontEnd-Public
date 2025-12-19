@@ -23,7 +23,11 @@ export const usePoseTracker = (videoRef, isCameraActive, activeExerciseId) => {
     isCountingDown: false,
     startTime: 0,
     cooldownFrames: 0,
-    lastAngles: {} // Store last angles for direction/movement check
+    lastAngles: {},
+    // Smart Partner Additions
+    calibratedROM: null,
+    phaseStartTime: 0,
+    isCalibrating: false
   });
 
   const [trackerState, setTrackerState] = useState({
@@ -31,7 +35,8 @@ export const usePoseTracker = (videoRef, isCameraActive, activeExerciseId) => {
     feedback: 'Ready',
     status: 'neutral',
     countdown: null,
-    isLoading: true
+    isLoading: true,
+    tempo: 'Normal' // 'Fast', 'Slow', 'Normal'
   });
 
   const loop = useCallback(async () => {
@@ -128,11 +133,37 @@ export const usePoseTracker = (videoRef, isCameraActive, activeExerciseId) => {
             hold: exercise.type==='hold' ? validatePosture(smoothed, exercise, 'hold') : {}
         };
 
+        // SMART PARTNER: 1. Dynamic Calibration Phase
+        if (logicState.current.calibratedROM === null && !logicState.current.isLoading) {
+            if (!logicState.current.isCalibrating) {
+                logicState.current.isCalibrating = true;
+                logicState.current.startTime = now;
+            }
+            const elapsed = (now - logicState.current.startTime) / 1000;
+            if (elapsed < 3) {
+                const currentAng = logicState.current.lastAngles.primary || 180;
+                // Track deepest point during calibration
+                if (logicState.current.maxROM === undefined || 
+                    (exercise.id === 'jumping_jack' ? currentAng > logicState.current.maxROM : currentAng < logicState.current.maxROM)) {
+                    logicState.current.maxROM = currentAng;
+                }
+                setTrackerState(prev => ({...prev, feedback: "Calibration: Go to Max Depth", status: 'neutral'}));
+                return;
+            } else {
+                logicState.current.calibratedROM = logicState.current.maxROM;
+                setTrackerState(prev => ({...prev, feedback: "Calibration Done!", status: 'correct'}));
+            }
+        }
+
+        // Logic for Dynamic Targets
+        const dynamicBottomMin = logicState.current.calibratedROM ? Math.min(logicState.current.calibratedROM + 10, 110) : exercise.angleRules.bottom[`left_${exercise.primaryJoint}`].min;
+
         // State Update
         const prevState = logicState.current.currentState;
         let newState = prevState;
+        let currentTempoFeedback = 'Normal';
+
         if (exercise.type === 'reps') {
-            // Strict: Must move to change state, or be waiting
             if (validMovement || prevState === MOVEMENT_PHASES.WAITING) {
                 const primaryAngleName = `left_${exercise.primaryJoint}`;
                 const waitingRule = exercise.angleRules.waiting[primaryAngleName];
@@ -141,6 +172,23 @@ export const usePoseTracker = (videoRef, isCameraActive, activeExerciseId) => {
                 
                 const currentIsDirectionValid = checkDirection(prevState, logicState.current.lastAngles.primary, lastAnglesPrev, isIncreasingExpected);
                 newState = updateExerciseState(prevState, valRes, exercise.type, currentIsDirectionValid);
+                
+                // SMART PARTNER: 3. Tempo Tracking
+                if (newState !== prevState) {
+                    const phaseDuration = now - logicState.current.phaseStartTime;
+                    
+                    // If moving from WAITING to DOWN too fast
+                    if (prevState === MOVEMENT_PHASES.WAITING && newState === MOVEMENT_PHASES.DOWN) {
+                        logicState.current.phaseStartTime = now;
+                    }
+                    
+                    if (prevState === MOVEMENT_PHASES.DOWN && newState === MOVEMENT_PHASES.BOTTOM) {
+                        if (phaseDuration < 800) { // Less than 0.8s for eccentric phase is usually "too fast"
+                            currentTempoFeedback = 'Too Fast';
+                        }
+                    }
+                    logicState.current.phaseStartTime = now;
+                }
             }
         } else {
             newState = updateExerciseState(prevState, valRes, exercise.type, true);
@@ -182,12 +230,16 @@ export const usePoseTracker = (videoRef, isCameraActive, activeExerciseId) => {
              if (newState === MOVEMENT_PHASES.BOTTOM) fb = "Push Up";
              if (stats.didCount) fb = "Good job!";
              
+             // Prioritize Tempo/Calibration feedback
+             const finalFB = currentTempoFeedback !== 'Normal' ? `Slow down! ${fb}` : fb;
+
              setTrackerState({
                  stats: logicState.current.stats,
-                 feedback: fb,
-                 status: stats.didCount ? 'correct' : 'neutral',
+                 feedback: finalFB,
+                 status: stats.didCount ? 'correct' : (currentTempoFeedback !== 'Normal' ? 'warning' : 'neutral'),
                  countdown: 0,
-                 isLoading: false
+                 isLoading: false,
+                 tempo: currentTempoFeedback
              });
              logicState.current.lastProcessedTime = now;
         }
@@ -209,9 +261,12 @@ export const usePoseTracker = (videoRef, isCameraActive, activeExerciseId) => {
              isCountingDown: false,
              startTime: 0,
              cooldownFrames: 0,
-             lastAngles: {}
+             lastAngles: {},
+             calibratedROM: null,
+             phaseStartTime: 0,
+             isCalibrating: false
          };
-         setTrackerState(s => ({...s, countdown: 3, stats: {reps:0, holdTime:0}}));
+         setTrackerState(s => ({...s, countdown: 3, stats: {reps:0, holdTime:0}, tempo: 'Normal'}));
          requestRef.current = requestAnimationFrame(loop);
      }
      return () => {

@@ -241,6 +241,7 @@
 // =========================
 export const MOVEMENT_PHASES = {
   WAITING: 'WAITING',   // بانتظار بدء الحركة
+  CALIBRATING: 'CALIBRATING', // مرحلة المعايرة
   DOWN: 'DOWN',         // في مرحلة النزول
   BOTTOM: 'BOTTOM',     // وصل لأقصى نقطة في التمرين
   UP: 'UP',             // في مرحلة الصعود
@@ -252,12 +253,11 @@ export const MOVEMENT_PHASES = {
 // EXERCISES CONFIGURATION
 // =========================
 export const EXERCISES = {
-  // 1. القرفصاء - SQUAT
   squat: {
     id: 'squat',
     name: 'Squat',
     type: 'reps',
-    gifUrl: '/assets/gifs/squat.gif', 
+    gifUrl: '/assets/exercises/squat.gif', 
     minConfidence: 0.65,
     joints: ['left_hip', 'left_knee', 'left_ankle', 'right_hip', 'right_knee', 'right_ankle'],
     primaryJoint: 'knee',
@@ -274,12 +274,11 @@ export const EXERCISES = {
     }
   },
 
-  // 2. تمرين الضغط - PUSH UP
   pushup: {
     id: 'pushup',
     name: 'Push Up',
     type: 'reps',
-    gifUrl: '/assets/gifs/pushup.gif',
+    gifUrl: '/assets/exercises/pushup.gif',
     minConfidence: 0.6,
     joints: ['left_shoulder', 'left_elbow', 'left_wrist', 'right_shoulder', 'right_elbow', 'right_wrist'],
     primaryJoint: 'elbow',
@@ -296,12 +295,11 @@ export const EXERCISES = {
     }
   },
 
-  // 3. تمرين الطعن - LUNGE
   lunge: {
     id: 'lunge',
     name: 'Lunge',
     type: 'reps',
-    gifUrl: '/assets/gifs/lunge.gif',
+    gifUrl: '/assets/exercises/lunge.gif',
     minConfidence: 0.65,
     joints: ['left_hip', 'left_knee', 'left_ankle', 'right_hip', 'right_knee', 'right_ankle'],
     primaryJoint: 'knee',
@@ -318,12 +316,11 @@ export const EXERCISES = {
     }
   },
 
-  // 4. قفز جاك - JUMPING JACK
   jumping_jack: {
     id: 'jumping_jack',
     name: 'Jumping Jack',
     type: 'reps',
-    gifUrl: '/assets/gifs/jumping-jack.gif',
+    gifUrl: '/assets/exercises/jumping-jack.gif',
     minConfidence: 0.65,
     joints: ['left_shoulder', 'right_shoulder'],
     primaryJoint: 'shoulder',
@@ -340,12 +337,11 @@ export const EXERCISES = {
     }
   },
 
-  // 5. ضغط الأكتاف - SHOULDER PRESS
   shoulder_press: {
     id: 'shoulder_press',
     name: 'Shoulder Press',
     type: 'reps',
-    gifUrl: '/assets/gifs/shoulder-press.gif',
+    gifUrl: '/assets/exercises/shoulder-press.gif',
     minConfidence: 0.65,
     joints: ['left_elbow', 'right_elbow'],
     primaryJoint: 'elbow',
@@ -362,12 +358,11 @@ export const EXERCISES = {
     }
   },
 
-  // 6. تمرين البلانك - PLANK (Hold)
   plank: {
     id: 'plank',
     name: 'Plank',
     type: 'hold',
-    gifUrl: '/assets/gifs/plank.gif',
+    gifUrl: '/assets/exercises/plank.jfif',
     minConfidence: 0.6,
     joints: ['left_shoulder', 'left_hip', 'left_knee'],
     angleRules: {
@@ -389,7 +384,7 @@ export const EXERCISES = {
     id: 'wall_sit',
     name: 'Wall Sit',
     type: 'hold',
-    gifUrl: '/assets/gifs/wall-sit.gif',
+    gifUrl: '/assets/exercises/wall-sit.jfif',
     minConfidence: 0.6,
     joints: ['left_hip', 'left_knee'],
     angleRules: {

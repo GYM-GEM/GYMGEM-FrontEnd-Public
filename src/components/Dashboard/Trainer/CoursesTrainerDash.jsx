@@ -1,8 +1,5 @@
 import { Link } from "react-router-dom";
 import testimg from "../../../assets/cardCo1.png";
-import testimg2 from "../../../assets/Sports Nutrition for Weight Loss.jpg";
-import testimg3 from "../../../assets/Fat Burning Cardio Workouts.jpg";
-import testimg4 from "../../../assets/Muscle Building.jpg";
 import { v4 as uuidv4 } from "uuid";
 import { IoIosTrash } from "react-icons/io";
 import { MdOutlineEdit } from "react-icons/md";
@@ -13,48 +10,7 @@ import { getCategoryName } from "../../../utils/categoryMapping";
 import axiosInstance from "../../../utils/axiosConfig";
 import NavBarDash from "./NavBarDash.jsx";
 import FooterDash from "../FooterDash.jsx";
-const initialRows = [
-  {
-    id: 1,
-    title: "30-Day Full Body Toning Challenge",
-    client: "580",
-    status: "Published",
-    category: "Strength Training",
-    img: testimg,
-  },
-  {
-    id: 2,
-    title: "Muscle Building Basics for Beginners",
-    client: "315",
-    status: "Published",
-    category: "Bodybuilding",
-    img: testimg4,
-  },
-  {
-    id: 3,
-    title: "Fat Burning Cardio Workouts",
-    client: "920",
-    status: "Published",
-    category: "Cardio",
-    img: testimg3,
-  },
-  {
-    id: 4,
-    title: "Morning Yoga and Flexibility Flow",
-    client: "155",
-    status: "Draft",
-    category: "Flexibility & Mobility",
-    img: testimg,
-  },
-  {
-    id: 5,
-    title: "Sports Nutrition for Weight Loss",
-    client: "450",
-    status: "Published",
-    category: "Nutrition",
-    img: testimg2,
-  },
-];
+
 const CoursesTrainerDash = () => {
   const [filters, setFilters] = useState({
     category: "All",
@@ -63,7 +19,7 @@ const CoursesTrainerDash = () => {
   });
   const [query, setQuery] = useState("");
   // stateful rows so we can edit/delete
-  const savedRows = JSON.parse(localStorage.getItem("courses")) || initialRows;
+  const savedRows = JSON.parse(localStorage.getItem("courses")) || [];
   const [rows, setRows] = useState(savedRows);
 
   // pagination

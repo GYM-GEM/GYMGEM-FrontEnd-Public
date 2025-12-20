@@ -15,10 +15,12 @@ import {
   Clock,
   GraduationCap,
   Loader2,
+  X,
 } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CourseCard from "./CourseCard";
+import { useToast } from "../context/ToastContext";
 
 const PublicTrainerProfile = () => {
   const { id } = useParams();
@@ -52,63 +54,23 @@ const PublicTrainerProfile = () => {
   const next7Days = getNext7Days();
   const [activeDayIndex, setActiveDayIndex] = useState(0);
 
-  // Fetch Trainer's Calendar Events from LocalStorage
-  // NOTE: In a real app, this would be an API call. 
-  // ensuring we are on the same machine/browser for the demo to work.
-  useEffect(() => {
-    if (id) {
-      try {
-        const specificKey = `wc_events_16`;
-        console.log(`PublicTrainerProfile: Trying specific key: ${specificKey}`);
-
-        let savedEvents = localStorage.getItem(specificKey);
-
-        // Fallback for debugging/legacy
-        if (!savedEvents) {
-          console.log(`PublicTrainerProfile: Specific key not found. Trying fallback: wc_events_v1`);
-          savedEvents = localStorage.getItem("wc_events_v1");
-        }
-
-        console.log("PublicTrainerProfile: savedEvents raw:", savedEvents);
-
-        if (savedEvents) {
-          setAvailableEvents(JSON.parse(savedEvents));
-        } else {
-          setAvailableEvents([]);
-        }
-      } catch (e) {
-        console.error("Failed to load trainer schedule", e);
-      }
-    }
-  }, [id]);
-
   // Derive slots for the currently selected day
   const getCurrentSlots = () => {
     if (!availableEvents.length) return [];
 
     const selectedDayDate = next7Days[activeDayIndex].fullDate;
-    const startOfDay = new Date(selectedDayDate);
-    startOfDay.setHours(0, 0, 0, 0);
-
     // Use local date string for comparison (YYYY-MM-DD)
-    const targetDateStr = next7Days[activeDayIndex].fullDate.toLocaleDateString('en-CA');
-
-    // Debug Filter
-    console.log("Filtering for Date (Local String):", targetDateStr);
+    const targetDateStr = selectedDayDate.toLocaleDateString('en-CA');
 
     return availableEvents
       .filter(ev => {
         if (!ev.start) return false;
         const eventStart = new Date(ev.start);
         const eventDateStr = eventStart.toLocaleDateString('en-CA');
-
-        const match = eventDateStr === targetDateStr;
-        // console.log(`Checking Event: ${ev.title} (${eventDateStr}) vs ${targetDateStr} => ${match}`);
-        return match;
+        return eventDateStr === targetDateStr;
       })
       .sort((a, b) => new Date(a.start) - new Date(b.start))
       .map(ev => {
-        // Format time: "02:00 PM"
         return {
           id: ev.id,
           time: new Date(ev.start).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
@@ -119,73 +81,57 @@ const PublicTrainerProfile = () => {
 
   const currentSlots = getCurrentSlots();
   const [selectedSlotId, setSelectedSlotId] = useState(null);
-
   const [user] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
+  const { showToast } = useToast();
+
+  // Booking Modal State
+  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+  const [bookingForm, setBookingForm] = useState({ title: "", description: "" });
+  const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
+
 
   const handleConfirmBooking = () => {
     if (!selectedSlotId) {
-      alert("Please select a time slot first.");
+      showToast("Please select a time slot.", { type: "info" });
       return;
     }
 
-    if (!user || !user.id) {
-      alert("You must be logged in to book a session.");
+    // Check for user existence
+    if (!user || (!user.id && !user.user_id)) {
+      showToast("Please log in to book a session.", { type: "error" });
       return;
     }
 
+    setIsBookingModalOpen(true);
+  };
+
+  const submitBooking = async () => {
+    if (!bookingForm.title.trim() || !bookingForm.description.trim()) {
+      showToast("Please fill in all fields.", { type: "error" });
+      return;
+    }
+
+    setIsSubmittingBooking(true);
     try {
-      const specificKey = `wc_events_16`; // Or fallback to 'wc_events_16' as user hardcoded
-      const savedEventsStr = localStorage.getItem(specificKey) || localStorage.getItem("wc_events_v1");
+      const payload = {
+        trainer_id: id,
+        time_slot_id: selectedSlotId,
+        session_title: bookingForm.title,
+        description: bookingForm.description
+      };
 
-      if (!savedEventsStr) return;
+      await axiosInstance.post('/api/interactive-sessions/request/', payload);
 
-      let events = JSON.parse(savedEventsStr);
-      let bookedEvent = null;
-
-      // Find and update event for TRAINER
-      const updatedEvents = events.map(ev => {
-        if (ev.id === selectedSlotId) {
-          bookedEvent = { ...ev }; // Copy for Trainee
-          return {
-            ...ev,
-            title: `Session: ${user.username || "Trainee"}`, // Trainer sees Trainee Name
-            status: "pending",
-            color: "#F59E0B", // Amber for pending
-            traineeId: user.id,
-            traineeName: user.username || "Trainee"
-          };
-        }
-        return ev;
-      });
-
-      // Save to TRAINER storage
-      localStorage.setItem(specificKey, JSON.stringify(updatedEvents));
-
-      // Save to TRAINEE storage
-      if (bookedEvent) {
-        const traineeKey = `trainee_bookings_${user.id}`;
-        const traineeEvents = JSON.parse(localStorage.getItem(traineeKey) || "[]");
-
-        const traineeVersion = {
-          ...bookedEvent,
-          title: `Session with ${profileData?.profile?.name || "Trainer"}`, // Trainee sees Trainer Name
-          status: "pending", // Pending initially
-          color: "#F59E0B",
-          trainerId: id
-        };
-
-        traineeEvents.push(traineeVersion);
-        localStorage.setItem(traineeKey, JSON.stringify(traineeEvents));
-      }
-
-      // Update local state to reflect change
-      setAvailableEvents(updatedEvents);
+      showToast("Booking request sent successfully!", { type: "success" });
+      setIsBookingModalOpen(false);
+      setBookingForm({ title: "", description: "" });
       setSelectedSlotId(null);
-      alert("Booking request sent! Check your My Sessions page.");
-
-    } catch (e) {
-      console.error("Booking failed", e);
-      alert("Failed to book session.");
+      // Optionally refresh slots here if needed
+    } catch (error) {
+      console.error("Booking error:", error);
+      showToast("Failed to book session. Please try again.", { type: "error" });
+    } finally {
+      setIsSubmittingBooking(false);
     }
   };
 
@@ -195,7 +141,6 @@ const PublicTrainerProfile = () => {
       try {
         const response = await axiosInstance.get('/api/utils/categories');
         setCategories(response.data.results);
-        console.log("categories:", response.data.results);
       } catch (error) {
         console.log("Failed to load categories");
       }
@@ -212,6 +157,20 @@ const PublicTrainerProfile = () => {
         // Map API response to component state structure
         const apiData = response.data;
         const trainer = apiData.trainer;
+
+        // Map slots
+        if (apiData.calendar_slots) {
+          const events = apiData.calendar_slots.map(slot => ({
+            id: slot.pk,
+            start: slot.slot_start_time,
+            end: slot.slot_end_time,
+            status: slot.is_available ? 'available' : 'booked',
+            is_available: slot.is_available,
+            title: slot.is_available ? "Available" : "Booked",
+            color: "#FF8211"
+          }));
+          setAvailableEvents(events);
+        }
 
         // This is the structure expected by the UI populated from the API
         setProfileData({
@@ -652,6 +611,70 @@ const PublicTrainerProfile = () => {
           </div>
         </div>
         <Footer />
+
+        {/* Booking Modal */}
+        {isBookingModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+              <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 className="font-bold text-lg text-gray-900">Request Session</h3>
+                <button
+                  onClick={() => setIsBookingModalOpen(false)}
+                  className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Session Title</label>
+                  <input
+                    type="text"
+                    value={bookingForm.title}
+                    onChange={(e) => setBookingForm({ ...bookingForm, title: e.target.value })}
+                    placeholder="e.g. Weekly Check-in"
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF8211] focus:border-transparent outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description / Goal</label>
+                  <textarea
+                    value={bookingForm.description}
+                    onChange={(e) => setBookingForm({ ...bookingForm, description: e.target.value })}
+                    placeholder="Briefly describe what you want to cover..."
+                    rows={4}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF8211] focus:border-transparent outline-none transition-all resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+                <button
+                  onClick={() => setIsBookingModalOpen(false)}
+                  className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                  disabled={isSubmittingBooking}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submitBooking}
+                  disabled={isSubmittingBooking}
+                  className="px-6 py-2 bg-[#FF8211] text-white font-bold rounded-lg shadow-md hover:bg-[#e67300] active:scale-95 transition-all flex items-center gap-2"
+                >
+                  {isSubmittingBooking ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Sending...
+                    </>
+                  ) : (
+                    "Confirm Booking"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

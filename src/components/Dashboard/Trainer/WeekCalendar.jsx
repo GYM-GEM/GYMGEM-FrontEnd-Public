@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Calculator, Calendar as CalendarIcon, Clock, X, Trash2, Edit2, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calculator, Calendar as CalendarIcon, Clock, X, Trash2, Edit2, Plus, Loader2 } from "lucide-react";
+import axiosInstance from "../../../utils/axiosConfig";
+import { useToast } from "../../../context/ToastContext";
 
 export default function WeekCalendar() {
     // Helper: start week on Monday
+    const { showToast } = useToast();
     const startOfWeek = (date) => {
         const d = new Date(date);
         const day = (d.getDay() + 6) % 7; // Monday = 0
@@ -36,33 +39,31 @@ export default function WeekCalendar() {
     }, []);
 
     const [user] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
-    // Robust ID check
-    const userId = user?.id || user?.pk || user?.user_id || user?._id;
-    const storageKey = userId ? `wc_events_${userId}` : "wc_events_v1";
-
-    useEffect(() => {
-        console.log("WeekCalendar: Using storage key:", storageKey);
-    }, [storageKey]);
-
     const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
-    const [events, setEvents] = useState(() => {
-        try {
-            const saved = localStorage.getItem(storageKey);
-            return saved ? JSON.parse(saved) : [];
-        } catch (e) {
-            return [];
-        }
-    });
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(false);
 
-    const [modal, setModal] = useState({ open: false, date: null, time: null });
-    const [form, setForm] = useState({ title: "", duration: 60, color: "#FF8211" }); // Default to brand orange
-    const [editingId, setEditingId] = useState(null);
-
+    // Fetch slots on mount
     useEffect(() => {
-        if (storageKey) {
-            localStorage.setItem(storageKey, JSON.stringify(events));
-        }
-    }, [events, storageKey]);
+        const fetchSlots = async () => {
+            try {
+                const response = await axiosInstance.get('/api/trainers/calendar-slots/');
+                const fetchedEvents = response.data.map(slot => ({
+                    id: slot.pk || slot.id,
+                    title: slot.is_available ? "Available Slot" : "Booked",
+                    start: slot.slot_start_time,
+                    end: slot.slot_end_time,
+                    color: slot.is_available ? "#FF8211" : "#22c55e", // Orange for available, Green for booked
+                    is_available: slot.is_available
+                }));
+                setEvents(fetchedEvents);
+            } catch (error) {
+                console.error("Failed to fetch slots:", error);
+            }
+        };
+
+        fetchSlots();
+    }, []);
 
     const days = useMemo(() => {
         const d = [];
@@ -114,63 +115,70 @@ export default function WeekCalendar() {
         return date;
     };
 
-    const toInputDate = (d) => {
-        return d.toISOString().slice(0, 10);
-    };
+    const addEventDirectly = async (dayDate, timeStr) => {
+        const start = parseDateTime(dayDate, timeStr);
+        // Optimistic UI update or wait for verified response? User asked for "buffer until response return".
+        // Use a temp loading state or just showing a spinner.
 
-    const openCreateModal = (dayDate, timeStr) => {
-        // Convert display time back to 24h for input if needed, or keeping it as is for parsing logic
-        // For standard HTML input type="time", we need HH:MM in 24h format
-        // But our timeStr from grid is now "6:00 AM"
+        // Let's prevent double clicking
+        if (loading) return;
 
-        let initialTime = "";
-        if (timeStr.includes('M')) {
-            const d = parseDateTime(dayDate, timeStr);
-            initialTime = d.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' });
-        } else {
-            initialTime = timeStr;
-        }
+        try {
+            // Provide visual feedback (maybe a temporary loading event or global loading)
+            // For row-level feedback, we might just block interaction.
+            // Let's modify the UI to show a "Adding..." slot temporarily or just wait if it's fast.
+            // Given the prompt "add a buffer untill the response return", I'll add a temporary "saving" event.
 
-        setModal({ open: true, date: new Date(dayDate), time: initialTime });
-        setForm({ title: "", duration: 60, color: "#FF8211" });
-        setEditingId(null);
-    };
-
-    const openEditModal = (ev, e) => {
-        e.stopPropagation();
-        const s = new Date(ev.start);
-        setModal({ open: true, date: s, time: `${pad(s.getHours())}:${pad(s.getMinutes())}` });
-        setForm({ title: ev.title, duration: Math.max(30, Math.round((new Date(ev.end) - s) / 60000)), color: ev.color });
-        setEditingId(ev.id);
-    };
-
-    const saveEvent = () => {
-        if (!modal.date || !modal.time) return;
-        const start = parseDateTime(modal.date, modal.time); // modal.time is 24h from input
-        const end = new Date(start.getTime() + form.duration * 60000);
-
-        if (editingId) {
-            setEvents((s) => s.map((ev) => (ev.id === editingId ? { ...ev, title: form.title || "Untitled", start: start.toISOString(), end: end.toISOString(), color: form.color } : ev)));
-        } else {
-            const newEvent = {
-                id: Date.now() + Math.random(),
-                title: form.title || "Untitled",
+            const tempId = Date.now();
+            const tempEvent = {
+                id: tempId,
+                title: "Adding...",
                 start: start.toISOString(),
-                end: end.toISOString(),
-                color: form.color,
+                end: new Date(start.getTime() + 30 * 60000).toISOString(),
+                color: "#ccc", // Grey for pending
+                isPending: true
             };
-            setEvents((s) => [...s, newEvent]);
-        }
 
-        setModal({ open: false, date: null, time: null });
-        setEditingId(null);
+            setEvents(prev => [...prev, tempEvent]);
+
+            const payload = {
+                slot_start_time: start.toISOString()
+            };
+
+            const response = await axiosInstance.post('/api/trainers/calendar-slots/', payload);
+
+            // Replace temp event with real one
+            const newSlot = response.data;
+            const finalEvent = {
+                id: newSlot.pk || newSlot.id || Math.random(),
+                title: newSlot.is_available ? "Available Slot" : "Booked",
+                start: newSlot.slot_start_time,
+                end: newSlot.slot_end_time,
+                color: "#FF8211"
+            };
+
+            setEvents(prev => prev.map(e => e.id === tempId ? finalEvent : e));
+
+        } catch (error) {
+            console.error("Error adding slot", error);
+            // Remove temp event on failure
+            setEvents(prev => prev.filter(e => !e.isPending));
+            alert("Failed to add slot.");
+        }
     };
 
-    const deleteEvent = (id) => {
-        setEvents((s) => s.filter((e) => e.id !== id));
-        if (editingId === id) {
-            setModal({ open: false, date: null, time: null });
-            setEditingId(null);
+    const handleDeleteSlot = async (id) => {
+        // Optimistic update
+        setEvents(prev => prev.map(e => e.id === id ? { ...e, isDeleting: true } : e));
+
+        try {
+            await axiosInstance.delete(`/api/trainers/calendar-slots/${id}/`);
+            setEvents(prev => prev.filter(e => e.id !== id));
+            showToast("Slot removed", { type: "success" });
+        } catch (error) {
+            console.error("Error deleting slot", error);
+            setEvents(prev => prev.map(e => e.id === id ? { ...e, isDeleting: false } : e));
+            showToast("Failed to delete slot", { type: "error" });
         }
     };
 
@@ -281,7 +289,7 @@ export default function WeekCalendar() {
                                     <div
                                         key={t + idx}
                                         className="h-12 border-b border-gray-100 relative hover:bg-gray-50 transition-colors cursor-pointer group"
-                                        onClick={() => openCreateModal(day, t)}
+                                        onClick={() => addEventDirectly(day, t)}
                                     >
                                         <div className="hidden group-hover:flex items-center justify-center h-full w-full opacity-0 group-hover:opacity-100 transition-opacity">
                                             <Plus className="w-4 h-4 text-gray-400" />
@@ -305,10 +313,22 @@ export default function WeekCalendar() {
                                                 return (
                                                     <div
                                                         key={ev.id}
-                                                        onClick={(e) => openEditModal(ev, e)}
-                                                        className="absolute left-[2px] right-[2px] top-[2px] z-10 rounded-lg p-2 text-white shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-95 transition-all cursor-pointer group/event overflow-hidden"
-                                                        style={{ height: `${height}px`, backgroundColor: ev.color }}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (!ev.isPending && !ev.isDeleting) {
+                                                                handleDeleteSlot(ev.id);
+                                                            }
+                                                        }}
+                                                        className={`absolute left-[2px] right-[2px] top-[2px] z-10 rounded-lg p-2 text-white shadow-sm transition-all group/event overflow-hidden 
+                                                            ${(ev.isPending || ev.isDeleting) ? 'opacity-80 cursor-wait' : 'cursor-pointer hover:shadow-md hover:bg-red-500 hover:opacity-90'}`}
+                                                        title={ev.isPending ? "Adding..." : ev.isDeleting ? "Deleting..." : "Click to delete"}
+                                                        style={{ height: `${height}px`, backgroundColor: ev.isDeleting ? '#999' : ev.color }}
                                                     >
+                                                        {(ev.isPending || ev.isDeleting) && (
+                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-20">
+                                                                <Loader2 className="w-5 h-5 animate-spin text-white" />
+                                                            </div>
+                                                        )}
                                                         <div className="flex flex-col h-full">
                                                             <div className="font-semibold text-xs leading-tight line-clamp-2 poppins-medium">
                                                                 {ev.title}
@@ -318,17 +338,7 @@ export default function WeekCalendar() {
                                                                 {s.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                                                             </div>
 
-                                                            {height > 60 && (
-                                                                <button
-                                                                    onClick={(evn) => {
-                                                                        evn.stopPropagation();
-                                                                        deleteEvent(ev.id);
-                                                                    }}
-                                                                    className="absolute bottom-2 right-2 p-1 rounded-full bg-black/10 hover:bg-black/20 text-white opacity-0 group-hover/event:opacity-100 transition-opacity"
-                                                                >
-                                                                    <Trash2 className="w-3 h-3" />
-                                                                </button>
-                                                            )}
+
                                                         </div>
                                                     </div>
                                                 );
@@ -342,7 +352,7 @@ export default function WeekCalendar() {
             </div>
 
             {/* Events List Footer */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+            {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h2 className="text-xl font-bold text-gray-900 bebas-regular mb-4 flex items-center gap-2">
                     Weekly Agenda
                     <span className="text-sm font-normal text-gray-500 poppins-regular bg-gray-100 px-2 py-0.5 rounded-full">
@@ -374,14 +384,7 @@ export default function WeekCalendar() {
                                         {new Date(e.start).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })} - {new Date(e.end).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
                                     </div>
                                 </div>
-                                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={(ev) => openEditModal(e, ev)} className="p-1.5 text-gray-400 hover:text-[#FF8211] hover:bg-orange-50 rounded-lg transition-colors">
-                                        <Edit2 className="w-4 h-4" />
-                                    </button>
-                                    <button onClick={() => deleteEvent(e.id)} className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
-                                </div>
+
                             </div>
                         ))}
 
@@ -395,136 +398,10 @@ export default function WeekCalendar() {
                             </div>
                         )}
                 </div>
-            </div>
+            </div> */}
 
             {/* Modal Overlay */}
-            {modal.open && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-                    <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                        {/* Modal Header */}
-                        <div className="bg-gradient-to-r from-gray-50 to-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                            <h3 className="font-bold text-xl text-gray-900 bebas-regular flex items-center gap-2">
-                                {editingId ? <Edit2 className="w-5 h-5 text-[#FF8211]" /> : <Plus className="w-5 h-5 text-[#FF8211]" />}
-                                {editingId ? 'Edit Event' : 'New Event'}
-                            </h3>
-                            <button
-                                onClick={() => { setModal({ open: false, date: null, time: null }); setEditingId(null); }}
-                                className="p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                            >
-                                <X className="w-5 h-5" />
-                            </button>
-                        </div>
 
-                        {/* Modal Body */}
-                        <div className="p-6 space-y-5">
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Date & Time</label>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input
-                                        type="date"
-                                        value={modal.date ? toInputDate(modal.date) : ''}
-                                        onChange={(e) => setModal((s) => ({ ...s, date: new Date(e.target.value) }))}
-                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:border-[#FF8211] focus:ring-2 focus:ring-[#FF8211]/20 transition-all poppins-regular text-sm"
-                                    />
-                                    <input
-                                        type="time"
-                                        value={modal.time || ''}
-                                        onChange={(e) => setModal((s) => ({ ...s, time: e.target.value }))}
-                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-700 focus:outline-none focus:border-[#FF8211] focus:ring-2 focus:ring-[#FF8211]/20 transition-all poppins-regular text-sm"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Event Title</label>
-                                <input
-                                    value={form.title}
-                                    onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
-                                    placeholder="e.g. Gym Session with Alex"
-                                    className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#FF8211] focus:ring-2 focus:ring-[#FF8211]/20 transition-all poppins-medium placeholder:font-normal placeholder:text-gray-400"
-                                />
-                            </div>
-
-                            <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Duration (min)</label>
-                                <div className="relative">
-                                    <input
-                                        type="number"
-                                        value={form.duration}
-                                        onChange={(e) => setForm((s) => ({ ...s, duration: Number(e.target.value) }))}
-                                        className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 focus:outline-none focus:border-[#FF8211] focus:ring-2 focus:ring-[#FF8211]/20 transition-all poppins-medium pr-10"
-                                    />
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">min</div>
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block">Color Tag</label>
-                                <div className="flex flex-wrap gap-2">
-                                    {colorPalette.map((c) => (
-                                        <button
-                                            key={c.bg}
-                                            type="button"
-                                            onClick={() => setForm(s => ({ ...s, color: c.bg }))}
-                                            className={`w-8 h-8 rounded-full transition-all ${form.color === c.bg ? 'ring-2 ring-offset-2 ring-gray-400 scale-110' : 'hover:scale-105'}`}
-                                            style={{ backgroundColor: c.bg }}
-                                            title={c.label}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Modal Footer */}
-                        <div className="bg-gray-50 px-6 py-4 flex items-center justify-between border-t border-gray-100">
-                            <div>
-                                {editingId && (
-                                    <button
-                                        onClick={() => { deleteEvent(editingId); }}
-                                        className="text-red-500 hover:text-red-600 text-sm font-medium transition-colors flex items-center gap-1"
-                                    >
-                                        <Trash2 className="w-4 h-4" /> {events.find(e => e.id === editingId)?.status === 'pending' ? 'Reject' : 'Delete'}
-                                    </button>
-                                )}
-                            </div>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => { setModal({ open: false, date: null, time: null }); setEditingId(null); }}
-                                    className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors poppins-medium"
-                                >
-                                    Cancel
-                                </button>
-
-                                {events.find(e => e.id === editingId)?.status === 'pending' ? (
-                                    <button
-                                        onClick={() => {
-                                            const ev = events.find(e => e.id === editingId);
-                                            setEvents(s => s.map(e => e.id === editingId ? {
-                                                ...e,
-                                                status: 'booked',
-                                                color: '#22c55e',
-                                                title: `Session: ${ev.traineeName || 'Trainee'}`
-                                            } : e));
-                                            setModal({ open: false, date: null, time: null });
-                                            setEditingId(null);
-                                        }}
-                                        className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-lg shadow-green-500/30 transition-all font-bold tracking-wide active:scale-95 bebas-regular tracking-wide"
-                                    >
-                                        Accept Request
-                                    </button>
-                                ) : (
-                                    <button
-                                        onClick={saveEvent}
-                                        className="px-6 py-2 bg-[#FF8211] hover:bg-[#ff7906] text-white rounded-lg shadow-lg shadow-orange-500/30 hover:shadow-orange-500/50 transition-all font-bold tracking-wide active:scale-95 bebas-regular tracking-wide"
-                                    >
-                                        {editingId ? 'Save Changes' : 'Add Slot'}
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

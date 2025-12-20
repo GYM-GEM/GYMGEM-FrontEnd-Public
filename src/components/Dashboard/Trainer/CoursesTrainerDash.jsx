@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
 import testimg from "../../../assets/cardCo1.png";
-import testimg2 from "../../../assets/Sports Nutrition for Weight Loss.jpg";
-import testimg3 from "../../../assets/Fat Burning Cardio Workouts.jpg";
-import testimg4 from "../../../assets/Muscle Building.jpg";
+import testimg2 from "../../../assets/FatBurningCardioWorkouts.jpg";
+import testimg3 from "../../../assets/FatBurningCardioWorkouts.jpg";
+import testimg4 from "../../../assets/MuscleBuilding.jpg";
 import { v4 as uuidv4 } from "uuid";
 import { IoIosTrash } from "react-icons/io";
 import { MdOutlineEdit } from "react-icons/md";
@@ -132,12 +132,12 @@ const CoursesTrainerDash = () => {
     if (page > totalPages) setPage(totalPages);
   }, [totalPages]);
 
- 
+
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-   
+
         console.log("Fetching courses from API...");
 
         // Use axiosInstance instead of axios

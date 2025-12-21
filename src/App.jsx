@@ -14,7 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./components/NotFound.jsx";
 import Community from "./pages/Community.jsx";
 import Coursedetails from "./components/courses/CourseDetails.jsx";
-import Viewprofile from "./components/Viewprofile.jsx";
+// import Viewprofile from "./components/Viewprofile.jsx";
 import Store from "./pages/Store.jsx";
 import ProductDetails from "./pages/ProductDetails.jsx";
 import SessionLayout from "./components/Session/SessionLayout.jsx";
@@ -146,7 +146,7 @@ function App() {
             <Route path="session/:id" element={<SessionLayout />} />
             <Route path="community" element={<Community />} />
             <Route path="/trainer-profile/:id" element={<PublicTrainerProfile />} />
-            <Route path="viewprofile" element={<Viewprofile />} />
+            {/* <Route path="viewprofile" element={<Viewprofile />} /> */}
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="settings" element={<Settings />} />
             <Route path="ai-trainer" element={<AiTrainerPage />} />

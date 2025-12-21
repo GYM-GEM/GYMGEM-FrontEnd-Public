@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   Star,
@@ -29,12 +29,13 @@ import {
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 import axiosInstance from "../../utils/axiosConfig";
-import axios from "axios";
+import { useToast } from "../../context/ToastContext";
 
 
 const CourseDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   // All state declarations at the top (before any conditional logic)
   const [course, setCourse] = useState(null);
@@ -48,6 +49,9 @@ const CourseDetails = () => {
   const [copied, setCopied] = useState(false);
   const [activeContent, setActiveContent] = useState(null);
   const [isEnrolling, setIsEnrolling] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [userBalance, setUserBalance] = useState(null);
+  const [loadingBalance, setLoadingBalance] = useState(false);
 
   const handleSectionClick = (section) => {
     setActiveContent(section);
@@ -77,8 +81,24 @@ const CourseDetails = () => {
     }
   };
 
+  const fetchUserBalance = async () => {
+    try {
+      setLoadingBalance(true);
+      const response = await axiosInstance.get('/api/profiles/balance', {
+        skipGlobalLoader: true
+      });
+      setUserBalance(response.data.balance);
+    } catch (error) {
+      console.error('Error fetching user balance:', error);
+      showToast('Failed to load balance', { type: 'error' });
+    } finally {
+      setLoadingBalance(false);
+    }
+  };
+
   useEffect(() => {
     getCourseById(id);
+    fetchUserBalance();
   }, [id]);
 
   useEffect(() => {
@@ -390,7 +410,7 @@ const CourseDetails = () => {
 
 
 
-  const handleBuyNow = async () => {
+  const handleBuyNow = () => {
     // Check if user is logged in
     const user = JSON.parse(localStorage.getItem("user"));
 
@@ -406,36 +426,40 @@ const CourseDetails = () => {
       return;
     }
 
+    // Show payment confirmation modal
+    setShowPaymentModal(true);
+    // Refresh balance when modal opens
+    fetchUserBalance();
+  };
+
+  const handleConfirmEnrollment = async () => {
     // Prevent multiple clicks
     if (isEnrolling) return;
 
     try {
       setIsEnrolling(true);
 
-      // Call payment start endpoint
-      const token = localStorage.getItem('access');
-      const response = await axios.post(
-        'http://localhost:8000/api/payment/start/',
-        { amount: parseFloat(course.price), course_id: course.id },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+      // Call enrollment endpoint
+      const response = await axiosInstance.post(
+        `/api/courses/enrollments/${course.id}/enroll/`
       );
 
-      // Navigate to checkout with course data and iframe URL
-      navigate('/checkout', {
-        state: {
-          course: course,
-          user: user,
-          iframeUrl: response.data.iframe_url,
-          paymentId: response.data.payment_id
-        }
-      });
+      // Close modal
+      setShowPaymentModal(false);
+
+      // Show success message
+      showToast('Successfully enrolled in the course! You can now start learning.', { type: 'success' });
+
+      // Refresh course data and balance
+      await getCourseById(id);
+      await fetchUserBalance();
+
+      // Navigate to course learning page
+      navigate(`/courses/${course.id}/learn`);
     } catch (error) {
-      console.error('Error starting payment:', error);
-      alert('Failed to start payment process. Please try again.');
+      console.error('Error enrolling in course:', error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Failed to enroll in course. Please check your GEM balance and try again.';
+      showToast(errorMessage, { type: 'error' });
     } finally {
       setIsEnrolling(false);
     }
@@ -553,8 +577,8 @@ const CourseDetails = () => {
                       onClick={handleToggleFavorite}
                       disabled={isWishlistLoading || isDropped}
                       className={`px-6 py-3 border-2 rounded-lg transition-colors flex items-center gap-2 ${isWishlisted
-                          ? "bg-[#FF8211] border-[#FF8211] text-white"
-                          : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
+                        ? "bg-[#FF8211] border-[#FF8211] text-white"
+                        : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
                         } ${isWishlistLoading || isDropped ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       {isWishlistLoading ? (
@@ -912,8 +936,8 @@ const CourseDetails = () => {
                       onClick={handleToggleFavorite}
                       disabled={isWishlistLoading || isDropped}
                       className={`w-full px-6 py-3 border-2 rounded-lg font-semibold bebas-regular text-lg transition-colors flex items-center justify-center gap-2 ${isWishlisted
-                          ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]"
-                          : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
+                        ? "bg-[#FF8211] border-[#FF8211] text-white hover:bg-[#ff7906]"
+                        : "border-[#FF8211] text-[#FF8211] hover:bg-[#FF8211]/10"
                         } ${isWishlistLoading || isDropped ? "opacity-70 cursor-not-allowed" : ""}`}
                     >
                       {isWishlistLoading ? (
@@ -975,8 +999,8 @@ const CourseDetails = () => {
                 onClick={handleToggleFavorite}
                 disabled={isWishlistLoading || isDropped}
                 className={`p-3 border-2 rounded-lg transition-colors ${isWishlisted
-                    ? "bg-[#FF8211] border-[#FF8211] text-white"
-                    : "border-[#FF8211] text-[#FF8211] bg-white"
+                  ? "bg-[#FF8211] border-[#FF8211] text-white"
+                  : "border-[#FF8211] text-[#FF8211] bg-white"
                   } ${isWishlistLoading || isDropped ? "opacity-70 cursor-not-allowed" : ""}`}
               >
                 {isWishlistLoading ? (
@@ -1052,100 +1076,246 @@ const CourseDetails = () => {
         </div>
       )}
 
-      {/* Share Modal */}
-      {showShareModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowShareModal(false)}>
-          <div className="bg-white rounded-xl max-w-sm w-full p-6" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900 bebas-regular">
-                Share this course
+      {/* Payment Confirmation Modal */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => !isEnrolling && setShowPaymentModal(false)}>
+          <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#FF8211] to-[#ff9933] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Sparkles className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900 bebas-regular mb-2">
+                Confirm Enrollment
               </h3>
-              <button onClick={() => setShowShareModal(false)} className="text-gray-500 hover:text-gray-700">
-                <X className="w-5 h-5" />
-              </button>
+              <p className="text-gray-600 poppins-regular text-sm">
+                You're about to enroll in this course
+              </p>
             </div>
 
-            <p className="text-sm text-gray-600 poppins-regular mb-6">
-              Share this course with your friends and colleagues.
-            </p>
-
-            <div className="flex justify-center gap-6 mb-8">
-              <a
-                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 group"
-              >
-                <div className="w-12 h-12 rounded-full bg-blue-600/10 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                  <Facebook className="w-5 h-5 text-blue-600 group-hover:text-white" />
+            {/* Course Summary */}
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 mb-6 border border-gray-200">
+              <div className="flex items-start gap-4 mb-4">
+                <img
+                  src={courseData.cover}
+                  alt={courseData.title}
+                  className="w-20 h-20 rounded-lg object-cover shadow-md"
+                />
+                <div className="flex-1">
+                  <h4 className="font-bold text-gray-900 poppins-medium text-sm mb-1 line-clamp-2">
+                    {courseData.title}
+                  </h4>
+                  <p className="text-xs text-gray-600 poppins-regular">
+                    by {trainer?.name || 'Instructor'}
+                  </p>
                 </div>
-                <span className="text-xs text-gray-600 poppins-regular">Facebook</span>
-              </a>
+              </div>
 
-              <a
-                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 group"
-              >
-                <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center group-hover:bg-sky-500 transition-colors">
-                  <Twitter className="w-5 h-5 text-sky-500 group-hover:text-white" />
+              <div className="border-t border-gray-300 pt-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 poppins-regular">Course Price</span>
+                  <div className="flex items-center gap-1">
+                    <Sparkles className="w-4 h-4 text-[#FF8211]" />
+                    <span className="text-lg font-bold text-[#FF8211] bebas-regular">
+                      {parseFloat(courseData.price).toFixed(0)} GEMs
+                    </span>
+                  </div>
                 </div>
-                <span className="text-xs text-gray-600 poppins-regular">Twitter</span>
-              </a>
 
-              <a
-                href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 group"
-              >
-                <div className="w-12 h-12 rounded-full bg-blue-700/10 flex items-center justify-center group-hover:bg-blue-700 transition-colors">
-                  <Linkedin className="w-5 h-5 text-blue-700 group-hover:text-white" />
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 poppins-regular">Your Balance</span>
+                  {loadingBalance ? (
+                    <div className="flex items-center gap-1">
+                      <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                      <span className="text-sm text-gray-400 poppins-regular">Loading...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1">
+                      <Sparkles className={`w-4 h-4 ${userBalance !== null && userBalance >= parseFloat(courseData.price) ? 'text-green-600' : 'text-red-600'}`} />
+                      <span className={`text-lg font-bold bebas-regular ${userBalance !== null && userBalance >= parseFloat(courseData.price) ? 'text-green-600' : 'text-red-600'}`}>
+                        {userBalance !== null ? userBalance.toFixed(2) : '0.00'} GEMs
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <span className="text-xs text-gray-600 poppins-regular">LinkedIn</span>
-              </a>
 
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-2 group"
-              >
-                <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center group-hover:bg-green-500 transition-colors">
-                  <div className="w-5 h-5 flex items-center justify-center text-green-500 group-hover:text-white font-bold text-xs" >WA</div>
-                </div>
-                <span className="text-xs text-gray-600 poppins-regular">WhatsApp</span>
-              </a>
-            </div>
-
-            <div className="relative">
-              <input
-                type="text"
-                readOnly
-                value={shareUrl}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 poppins-regular pr-24"
-              />
-              <button
-                onClick={handleCopyLink}
-                className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#FF8211] text-white rounded-md text-xs font-semibold hover:bg-[#ff7906] transition-colors flex items-center gap-1"
-              >
-                {copied ? (
-                  <>
-                    <CheckCircle2 className="w-3 h-3" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <LinkIcon className="w-3 h-3" />
-                    Copy
-                  </>
+                {userBalance !== null && userBalance >= parseFloat(courseData.price) && (
+                  <div className="border-t border-gray-300 pt-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-gray-700 poppins-medium">Balance After</span>
+                      <div className="flex items-center gap-1">
+                        <Sparkles className="w-4 h-4 text-gray-700" />
+                        <span className="text-lg font-bold text-gray-900 bebas-regular">
+                          {(userBalance - parseFloat(courseData.price)).toFixed(2)} GEMs
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 )}
+              </div>
+            </div>
+
+            {/* Insufficient Balance Warning */}
+            {userBalance !== null && userBalance < parseFloat(courseData.price) && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-red-600 text-lg">⚠️</span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-red-900 poppins-medium text-sm mb-1">
+                      Insufficient Balance
+                    </h4>
+                    <p className="text-red-700 poppins-regular text-xs">
+                      You need {(parseFloat(courseData.price) - userBalance).toFixed(2)} more GEMs to enroll in this course.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              {userBalance !== null && userBalance >= parseFloat(courseData.price) ? (
+                <button
+                  onClick={handleConfirmEnrollment}
+                  disabled={isEnrolling || loadingBalance}
+                  className={`w-full px-6 py-4 bg-gradient-to-r from-[#FF8211] to-[#ff9933] text-white rounded-xl font-bold bebas-regular text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${isEnrolling || loadingBalance ? "opacity-70 cursor-not-allowed" : "hover:scale-[1.02] active:scale-[0.98]"
+                    }`}
+                >
+                  {isEnrolling ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-5 h-5" />
+                      Confirm Enrollment
+                    </>
+                  )}
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowPaymentModal(false);
+                    navigate('/buy-gems');
+                  }}
+                  disabled={loadingBalance}
+                  className="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold bebas-regular text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  Buy More GEMs
+                </button>
+              )}
+
+              <button
+                onClick={() => setShowPaymentModal(false)}
+                disabled={isEnrolling}
+                className="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold poppins-regular hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
               </button>
             </div>
           </div>
-        </div>
+        </div >
       )}
+
+      {/* Share Modal */}
+      {
+        showShareModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowShareModal(false)}>
+            <div className="bg-white rounded-xl max-w-sm w-full p-6" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold text-gray-900 bebas-regular">
+                  Share this course
+                </h3>
+                <button onClick={() => setShowShareModal(false)} className="text-gray-500 hover:text-gray-700">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <p className="text-sm text-gray-600 poppins-regular mb-6">
+                Share this course with your friends and colleagues.
+              </p>
+
+              <div className="flex justify-center gap-6 mb-8">
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-blue-600/10 flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                    <Facebook className="w-5 h-5 text-blue-600 group-hover:text-white" />
+                  </div>
+                  <span className="text-xs text-gray-600 poppins-regular">Facebook</span>
+                </a>
+
+                <a
+                  href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center group-hover:bg-sky-500 transition-colors">
+                    <Twitter className="w-5 h-5 text-sky-500 group-hover:text-white" />
+                  </div>
+                  <span className="text-xs text-gray-600 poppins-regular">Twitter</span>
+                </a>
+
+                <a
+                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-blue-700/10 flex items-center justify-center group-hover:bg-blue-700 transition-colors">
+                    <Linkedin className="w-5 h-5 text-blue-700 group-hover:text-white" />
+                  </div>
+                  <span className="text-xs text-gray-600 poppins-regular">LinkedIn</span>
+                </a>
+
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center group-hover:bg-green-500 transition-colors">
+                    <div className="w-5 h-5 flex items-center justify-center text-green-500 group-hover:text-white font-bold text-xs" >WA</div>
+                  </div>
+                  <span className="text-xs text-gray-600 poppins-regular">WhatsApp</span>
+                </a>
+              </div>
+
+              <div className="relative">
+                <input
+                  type="text"
+                  readOnly
+                  value={shareUrl}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 poppins-regular pr-24"
+                />
+                <button
+                  onClick={handleCopyLink}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 bg-[#FF8211] text-white rounded-md text-xs font-semibold hover:bg-[#ff7906] transition-colors flex items-center gap-1"
+                >
+                  {copied ? (
+                    <>
+                      <CheckCircle2 className="w-3 h-3" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <LinkIcon className="w-3 h-3" />
+                      Copy
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
 
       <Footer />
     </>

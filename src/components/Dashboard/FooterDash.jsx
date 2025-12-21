@@ -26,7 +26,7 @@ export default function FooterDash({
         {/* Brand Section */}
         <div className="flex items-center gap-2 group order-2 md:order-1">
           <div className="p-2 bg-[#FF8211]/10 rounded-lg group-hover:bg-[#FF8211]/20 transition-colors duration-300">
-            <FaGem className="text-[#FF8211] text-lg" />
+            <FaGem className="text-[#9ebd77] text-lg" />
           </div>
           <div className="flex flex-col sm:flex-row sm:items-center">
             <p className="text-sm font-medium poppins-medium text-gray-700">

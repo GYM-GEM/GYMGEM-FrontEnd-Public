@@ -101,12 +101,13 @@ const CourseCard = ({ course, categoryTheme }) => {
 
                 {/* Price Tag Overlay */}
                 <div className="absolute right-3 bottom-3 z-20">
-                    <div className="flex items-center justify-center rounded-lg bg-[#FF8211] px-3.5 py-1.5 shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
+                    <div className="backdrop-blur-xl bg-orange-500/90 px-4 py-2 rounded-xl shadow-xl shadow-orange-500/30 ring-1 ring-white/20 group-hover:scale-105 transition">
                         <span className="font-bebas text-lg text-white tracking-wide">
-                            ${price || 0}
+                            {price || 0} <span className="text-sm opacity-80">GEMs</span>
                         </span>
                     </div>
                 </div>
+
             </div>
 
             <div className="flex flex-1 flex-col p-5">

@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Calculator, Calendar as CalendarIcon, Clock, X, Trash2, Edit2, Plus, Loader2 } from "lucide-react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useToast } from "../../../context/ToastContext";
+import NavBarDash from "./NavBarDash";
+import FooterDash from "../FooterDash";
 
 export default function WeekCalendar() {
     // Helper: start week on Monday
@@ -194,6 +196,8 @@ export default function WeekCalendar() {
     };
 
     return (
+        <>
+        <NavBarDash />  
         <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
 
             {/* Header Section */}
@@ -403,5 +407,7 @@ export default function WeekCalendar() {
             {/* Modal Overlay */}
 
         </div>
+        <FooterDash />
+        </>
     );
 }

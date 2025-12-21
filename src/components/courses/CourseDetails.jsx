@@ -567,7 +567,7 @@ const CourseDetails = () => {
                           Processing...
                         </>
                       ) : (
-                        `Buy Now - $${courseData.price}`
+                        `Buy Now - ${courseData.price} GEMs`
                       )}
                     </button>
                   )}
@@ -885,8 +885,8 @@ const CourseDetails = () => {
               {/* Price Card */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-[#FF8211] bebas-regular">
-                    ${courseData.price}
+                  <span className="font-bebas text-4xl text-[#FF8211] tracking-wide">
+                    {courseData.price || 0} <span className="text-lg opacity-80">GEMs</span>
                   </span>
                 </div>
 
@@ -989,8 +989,8 @@ const CourseDetails = () => {
           )}
           <div className="flex items-center gap-4">
             <div>
-              <span className="text-2xl font-bold text-[#FF8211] bebas-regular">
-                ${courseData.price}
+              <span className="text-2xl font-bold text-[#FF8211]">
+                {courseData.price} GEMs
               </span>
             </div>
 
@@ -1062,7 +1062,7 @@ const CourseDetails = () => {
                   }}
                   className="w-full px-6 py-3 bg-[#FF8211] text-white rounded-lg font-semibold bebas-regular hover:bg-[#ff7906] transition-colors"
                 >
-                  Buy Course - ${courseData.price}
+                  Buy Course - {courseData.price} GEMs
                 </button>
                 <button
                   onClick={() => setShowLockModal(false)}

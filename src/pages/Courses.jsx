@@ -283,7 +283,7 @@ function Courses() {
                 {/* Price Range */}
                 <div className="flex items-center gap-2">
                   <div className="relative w-20">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">G</span>
                     <input
                       type="number"
                       placeholder="Min"
@@ -291,12 +291,12 @@ function Courses() {
                       onChange={(e) => setLocalPrice(prev => ({ ...prev, min: e.target.value }))}
                       onBlur={handlePriceBlur}
                       onKeyDown={(e) => e.key === 'Enter' && handlePriceBlur()}
-                      className="w-full pl-5 pr-2 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#FF8211]"
+                      className="w-full pl-5 pr-2 py-2 pl-3 bg-white border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#FF8211]"
                     />
                   </div>
                   <span className="text-gray-400">-</span>
                   <div className="relative w-20">
-                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400 text-xs">G</span>
                     <input
                       type="number"
                       placeholder="Max"

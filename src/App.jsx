@@ -18,6 +18,9 @@ import Viewprofile from "./components/Viewprofile.jsx";
 import Store from "./pages/Store.jsx";
 import ProductDetails from "./pages/ProductDetails.jsx";
 import SessionLayout from "./components/Session/SessionLayout.jsx";
+import Support from "./components/Support/Support.jsx";
+import Privacy from "./components/Privacy/Privacy.jsx";
+import Terms from "./components/TermsOfService/Terms.jsx";
 
 // forms
 import Selectrole from "./components/SelectRole";
@@ -134,6 +137,10 @@ function App() {
             <Route path="about" element={<About />} />
             <Route path="profile" element={<Profile />} />
             <Route path="requestdetails" element={<RequestDetails />} />
+            <Route path="contact" element={<Support />} />
+            <Route path="privacy" element={<Privacy />} />
+            <Route path="terms" element={<Terms />} />
+            
 
             <Route path="session" element={<SessionLayout />} />
             <Route path="session/:id" element={<SessionLayout />} />

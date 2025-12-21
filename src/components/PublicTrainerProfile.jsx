@@ -16,6 +16,8 @@ import {
   GraduationCap,
   Loader2,
   X,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -84,11 +86,28 @@ const PublicTrainerProfile = () => {
   const [user] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
   const { showToast } = useToast();
 
-  // Booking Modal State
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
   const [bookingForm, setBookingForm] = useState({ title: "", description: "" });
   const [isSubmittingBooking, setIsSubmittingBooking] = useState(false);
+  const [userBalance, setUserBalance] = useState(null);
+  const [loadingBalance, setLoadingBalance] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
+
+  const fetchUserBalance = async () => {
+    try {
+      setLoadingBalance(true);
+      const response = await axiosInstance.get('/api/profiles/balance', {
+        skipGlobalLoader: true
+      });
+      setUserBalance(response.data.balance);
+    } catch (error) {
+      console.error('Error fetching user balance:', error);
+      showToast('Failed to load balance', { type: 'error' });
+    } finally {
+      setLoadingBalance(false);
+    }
+  };
 
   const handleConfirmBooking = () => {
     if (!selectedSlotId) {
@@ -102,34 +121,40 @@ const PublicTrainerProfile = () => {
       return;
     }
 
-    setIsBookingModalOpen(true);
+    // Show payment confirmation modal and fetch balance
+    setShowPaymentModal(true);
+    fetchUserBalance();
   };
 
-  const submitBooking = async () => {
-    if (!bookingForm.title.trim() || !bookingForm.description.trim()) {
-      showToast("Please fill in all fields.", { type: "error" });
-      return;
-    }
+  const submitBookingWithGEMs = async () => {
+    // Prevent multiple clicks
+    if (isSubmittingBooking) return;
 
     setIsSubmittingBooking(true);
     try {
       const payload = {
         trainer_id: id,
         time_slot_id: selectedSlotId,
-        session_title: bookingForm.title,
-        description: bookingForm.description
+        session_title: "1-on-1 Training Session",
+        description: `Session with ${profile.name}`
       };
 
       await axiosInstance.post('/api/interactive-sessions/request/', payload);
 
-      showToast("Booking request sent successfully!", { type: "success" });
-      setIsBookingModalOpen(false);
-      setBookingForm({ title: "", description: "" });
+      // Close modal
+      setShowPaymentModal(false);
+
+      // Show success message
+      showToast("Session booked successfully! You can now view your upcoming sessions.", { type: "success" });
+
+      // Reset selection and refresh balance
       setSelectedSlotId(null);
-      // Optionally refresh slots here if needed
+      await fetchUserBalance();
+
     } catch (error) {
-      console.error("Booking error:", error);
-      showToast("Failed to book session. Please try again.", { type: "error" });
+      console.error('Booking error:', error);
+      const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Failed to book session. Please check your GEM balance and try again.';
+      showToast(errorMessage, { type: 'error' });
     } finally {
       setIsSubmittingBooking(false);
     }
@@ -611,72 +636,156 @@ const PublicTrainerProfile = () => {
 
           </div>
         </div>
-        <Footer />
+      </div>
+      {/* Payment Confirmation Modal */}
+      {showPaymentModal && (() => {
+        const sessionPrice = parseFloat(profile.rate || 0);
+        const hasEnoughBalance = userBalance !== null && userBalance >= sessionPrice;
+        const balanceAfter = userBalance !== null ? (userBalance - sessionPrice).toFixed(2) : 0;
 
-        {/* Booking Modal */}
-        {isBookingModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                <h3 className="font-bold text-lg text-gray-900">Request Session</h3>
-                <button
-                  onClick={() => setIsBookingModalOpen(false)}
-                  className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+        return (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => !isSubmittingBooking && setShowPaymentModal(false)}>
+            <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+              <div className="text-center mb-6">
+                <div className="w-20 h-20 bg-gradient-to-br from-[#FF8211] to-[#ff9933] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <Sparkles className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="text-3xl font-bold text-gray-900 bebas-regular mb-2">
+                  Confirm Session Booking
+                </h3>
+                <p className="text-gray-600 poppins-regular text-sm">
+                  You're about to book a training session
+                </p>
               </div>
 
-              <div className="p-6 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Session Title</label>
-                  <input
-                    type="text"
-                    value={bookingForm.title}
-                    onChange={(e) => setBookingForm({ ...bookingForm, title: e.target.value })}
-                    placeholder="e.g. Weekly Check-in"
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF8211] focus:border-transparent outline-none transition-all"
+              {/* Session Summary */}
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 mb-6 border border-gray-200">
+                <div className="flex items-start gap-4 mb-4">
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name}
+                    className="w-20 h-20 rounded-lg object-cover shadow-md"
                   />
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900 poppins-medium text-sm mb-1">
+                      1-on-1 Training Session
+                    </h4>
+                    <p className="text-xs text-gray-600 poppins-regular">
+                      with {profile.name}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description / Goal</label>
-                  <textarea
-                    value={bookingForm.description}
-                    onChange={(e) => setBookingForm({ ...bookingForm, description: e.target.value })}
-                    placeholder="Briefly describe what you want to cover..."
-                    rows={4}
-                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF8211] focus:border-transparent outline-none transition-all resize-none"
-                  />
+
+                <div className="border-t border-gray-300 pt-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 poppins-regular">Session Price</span>
+                    <div className="flex items-center gap-1">
+                      <Sparkles className="w-4 h-4 text-[#FF8211]" />
+                      <span className="text-lg font-bold text-[#FF8211] bebas-regular">
+                        {sessionPrice.toFixed(2)} GEMs
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 poppins-regular">Your Balance</span>
+                    {loadingBalance ? (
+                      <div className="flex items-center gap-1">
+                        <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                        <span className="text-sm text-gray-400 poppins-regular">Loading...</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <Sparkles className={`w-4 h-4 ${hasEnoughBalance ? 'text-green-600' : 'text-red-600'}`} />
+                        <span className={`text-lg font-bold bebas-regular ${hasEnoughBalance ? 'text-green-600' : 'text-red-600'}`}>
+                          {userBalance !== null ? userBalance.toFixed(2) : '0.00'} GEMs
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {hasEnoughBalance && (
+                    <div className="border-t border-gray-300 pt-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-semibold text-gray-700 poppins-medium">Balance After</span>
+                        <div className="flex items-center gap-1">
+                          <Sparkles className="w-4 h-4 text-gray-700" />
+                          <span className="text-lg font-bold text-gray-900 bebas-regular">
+                            {balanceAfter} GEMs
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="p-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+              {/* Insufficient Balance Warning */}
+              {!hasEnoughBalance && userBalance !== null && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-red-600 text-lg">⚠️</span>
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-red-900 poppins-medium text-sm mb-1">
+                        Insufficient Balance
+                      </h4>
+                      <p className="text-red-700 poppins-regular text-xs">
+                        You need {(sessionPrice - userBalance).toFixed(2)} more GEMs to book this session.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                {hasEnoughBalance ? (
+                  <button
+                    onClick={submitBookingWithGEMs}
+                    disabled={isSubmittingBooking || loadingBalance}
+                    className={`w-full px-6 py-4 bg-gradient-to-r from-[#FF8211] to-[#ff9933] text-white rounded-xl font-bold bebas-regular text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 ${isSubmittingBooking || loadingBalance ? "opacity-70 cursor-not-allowed" : "hover:scale-[1.02] active:scale-[0.98]"
+                      }`}
+                  >
+                    {isSubmittingBooking ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2 className="w-5 h-5" />
+                        Confirm Booking
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setShowPaymentModal(false);
+                      window.location.href = '/buy-gems';
+                    }}
+                    disabled={loadingBalance}
+                    className="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold bebas-regular text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    <Sparkles className="w-5 h-5" />
+                    Buy More GEMs
+                  </button>
+                )}
+
                 <button
-                  onClick={() => setIsBookingModalOpen(false)}
-                  className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+                  onClick={() => setShowPaymentModal(false)}
                   disabled={isSubmittingBooking}
+                  className="w-full px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold poppins-regular hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
-                </button>
-                <button
-                  onClick={submitBooking}
-                  disabled={isSubmittingBooking}
-                  className="px-6 py-2 bg-[#FF8211] text-white font-bold rounded-lg shadow-md hover:bg-[#e67300] active:scale-95 transition-all flex items-center gap-2"
-                >
-                  {isSubmittingBooking ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Sending...
-                    </>
-                  ) : (
-                    "Confirm Booking"
-                  )}
                 </button>
               </div>
             </div>
           </div>
-        )}
-      </div>
+        );
+      })()}
     </>
   );
 };

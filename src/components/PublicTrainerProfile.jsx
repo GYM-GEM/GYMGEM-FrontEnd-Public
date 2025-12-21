@@ -183,7 +183,8 @@ const PublicTrainerProfile = () => {
             bio: trainer.bio || "",
             linkedin: null, // Not in provided response example
             phone: trainer.phone_number,
-            rating: trainer.rating // Assuming rating might come from API eventually
+            rating: trainer.rating,
+            rate: trainer.rate,
           },
           specializations: apiData.specializations ? apiData.specializations.map(spec => ({
             id: spec.specialization, // This is the category ID
@@ -410,7 +411,7 @@ const PublicTrainerProfile = () => {
                             </div>
                             <div className="flex justify-between border-b border-dashed border-gray-100 pb-2">
                               <span className="text-gray-500">Rate</span>
-                              <span className="font-medium text-gray-900">${spec.hourlyRate}/hr</span>
+                              <span className="font-medium text-gray-900">${profile.rate}/session</span>
                             </div>
                             <div className="flex justify-between">
                               <span className="text-gray-500">Location</span>

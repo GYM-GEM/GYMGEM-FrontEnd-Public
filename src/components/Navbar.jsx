@@ -32,7 +32,7 @@ function Navbar() {
 
   const [gemsBalance, setGemsBalance] = useState(() => {
     const saved = localStorage.getItem("gems_balance");
-    return saved ? parseInt(saved, 10) : 1200; // Mock initial balance
+    return saved ? parseInt(saved, 10) : 0; 
   });
   const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
 

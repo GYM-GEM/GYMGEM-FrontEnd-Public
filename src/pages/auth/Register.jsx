@@ -7,7 +7,8 @@ import { motion } from "framer-motion";
 import cover_img from "../../assets/cover.svg";
 import axios from "axios";
 import GoogleLogin from "../../components/GoogleLogin";
-import { useToast } from "../../context/ToastContext";
+// import { useToast } from "../../context/ToastContext";
+import { showToast } from "@/utils/toast";
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 
@@ -23,21 +24,44 @@ const SignUpPage = () => {
     formState: { errors },
   } = useForm({ mode: "onChange" });
 
+  // const onSubmit = async (data) => {
+  //   try {
+  //     // Send POST request to backend
+  //     const response = await axios.post(
+  //       `${VITE_API_URL}/api/accounts/create`,
+  //       data
+  //     );
+  //     console.log("Response:", response.data);
+  //     showToast("Sign up successful!", { type: "success" });
+  //     navigate("/role");
+  //   } catch (error) {
+  //     console.error("Error during registration:", error);
+  //     showToast("Registration failed. Please try again.", { type: "error" });
+  //   }
+  // };
+
   const onSubmit = async (data) => {
-    try {
-      // Send POST request to backend
-      const response = await axios.post(
-        `${VITE_API_URL}/api/accounts/create`,
-        data
-      );
-      console.log("Response:", response.data);
-      showToast("Sign up successful!", { type: "success" });
-      navigate("/role");
-    } catch (error) {
-      console.error("Error during registration:", error);
-      showToast("Registration failed. Please try again.", { type: "error" });
-    }
-  };
+  try {
+    const payload = {
+      username: data.username,
+      email: data.email,
+      password: data.password,
+      first_name: data.firstName,
+      last_name: data.lastName,
+    };
+
+    const response = await axios.post(
+      `${VITE_API_URL}/api/accounts/create`,
+      payload
+    );
+
+    showToast("Sign up successful!", { type: "success" });
+    navigate("/role");
+  } catch (error) {
+    console.error("Error during registration:", error.response?.data);
+    showToast("Registration failed. Please try again.", { type: "error" });
+  }
+};
 
   return (
     <motion.div

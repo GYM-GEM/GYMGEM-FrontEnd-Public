@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useToast } from "../context/ToastContext";
@@ -7,42 +7,45 @@ const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 export default function GoogleLogin({ signType, onStart, onComplete }) {
 	const navigate = useNavigate();
-
 	const { showToast } = useToast();
-
+	const buttonRef = useRef(null);
 	const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
-	// If client ID is missing, show a helpful message instead of attempting to load GSI
+	// Use refs for callbacks to avoid re-triggering useEffect
+	const onStartRef = useRef(onStart);
+	const onCompleteRef = useRef(onComplete);
+
+	useEffect(() => {
+		onStartRef.current = onStart;
+		onCompleteRef.current = onComplete;
+	}, [onStart, onComplete]);
+
+	// If client ID is missing, show a helpful message
 	if (!clientId) {
 		return (
 			<div className="w-full">
 				<div className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-border bg-background/80 px-4 text-sm font-semibold text-foreground">
 					<span className="mr-2">⚠️</span>
-					Google sign-in is not configured. Set `VITE_GOOGLE_CLIENT_ID` in your `.env` and restart dev server.
+					Google sign-in is not configured.
 				</div>
 			</div>
 		);
 	}
 
 	useEffect(() => {
-		const script = document.createElement("script");
-		script.src = "https://accounts.google.com/gsi/client";
-		script.async = true;
-		script.defer = true;
-
-		let attachedButton = null;
-		let clickHandler = null;
+		let isMounted = true;
 
 		const handleCredentialResponse = async (response) => {
-			if (onStart) onStart();
+			if (onStartRef.current) onStartRef.current();
 			try {
 				const id_token = response.credential;
-				// POST id_token to your custom accounts/google/login/ endpoint (backend should verify)
 				const res = await axios.post(
 					`${VITE_API_URL}/api/auth/social/google/login/`,
 					{ id_token },
 					{ headers: { "Content-Type": "application/json" } }
 				);
+
+				if (!isMounted) return;
 
 				localStorage.setItem("access", res.data.access);
 				localStorage.setItem("refresh", res.data.refresh);
@@ -56,67 +59,65 @@ export default function GoogleLogin({ signType, onStart, onComplete }) {
 					navigate("/");
 				}
 			} catch (error) {
+				if (!isMounted) return;
 				console.error("Error during login:", error);
 				showToast("Login failed. Please try again.", { type: "error" });
 			} finally {
-				if (onComplete) onComplete();
+				if (isMounted && onCompleteRef.current) onCompleteRef.current();
 			}
 		};
 
+		const initializeGoogle = () => {
+			if (window.google?.accounts?.id && buttonRef.current) {
+				const buttonText = signType === 'signup' ? 'signup_with' : 'signin_with';
 
-		script.onload = () => {
-			let buttonText;
-
-			if (signType === 'signup') {
-				buttonText = 'signup_with';
-			} else {
-				buttonText = 'signin_with';
-			}
-
-			if (window.google && window.google.accounts && window.google.accounts.id) {
 				window.google.accounts.id.initialize({
 					client_id: clientId,
 					callback: handleCredentialResponse,
 				});
 
 				window.google.accounts.id.renderButton(
-					document.getElementById("google-signup-button"),
-					{ theme: "outline", size: "large", text: buttonText }
+					buttonRef.current,
+					{ theme: "outline", size: "large", text: buttonText, width: "100%" }
 				);
-
-				// Attach click handler to the generated button to start buffering immediately on user action
-				const container = document.getElementById("google-signup-button");
-				if (container) {
-					attachedButton = container.firstElementChild || container.querySelector('button') || container.querySelector('div');
-					if (attachedButton) {
-						clickHandler = () => { if (onStart) onStart(); };
-						attachedButton.addEventListener('click', clickHandler);
-					}
-				}
-
-				// optional: show One Tap
-				// window.google.accounts.id.prompt();
 			}
 		};
 
-		document.body.appendChild(script);
+		// Check if script already exists
+		let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+		
+		if (!script) {
+			script = document.createElement("script");
+			script.src = "https://accounts.google.com/gsi/client";
+			script.async = true;
+			script.defer = true;
+			script.onload = initializeGoogle;
+			document.body.appendChild(script);
+		} else {
+			// If script exists but window.google is not yet available, wait for it
+			if (window.google?.accounts?.id) {
+				initializeGoogle();
+			} else {
+				script.addEventListener('load', initializeGoogle);
+			}
+		}
 
 		return () => {
-			document.body.removeChild(script);
-			if (attachedButton && clickHandler) {
-				try { attachedButton.removeEventListener('click', clickHandler); } catch (e) { }
+			isMounted = false;
+			if (script) {
+				script.removeEventListener('load', initializeGoogle);
 			}
-			if (window.google && window.google.accounts && window.google.accounts.id) {
+			if (window.google?.accounts?.id) {
 				try {
 					window.google.accounts.id.cancel();
 				} catch (e) { }
 			}
 		};
-	}, [navigate, clientId, onStart, onComplete, signType]);
+	}, [navigate, clientId, signType]);
 
 	return (
-		<div>
-			<div id="google-signup-button"></div>
+		<div className="w-full">
+			<div ref={buttonRef} className="w-full min-h-[44px]"></div>
 		</div>
 	);
 }

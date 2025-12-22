@@ -137,7 +137,7 @@ const UserDropdown = ({
       icon: FaUserTie,
       colorClass: "bg-purple-100 text-purple-600"
     },
-   
+
     {
       type: "Store",
       path: "/store",
@@ -211,7 +211,7 @@ const UserDropdown = ({
                   className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 hover:text-[#ff8211] transition-colors"
                 >
                   <Settings className="h-4 w-4" />
-                  Settings
+                  {settingsPath === "/settings" ? "Settings" : "Settings Profile"}
                 </Link>
 
                 <button

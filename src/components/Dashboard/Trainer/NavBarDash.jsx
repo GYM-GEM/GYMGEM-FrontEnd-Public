@@ -8,6 +8,9 @@ import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
 import NotificationDropdown from "../../NotificationDropdown";
+import GemsBadge from "../../GemsBadge";
+import AddGemsModal from "../../AddGemsModal";
+import getBalance from "../../../utils/balance";
 import { BookOpen, Users, ClipboardList, MessageSquare, Calendar } from "lucide-react";
 
 const NavBarDash = () => {
@@ -23,7 +26,7 @@ const NavBarDash = () => {
   // Ensure we get the correct Trainer profile ID regardless of current selection
   const trainerProfile = user.profiles?.find(p => p.type === "trainer");
   const currentProfileId = trainerProfile?.id || user.current_profile || user.id;
- 
+
 
 
   // Main Navigation Links
@@ -44,6 +47,51 @@ const NavBarDash = () => {
 
   const [showFullName, setShowFullName] = useState(false);
   const [showGG, setShowGG] = useState(true);
+
+  const [gemsBalance, setGemsBalance] = useState(() => {
+    const saved = localStorage.getItem("gems_balance");
+    return saved ? parseInt(saved, 10) : null;
+  });
+  const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!localStorage.getItem("gems_balance")) {
+        setIsLoadingBalance(true);
+      }
+      const balance = await getBalance();
+      if (balance !== null) setGemsBalance(balance);
+      setIsLoadingBalance(false);
+    };
+
+    fetchBalance();
+
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("gems_balance");
+      if (saved) setGemsBalance(parseInt(saved, 10));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('gemsUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('gemsUpdated', handleStorageChange);
+    };
+  }, []);
+
+  const handleAddGems = (pkg) => {
+    setIsAddGemsModalOpen(false);
+    navigate('/checkout', {
+      state: {
+        type: 'gems',
+        gems: pkg.gems,
+        price: pkg.price,
+        user: user
+      }
+    });
+  };
 
   const logout = async (e) => {
     e.preventDefault();
@@ -238,12 +286,19 @@ const NavBarDash = () => {
             <div className="flex items-center gap-3 md:gap-5">
 
               {/* <NotificationDropdown /> */}
-              <UserDropdown
-                user={user}
-                logout={logout}
-                dashboardPath="/trainer"
-                settingsPath="/trainer/settings"
-              />
+              <div className="flex items-center gap-3">
+                <GemsBadge
+                  balance={gemsBalance}
+                  onAddClick={() => setIsAddGemsModalOpen(true)}
+                  isLoading={isLoadingBalance}
+                />
+                <UserDropdown
+                  user={user}
+                  logout={logout}
+                  dashboardPath="/trainer"
+                  settingsPath="/trainer/settings"
+                />
+              </div>
 
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -319,6 +374,12 @@ const NavBarDash = () => {
           )}
         </AnimatePresence>
       </motion.nav>
+
+      <AddGemsModal
+        isOpen={isAddGemsModalOpen}
+        onClose={() => setIsAddGemsModalOpen(false)}
+        onContinue={handleAddGems}
+      />
 
       {/* Spacer */}
       <div className="h-16 md:h-20" />

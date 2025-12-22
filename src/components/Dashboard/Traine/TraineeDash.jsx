@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import NavTraineeDash from "./NavTraineDash";
 import FooterDash from "../FooterDash";
 import { useToast } from "../../../context/ToastContext";
+import axiosInstance from "../../../utils/axiosConfig";
 import {
   User,
   TrendingUp,
@@ -44,13 +45,33 @@ const TraineeDash = () => {
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [isHeaderExpanded, setIsHeaderExpanded] = useState(false);
 
-  const [progressRecords, setProgressRecords] = useState([
-    { id: 1, date: "2024-12-01", weight: 75.5, height: 175, bodyFat: 18.2, muscleMass: 61.8, bmr: 1720 },
-    { id: 2, date: "2024-11-24", weight: 76.2, height: 175, bodyFat: 18.8, muscleMass: 61.2, bmr: 1710 },
-    { id: 3, date: "2024-11-17", weight: 76.8, height: 175, bodyFat: 19.2, muscleMass: 60.9, bmr: 1705 },
-    { id: 4, date: "2024-11-10", weight: 77.3, height: 175, bodyFat: 19.6, muscleMass: 60.5, bmr: 1700 },
-    { id: 5, date: "2024-11-03", weight: 77.9, height: 175, bodyFat: 20.1, muscleMass: 60.1, bmr: 1695 },
-  ]);
+  const [progressRecords, setProgressRecords] = useState([]);
+
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        const response = await axiosInstance.get('/api/trainees/records/');
+        if (response.data && response.data.results) {
+          const mappedRecords = response.data.results.map(record => ({
+            id: record.id,
+            date: record.record_date,
+            weight: parseFloat(record.weight) || 0,
+            height: parseFloat(record.height) || 0,
+            bodyFat: parseFloat(record.body_fat_percentage) || 0,
+            muscleMass: parseFloat(record.muscle_mass) || 0,
+            bmr: parseInt(record.BMR) || 0,
+            boneMass: parseFloat(record.bone_mass) || 0,
+            bodyWater: parseFloat(record.body_water_percentage) || 0
+          }));
+          setProgressRecords(mappedRecords);
+        }
+      } catch (error) {
+        console.error("Error fetching trainee records:", error);
+      }
+    };
+
+    fetchRecords();
+  }, []);
 
   // Load logged-in user data from localStorage
   const loggedInUser = JSON.parse(localStorage.getItem("user") || "{}");
@@ -99,19 +120,54 @@ const TraineeDash = () => {
     height: "",
     bodyFat: "",
     muscleMass: "",
+    boneMass: "",
+    bodyWater: "",
     bmr: ""
   });
 
-  const [upcomingSessions, setUpcomingSessions] = useState([
-    { id: 1, date: "Dec 2", time: "10:00 AM", activity: "Strength Training", trainer: "Coach Sarah" },
-    { id: 2, date: "Dec 4", time: "3:00 PM", activity: "HIIT Cardio", trainer: "Coach Mike" },
-    { id: 3, date: "Dec 6", time: "9:00 AM", activity: "Yoga & Mobility", trainer: "Coach Lisa" },
-  ]);
+  // const [upcomingSessions, setUpcomingSessions] = useState([
+  //   { id: 1, date: "Dec 2", time: "10:00 AM", activity: "Strength Training", trainer: "Coach Sarah" },
+  //   { id: 2, date: "Dec 4", time: "3:00 PM", activity: "HIIT Cardio", trainer: "Coach Mike" },
+  //   { id: 3, date: "Dec 6", time: "9:00 AM", activity: "Yoga & Mobility", trainer: "Coach Lisa" },
+  // ]);
 
   const [notifications, setNotifications] = useState([
     { id: 1, type: "reminder", message: "Your next session is tomorrow at 10:00 AM", read: false },
     { id: 2, type: "achievement", message: "You've completed 24 workouts this month! 🎉", read: false },
   ]);
+
+
+  // useEffect(() => {
+  //   const fetchUserData = async () => {
+  //     try {
+  //       const response = await axiosInstance.get('/api/trainees/detail');
+  //       const userData = response.data;
+
+  //       setUser(prev => ({
+  //         ...prev,
+  //         name: userData.name || prev.name,
+  //         avatar: userData.profile_picture || prev.avatar,
+  //         birthdate: userData.birthdate || prev.birthdate,
+  //         email: prev.email, // API doesn't return email in this specific response based on user input
+  //         location: userData.country && userData.state
+  //           ? `${userData.state}, ${userData.country}`
+  //           : (userData.country || userData.state || prev.location),
+  //         phone: userData.phone_number || prev.phone,
+  //         city: userData.state || prev.city,
+  //         state: userData.state || prev.state,
+  //         zip: userData.zip_code || prev.zip,
+  //         // Preserve other fields that are valid in frontend state but potentially missing in this API response:
+  //         job: prev.job,
+  //         joined: userData.created_at ? new Date(userData.created_at).toLocaleDateString() : prev.joined,
+  //         memberSince: userData.created_at ? new Date(userData.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : prev.memberSince,
+  //       }));
+  //     } catch (error) {
+  //       console.log("Error fetching user details:", error);
+  //     }
+  //   };
+
+  //   fetchUserData();
+  // }, []);
 
   // Filter records based on time range
   const getFilteredRecords = () => {
@@ -128,41 +184,66 @@ const TraineeDash = () => {
   };
 
   // Add new record
-  const handleAddRecord = (e) => {
+  const handleAddRecord = async (e) => {
     e.preventDefault();
-    const record = {
-      id: progressRecords.length + 1,
-      ...newRecord,
-      weight: parseFloat(newRecord.weight),
-      height: parseFloat(newRecord.height),
-      bodyFat: parseFloat(newRecord.bodyFat),
-      muscleMass: parseFloat(newRecord.muscleMass),
-      bmr: parseInt(newRecord.bmr)
-    };
 
-    setProgressRecords([record, ...progressRecords]);
+    try {
+      const payload = {
+        record_date: newRecord.date,
+        weight: newRecord.weight,
+        height: newRecord.height,
+        body_fat_percentage: newRecord.bodyFat,
+        muscle_mass: newRecord.muscleMass,
+        bone_mass: newRecord.boneMass,
+        body_water_percentage: newRecord.bodyWater,
+        BMR: newRecord.bmr
+      };
 
-    // Update user stats
-    setUser(prev => ({
-      ...prev,
-      currentWeight: record.weight,
-      bodyFat: record.bodyFat,
-      muscleMass: record.muscleMass
-    }));
+      const response = await axiosInstance.post('/api/trainees/records/', payload);
+      const savedRecord = response.data;
 
-    // Reset form and close modal
-    setNewRecord({
-      date: new Date().toISOString().split('T')[0],
-      weight: "",
-      height: "",
-      bodyFat: "",
-      muscleMass: "",
-      bmr: ""
-    });
-    setShowAddRecordModal(false);
+      // Transform response to match frontend state structure if needed, or use as is
+      const record = {
+        id: savedRecord.id, // Use ID from backend
+        date: savedRecord.record_date,
+        weight: parseFloat(savedRecord.weight),
+        height: savedRecord.height !== "-" ? parseFloat(savedRecord.height) : "-",
+        bodyFat: savedRecord.body_fat_percentage !== "-" ? parseFloat(savedRecord.body_fat_percentage) : "-",
+        muscleMass: savedRecord.muscle_mass !== "-" ? parseFloat(savedRecord.muscle_mass) : "-",
+        bmr: savedRecord.BMR
+      };
 
-    // Add success notification
-    addNotification("achievement", "New record added successfully! 📊");
+      setProgressRecords([record, ...progressRecords]);
+
+      // Update user stats
+      setUser(prev => ({
+        ...prev,
+        currentWeight: record.weight,
+        bodyFat: record.bodyFat !== "-" ? record.bodyFat : prev.bodyFat,
+        muscleMass: record.muscleMass !== "-" ? record.muscleMass : prev.muscleMass
+      }));
+
+      // Reset form and close modal
+      setNewRecord({
+        date: new Date().toISOString().split('T')[0],
+        weight: "",
+        height: "",
+        bodyFat: "",
+        muscleMass: "",
+        boneMass: "",
+        bodyWater: "",
+        bmr: ""
+      });
+      setShowAddRecordModal(false);
+
+      // Add success notification
+      addNotification("achievement", "New record added successfully! 📊");
+      showToast("Record saved successfully!", { type: "success" });
+
+    } catch (error) {
+      console.error("Error adding record:", error);
+      showToast("Failed to save record.", { type: "error" });
+    }
   };
 
   // Delete record
@@ -526,6 +607,8 @@ const TraineeDash = () => {
                         <th className="text-left py-4 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Height (cm)</th>
                         <th className="text-left py-4 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Body Fat %</th>
                         <th className="text-left py-4 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Muscle (kg)</th>
+                        <th className="text-left py-4 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Bone Mass (kg)</th>
+                        <th className="text-left py-4 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Body Water (%)</th>
                         <th className="text-left py-4 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">BMR</th>
                         <th className="text-left py-4 px-4 text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
                       </tr>
@@ -538,6 +621,8 @@ const TraineeDash = () => {
                           <td className="py-4 px-4 text-sm text-gray-600">{record.height}</td>
                           <td className="py-4 px-4 text-sm text-gray-600">{record.bodyFat}%</td>
                           <td className="py-4 px-4 text-sm text-gray-600">{record.muscleMass}</td>
+                          <td className="py-4 px-4 text-sm text-gray-600">{record.boneMass}</td>
+                          <td className="py-4 px-4 text-sm text-gray-600">{record.bodyWater}%</td>
                           <td className="py-4 px-4 text-sm text-gray-600">{record.bmr}</td>
                           <td className="py-4 px-4">
                             <button
@@ -735,6 +820,30 @@ const TraineeDash = () => {
                     step="0.1"
                     value={newRecord.muscleMass}
                     onChange={(e) => setNewRecord({ ...newRecord, muscleMass: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Bone Mass (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={newRecord.boneMass}
+                    onChange={(e) => setNewRecord({ ...newRecord, boneMass: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Body Water (%)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={newRecord.bodyWater}
+                    onChange={(e) => setNewRecord({ ...newRecord, bodyWater: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-transparent"
                     required
                   />

@@ -9,6 +9,9 @@ import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
 import { ClipboardList, Calendar, Heart, MessageSquare } from "lucide-react"; // Import new icons
 import NotificationDropdown from "../../NotificationDropdown";
+import GemsBadge from "../../GemsBadge";
+import AddGemsModal from "../../AddGemsModal";
+import getBalance from "../../../utils/balance";
 
 const NavTraineDash = () => {
   const navigate = useNavigate();
@@ -26,7 +29,7 @@ const NavTraineDash = () => {
   const mainLinks = [
     { to: "/trainee", label: "Dashboard" },
     { to: "/trainee/courses", label: "Courses" },
-    { to: "/trainee/calendar", label: "Calendar", icon: <Calendar size={18} /> },
+    // { to: "/trainee/calendar", label: "Calendar", icon: <Calendar size={18} /> },
     { to: "/trainee/message", label: "Messages", icon: <MessageSquare size={18} /> },
   ];
 
@@ -39,6 +42,51 @@ const NavTraineDash = () => {
 
   const [showFullName, setShowFullName] = useState(false);
   const [showGG, setShowGG] = useState(true);
+
+  const [gemsBalance, setGemsBalance] = useState(() => {
+    const saved = localStorage.getItem("gems_balance");
+    return saved ? parseInt(saved, 10) : null;
+  });
+  const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!localStorage.getItem("gems_balance")) {
+        setIsLoadingBalance(true);
+      }
+      const balance = await getBalance();
+      if (balance !== null) setGemsBalance(balance);
+      setIsLoadingBalance(false);
+    };
+
+    fetchBalance();
+
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("gems_balance");
+      if (saved) setGemsBalance(parseInt(saved, 10));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('gemsUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('gemsUpdated', handleStorageChange);
+    };
+  }, []);
+
+  const handleAddGems = (pkg) => {
+    setIsAddGemsModalOpen(false);
+    navigate('/checkout', {
+      state: {
+        type: 'gems',
+        gems: pkg.gems,
+        price: pkg.price,
+        user: user
+      }
+    });
+  };
 
   // Logout function
   const logout = async (e) => {
@@ -230,12 +278,19 @@ const NavTraineDash = () => {
 
               {/* User Dropdown Menu */}
               {/* <NotificationDropdown /> */}
-              <UserDropdown
-                user={user}
-                logout={logout}
-                dashboardPath="/trainee"
-                settingsPath="/trainee/settings"
-              />
+              <div className="flex items-center gap-3">
+                <GemsBadge
+                  balance={gemsBalance}
+                  onAddClick={() => setIsAddGemsModalOpen(true)}
+                  isLoading={isLoadingBalance}
+                />
+                <UserDropdown
+                  user={user}
+                  logout={logout}
+                  dashboardPath="/trainee"
+                  settingsPath="/trainee/settings"
+                />
+              </div>
 
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -311,6 +366,12 @@ const NavTraineDash = () => {
           )}
         </AnimatePresence>
       </motion.nav>
+
+      <AddGemsModal
+        isOpen={isAddGemsModalOpen}
+        onClose={() => setIsAddGemsModalOpen(false)}
+        onContinue={handleAddGems}
+      />
 
       {/* Spacer */}
       <div className="h-16 md:h-20" />

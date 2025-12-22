@@ -257,10 +257,10 @@ const TrainerProfileDash = () => {
         BMR: formData.BMR,
       };
 
-      const recordId = profileData.record?.id;
+      const recordId = currentEdit?.id;
       let response;
 
-      if (recordId !== undefined && recordId !== null) {
+      if (recordId) {
         // Update existing record
         response = await axiosInstance.put(`/api/trainers/records/${recordId}/`, payload);
       } else {
@@ -533,22 +533,26 @@ const TrainerProfileDash = () => {
                     <span className="w-1 h-8 bg-red-500 rounded-full"></span>
                     Body Composition
                   </h2>
-                  <button
-                    onClick={() => openModal("editRecord", profileData.record)}
-                    className={`px-4 py-2 ${profileData.record ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-red-500 text-white hover:bg-red-600'} rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm`}
-                  >
-                    {profileData.record ? (
-                      <>
-                        <Edit className="w-4 h-4" />
-                        Edit
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-4 h-4" />
-                        Add Record
-                      </>
-                    )}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => profileData.record && openModal("editRecord", profileData.record)}
+                      disabled={!profileData.record}
+                      className={`px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm ${profileData.record
+                          ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        }`}
+                    >
+                      <Edit className="w-4 h-4" />
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => openModal("editRecord", null)}
+                      className="px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Add Record
+                    </button>
+                  </div>
                 </div>
 
                 {profileData.record ? (
@@ -962,7 +966,7 @@ const TrainerProfileDash = () => {
           <div className="bg-white rounded-lg w-full max-w-2xl">
             <div className="border-b px-6 py-4 flex justify-between items-center">
               <h3 className="text-xl font-bold">
-                {profileData.record ? "Edit" : "Add"} Body Composition Record
+                {currentEdit ? "Edit" : "Add"} Body Composition Record
               </h3>
               <button
                 onClick={() => closeModal("editRecord")}

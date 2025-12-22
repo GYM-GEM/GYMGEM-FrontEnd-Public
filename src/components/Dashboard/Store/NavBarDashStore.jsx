@@ -8,6 +8,9 @@ import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
 import NotificationDropdown from "../../NotificationDropdown";
+import GemsBadge from "../../GemsBadge";
+import AddGemsModal from "../../AddGemsModal";
+import getBalance from "../../../utils/balance";
 import { ShoppingCart, Package, MessageSquare } from "lucide-react";
 
 const NavBarDashStore = () => {
@@ -36,6 +39,51 @@ const NavBarDashStore = () => {
 
   const [showFullName, setShowFullName] = useState(false);
   const [showGG, setShowGG] = useState(true);
+
+  const [gemsBalance, setGemsBalance] = useState(() => {
+    const saved = localStorage.getItem("gems_balance");
+    return saved ? parseInt(saved, 10) : null;
+  });
+  const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!localStorage.getItem("gems_balance")) {
+        setIsLoadingBalance(true);
+      }
+      const balance = await getBalance();
+      if (balance !== null) setGemsBalance(balance);
+      setIsLoadingBalance(false);
+    };
+
+    fetchBalance();
+
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("gems_balance");
+      if (saved) setGemsBalance(parseInt(saved, 10));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('gemsUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('gemsUpdated', handleStorageChange);
+    };
+  }, []);
+
+  const handleAddGems = (pkg) => {
+    setIsAddGemsModalOpen(false);
+    navigate('/checkout', {
+      state: {
+        type: 'gems',
+        gems: pkg.gems,
+        price: pkg.price,
+        user: user
+      }
+    });
+  };
 
   const logout = async (e) => {
     e.preventDefault();
@@ -230,12 +278,19 @@ const NavBarDashStore = () => {
             <div className="flex items-center gap-3 md:gap-5">
 
               {/* <NotificationDropdown /> */}
-              <UserDropdown
-                user={user}
-                logout={logout}
-                dashboardPath="/store/dashboard"
-                settingsPath="/store/settings"
-              />
+              <div className="flex items-center gap-3">
+                <GemsBadge
+                  balance={gemsBalance}
+                  onAddClick={() => setIsAddGemsModalOpen(true)}
+                  isLoading={isLoadingBalance}
+                />
+                <UserDropdown
+                  user={user}
+                  logout={logout}
+                  dashboardPath="/store/dashboard"
+                  settingsPath="/store/settings"
+                />
+              </div>
 
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -311,6 +366,12 @@ const NavBarDashStore = () => {
           )}
         </AnimatePresence>
       </motion.nav>
+
+      <AddGemsModal
+        isOpen={isAddGemsModalOpen}
+        onClose={() => setIsAddGemsModalOpen(false)}
+        onContinue={handleAddGems}
+      />
 
       {/* Spacer */}
       <div className="h-16 md:h-20" />

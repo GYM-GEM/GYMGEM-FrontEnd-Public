@@ -9,6 +9,9 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
+import GemsBadge from "../../GemsBadge";
+import AddGemsModal from "../../AddGemsModal";
+import getBalance from "../../../utils/balance";
 
 const NavBarDashGym = () => {
   const navigate = useNavigate();
@@ -55,6 +58,51 @@ const NavBarDashGym = () => {
 
   const [showFullName, setShowFullName] = useState(false);
   const [showGG, setShowGG] = useState(true);
+
+  const [gemsBalance, setGemsBalance] = useState(() => {
+    const saved = localStorage.getItem("gems_balance");
+    return saved ? parseInt(saved, 10) : null;
+  });
+  const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+
+  useEffect(() => {
+    const fetchBalance = async () => {
+      if (!localStorage.getItem("gems_balance")) {
+        setIsLoadingBalance(true);
+      }
+      const balance = await getBalance();
+      if (balance !== null) setGemsBalance(balance);
+      setIsLoadingBalance(false);
+    };
+
+    fetchBalance();
+
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("gems_balance");
+      if (saved) setGemsBalance(parseInt(saved, 10));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('gemsUpdated', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('gemsUpdated', handleStorageChange);
+    };
+  }, []);
+
+  const handleAddGems = (pkg) => {
+    setIsAddGemsModalOpen(false);
+    navigate('/checkout', {
+      state: {
+        type: 'gems',
+        gems: pkg.gems,
+        price: pkg.price,
+        user: user
+      }
+    });
+  };
 
   useEffect(() => {
     let interval;
@@ -103,8 +151,8 @@ const NavBarDashGym = () => {
               <span className="relative h-6 w-32 overflow-hidden">
                 <span
                   className={`absolute inset-0 font-bebas text-2xl transition-all text-[#ff8211] duration-500 ${showGG
-                      ? "translate-y-0 opacity-100"
-                      : "-translate-y-4 opacity-0"
+                    ? "translate-y-0 opacity-100"
+                    : "-translate-y-4 opacity-0"
                     }`}
                 >
                   GG
@@ -119,8 +167,8 @@ const NavBarDashGym = () => {
                         key={char + index}
                         style={{ transitionDelay: `${delay}s` }}
                         className={`transition-all duration-300 ${showFullName
-                            ? "translate-y-0 opacity-100"
-                            : "translate-y-4 opacity-0"
+                          ? "translate-y-0 opacity-100"
+                          : "translate-y-4 opacity-0"
                           }`}
                       >
                         {char}
@@ -173,12 +221,19 @@ const NavBarDashGym = () => {
                 </NavLink>
               </motion.div>
 
-              <UserDropdown
-                user={user}
-                logout={logout}
-                dashboardPath="/gym"
-                settingsPath="/gym/settings"
-              />
+              <div className="flex items-center gap-3">
+                <GemsBadge
+                  balance={gemsBalance}
+                  onAddClick={() => setIsAddGemsModalOpen(true)}
+                  isLoading={isLoadingBalance}
+                />
+                <UserDropdown
+                  user={user}
+                  logout={logout}
+                  dashboardPath="/gym"
+                  settingsPath="/gym/settings"
+                />
+              </div>
 
               <motion.button
                 whileTap={{ scale: 0.9 }}
@@ -227,6 +282,12 @@ const NavBarDashGym = () => {
           )}
         </AnimatePresence>
       </motion.nav>
+
+      <AddGemsModal
+        isOpen={isAddGemsModalOpen}
+        onClose={() => setIsAddGemsModalOpen(false)}
+        onContinue={handleAddGems}
+      />
 
       {/* Spacer */}
       <div className="h-16" />

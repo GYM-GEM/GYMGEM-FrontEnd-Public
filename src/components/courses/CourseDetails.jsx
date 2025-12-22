@@ -30,6 +30,7 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import axiosInstance from "../../utils/axiosConfig";
 import { useToast } from "../../context/ToastContext";
+import getBalance from "../../utils/balance";
 
 
 const CourseDetails = () => {
@@ -443,6 +444,10 @@ const CourseDetails = () => {
       const response = await axiosInstance.post(
         `/api/courses/enrollments/${course.id}/enroll/`
       );
+      if(response.status === 200){
+        getBalance()
+        
+      }
 
       // Close modal
       setShowPaymentModal(false);

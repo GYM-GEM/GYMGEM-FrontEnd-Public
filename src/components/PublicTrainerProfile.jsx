@@ -24,6 +24,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CourseCard from "./CourseCard";
 import { useToast } from "../context/ToastContext";
+import getBalance from "../utils/balance";
 
 const PublicTrainerProfile = () => {
   const { id } = useParams();
@@ -98,6 +99,7 @@ const PublicTrainerProfile = () => {
   const fetchUserBalance = async () => {
     try {
       setLoadingBalance(true);
+      
       const response = await axiosInstance.get('/api/profiles/balance', {
         skipGlobalLoader: true
       });
@@ -147,8 +149,10 @@ const PublicTrainerProfile = () => {
         description: bookingForm.description
       };
 
-      await axiosInstance.post('/api/interactive-sessions/request/', payload);
-
+      const response = await axiosInstance.post('/api/interactive-sessions/request/', payload);
+      if (response.status === 201) {
+        getBalance()
+      }
       // Close modal
       setShowPaymentModal(false);
 
@@ -733,7 +737,7 @@ const PublicTrainerProfile = () => {
                         <div className="flex items-center gap-1">
                           <Sparkles className={`w-4 h-4 ${hasEnoughBalance ? 'text-green-600' : 'text-red-600'}`} />
                           <span className={`text-lg font-bold bebas-regular ${hasEnoughBalance ? 'text-green-600' : 'text-red-600'}`}>
-                            {userBalance !== null ? userBalance.toFixed(2) : '0.00'} GEMs
+                            {userBalance !== null ? userBalance.toFixed(2) : localStorage.getItem("gems_balance")} GEMs
                           </span>
                         </div>
                       )}

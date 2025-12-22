@@ -13,6 +13,7 @@ import NotificationDropdown from "./NotificationDropdown";
 import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon } from "lucide-react"; // Added Icons
 import GemsBadge from "./GemsBadge";
 import AddGemsModal from "./AddGemsModal";
+import getBalance from "../utils/balance";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -32,19 +33,31 @@ function Navbar() {
 
   const [gemsBalance, setGemsBalance] = useState(() => {
     const saved = localStorage.getItem("gems_balance");
-    return saved ? parseInt(saved, 10) : 0; 
+    return saved ? parseInt(saved, 10) : null; 
   });
   const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
 
   useEffect(() => {
-    // Keep balance in sync with localStorage if updated elsewhere
+    const fetchBalance = async () => {
+      if (!localStorage.getItem("gems_balance")) {
+        setIsLoadingBalance(true);
+      }
+      const balance = await getBalance();
+      if (balance !== null) setGemsBalance(balance);
+      setIsLoadingBalance(false);
+    };
+
+    fetchBalance();
+
     const handleStorageChange = () => {
       const saved = localStorage.getItem("gems_balance");
       if (saved) setGemsBalance(parseInt(saved, 10));
     };
+
     window.addEventListener('storage', handleStorageChange);
-    // Custom event for same-window updates
     window.addEventListener('gemsUpdated', handleStorageChange);
+    
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('gemsUpdated', handleStorageChange);
@@ -326,6 +339,7 @@ function Navbar() {
                   <GemsBadge 
                     balance={gemsBalance} 
                     onAddClick={() => setIsAddGemsModalOpen(true)} 
+                    isLoading={isLoadingBalance}
                   />
                   {/* <NotificationDropdown /> */}
                   <UserDropdown

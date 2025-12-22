@@ -1,13 +1,22 @@
 import React from 'react';
 import { Sparkles, Plus } from 'lucide-react';
 
-const GemsBadge = ({ balance = 0, onAddClick }) => {
+const GemsBadge = ({ balance = 0, onAddClick, isLoading = false }) => {
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-full border border-gray-100 shadow-sm animate-pulse w-24 h-[34px]">
+        <div className="w-4 h-4 bg-gray-200 rounded-full" />
+        <div className="h-4 bg-gray-200 rounded-md w-12" />
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-full border border-orange-100 shadow-sm transition-all hover:shadow-md group">
       <div className="flex items-center gap-1.5">
         <Sparkles className="w-4 h-4 text-[#FF8211] animate-pulse" />
         <span className="text-sm font-bold text-gray-800 poppins-semibold">
-          {balance.toLocaleString()}
+          {balance !== null ? balance.toLocaleString() : '0'}
         </span>
       </div>
       <button

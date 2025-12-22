@@ -2,19 +2,22 @@ import React, { useState, useEffect } from "react";
 import NavTraineDash from "./NavTraineDash";
 import FooterDash from "../FooterDash";
 import {
-    Video,
-    Play,
     Calendar,
     Clock,
     User,
     FileText,
-    DollarSign,
     Filter,
     Loader2,
     CheckCircle2,
     XCircle,
     AlertCircle,
-    Circle
+    Circle,
+    Sparkles,
+    MessageCircle,
+    Check,
+    X,
+    Ban,
+    Play
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../utils/axiosConfig";
@@ -26,7 +29,8 @@ const MySessions = () => {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState("all");
-    const [sessionId, setSessionId] = useState("");
+    const [userRole, setUserRole] = useState(null);
+    const [actionLoading, setActionLoading] = useState({});
 
     // Status configuration
     const statusConfig = {
@@ -35,9 +39,9 @@ const MySessions = () => {
         completed: { label: "Completed", color: "bg-green-100 text-green-700", icon: CheckCircle2 },
         canceled: { label: "Canceled", color: "bg-gray-100 text-gray-700", icon: XCircle },
         aborted: { label: "Aborted", color: "bg-red-100 text-red-700", icon: XCircle },
-        refunded: { label: "Refunded", color: "bg-orange-100 text-orange-700", icon: DollarSign },
+        refunded: { label: "Refunded", color: "bg-orange-100 text-orange-700", icon: Sparkles },
         rejected: { label: "Rejected", color: "bg-red-100 text-red-700", icon: XCircle },
-        live: { label: "Live", color: "bg-green-500 text-white animate-pulse", icon: Video },
+        live: { label: "Live", color: "bg-green-500 text-white animate-pulse", icon: Play },
         waiting: { label: "Waiting", color: "bg-yellow-100 text-yellow-700", icon: Clock },
         no_show: { label: "No Show", color: "bg-gray-100 text-gray-500", icon: AlertCircle }
     };
@@ -47,7 +51,8 @@ const MySessions = () => {
         try {
             setLoading(true);
             const response = await axiosInstance.get('/api/interactive-sessions/list/');
-            setSessions(response.data || []);
+            setSessions(response.data.data || []);
+            setUserRole(response.data.role);
         } catch (error) {
             console.error('Error fetching sessions:', error);
             showToast('Failed to load sessions', { type: 'error' });
@@ -59,6 +64,69 @@ const MySessions = () => {
     useEffect(() => {
         fetchSessions();
     }, []);
+
+    // Handle session actions
+    const handleAccept = async (sessionId) => {
+        setActionLoading({ ...actionLoading, [sessionId]: 'accept' });
+        try {
+            await axiosInstance.post(`/api/interactive-sessions/${sessionId}/accept/`);
+            showToast('Session accepted successfully', { type: 'success' });
+            await fetchSessions();
+        } catch (error) {
+            console.error('Error accepting session:', error);
+            showToast('Failed to accept session', { type: 'error' });
+        } finally {
+            setActionLoading({ ...actionLoading, [sessionId]: null });
+        }
+    };
+
+    const handleReject = async (sessionId) => {
+        setActionLoading({ ...actionLoading, [sessionId]: 'reject' });
+        try {
+            await axiosInstance.post(`/api/interactive-sessions/${sessionId}/reject/`);
+            showToast('Session rejected', { type: 'success' });
+            await fetchSessions();
+        } catch (error) {
+            console.error('Error rejecting session:', error);
+            showToast('Failed to reject session', { type: 'error' });
+        } finally {
+            setActionLoading({ ...actionLoading, [sessionId]: null });
+        }
+    };
+
+    const handleAbort = async (sessionId) => {
+        setActionLoading({ ...actionLoading, [sessionId]: 'abort' });
+        try {
+            await axiosInstance.post(`/api/interactive-sessions/${sessionId}/abort/`);
+            showToast('Session aborted', { type: 'success' });
+            await fetchSessions();
+        } catch (error) {
+            console.error('Error aborting session:', error);
+            showToast('Failed to abort session', { type: 'error' });
+        } finally {
+            setActionLoading({ ...actionLoading, [sessionId]: null });
+        }
+    };
+
+    const handleCancel = async (sessionId) => {
+        setActionLoading({ ...actionLoading, [sessionId]: 'cancel' });
+        try {
+            await axiosInstance.post(`/api/interactive-sessions/${sessionId}/cancel/`);
+            showToast('Session canceled', { type: 'success' });
+            await fetchSessions();
+        } catch (error) {
+            console.error('Error canceling session:', error);
+            showToast('Failed to cancel session', { type: 'error' });
+        } finally {
+            setActionLoading({ ...actionLoading, [sessionId]: null });
+        }
+    };
+
+    const handleSendMessage = (session) => {
+        // Navigate to messages with the other person's ID
+        const otherPersonId = userRole === 'trainer' ? session.trainee : session.trainer;
+        navigate(`/messages/${otherPersonId}`);
+    };
 
     // Categorize sessions
     const upcomingStatuses = ['requested', 'scheduled', 'live', 'waiting'];
@@ -73,13 +141,6 @@ const MySessions = () => {
         return sessionList.filter(s => s.status === statusFilter);
     };
 
-    const handleJoin = (e) => {
-        e.preventDefault();
-        if (sessionId.trim()) {
-            navigate(`/session/${sessionId}`);
-        }
-    };
-
     const formatDateTime = (dateString) => {
         const date = new Date(dateString);
         return {
@@ -88,12 +149,23 @@ const MySessions = () => {
         };
     };
 
+    // Check if session can be joined (5 minutes before to session time, and status is scheduled)
+    const canJoinSession = (session) => {
+        if (session.status !== 'scheduled') return false;
+
+        const sessionTime = new Date(session.starting_time);
+        const now = new Date();
+        const diffMinutes = (sessionTime - now) / (1000 * 60);
+
+        // Can join if within 5 minutes before or if time has passed
+        return diffMinutes <= 5;
+    };
+
     const SessionCard = ({ session }) => {
         const { date, time } = formatDateTime(session.starting_time);
         const StatusIcon = statusConfig[session.status]?.icon || Circle;
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const isTrainer = user.profile_type === "trainer";
-        const otherPersonName = isTrainer ? session.trainee_name : session.trainer_name;
+        const otherPersonName = userRole === 'trainer' ? session.trainee_name : session.trainer_name;
+        const isLoading = actionLoading[session.id];
 
         return (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all">
@@ -107,7 +179,7 @@ const MySessions = () => {
                                 <h4 className="font-bold text-lg text-gray-900 mb-1">{session.session_title}</h4>
                                 <p className="text-sm text-gray-600 flex items-center gap-1.5">
                                     <User className="w-4 h-4" />
-                                    {isTrainer ? "with" : "by"} {otherPersonName}
+                                    {userRole === 'trainer' ? "with" : "by"} {otherPersonName}
                                 </p>
                             </div>
                         </div>
@@ -122,7 +194,7 @@ const MySessions = () => {
                                 <span className="font-medium">{time}</span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[#ff8211] bg-orange-50 px-3 py-1.5 rounded-lg">
-                                <DollarSign className="w-4 h-4" />
+                                <Sparkles className="w-4 h-4" />
                                 <span className="font-bold">{session.fees} GEMs</span>
                             </div>
                         </div>
@@ -143,16 +215,97 @@ const MySessions = () => {
                     </div>
                 </div>
 
-                {/* Action button for live sessions */}
-                {session.status === 'live' && (
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2 mt-4">
+                    {/* Join button for scheduled sessions when time is near */}
+                    {canJoinSession(session) && (
+                        <button
+                            onClick={() => navigate(`/session/${session.id}`)}
+                            className="flex-1 min-w-[140px] bg-green-500 text-white px-4 py-2.5 rounded-lg font-bold hover:bg-green-600 transition-all flex items-center justify-center gap-2"
+                        >
+                            <Play className="w-4 h-4" />
+                            Join Now
+                        </button>
+                    )}
+
+                    {/* Trainer-specific buttons */}
+                    {userRole === 'trainer' && session.status === 'requested' && (
+                        <>
+                            <button
+                                onClick={() => handleAccept(session.id)}
+                                disabled={!!isLoading}
+                                className="flex-1 min-w-[100px] bg-green-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-green-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading === 'accept' ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <>
+                                        <Check className="w-4 h-4" />
+                                        Accept
+                                    </>
+                                )}
+                            </button>
+                            <button
+                                onClick={() => handleReject(session.id)}
+                                disabled={!!isLoading}
+                                className="flex-1 min-w-[100px] bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isLoading === 'reject' ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <>
+                                        <X className="w-4 h-4" />
+                                        Reject
+                                    </>
+                                )}
+                            </button>
+                        </>
+                    )}
+
+                    {userRole === 'trainer' && session.status === 'scheduled' && !canJoinSession(session) && (
+                        <button
+                            onClick={() => handleAbort(session.id)}
+                            disabled={!!isLoading}
+                            className="flex-1 min-w-[120px] bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading === 'abort' ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <>
+                                    <Ban className="w-4 h-4" />
+                                    Abort
+                                </>
+                            )}
+                        </button>
+                    )}
+
+                    {/* Trainee-specific buttons */}
+                    {userRole === 'trainee' && (session.status === 'requested' || session.status === 'scheduled') && !canJoinSession(session) && (
+                        <button
+                            onClick={() => handleCancel(session.id)}
+                            disabled={!!isLoading}
+                            className="flex-1 min-w-[120px] bg-gray-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading === 'cancel' ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <>
+                                    <XCircle className="w-4 h-4" />
+                                    Cancel
+                                </>
+                            )}
+                        </button>
+                    )}
+
+                    {/* Message button - always available */}
                     <button
-                        onClick={() => navigate(`/session/${session.id}`)}
-                        className="w-full mt-4 bg-green-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-600 transition-all flex items-center justify-center gap-2 animate-pulse"
+                        onClick={() => handleSendMessage(session)}
+                        className="bg-blue-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
                     >
-                        <Play className="w-5 h-5 fill-current" />
-                        JOIN LIVE SESSION
+                        <MessageCircle className="w-4 h-4" />
+                        Message
                     </button>
-                )}
+                </div>
             </div>
         );
     };
@@ -165,35 +318,9 @@ const MySessions = () => {
                     {/* Header */}
                     <div className="mb-8">
                         <h1 className="font-bebas text-4xl text-gray-900 mb-2">My Sessions</h1>
-                        <p className="text-gray-600">Manage and track your training sessions</p>
-                    </div>
-
-                    {/* JOIN SECTION */}
-                    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
-                        <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                            <Video className="w-6 h-6 text-[#ff8211]" />
-                            Join a Session
-                        </h2>
-                        <p className="text-gray-600 mb-4 text-sm">
-                            Enter the Session ID to join a live session
+                        <p className="text-gray-600">
+                            {userRole === 'trainer' ? 'Manage your training sessions with clients' : 'Track your training sessions'}
                         </p>
-                        <form onSubmit={handleJoin} className="flex gap-3">
-                            <input
-                                type="text"
-                                placeholder="Enter Session ID..."
-                                value={sessionId}
-                                onChange={(e) => setSessionId(e.target.value)}
-                                className="flex-1 px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#ff8211] focus:border-transparent"
-                            />
-                            <button
-                                type="submit"
-                                disabled={!sessionId.trim()}
-                                className="bg-[#ff8211] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#e06900] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
-                            >
-                                <Play className="w-5 h-5" />
-                                Join Now
-                            </button>
-                        </form>
                     </div>
 
                     {/* Status Filter */}
@@ -253,7 +380,11 @@ const MySessions = () => {
                                     <div className="bg-white rounded-xl border-2 border-dashed border-gray-200 p-12 text-center">
                                         <Calendar className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                                         <p className="text-gray-500 font-medium">No upcoming sessions</p>
-                                        <p className="text-gray-400 text-sm mt-1">Book a session with a trainer to get started</p>
+                                        <p className="text-gray-400 text-sm mt-1">
+                                            {userRole === 'trainer'
+                                                ? 'Accepted sessions will appear here'
+                                                : 'Book a session with a trainer to get started'}
+                                        </p>
                                     </div>
                                 )}
                             </div>

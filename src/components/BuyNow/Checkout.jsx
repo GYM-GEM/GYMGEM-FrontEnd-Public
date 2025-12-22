@@ -5,7 +5,7 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import axios from "axios";
 import PaymentPage from "./PaymentPage";
-// import PaymentSummary from "../PaymentSummary";
+import { Sparkles } from "lucide-react";
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 
@@ -382,8 +382,39 @@ const Checkout = () => {
             {/* Order Summary */}
             <div className={(iframeUrl || isGemsPurchase) ? "lg:col-span-3 max-w-2xl mx-auto w-full" : "lg:col-span-2"}>
               {isGemsPurchase ? (
-                <div className="mb-8">
-                  <PaymentSummary gems={gems} price={gemsPrice} />
+                <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8 relative overflow-hidden group">
+                  {/* Decorative Background */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-700" />
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="p-4 bg-orange-100 rounded-2xl">
+                        <Sparkles className="w-8 h-8 text-[#FF8211]" />
+                      </div>
+                      <div>
+                        <h2 className="text-3xl font-bold text-gray-900 bebas-regular">GEMS Package</h2>
+                        <p className="text-gray-500 poppins-regular">Boost your account balance</p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                        <p className="text-sm font-semibold text-gray-400 mb-1 uppercase tracking-wider">Amount to Add</p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-3xl font-bold text-gray-900 poppins-bold">{gems?.toLocaleString()}</span>
+                          <span className="text-lg font-bold text-[#FF8211]">GEMS</span>
+                        </div>
+                      </div>
+
+                      <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
+                        <p className="text-sm font-semibold text-gray-400 mb-1 uppercase tracking-wider">Total Price</p>
+                        <div className="flex items-center gap-1">
+                          <span className="text-3xl font-bold text-gray-900 poppins-bold">${gemsPrice?.toFixed(2)}</span>
+                          <span className="text-sm font-medium text-gray-500 poppins-regular">(USD)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">

@@ -346,11 +346,11 @@ const PublicTrainerProfile = () => {
       <div className="min-h-screen bg-gray-50 pb-12">
 
         {/* Header / Hero Section */}
-        <div className="bg-white border-b border-gray-200">
+        <div className="bg-white border-b border-gray-200 pt-20">
           {/* Cover Photo Area */}
-          <div className="h-32 bg-gradient-to-r from-gray-100 to-gray-200 w-full relative">
-            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#FF8211 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-          </div>
+          {/* <div className="h-30 bg-gradient-to-r from-gray-100 to-gray-200 w-full relative "> */}
+            {/* <div className="absolute inset-0 opacity-10 p" style={{ backgroundImage: 'radial-gradient(#FF8211 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div> */}
+          {/* </div> */}
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 pb-6">
             <div className="flex flex-col md:flex-row items-center md:items-end gap-6">

@@ -37,7 +37,7 @@ export default function GoogleLogin({ signType, onStart, onComplete }) {
 				const id_token = response.credential;
 				// POST id_token to your custom accounts/google/login/ endpoint (backend should verify)
 				const res = await axios.post(
-					"http://127.0.0.1:8000/api/auth/social/google/login/",
+					`${VITE_API_URL}/api/auth/social/google/login/`,
 					{ id_token },
 					{ headers: { "Content-Type": "application/json" } }
 				);

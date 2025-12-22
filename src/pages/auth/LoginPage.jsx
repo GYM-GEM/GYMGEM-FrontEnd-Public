@@ -42,7 +42,7 @@ const LoginPage = () => {
       }
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/login",
+        `${VITE_API_URL}/api/auth/login`,
         payload
       );
 

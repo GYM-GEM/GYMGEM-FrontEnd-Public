@@ -39,7 +39,7 @@ const getAllOrders = () => {
 const getEnrolledCourses = () => {
   const token = localStorage.getItem("access");
   try {
-    const response = axios.get("http://127.0.0.1:8000/api/courses/enrollments/my-enrollments", {
+    const response = axios.get(`${VITE_API_URL}/api/courses/enrollments/my-enrollments`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -304,7 +304,7 @@ const Checkout = () => {
         const token = localStorage.getItem("access");
         try {
           const enrollmentResponse = await axios.post(
-            `http://127.0.0.1:8000/api/courses/enrollments/${course.id}/enroll/`,
+            `${VITE_API_URL}/api/courses/enrollments/${course.id}/enroll/`,
             {},
             {
               headers: {

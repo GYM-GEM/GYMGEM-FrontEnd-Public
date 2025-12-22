@@ -57,7 +57,7 @@ const refreshAccessToken = async () => {
         // Send refresh token in the BODY
         // Sending both keys to handle different backend naming conventions (refresh vs refresh_token)
         const response = await axios.post(
-            "http://127.0.0.1:8000/api/auth/refresh-token",
+            `${VITE_API_URL}/api/auth/refresh-token`,
             {
                 refresh: refreshToken,
                 refresh_token: refreshToken

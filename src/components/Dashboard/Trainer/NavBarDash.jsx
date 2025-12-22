@@ -34,6 +34,7 @@ const NavBarDash = () => {
     { to: "/trainer/courses", label: "Courses", icon: <BookOpen size={18} /> },
     { to: "/trainer/clients", label: "Clients", icon: <Users size={18} /> },
     { to: "/trainer/myorder", label: "My Orders", icon: <ClipboardList size={18} /> },
+    { to: "/trainer/sessions", label: "My Sessions", icon: <Calendar size={18} /> },
   ];
 
   const [showFullName, setShowFullName] = useState(false);

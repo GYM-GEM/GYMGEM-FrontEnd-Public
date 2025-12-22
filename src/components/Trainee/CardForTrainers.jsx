@@ -8,8 +8,8 @@ function CardForTrainers({ trainers }) {
         {trainers && trainers.length > 0 ? (
           trainers.map((item) => {
             // Get price from first specialization or default
-            const price = item.specializations?.[0]?.hourly_rate
-              ? `$${item.specializations[0].hourly_rate}`
+            const price = item.rate
+              ? `${item.rate} GEMs`
               : "Contact";
 
             return (
@@ -50,7 +50,7 @@ function CardForTrainers({ trainers }) {
                       </h3>
                       <div className="flex items-center gap-1 text-sm font-bold text-[#ff8211]">
                         {price}
-                        <span className="text-xs font-normal text-gray-400">/hr</span>
+                        <span className="text-xs font-normal text-gray-400">/session</span>
                       </div>
                     </div>
 

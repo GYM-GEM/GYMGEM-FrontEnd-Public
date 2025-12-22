@@ -183,6 +183,7 @@ function App() {
             <Route path="message" element={<ProtectedRoute requiredProfile="trainer"><MessageTR /></ProtectedRoute>} />
             <Route path="calendar" element={<ProtectedRoute requiredProfile="trainer"><WeekCalendar /></ProtectedRoute>} />
             <Route path="myorder" element={<ProtectedRoute requiredProfile="trainer"><OrderTrackingTR /></ProtectedRoute>} />
+            <Route path="sessions" element={<ProtectedRoute requiredProfile="trainer"><MySessions /></ProtectedRoute>} />
           </Route>
 
           {/* -------------------- TRAINEE DASHBOARD -------------------- */}

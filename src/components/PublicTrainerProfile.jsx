@@ -123,6 +123,7 @@ const PublicTrainerProfile = () => {
 
     // Show payment confirmation modal and fetch balance
     setShowPaymentModal(true);
+    setBookingForm({ title: "", description: "" });
     fetchUserBalance();
   };
 
@@ -130,13 +131,19 @@ const PublicTrainerProfile = () => {
     // Prevent multiple clicks
     if (isSubmittingBooking) return;
 
+    // Validate form fields
+    if (!bookingForm.title.trim() || !bookingForm.description.trim()) {
+      showToast("Please fill in all fields.", { type: "error" });
+      return;
+    }
+
     setIsSubmittingBooking(true);
     try {
       const payload = {
         trainer_id: id,
         time_slot_id: selectedSlotId,
-        session_title: "1-on-1 Training Session",
-        description: `Session with ${profile.name}`
+        session_title: bookingForm.title,
+        description: bookingForm.description
       };
 
       await axiosInstance.post('/api/interactive-sessions/request/', payload);
@@ -147,8 +154,9 @@ const PublicTrainerProfile = () => {
       // Show success message
       showToast("Session booked successfully! You can now view your upcoming sessions.", { type: "success" });
 
-      // Reset selection and refresh balance
+      // Reset selection, form, and refresh balance
       setSelectedSlotId(null);
+      setBookingForm({ title: "", description: "" });
       await fetchUserBalance();
 
     } catch (error) {
@@ -645,7 +653,7 @@ const PublicTrainerProfile = () => {
 
         return (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => !isSubmittingBooking && setShowPaymentModal(false)}>
-            <div className="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl max-w-3xl w-full p-8 shadow-2xl" onClick={e => e.stopPropagation()}>
               <div className="text-center mb-6">
                 <div className="w-20 h-20 bg-gradient-to-br from-[#FF8211] to-[#ff9933] rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <Sparkles className="w-10 h-10 text-white" />
@@ -658,67 +666,110 @@ const PublicTrainerProfile = () => {
                 </p>
               </div>
 
-              {/* Session Summary */}
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 mb-6 border border-gray-200">
-                <div className="flex items-start gap-4 mb-4">
-                  <img
-                    src={profile.avatar}
-                    alt={profile.name}
-                    className="w-20 h-20 rounded-lg object-cover shadow-md"
-                  />
-                  <div className="flex-1">
-                    <h4 className="font-bold text-gray-900 poppins-medium text-sm mb-1">
-                      1-on-1 Training Session
-                    </h4>
-                    <p className="text-xs text-gray-600 poppins-regular">
-                      with {profile.name}
-                    </p>
+              {/* Session Summary and Balance - Side by Side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Left: Session Summary */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Session Details</h4>
+                  <div className="flex items-start gap-4">
+                    <img
+                      src={profile.avatar}
+                      alt={profile.name}
+                      className="w-16 h-16 rounded-lg object-cover shadow-md"
+                    />
+                    <div className="flex-1">
+                      <h5 className="font-bold text-gray-900 poppins-medium text-sm mb-1">
+                        1-on-1 Training Session
+                      </h5>
+                      <p className="text-xs text-gray-600 poppins-regular">
+                        with {profile.name}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <div className="border-t border-gray-300 pt-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 poppins-regular">Session Price</span>
-                    <div className="flex items-center gap-1">
-                      <Sparkles className="w-4 h-4 text-[#FF8211]" />
-                      <span className="text-lg font-bold text-[#FF8211] bebas-regular">
-                        {sessionPrice.toFixed(2)} GEMs
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 poppins-regular">Your Balance</span>
-                    {loadingBalance ? (
+                {/* Right: Balance Info */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Payment Summary</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 poppins-regular">Session Price</span>
                       <div className="flex items-center gap-1">
-                        <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
-                        <span className="text-sm text-gray-400 poppins-regular">Loading...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1">
-                        <Sparkles className={`w-4 h-4 ${hasEnoughBalance ? 'text-green-600' : 'text-red-600'}`} />
-                        <span className={`text-lg font-bold bebas-regular ${hasEnoughBalance ? 'text-green-600' : 'text-red-600'}`}>
-                          {userBalance !== null ? userBalance.toFixed(2) : '0.00'} GEMs
+                        <Sparkles className="w-4 h-4 text-[#FF8211]" />
+                        <span className="text-lg font-bold text-[#FF8211] bebas-regular">
+                          {sessionPrice.toFixed(2)} GEMs
                         </span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600 poppins-regular">Your Balance</span>
+                      {loadingBalance ? (
+                        <div className="flex items-center gap-1">
+                          <Loader2 className="w-4 h-4 text-gray-400 animate-spin" />
+                          <span className="text-sm text-gray-400 poppins-regular">Loading...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1">
+                          <Sparkles className={`w-4 h-4 ${hasEnoughBalance ? 'text-green-600' : 'text-red-600'}`} />
+                          <span className={`text-lg font-bold bebas-regular ${hasEnoughBalance ? 'text-green-600' : 'text-red-600'}`}>
+                            {userBalance !== null ? userBalance.toFixed(2) : '0.00'} GEMs
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {hasEnoughBalance && (
+                      <div className="border-t border-gray-300 pt-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-semibold text-gray-700 poppins-medium">Balance After</span>
+                          <div className="flex items-center gap-1">
+                            <Sparkles className="w-4 h-4 text-gray-700" />
+                            <span className="text-lg font-bold text-gray-900 bebas-regular">
+                              {balanceAfter} GEMs
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
-
-                  {hasEnoughBalance && (
-                    <div className="border-t border-gray-300 pt-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-700 poppins-medium">Balance After</span>
-                        <div className="flex items-center gap-1">
-                          <Sparkles className="w-4 h-4 text-gray-700" />
-                          <span className="text-lg font-bold text-gray-900 bebas-regular">
-                            {balanceAfter} GEMs
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
+
+              {/* Session Details Form - Only shown when balance is sufficient */}
+              {hasEnoughBalance && (
+                <div className="mb-6">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-4">Session Information</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Session Title <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={bookingForm.title}
+                        onChange={(e) => setBookingForm({ ...bookingForm, title: e.target.value })}
+                        placeholder="e.g., Weight Loss Consultation"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF8211] focus:border-transparent outline-none transition-all"
+                        disabled={isSubmittingBooking}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Description / Goals <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={bookingForm.description}
+                        onChange={(e) => setBookingForm({ ...bookingForm, description: e.target.value })}
+                        placeholder="e.g., Learn proper squat form, create meal plan"
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#FF8211] focus:border-transparent outline-none transition-all"
+                        disabled={isSubmittingBooking}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Insufficient Balance Warning */}
               {!hasEnoughBalance && userBalance !== null && (

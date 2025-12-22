@@ -25,18 +25,19 @@ export default function WeekCalendar() {
     const pad = (n) => String(n).padStart(2, "0");
 
     const timeRange = useMemo(() => {
-        const startHour = 6;
-        const endHour = 22;
+        const startHour = 0;
+        const endHour = 24;
         const slots = [];
         for (let h = startHour; h < endHour; h++) {
             const displayHour = h > 12 ? h - 12 : h;
             const ampm = h >= 12 ? 'PM' : 'AM';
+
             slots.push(`${displayHour}:00 ${ampm}`);
             slots.push(`${displayHour}:30 ${ampm}`);
         }
         const endDisplayHour = endHour > 12 ? endHour - 12 : endHour;
         const endAmPm = endHour >= 12 ? 'PM' : 'AM';
-        slots.push(`${endDisplayHour}:00 ${endAmPm}`);
+        // slots.push(`${endDisplayHour}:00 ${endAmPm}`);
         return slots;
     }, []);
 
@@ -197,166 +198,166 @@ export default function WeekCalendar() {
 
     return (
         <>
-        <NavBarDash />  
-        <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
+            <NavBarDash />
+            <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
 
-            {/* Header Section */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                <div>
-                    <h1 className="text-3xl font-bold text-gray-900 bebas-regular flex items-center gap-2">
-                        <CalendarIcon className="w-6 h-6 text-[#FF8211]" />
-                        My Schedule
-                    </h1>
-                    <p className="text-gray-500 poppins-regular text-sm mt-1">
-                        Manage your weekly sessions and events
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-3 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
-                    <button
-                        onClick={prevWeek}
-                        className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600 hover:text-[#FF8211]"
-                    >
-                        <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <button
-                        onClick={goToday}
-                        className="px-4 py-2 text-sm font-semibold poppins-medium text-gray-700 bg-white shadow-sm rounded-lg hover:text-[#FF8211] transition-colors"
-                    >
-                        Today
-                    </button>
-                    <button
-                        onClick={nextWeek}
-                        className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600 hover:text-[#FF8211]"
-                    >
-                        <ChevronRight className="w-5 h-5" />
-                    </button>
-                </div>
-
-                <div className="hidden md:block text-right">
-                    <div className="text-lg font-semibold poppins-semibold text-gray-800">
-                        {weekStart.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
+                {/* Header Section */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                    <div>
+                        <h1 className="text-3xl font-bold text-gray-900 bebas-regular flex items-center gap-2">
+                            <CalendarIcon className="w-6 h-6 text-[#FF8211]" />
+                            My Schedule
+                        </h1>
+                        <p className="text-gray-500 poppins-regular text-sm mt-1">
+                            Manage your weekly sessions and events
+                        </p>
                     </div>
-                    <div className="text-sm text-gray-500 poppins-regular">
-                        Week {pad(Math.ceil((weekStart.getDate() + 6 - weekStart.getDay()) / 7))}
-                    </div>
-                </div>
-            </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                {/* Calendar Grid Header */}
-                <div className="grid grid-cols-8 border-b border-gray-200 bg-gray-50/50">
-                    <div className="h-14 border-r border-gray-200 flex items-center justify-center p-2">
-                        <Clock className="w-5 h-5 text-gray-400" />
+                    <div className="flex items-center gap-3 bg-gray-50 p-1.5 rounded-xl border border-gray-200">
+                        <button
+                            onClick={prevWeek}
+                            className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600 hover:text-[#FF8211]"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={goToday}
+                            className="px-4 py-2 text-sm font-semibold poppins-medium text-gray-700 bg-white shadow-sm rounded-lg hover:text-[#FF8211] transition-colors"
+                        >
+                            Today
+                        </button>
+                        <button
+                            onClick={nextWeek}
+                            className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all text-gray-600 hover:text-[#FF8211]"
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </button>
                     </div>
-                    {days.map((d) => {
-                        const isToday = d.toDateString() === new Date().toDateString();
-                        return (
-                            <div key={d.toDateString()} className={`h-14 border-r border-gray-200 last:border-r-0 flex flex-col items-center justify-center p-2 transition-colors ${isToday ? 'bg-[#FF8211]/5' : ''}`}>
-                                <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${isToday ? 'text-[#FF8211]' : 'text-gray-500'}`}>
-                                    {d.toLocaleDateString(undefined, { weekday: "short" })}
-                                </div>
-                                <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm ${isToday ? 'bg-[#FF8211] text-white shadow-md' : 'text-gray-900 group-hover:bg-gray-100'}`}>
-                                    {d.getDate()}
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
 
-                {/* Scrollable Grid Area */}
-                <div className="relative max-h-[800px] overflow-y-auto custom-scrollbar">
-                    <div className="grid grid-cols-8 min-w-[800px]">
-                        {/* Time Column */}
-                        <div className="col-start-1 col-end-2 border-r border-gray-200 bg-gray-50/30">
-                            {timeRange.map((t, idx) => (
-                                <div key={t + idx} className={`h-12 border-b border-gray-100 flex items-start justify-end px-3 py-1 text-xs font-medium text-gray-400 ${idx % 2 !== 0 && 'bg-white'}`}>
-                                    {t}
-                                </div>
-                            ))}
+                    <div className="hidden md:block text-right">
+                        <div className="text-lg font-semibold poppins-semibold text-gray-800">
+                            {weekStart.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
                         </div>
+                        <div className="text-sm text-gray-500 poppins-regular">
+                            Week {pad(Math.ceil((weekStart.getDate() + 6 - weekStart.getDay()) / 7))}
+                        </div>
+                    </div>
+                </div>
 
-                        {/* Days Columns */}
-                        {days.map((day) => {
-                            const isToday = day.toDateString() === new Date().toDateString();
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                    {/* Calendar Grid Header */}
+                    <div className="grid grid-cols-8 border-b border-gray-200 bg-gray-50/50">
+                        <div className="h-14 border-r border-gray-200 flex items-center justify-center p-2">
+                            <Clock className="w-5 h-5 text-gray-400" />
+                        </div>
+                        {days.map((d) => {
+                            const isToday = d.toDateString() === new Date().toDateString();
                             return (
-                                <div key={day.toDateString()} className={`col-start-2 col-end-9 grid grid-cols-7 absolute inset-0 left-[12.5%] pointer-events-none`}>
-                                    {/* Just for grid lines visual */}
+                                <div key={d.toDateString()} className={`h-14 border-r border-gray-200 last:border-r-0 flex flex-col items-center justify-center p-2 transition-colors ${isToday ? 'bg-[#FF8211]/5' : ''}`}>
+                                    <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${isToday ? 'text-[#FF8211]' : 'text-gray-500'}`}>
+                                        {d.toLocaleDateString(undefined, { weekday: "short" })}
+                                    </div>
+                                    <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold text-sm ${isToday ? 'bg-[#FF8211] text-white shadow-md' : 'text-gray-900 group-hover:bg-gray-100'}`}>
+                                        {d.getDate()}
+                                    </div>
                                 </div>
                             );
                         })}
+                    </div>
 
-                        {/* Actually rendered columns for interaction */}
-                        {days.map((day, colIndex) => (
-                            <div key={day.toDateString()} className={`col-span-1 border-r border-gray-100 relative ${colIndex === 6 ? 'border-r-0' : ''}`}>
+                    {/* Scrollable Grid Area */}
+                    <div className="relative max-h-[800px] overflow-y-auto custom-scrollbar">
+                        <div className="grid grid-cols-8 min-w-[800px]">
+                            {/* Time Column */}
+                            <div className="col-start-1 col-end-2 border-r border-gray-200 bg-gray-50/30">
                                 {timeRange.map((t, idx) => (
-                                    <div
-                                        key={t + idx}
-                                        className="h-12 border-b border-gray-100 relative hover:bg-gray-50 transition-colors cursor-pointer group"
-                                        onClick={() => addEventDirectly(day, t)}
-                                    >
-                                        <div className="hidden group-hover:flex items-center justify-center h-full w-full opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Plus className="w-4 h-4 text-gray-400" />
-                                        </div>
-
-                                        {/* Render Events */}
-                                        {eventsForDay(day)
-                                            .filter((ev) => {
-                                                const s = new Date(ev.start);
-                                                const thisSlot = parseDateTime(day, t);
-                                                return s.getTime() === thisSlot.getTime();
-                                            })
-                                            .map((ev) => {
-                                                const s = new Date(ev.start);
-                                                const e = new Date(ev.end);
-                                                const durationMins = Math.max(30, (e - s) / 60000);
-                                                const heightSlots = durationMins / 30;
-                                                // 48px (h-12) per slot
-                                                const height = heightSlots * 48 - 4; // -4 for spacing
-
-                                                return (
-                                                    <div
-                                                        key={ev.id}
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (!ev.isPending && !ev.isDeleting) {
-                                                                handleDeleteSlot(ev.id);
-                                                            }
-                                                        }}
-                                                        className={`absolute left-[2px] right-[2px] top-[2px] z-10 rounded-lg p-2 text-white shadow-sm transition-all group/event overflow-hidden 
-                                                            ${(ev.isPending || ev.isDeleting) ? 'opacity-80 cursor-wait' : 'cursor-pointer hover:shadow-md hover:bg-red-500 hover:opacity-90'}`}
-                                                        title={ev.isPending ? "Adding..." : ev.isDeleting ? "Deleting..." : "Click to delete"}
-                                                        style={{ height: `${height}px`, backgroundColor: ev.isDeleting ? '#999' : ev.color }}
-                                                    >
-                                                        {(ev.isPending || ev.isDeleting) && (
-                                                            <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-20">
-                                                                <Loader2 className="w-5 h-5 animate-spin text-white" />
-                                                            </div>
-                                                        )}
-                                                        <div className="flex flex-col h-full">
-                                                            <div className="font-semibold text-xs leading-tight line-clamp-2 poppins-medium">
-                                                                {ev.title}
-                                                            </div>
-                                                            <div className="text-[10px] opacity-90 mt-0.5 flex items-center gap-1 font-mono">
-                                                                <Clock className="w-3 h-3" />
-                                                                {s.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
-                                                            </div>
-
-
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
+                                    <div key={t + idx} className={`h-12 border-b border-gray-100 flex items-start justify-end px-3 py-1 text-xs font-medium text-gray-400 ${idx % 2 !== 0 && 'bg-white'}`}>
+                                        {t}
                                     </div>
                                 ))}
                             </div>
-                        ))}
+
+                            {/* Days Columns */}
+                            {days.map((day) => {
+                                const isToday = day.toDateString() === new Date().toDateString();
+                                return (
+                                    <div key={day.toDateString()} className={`col-start-2 col-end-9 grid grid-cols-7 absolute inset-0 left-[12.5%] pointer-events-none`}>
+                                        {/* Just for grid lines visual */}
+                                    </div>
+                                );
+                            })}
+
+                            {/* Actually rendered columns for interaction */}
+                            {days.map((day, colIndex) => (
+                                <div key={day.toDateString()} className={`col-span-1 border-r border-gray-100 relative ${colIndex === 6 ? 'border-r-0' : ''}`}>
+                                    {timeRange.map((t, idx) => (
+                                        <div
+                                            key={t + idx}
+                                            className="h-12 border-b border-gray-100 relative hover:bg-gray-50 transition-colors cursor-pointer group"
+                                            onClick={() => addEventDirectly(day, t)}
+                                        >
+                                            <div className="hidden group-hover:flex items-center justify-center h-full w-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Plus className="w-4 h-4 text-gray-400" />
+                                            </div>
+
+                                            {/* Render Events */}
+                                            {eventsForDay(day)
+                                                .filter((ev) => {
+                                                    const s = new Date(ev.start);
+                                                    const thisSlot = parseDateTime(day, t);
+                                                    return s.getTime() === thisSlot.getTime();
+                                                })
+                                                .map((ev) => {
+                                                    const s = new Date(ev.start);
+                                                    const e = new Date(ev.end);
+                                                    const durationMins = Math.max(30, (e - s) / 60000);
+                                                    const heightSlots = durationMins / 30;
+                                                    // 48px (h-12) per slot
+                                                    const height = heightSlots * 48 - 4; // -4 for spacing
+
+                                                    return (
+                                                        <div
+                                                            key={ev.id}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (!ev.isPending && !ev.isDeleting) {
+                                                                    handleDeleteSlot(ev.id);
+                                                                }
+                                                            }}
+                                                            className={`absolute left-[2px] right-[2px] top-[2px] z-10 rounded-lg p-2 text-white shadow-sm transition-all group/event overflow-hidden 
+                                                            ${(ev.isPending || ev.isDeleting) ? 'opacity-80 cursor-wait' : 'cursor-pointer hover:shadow-md hover:bg-red-500 hover:opacity-90'}`}
+                                                            title={ev.isPending ? "Adding..." : ev.isDeleting ? "Deleting..." : "Click to delete"}
+                                                            style={{ height: `${height}px`, backgroundColor: ev.isDeleting ? '#999' : ev.color }}
+                                                        >
+                                                            {(ev.isPending || ev.isDeleting) && (
+                                                                <div className="absolute inset-0 flex items-center justify-center bg-black/10 z-20">
+                                                                    <Loader2 className="w-5 h-5 animate-spin text-white" />
+                                                                </div>
+                                                            )}
+                                                            <div className="flex flex-col h-full">
+                                                                <div className="font-semibold text-xs leading-tight line-clamp-2 poppins-medium">
+                                                                    {ev.title}
+                                                                </div>
+                                                                <div className="text-[10px] opacity-90 mt-0.5 flex items-center gap-1 font-mono">
+                                                                    <Clock className="w-3 h-3" />
+                                                                    {s.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })}
+                                                                </div>
+
+
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Events List Footer */}
-            {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                {/* Events List Footer */}
+                {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                 <h2 className="text-xl font-bold text-gray-900 bebas-regular mb-4 flex items-center gap-2">
                     Weekly Agenda
                     <span className="text-sm font-normal text-gray-500 poppins-regular bg-gray-100 px-2 py-0.5 rounded-full">
@@ -404,10 +405,10 @@ export default function WeekCalendar() {
                 </div>
             </div> */}
 
-            {/* Modal Overlay */}
+                {/* Modal Overlay */}
 
-        </div>
-        <FooterDash />
+            </div>
+            <FooterDash />
         </>
     );
 }

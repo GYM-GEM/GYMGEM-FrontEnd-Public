@@ -5,6 +5,7 @@ import {
     Lock,
     ShieldCheck,
 } from "lucide-react";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 export default function PaymentPage({
     total = 0,
@@ -74,7 +75,7 @@ export default function PaymentPage({
                 const token = localStorage.getItem("access");
 
                 // Call the payment start endpoint with course ID
-                const res = await fetch(`http://127.0.0.1:8000/api/payment/start/`, {
+                const res = await fetch(`${VITE_API_URL}/api/payment/start/`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

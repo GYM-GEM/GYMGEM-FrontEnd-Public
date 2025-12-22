@@ -69,7 +69,7 @@ const MySessions = () => {
     const handleAccept = async (sessionId) => {
         setActionLoading({ ...actionLoading, [sessionId]: 'accept' });
         try {
-            await axiosInstance.post(`/api/interactive-sessions/${sessionId}/accept/`);
+            await axiosInstance.post(`/api/interactive-sessions/accept/${sessionId}/`);
             showToast('Session accepted successfully', { type: 'success' });
             await fetchSessions();
         } catch (error) {
@@ -83,7 +83,7 @@ const MySessions = () => {
     const handleReject = async (sessionId) => {
         setActionLoading({ ...actionLoading, [sessionId]: 'reject' });
         try {
-            await axiosInstance.post(`/api/interactive-sessions/${sessionId}/reject/`);
+            await axiosInstance.post(`/api/interactive-sessions/reject/${sessionId}/`);
             showToast('Session rejected', { type: 'success' });
             await fetchSessions();
         } catch (error) {
@@ -97,7 +97,7 @@ const MySessions = () => {
     const handleAbort = async (sessionId) => {
         setActionLoading({ ...actionLoading, [sessionId]: 'abort' });
         try {
-            await axiosInstance.post(`/api/interactive-sessions/${sessionId}/abort/`);
+            await axiosInstance.post(`/api/interactive-sessions/abort/${sessionId}/`);
             showToast('Session aborted', { type: 'success' });
             await fetchSessions();
         } catch (error) {
@@ -111,7 +111,7 @@ const MySessions = () => {
     const handleCancel = async (sessionId) => {
         setActionLoading({ ...actionLoading, [sessionId]: 'cancel' });
         try {
-            await axiosInstance.post(`/api/interactive-sessions/${sessionId}/cancel/`);
+            await axiosInstance.post(`/api/interactive-sessions/cancel/${sessionId}/`);
             showToast('Session canceled', { type: 'success' });
             await fetchSessions();
         } catch (error) {
@@ -221,7 +221,7 @@ const MySessions = () => {
                     {canJoinSession(session) && (
                         <button
                             onClick={() => navigate(`/session/${session.id}`)}
-                            className="flex-1 min-w-[140px] bg-green-500 text-white px-4 py-2.5 rounded-lg font-bold hover:bg-green-600 transition-all flex items-center justify-center gap-2"
+                            className="flex-1 min-w-[140px] bg-emerald-500 text-white px-4 py-2.5 rounded-lg font-bold hover:bg-emerald-600 transition-all flex items-center justify-center gap-2"
                         >
                             <Play className="w-4 h-4" />
                             Join Now
@@ -234,7 +234,7 @@ const MySessions = () => {
                             <button
                                 onClick={() => handleAccept(session.id)}
                                 disabled={!!isLoading}
-                                className="flex-1 min-w-[100px] bg-green-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-green-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 min-w-[100px] bg-teal-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-teal-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading === 'accept' ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -248,7 +248,7 @@ const MySessions = () => {
                             <button
                                 onClick={() => handleReject(session.id)}
                                 disabled={!!isLoading}
-                                className="flex-1 min-w-[100px] bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex-1 min-w-[100px] bg-rose-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-rose-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isLoading === 'reject' ? (
                                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -266,7 +266,7 @@ const MySessions = () => {
                         <button
                             onClick={() => handleAbort(session.id)}
                             disabled={!!isLoading}
-                            className="flex-1 min-w-[120px] bg-red-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-red-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 min-w-[120px] bg-rose-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-rose-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading === 'abort' ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -284,7 +284,7 @@ const MySessions = () => {
                         <button
                             onClick={() => handleCancel(session.id)}
                             disabled={!!isLoading}
-                            className="flex-1 min-w-[120px] bg-gray-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-gray-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 min-w-[120px] bg-slate-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-slate-600 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading === 'cancel' ? (
                                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -300,7 +300,7 @@ const MySessions = () => {
                     {/* Message button - always available */}
                     <button
                         onClick={() => handleSendMessage(session)}
-                        className="bg-blue-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
+                        className="bg-sky-500 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-sky-600 transition-all flex items-center justify-center gap-2"
                     >
                         <MessageCircle className="w-4 h-4" />
                         Message
@@ -333,8 +333,8 @@ const MySessions = () => {
                             <button
                                 onClick={() => setStatusFilter("all")}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${statusFilter === "all"
-                                        ? "bg-[#ff8211] text-white shadow-md"
-                                        : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                                    ? "bg-[#ff8211] text-white shadow-md"
+                                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
                                     }`}
                             >
                                 All Sessions
@@ -346,8 +346,8 @@ const MySessions = () => {
                                         key={status}
                                         onClick={() => setStatusFilter(status)}
                                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 whitespace-nowrap ${statusFilter === status
-                                                ? config.color + " shadow-md"
-                                                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                                            ? config.color + " shadow-md"
+                                            : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
                                             }`}
                                     >
                                         <Icon className="w-4 h-4" />

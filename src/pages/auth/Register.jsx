@@ -8,6 +8,8 @@ import cover_img from "../../assets/cover.svg";
 import axios from "axios";
 import GoogleLogin from "../../components/GoogleLogin";
 import { useToast } from "../../context/ToastContext";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,7 +27,7 @@ const SignUpPage = () => {
     try {
       // Send POST request to backend
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/accounts/create",
+        `${VITE_API_URL}/api/accounts/create`,
         data
       );
       console.log("Response:", response.data);

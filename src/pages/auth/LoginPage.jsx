@@ -9,6 +9,8 @@ import GoogleLogin from "../../components/GoogleLogin.jsx";
 import { Loader2 } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
 
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
 function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);
@@ -42,7 +44,7 @@ const LoginPage = () => {
       }
 
       const response = await axios.post(
-        "http://127.0.0.1:8000/api/auth/login",
+        `${VITE_API_URL}/api/auth/login`,
         payload
       );
 

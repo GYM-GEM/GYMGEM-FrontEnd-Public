@@ -1,13 +1,13 @@
 import axios from "axios";
 import { getTokenTimeRemaining, decodeToken } from "./auth.js";
 
-const baseURL = import.meta.env.VITE_API_URL;
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 // ============================================================================
 // AXIOS INSTANCE CONFIGURATION
 // ============================================================================
 const axiosInstance = axios.create({
-    baseURL: baseURL,
+    baseURL: VITE_API_URL,
     timeout: 20000,
     headers: {
         "Content-Type": "application/json",
@@ -57,7 +57,7 @@ const refreshAccessToken = async () => {
         // Send refresh token in the BODY
         // Sending both keys to handle different backend naming conventions (refresh vs refresh_token)
         const response = await axios.post(
-            "http://127.0.0.1:8000/api/auth/refresh-token",
+            `${VITE_API_URL}/api/auth/refresh-token`,
             {
                 refresh: refreshToken,
                 refresh_token: refreshToken

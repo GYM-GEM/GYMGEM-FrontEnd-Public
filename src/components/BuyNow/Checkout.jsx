@@ -5,6 +5,8 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import axios from "axios";
 import PaymentPage from "./PaymentPage";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
 
 // ============================================================================
 // ORDER MANAGEMENT LOGIC

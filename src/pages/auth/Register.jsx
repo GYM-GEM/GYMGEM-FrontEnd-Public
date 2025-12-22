@@ -8,6 +8,8 @@ import cover_img from "../../assets/cover.svg";
 import axios from "axios";
 import GoogleLogin from "../../components/GoogleLogin";
 import { useToast } from "../../context/ToastContext";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);

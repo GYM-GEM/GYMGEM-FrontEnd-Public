@@ -1,5 +1,7 @@
 import axios from "axios";
 import { getTokenTimeRemaining, isRefreshTokenValid, decodeToken } from "./auth";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
 
 /**
  * ensureValidToken()

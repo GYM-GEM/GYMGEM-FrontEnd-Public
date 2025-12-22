@@ -5,6 +5,7 @@ import {
     Lock,
     ShieldCheck,
 } from "lucide-react";
+const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 export default function PaymentPage({
     total = 0,

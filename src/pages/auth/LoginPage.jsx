@@ -9,6 +9,8 @@ import GoogleLogin from "../../components/GoogleLogin.jsx";
 import { Loader2 } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
 
+const VITE_API_URL = import.meta.env.VITE_API_URL;
+
 function isValidEmail(email) {
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return re.test(email);

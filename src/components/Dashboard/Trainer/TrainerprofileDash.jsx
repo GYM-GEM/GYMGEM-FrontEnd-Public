@@ -4,7 +4,7 @@ import {
   Edit, Trash2, Plus, X, Save,
   MapPin, Phone, Mail, Calendar,
   Briefcase, Award, Activity, TrendingUp,
-  User, DollarSign, Linkedin
+  User, Sparkles, Linkedin
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,8 @@ const TrainerProfileDash = () => {
     editSpecialization: false,
     addExperience: false,
     editExperience: false,
+    editRecord: false,
+    viewRecord: false,
   });
 
   // Initialize state with default empty values
@@ -44,7 +46,8 @@ const TrainerProfileDash = () => {
       balance: 0,
     },
     specializations: [],
-    experiences: []
+    experiences: [],
+    allRecords: []
   });
 
   const [currentEdit, setCurrentEdit] = useState(null);
@@ -67,7 +70,8 @@ const TrainerProfileDash = () => {
         if (trainer) {
           const resolvedName = trainer.name || "Trainer";
 
-          setProfileData({
+          setProfileData(prev => ({
+            ...prev,
             profile: {
               name: resolvedName,
               avatar: trainer.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(resolvedName)}&background=FF8211&color=fff`,
@@ -83,7 +87,9 @@ const TrainerProfileDash = () => {
             },
             specializations: specializations || [],
             experiences: experiences || []
-          });
+          }));
+
+
         }
       } catch (error) {
         console.error("Error fetching trainer profile:", error);
@@ -227,6 +233,91 @@ const TrainerProfileDash = () => {
     }
   };
 
+  // Record handlers
+  const handleSaveRecord = async () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const profileId = user.current_profile;
+
+    if (!profileId) {
+      showToast("Profile ID not found", { type: "error" });
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const payload = {
+        record_date: formData.record_date,
+        weight: formData.weight,
+        height: formData.height,
+        body_fat_percentage: formData.body_fat_percentage,
+        muscle_mass: formData.muscle_mass,
+        bone_mass: formData.bone_mass,
+        body_water_percentage: formData.body_water_percentage,
+        BMR: formData.BMR,
+      };
+
+      const recordId = profileData.record?.id;
+      let response;
+
+      if (recordId !== undefined && recordId !== null) {
+        // Update existing record
+        response = await axiosInstance.put(`/api/trainers/records/${recordId}/`, payload);
+      } else {
+        // Create new record
+        response = await axiosInstance.post(`/api/trainers/records/`, payload);
+      }
+
+      setProfileData(prev => ({
+        ...prev,
+        record: response.data
+      }));
+
+      // Refresh all records to update history and latest record
+      await fetchAllRecords();
+
+      closeModal("editRecord");
+      showToast("Record saved successfully!", { type: "success" });
+    } catch (error) {
+      console.error("Error saving record:", error);
+      showToast("Failed to save record", { type: "error" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchAllRecords = async () => {
+    try {
+      const response = await axiosInstance.get(`/api/trainers/records/`);
+      console.log("All records data:", response.data);
+      if (response.data && response.data.results) {
+        const sortedRecords = response.data.results.sort((a, b) => {
+          const dateComparison = new Date(b.record_date) - new Date(a.record_date);
+          if (dateComparison !== 0) return dateComparison;
+          // If dates are equal, sort by created_at desc to get the latest entry for that day
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+
+        setProfileData(prev => ({
+          ...prev,
+          record: sortedRecords.length > 0 ? sortedRecords[0] : null,
+          allRecords: sortedRecords
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching records:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllRecords();
+  }, []);
+
+
+
+
+
+
   if (isLoading) {
     return (
       <>
@@ -250,12 +341,12 @@ const TrainerProfileDash = () => {
         {/* Header / Cover Section */}
         <div className="bg-white border-b border-gray-200">
           {/* Cover Photo */}
-          <div className="h-48 bg-gradient-to-r from-[#FF8211] via-[#ff9a42] to-[#FF8211] w-full relative">
+          <div className="h-48 bg-gradient-to-r from-[#FF8211] via-[#ff9a42] to-[#FF8211] w-full relative overflow-hidden">
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
           </div>
 
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-6">
-            <div className="flex flex-col md:flex-row items-center md:items-end gap-6">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 pb-6">
+            <div className="flex flex-col md:flex-row items-center md:items-end gap-6 bg-white pt-16 px-4 rounded-t-2xl">
               {/* Avatar */}
               <div className="relative">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-100">
@@ -292,9 +383,9 @@ const TrainerProfileDash = () => {
                     </span>
                   )}
                   {profile.rate > 0 && (
-                    <span className="flex items-center gap-1 text-green-600 font-semibold">
-                      <DollarSign className="w-4 h-4" />
-                      ${profile.rate}/session
+                    <span className="flex items-center gap-1 text-[#FF8211] font-semibold">
+                      <Sparkles className="w-4 h-4 text-[#FF8211]" />
+                      {profile.rate} gems/session
                     </span>
                   )}
                 </div>
@@ -434,6 +525,121 @@ const TrainerProfileDash = () => {
                   </div>
                 )}
               </div>
+
+              {/* Body Composition Record */}
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 bebas-regular flex items-center gap-2">
+                    <span className="w-1 h-8 bg-red-500 rounded-full"></span>
+                    Body Composition
+                  </h2>
+                  <button
+                    onClick={() => openModal("editRecord", profileData.record)}
+                    className={`px-4 py-2 ${profileData.record ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' : 'bg-red-500 text-white hover:bg-red-600'} rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm`}
+                  >
+                    {profileData.record ? (
+                      <>
+                        <Edit className="w-4 h-4" />
+                        Edit
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-4 h-4" />
+                        Add Record
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {profileData.record ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div className="bg-gray-50 p-4 rounded-xl text-center">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Weight</p>
+                      <p className="text-xl font-bold text-gray-900">{profileData.record.weight || "-"}</p>
+                      <p className="text-xs text-gray-400">kg</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl text-center">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Height</p>
+                      <p className="text-xl font-bold text-gray-900">{profileData.record.height || "-"}</p>
+                      <p className="text-xs text-gray-400">cm</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl text-center">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Body Fat</p>
+                      <p className="text-xl font-bold text-gray-900">{profileData.record.body_fat_percentage || "-"}</p>
+                      <p className="text-xs text-gray-400">%</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl text-center">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Muscle</p>
+                      <p className="text-xl font-bold text-gray-900">{profileData.record.muscle_mass || "-"}</p>
+                      <p className="text-xs text-gray-400">kg</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl text-center">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Water</p>
+                      <p className="text-xl font-bold text-gray-900">{profileData.record.body_water_percentage || "-"}</p>
+                      <p className="text-xs text-gray-400">%</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl text-center">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Bone Mass</p>
+                      <p className="text-xl font-bold text-gray-900">{profileData.record.bone_mass || "-"}</p>
+                      <p className="text-xs text-gray-400">kg</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl text-center">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">BMR</p>
+                      <p className="text-xl font-bold text-gray-900">{profileData.record.BMR || "-"}</p>
+                      <p className="text-xs text-gray-400">kcal</p>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-xl text-center">
+                      <p className="text-xs text-gray-500 uppercase font-semibold mb-1">Date</p>
+                      <p className="text-sm font-bold text-gray-900 mt-1">{profileData.record.record_date || "-"}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-gray-400">
+                    <Activity className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                    <p className="text-sm">No body composition record found</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Records History List */}
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-4 flex items-center gap-2">
+                  <span className="w-1 h-8 bg-gray-400 rounded-full"></span>
+                  Records History
+                </h2>
+
+                {profileData.allRecords && profileData.allRecords.length > 1 ? (
+                  <div className="space-y-3">
+                    {profileData.allRecords.slice(1).map((rec) => (
+                      <div
+                        key={rec.id}
+                        onClick={() => openModal("viewRecord", rec)}
+                        className="flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors group"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-white rounded-lg border border-gray-200 text-gray-400 group-hover:text-[#FF8211] group-hover:border-[#FF8211] transition-colors">
+                            <Calendar className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-bold text-gray-900">{rec.record_date}</p>
+                            <p className="text-xs text-gray-500">Weight: {rec.weight} kg</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm font-semibold text-gray-600 group-hover:text-gray-900">
+                            {rec.body_fat_percentage}% BF
+                          </span>
+                          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                            <TrendingUp className="w-4 h-4 text-gray-400 group-hover:text-[#FF8211]" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-sm text-center py-4">No historical records found.</p>
+                )}
+              </div>
             </div>
 
             {/* Right Column - Stats */}
@@ -441,15 +647,19 @@ const TrainerProfileDash = () => {
               {/* Balance Card */}
               <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl p-6 shadow-sm border border-green-100">
                 <h3 className="text-sm font-semibold text-gray-600 mb-2">Account Balance</h3>
-                <p className="text-4xl font-bold text-green-600 bebas-regular">${profile.balance}</p>
+                <p className="text-4xl font-bold text-[#FF8211] bebas-regular flex items-center gap-2">
+                  <span>   <Sparkles className="w-8 h-8 text-[#FF8211]" /></span> {profile.balance}
+                </p>
                 <p className="text-xs text-gray-500 mt-1">Available for withdrawal</p>
               </div>
 
               {/* Rate Card */}
               <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-6 shadow-sm border border-orange-100">
                 <h3 className="text-sm font-semibold text-gray-600 mb-2">Session Rate</h3>
-                <p className="text-4xl font-bold text-[#FF8211] bebas-regular">${profile.rate}</p>
-                <p className="text-xs text-gray-500 mt-1">Per training session</p>
+                <p className="text-4xl font-bold text-[#FF8211] bebas-regular flex items-center gap-2">
+                  <Sparkles className="w-8 h-8 text-[#FF8211]" /> {profile.rate}
+                </p>
+                <p className="text-xs text-gray-500 mt-1">Gems per training session</p>
               </div>
 
               {/* Quick Stats */}
@@ -746,6 +956,186 @@ const TrainerProfileDash = () => {
           </div>
         </div>
       )}
+      {/* Edit Record Modal */}
+      {modals.editRecord && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg w-full max-w-2xl">
+            <div className="border-b px-6 py-4 flex justify-between items-center">
+              <h3 className="text-xl font-bold">
+                {profileData.record ? "Edit" : "Add"} Body Composition Record
+              </h3>
+              <button
+                onClick={() => closeModal("editRecord")}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Record Date</label>
+                  <input
+                    type="date"
+                    value={formData.record_date || ""}
+                    onChange={(e) => setFormData({ ...formData, record_date: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Weight (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.weight || ""}
+                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Height (cm)</label>
+                  <input
+                    type="number"
+                    value={formData.height || ""}
+                    onChange={(e) => setFormData({ ...formData, height: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Body Fat %</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.body_fat_percentage || ""}
+                    onChange={(e) => setFormData({ ...formData, body_fat_percentage: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Muscle Mass (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.muscle_mass || ""}
+                    onChange={(e) => setFormData({ ...formData, muscle_mass: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Bone Mass (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.bone_mass || ""}
+                    onChange={(e) => setFormData({ ...formData, bone_mass: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Body Water %</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={formData.body_water_percentage || ""}
+                    onChange={(e) => setFormData({ ...formData, body_water_percentage: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">BMR (kcal)</label>
+                  <input
+                    type="number"
+                    value={formData.BMR || ""}
+                    onChange={(e) => setFormData({ ...formData, BMR: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="border-t px-6 py-4 flex justify-end gap-3">
+              <button
+                onClick={() => closeModal("editRecord")}
+                className="px-4 py-2 border rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveRecord}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Save Record
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View Record Detail Modal */}
+      {modals.viewRecord && currentEdit && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl transform transition-all">
+            <div className="bg-[#FF8211] px-6 py-4 flex justify-between items-center text-white">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Record Details
+              </h3>
+              <button
+                onClick={() => closeModal("viewRecord")}
+                className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="flex items-center justify-center mb-6">
+                <div className="text-center">
+                  <p className="text-sm text-gray-500 font-medium uppercase tracking-wider">Recorded On</p>
+                  <p className="text-2xl font-bold text-gray-900">{currentEdit.record_date}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1 p-3 bg-gray-50 rounded-xl">
+                  <p className="text-xs text-gray-500 uppercase font-semibold">Weight</p>
+                  <p className="text-lg font-bold text-gray-900">{currentEdit.weight} <span className="text-sm font-normal text-gray-500">kg</span></p>
+                </div>
+                <div className="space-y-1 p-3 bg-gray-50 rounded-xl">
+                  <p className="text-xs text-gray-500 uppercase font-semibold">Height</p>
+                  <p className="text-lg font-bold text-gray-900">{currentEdit.height} <span className="text-sm font-normal text-gray-500">cm</span></p>
+                </div>
+                <div className="space-y-1 p-3 bg-gray-50 rounded-xl">
+                  <p className="text-xs text-gray-500 uppercase font-semibold">Body Fat</p>
+                  <p className="text-lg font-bold text-gray-900">{currentEdit.body_fat_percentage} <span className="text-sm font-normal text-gray-500">%</span></p>
+                </div>
+                <div className="space-y-1 p-3 bg-gray-50 rounded-xl">
+                  <p className="text-xs text-gray-500 uppercase font-semibold">Muscle Mass</p>
+                  <p className="text-lg font-bold text-gray-900">{currentEdit.muscle_mass} <span className="text-sm font-normal text-gray-500">kg</span></p>
+                </div>
+                <div className="space-y-1 p-3 bg-gray-50 rounded-xl">
+                  <p className="text-xs text-gray-500 uppercase font-semibold">Bone Mass</p>
+                  <p className="text-lg font-bold text-gray-900">{currentEdit.bone_mass} <span className="text-sm font-normal text-gray-500">kg</span></p>
+                </div>
+                <div className="space-y-1 p-3 bg-gray-50 rounded-xl">
+                  <p className="text-xs text-gray-500 uppercase font-semibold">Body Water</p>
+                  <p className="text-lg font-bold text-gray-900">{currentEdit.body_water_percentage} <span className="text-sm font-normal text-gray-500">%</span></p>
+                </div>
+                <div className="col-span-2 space-y-1 p-3 bg-gray-50 rounded-xl">
+                  <p className="text-xs text-gray-500 uppercase font-semibold">BMR (Basal Metabolic Rate)</p>
+                  <p className="text-lg font-bold text-gray-900">{currentEdit.BMR} <span className="text-sm font-normal text-gray-500">kcal</span></p>
+                </div>
+              </div>
+
+              {currentEdit.updated_at && (
+                <p className="text-xs text-gray-400 mt-6 text-center">
+                  Last updated: {new Date(currentEdit.updated_at).toLocaleString()}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
 
       <FooterDash />
     </>

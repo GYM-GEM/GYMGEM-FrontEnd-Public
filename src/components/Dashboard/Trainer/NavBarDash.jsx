@@ -19,12 +19,17 @@ const NavBarDash = () => {
   const [managementDropdownOpen, setManagementDropdownOpen] = useState(false);
   const userRef = useRef(null);
   const managementRef = useRef(null);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  // Ensure we get the correct Trainer profile ID regardless of current selection
+  const trainerProfile = user.profiles?.find(p => p.type === "trainer");
+  const currentProfileId = trainerProfile?.id || user.current_profile || user.id;
+ 
+
 
   // Main Navigation Links
   const mainLinks = [
     { to: "/trainer", label: "Dashboard" },
-    { to: "/trainer/profile", label: "Profile" },
+    { to: `/trainer/profile/${currentProfileId}`, label: "Profile" },
     { to: "/trainer/message", label: "Messages", icon: <MessageSquare size={18} /> },
     { to: "/trainer/calendar", label: "My Calendar", icon: <Calendar size={18} /> },
   ];

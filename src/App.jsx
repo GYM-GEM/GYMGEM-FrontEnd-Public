@@ -175,7 +175,7 @@ function App() {
             <Route path="courses" element={<ProtectedRoute requiredProfile="trainer"><CoursesTrainerDash /></ProtectedRoute>} />
             <Route path="courses/:id" element={<ProtectedRoute requiredProfile="trainer"><CourseDetailsDash /></ProtectedRoute>} />
             <Route path="clients" element={<ProtectedRoute requiredProfile="trainer"><ClientTrainerDash /></ProtectedRoute>} />
-            <Route path="profile" element={<ProtectedRoute requiredProfile="trainer"><TrainerprofileDash /></ProtectedRoute>} />
+            <Route path="profile/:id" element={<ProtectedRoute requiredProfile="trainer"><TrainerprofileDash /></ProtectedRoute>} />
             <Route path="addlesson" element={<ProtectedRoute requiredProfile="trainer"><NewLeason /></ProtectedRoute>} />
             <Route path="addsection" element={<ProtectedRoute requiredProfile="trainer"><AddSection /></ProtectedRoute>} />
             <Route path="addcourse" element={<ProtectedRoute requiredProfile="trainer"><AddCourse /></ProtectedRoute>} />

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import {
     Search,
     Send,
@@ -460,6 +461,7 @@ const NewConversationModal = ({ isOpen, onClose, onStartChat }) => {
 };
 
 const Message = () => {
+    const location = useLocation();
     const { showToast } = useToast(); // Uncomment when ToastContext is ready
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -487,6 +489,44 @@ const Message = () => {
         };
         loadData();
     }, []);
+
+    // Auto-open chat with trainer if coming from PublicTrainerProfile
+    useEffect(() => {
+        if (location.state?.trainerId && location.state?.trainerName && conversations.length > 0) {
+            const { trainerId, trainerName, trainerAvatar } = location.state;
+
+            // Try to find existing conversation with this trainer
+            const existingConv = conversations.find(conv =>
+                conv.participants.some(p => p.id === trainerId)
+            );
+
+            if (existingConv) {
+                // Open existing conversation
+                handleConversationClick(existingConv.id);
+            } else {
+                // Create new conversation
+                const newConv = {
+                    id: Date.now(),
+                    participants: [{
+                        id: trainerId,
+                        name: trainerName,
+                        role: "Trainer",
+                        avatar: trainerAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(trainerName)}&background=FF8211&color=fff`,
+                        status: 'online'
+                    }],
+                    lastMessage: "Start chatting with your trainer!",
+                    timestamp: "Just now",
+                    unreadCount: 0,
+                    messages: []
+                };
+                setConversations(prev => [newConv, ...prev]);
+                setActiveConversationId(newConv.id);
+            }
+
+            // Clear the location state to prevent re-opening on re-render
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state, conversations, loading]);
 
     // Dynamic Emoji & Attachment State
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);

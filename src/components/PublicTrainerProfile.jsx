@@ -18,6 +18,7 @@ import {
   X,
   Sparkles,
   CheckCircle2,
+  MessageCircle,
 } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -369,31 +370,50 @@ const PublicTrainerProfile = () => {
 
               {/* Name & Title & Stats */}
               <div className="flex-1 text-center md:text-left mb-2 md:mb-0">
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 bebas-regular">
-                  {profile.name}
-                </h1>
-                <p className="text-[#FF8211] font-semibold poppins-medium text-lg">
-                  Personal Trainer & Fitness Expert
-                </p>
-                <div className="flex items-center justify-center md:justify-start gap-4 mt-3 text-sm text-gray-600 poppins-regular">
-                  {profile.country && (
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {profile.country}, {profile.state}
-                    </span>
-                  )}
-                  <span className="flex items-center gap-1 text-yellow-500 font-medium">
-                    <Star className="w-4 h-4 fill-current" />
-                    {profile.rating || "4.9"} (120 reviews)
-                  </span>
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+                  <div>
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 bebas-regular">
+                      {profile.name}
+                    </h1>
+                    <p className="text-[#FF8211] font-semibold poppins-medium text-lg">
+                      Personal Trainer & Fitness Expert
+                    </p>
+                    <div className="flex items-center justify-center md:justify-start gap-4 mt-3 text-sm text-gray-600 poppins-regular">
+                      {profile.country && (
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-4 h-4" />
+                          {profile.country}, {profile.state}
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1 text-yellow-500 font-medium">
+                        <Star className="w-4 h-4 fill-current" />
+                        {profile.rating || "4.9"} (120 reviews)
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Send Message Button - Desktop */}
+                  <Link
+                    to="/trainee/message"
+                    state={{ trainerId: id, trainerName: profile.name, trainerAvatar: profile.avatar }}
+                    className="hidden md:flex bg-white border-2 border-[#FF8211] text-[#FF8211] font-bold py-2 px-6 rounded-xl shadow-lg hover:bg-[#FF8211] hover:text-white active:scale-95 transition-all items-center justify-center gap-2 self-start"
+                  >
+                    <MessageCircle className="w-5 h-5" />
+                    Send Message
+                  </Link>
                 </div>
               </div>
 
-              {/* Action Button (Mobile Only - Desktop has sidebar) */}
+              {/* Action Button (Mobile Only) */}
               <div className="md:hidden w-full sm:w-auto">
-                <button className="w-full bg-[#FF8211] text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-orange-200 active:scale-95 transition-transform">
-                  Book Session
-                </button>
+                <Link
+                  to="/trainee/message"
+                  state={{ trainerId: id, trainerName: profile.name, trainerAvatar: profile.avatar }}
+                  className="w-full bg-white border-2 border-[#FF8211] text-[#FF8211] font-bold py-3 px-6 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Send Message
+                </Link>
               </div>
             </div>
           </div>

@@ -554,67 +554,6 @@ const TraineeDash = () => {
                   </table>
                 </div>
               </div>
-
-              {/* Charts Section */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Weight Progress Chart */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <TrendingDown className="w-5 h-5 text-purple-600" />
-                    Weight Progress
-                  </h3>
-                  <div className="h-52 flex items-end justify-between gap-2">
-                    {[...filteredRecords].reverse().map((record, index) => {
-                      const maxWeight = 80;
-                      const minWeight = 74;
-                      const height = ((record.weight - minWeight) / (maxWeight - minWeight)) * 100;
-
-                      return (
-                        <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                          <div className="text-xs text-gray-700 font-bold">{record.weight}</div>
-                          <div
-                            className="w-full bg-gradient-to-t from-purple-500 via-purple-400 to-purple-300 rounded-t-xl transition-all hover:opacity-90 cursor-pointer shadow-sm"
-                            style={{ height: `${height}%` }}
-                            title={`${record.date}: ${record.weight}kg`}
-                          ></div>
-                          <div className="text-xs text-gray-500 font-medium">{record.date.slice(5)}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Body Composition Chart */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-green-600" />
-                    Body Composition
-                  </h3>
-                  <div className="h-52 flex items-end justify-around gap-6">
-                    {/* Muscle Mass Bar */}
-                    <div className="flex-1 flex flex-col items-center gap-2">
-                      <div className="text-xs text-gray-700 font-bold">{user.muscleMass} kg</div>
-                      <div
-                        className="w-full bg-gradient-to-t from-green-600 via-green-500 to-green-400 rounded-t-xl cursor-pointer hover:opacity-90 transition-opacity shadow-sm"
-                        style={{ height: '80%' }}
-                        title={`Muscle Mass: ${user.muscleMass}kg`}
-                      ></div>
-                      <div className="text-xs text-gray-600 font-bold">Muscle</div>
-                    </div>
-
-                    {/* Body Fat Bar */}
-                    <div className="flex-1 flex flex-col items-center gap-2">
-                      <div className="text-xs text-gray-700 font-bold">{user.bodyFat}%</div>
-                      <div
-                        className="w-full bg-gradient-to-t from-orange-600 via-orange-500 to-orange-400 rounded-t-xl cursor-pointer hover:opacity-90 transition-opacity shadow-sm"
-                        style={{ height: '35%' }}
-                        title={`Body Fat: ${user.bodyFat}%`}
-                      ></div>
-                      <div className="text-xs text-gray-600 font-bold">Fat</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
 
             {/* Quick Actions & Schedule - Takes 1 column */}
@@ -647,17 +586,17 @@ const TraineeDash = () => {
                     </div>
                     <span>Edit Profile</span>
                   </button>
-                  <button className="group w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 text-gray-700 rounded-xl hover:border-[#ff8211] hover:bg-orange-50 hover:scale-[1.02] transition-all font-medium">
+                  {/* <button className="group w-full flex items-center gap-3 px-4 py-3.5 border-2 border-gray-200 text-gray-700 rounded-xl hover:border-[#ff8211] hover:bg-orange-50 hover:scale-[1.02] transition-all font-medium">
                     <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center group-hover:bg-orange-100 transition-colors">
                       <BarChart3 className="w-5 h-5 group-hover:text-[#ff8211]" />
                     </div>
                     <span>View Detailed Graphs</span>
-                  </button>
+                  </button> */}
                 </div>
               </div>
 
               {/* Upcoming Sessions */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
                     <Calendar className="w-5 h-5 text-blue-600" />
@@ -685,10 +624,10 @@ const TraineeDash = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
 
               {/* Notifications */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+              {/* <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center">
                     <Bell className="w-5 h-5 text-yellow-600" />
@@ -723,7 +662,7 @@ const TraineeDash = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

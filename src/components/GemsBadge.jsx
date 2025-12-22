@@ -1,0 +1,24 @@
+import React from 'react';
+import { Sparkles, Plus } from 'lucide-react';
+
+const GemsBadge = ({ balance = 0, onAddClick }) => {
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-full border border-orange-100 shadow-sm transition-all hover:shadow-md group">
+      <div className="flex items-center gap-1.5">
+        <Sparkles className="w-4 h-4 text-[#FF8211] animate-pulse" />
+        <span className="text-sm font-bold text-gray-800 poppins-semibold">
+          {balance.toLocaleString()}
+        </span>
+      </div>
+      <button
+        onClick={onAddClick}
+        className="ml-1 p-0.5 bg-[#FF8211] text-white rounded-full hover:bg-[#ff9533] transition-colors active:scale-95 shadow-sm"
+        aria-label="Add GEMS"
+      >
+        <Plus className="w-3 h-3" />
+      </button>
+    </div>
+  );
+};
+
+export default GemsBadge;

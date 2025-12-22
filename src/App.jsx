@@ -98,30 +98,6 @@ import GlobalLoader from "./components/GlobalLoader.jsx";
 
 function App() {
   const location = useLocation();
-
-  // // Expose test function to window for easy console debugging
-  // useEffect(() => {
-  //   window.verifyRefresh = verifyRefreshFlow;
-  // }, []);
-
-  // useEffect(() => {
-  //   // Attempt to refresh token on app load/refresh to validate session
-  //   const validateSession = async () => {
-  //     const refreshToken = localStorage.getItem("refresh");
-  //     if (refreshToken) {
-  //       try {
-  //         await refreshSession();
-  //       } catch (error) {
-  //         // If refresh fails, interceptor handles logout, but we can catch here too
-  //         console.warn("Session validation failed:", error);
-  //       }
-  //     }
-  //   };
-  //   validateSession();
-  // }, []);
-
-  // useAuthCheck();
-
   return (
     <>
       <GlobalLoader />

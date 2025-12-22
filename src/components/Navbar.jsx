@@ -11,6 +11,8 @@ import axiosInstance from "../utils/axiosConfig";
 import UserDropdown from "./UserDropdown";
 import NotificationDropdown from "./NotificationDropdown";
 import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon } from "lucide-react"; // Added Icons
+import GemsBadge from "./GemsBadge";
+import AddGemsModal from "./AddGemsModal";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -27,6 +29,39 @@ function Navbar() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const { showToast } = useToast();
+
+  const [gemsBalance, setGemsBalance] = useState(() => {
+    const saved = localStorage.getItem("gems_balance");
+    return saved ? parseInt(saved, 10) : 1200; // Mock initial balance
+  });
+  const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
+
+  useEffect(() => {
+    // Keep balance in sync with localStorage if updated elsewhere
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("gems_balance");
+      if (saved) setGemsBalance(parseInt(saved, 10));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    // Custom event for same-window updates
+    window.addEventListener('gemsUpdated', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('gemsUpdated', handleStorageChange);
+    };
+  }, []);
+
+  const handleAddGems = (pkg) => {
+    setIsAddGemsModalOpen(false);
+    navigate('/checkout', { 
+      state: { 
+        type: 'gems',
+        gems: pkg.gems,
+        price: pkg.price,
+        user: user
+      } 
+    });
+  };
 
   const logout = async (e) => {
     e.preventDefault();
@@ -288,6 +323,10 @@ function Navbar() {
             <div className="hidden md:flex md:items-center md:gap-4">
               {user ? (
                 <div className="flex items-center gap-3">
+                  <GemsBadge 
+                    balance={gemsBalance} 
+                    onAddClick={() => setIsAddGemsModalOpen(true)} 
+                  />
                   {/* <NotificationDropdown /> */}
                   <UserDropdown
                     user={user}
@@ -524,6 +563,12 @@ function Navbar() {
           )}
         </AnimatePresence>
       </nav>
+
+      <AddGemsModal 
+        isOpen={isAddGemsModalOpen}
+        onClose={() => setIsAddGemsModalOpen(false)}
+        onContinue={handleAddGems}
+      />
 
       {/* Spacer to prevent content from going under fixed navbar */}
       <div className="h-16 md:h-20" />

@@ -88,7 +88,7 @@ function HeroSc() {
                   Go to Community
                 </button>
                 <button
-                  onClick={() => navigate("/trainer/courses")}
+                  onClick={() => navigate("/trainer/addcourse")}
                   className="inline-flex h-12 min-w-[180px] items-center justify-center bg-gradient-to-r from-white to-gray-100 rounded-xl border-2 border-[#ff8211] px-6 text-sm font-semibold text-[#ff8211] shadow-md transition-all duration-300 hover:scale-110 hover:from-orange-50 hover:to-orange-100 hover:shadow-lg hover:text-orange-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                 >
                   Create Course

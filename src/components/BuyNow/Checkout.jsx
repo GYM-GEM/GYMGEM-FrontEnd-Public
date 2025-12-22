@@ -5,6 +5,7 @@ import Navbar from "../Navbar";
 import Footer from "../Footer";
 import axios from "axios";
 import PaymentPage from "./PaymentPage";
+// import PaymentSummary from "../PaymentSummary";
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 
 
@@ -224,7 +225,7 @@ export const processPayment = async (paymentData) => {
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { course, user, iframeUrl, paymentId } = location.state || {};
+  const { course, user, iframeUrl, paymentId, type, gems, price: gemsPrice, returnUrl } = location.state || {};
 
   const [paymentMethod, setPaymentMethod] = useState("credit_card");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -236,20 +237,21 @@ const Checkout = () => {
     cvv: "",
   });
 
-  // Redirect if no course or user data
+  // Redirect if no data
   useEffect(() => {
-    if (!course || !user) {
+    if (!user || (!course && type !== 'gems')) {
       navigate('/courses');
     }
-  }, [course, user, navigate]);
+  }, [course, user, type, navigate]);
 
-  if (!course || !user) {
+  if (!user || (!course && type !== 'gems')) {
     return null;
   }
 
-  const price = parseFloat(course.price) || 49.99;
+  const isGemsPurchase = type === 'gems';
+  const price = isGemsPurchase ? gemsPrice : (parseFloat(course?.price) || 49.99);
   const tax = price * 0.1; // 10% tax
-  const total = price + tax;
+  const total = isGemsPurchase ? price : (price + tax);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -302,7 +304,23 @@ const Checkout = () => {
       });
 
       if (paymentResult.success) {
-        // Enroll user in course via API
+        if (isGemsPurchase) {
+          // Update GEMS balance
+          const currentBalance = parseInt(localStorage.getItem("gems_balance") || "0", 10);
+          const newBalance = currentBalance + gems;
+          localStorage.setItem("gems_balance", newBalance.toString());
+          window.dispatchEvent(new Event('gemsUpdated'));
+
+          // Navigate back or to success
+          if (returnUrl) {
+            navigate(returnUrl, { state: { success: true } });
+          } else {
+            navigate('/courses', { state: { success: true, message: `Added ${gems} GEMS to your account!` } });
+          }
+          return;
+        }
+
+        // Enroll user in course via API (for normal purchases)
         const token = localStorage.getItem("access");
         try {
           const enrollmentResponse = await axios.post(
@@ -346,59 +364,65 @@ const Checkout = () => {
           {/* Header */}
           <div className="mb-8">
             <Link
-              to={`/courses/${course.id}`}
+              to={isGemsPurchase ? (returnUrl || '/courses') : `/courses/${course.id}`}
               className="text-[#FF8211] text-sm font-medium hover:underline poppins-regular inline-flex items-center gap-1 mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back to Course
+              Back
             </Link>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 bebas-regular">
               Checkout
             </h1>
             <p className="text-gray-600 poppins-regular mt-2">
-              Complete your purchase securely
+              {isGemsPurchase ? 'Complete your GEMs purchase' : 'Complete your purchase securely'}
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Order Summary */}
-            <div className={iframeUrl ? "lg:col-span-3" : "lg:col-span-2"}>
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
-                  Order Summary
-                </h2>
+            <div className={(iframeUrl || isGemsPurchase) ? "lg:col-span-3 max-w-2xl mx-auto w-full" : "lg:col-span-2"}>
+              {isGemsPurchase ? (
+                <div className="mb-8">
+                  <PaymentSummary gems={gems} price={gemsPrice} />
+                </div>
+              ) : (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 bebas-regular mb-6">
+                    Order Summary
+                  </h2>
 
-                <div className="flex gap-4 mb-6">
-                  <img
-                    src={course.img || "https://via.placeholder.com/200x112"}
-                    alt={course.title}
-                    className="w-32 h-20 object-cover rounded-lg"
-                  />
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-gray-900 poppins-medium mb-1">
-                      {course.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 poppins-regular line-clamp-2">
-                      {course.description}
-                    </p>
+                  <div className="flex gap-4 mb-6">
+                    <img
+                      src={course.img || "https://via.placeholder.com/200x112"}
+                      alt={course.title}
+                      className="w-32 h-20 object-cover rounded-lg"
+                    />
+                    <div className="flex-1">
+                      <h3 className="text-lg font-bold text-gray-900 poppins-medium mb-1">
+                        {course.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 poppins-regular line-clamp-2">
+                        {course.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-4 space-y-2">
+                    <div className="flex justify-between text-gray-700 poppins-regular">
+                      <span>Subtotal</span>
+                      <span>${price.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-700 poppins-regular">
+                      <span>Tax (10%)</span>
+                      <span>${tax.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-xl font-bold text-gray-900 poppins-semibold pt-2 border-t border-gray-200">
+                      <span>Total</span>
+                      <span className="text-[#FF8211]">${total.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
-
-                <div className="border-t border-gray-200 pt-4 space-y-2">
-                  <div className="flex justify-between text-gray-700 poppins-regular">
-                    <span>Subtotal</span>
-                    <span>${price.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-700 poppins-regular">
-                    <span>Tax (10%)</span>
-                    <span>${tax.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between text-xl font-bold text-gray-900 poppins-semibold pt-2 border-t border-gray-200">
-                    <span>Total</span>
-                    <span className="text-[#FF8211]">${total.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
+              )}
 
               {/* Payment Form */}
               <PaymentPage

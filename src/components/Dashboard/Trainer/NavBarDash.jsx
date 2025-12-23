@@ -31,7 +31,7 @@ const NavBarDash = () => {
 
   // Main Navigation Links
   const mainLinks = [
-    // { to: "/trainer", label: "Dashboard" },
+    // { to: "/trainer/", label: "Dashboard" },
     { to: `/trainer/profile/${currentProfileId}`, label: "Profile" },
     { to: "/trainer/message", label: "Messages", icon: <MessageSquare size={18} /> },
     { to: "/trainer/calendar", label: "My Calendar", icon: <Calendar size={18} /> },
@@ -296,7 +296,7 @@ const NavBarDash = () => {
                 <UserDropdown
                   user={user}
                   logout={logout}
-                  dashboardPath="/trainer"
+                  dashboardPath={`/trainer/profile/${currentProfileId}`}
                   settingsPath="/settings"
                 />
               </div>

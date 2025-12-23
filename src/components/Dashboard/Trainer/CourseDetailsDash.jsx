@@ -150,10 +150,16 @@ const CourseDetailsDash = () => {
     setIsEditingInfo(false);
   };
 
-  const handleSaveDesc = () => {
-    const updatedCourse = { ...course, description: descForm };
-    updateCourseInStorage(updatedCourse);
-    setIsEditingDesc(false);
+  const handleSaveDesc = async () => {
+    try{
+      const res= await axiosInstance.put(`/api/courses/courses/${id}/update/`, { description: descForm });
+      const updatedCourse = { ...course, description: descForm };
+      updateCourseInStorage(updatedCourse);
+      setIsEditingDesc(false);
+    }
+    catch(error){
+      console.log(error);
+    }
   };
 
   const handleSaveLearn = () => {

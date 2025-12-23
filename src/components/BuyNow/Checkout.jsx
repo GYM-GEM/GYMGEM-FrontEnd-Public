@@ -364,9 +364,9 @@ const Checkout = () => {
       <Navbar />
 
       <div className="min-h-screen bg-gray-50 py-8">
-        <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${iframeUrl ? 'max-w-6xl' : 'max-w-7xl'}`}>
+        <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${iframeUrl ? '' : 'max-w-7xl'}`}>
           {/* Header */}
-          <div className="mb-8">
+          <div className={iframeUrl ? "mb-8 max-w-4xl mx-auto" : "mb-8"}>
             <Link
               to={isGemsPurchase ? "/" : `/courses/${course?.id || ''}`}
               className="text-[#FF8211] text-sm font-medium hover:underline poppins-regular inline-flex items-center gap-1 mb-4"
@@ -384,7 +384,7 @@ const Checkout = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Order Summary */}
-            <div className={(iframeUrl || isGemsPurchase) ? "lg:col-span-3 max-w-2xl mx-auto w-full" : "lg:col-span-2"}>
+            <div className={(iframeUrl || isGemsPurchase) ? "lg:col-span-3 max-w-4xl mx-auto w-full" : "lg:col-span-2"}>
               {isGemsPurchase ? (
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8 relative overflow-hidden group">
                   {/* Decorative Background */}

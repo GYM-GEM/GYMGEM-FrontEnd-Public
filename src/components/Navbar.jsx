@@ -3,7 +3,6 @@ import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { FaGem } from "react-icons/fa";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { MdSportsMartialArts } from "react-icons/md";
-
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../context/ToastContext";
@@ -40,6 +39,8 @@ function Navbar() {
 
   useEffect(() => {
     const fetchBalance = async () => {
+      if (!user) return; // Don't fetch if user is not logged in
+
       if (!localStorage.getItem("gems_balance")) {
         setIsLoadingBalance(true);
       }
@@ -62,7 +63,7 @@ function Navbar() {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('gemsUpdated', handleStorageChange);
     };
-  }, []);
+  }, [user]);
 
   const handleAddGems = async (pkg) => {
     setIsAddGemsModalOpen(false);
@@ -304,40 +305,44 @@ function Navbar() {
               <span className="px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
             </div> */}
 
-            {/* Community */}
-            <NavLink
-              to="/community"
-              className={({ isActive }) =>
-                `relative px-3 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 
-                ${isActive ? "text-[#ff8211] bg-white shadow-sm ring-1 ring-gray-100" : "text-gray-600 hover:text-[#ff8211] hover:bg-white/50"}`
-              }
-            >
-              <CommunityIcon size={16} />
-              Community
-            </NavLink>
+            {/* Community - Only show if logged in */}
+            {user && (
+              <NavLink
+                to="/community"
+                className={({ isActive }) =>
+                  `relative px-3 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 
+                  ${isActive ? "text-[#ff8211] bg-white shadow-sm ring-1 ring-gray-100" : "text-gray-600 hover:text-[#ff8211] hover:bg-white/50"}`
+                }
+              >
+                <CommunityIcon size={16} />
+                Community
+              </NavLink>
+            )}
 
-            {/* AI Trainer */}
-            <NavLink
-              to="/ai-trainer"
-              className={({ isActive }) =>
-                `relative px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 group overflow-hidden
-                ${isActive
-                  ? "text-white bg-[#ff8211] shadow-md shadow-orange-500/20"
-                  : "text-gray-700 hover:text-[#ff8211] hover:bg-orange-50"}`
-              }
-            >
-              {/* Shimmer Effect */}
-              <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+            {/* AI Trainer - Only show if logged in */}
+            {user && (
+              <NavLink
+                to="/ai-trainer"
+                className={({ isActive }) =>
+                  `relative px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 group overflow-hidden
+                  ${isActive
+                    ? "text-white bg-[#ff8211] shadow-md shadow-orange-500/20"
+                    : "text-gray-700 hover:text-[#ff8211] hover:bg-orange-50"}`
+                }
+              >
+                {/* Shimmer Effect */}
+                <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
 
-              <MdSportsMartialArts size={20} className="relative z-20" />
-              <span className="relative z-20">AI Trainer</span>
+                <MdSportsMartialArts size={20} className="relative z-20" />
+                <span className="relative z-20">AI Trainer</span>
 
-              {/* Badge */}
-              <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 z-20">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
-              </span>
-            </NavLink>
+                {/* Badge */}
+                <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 z-20">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
+                </span>
+              </NavLink>
+            )}
 
             {/* About */}
             <NavLink
@@ -503,41 +508,47 @@ function Navbar() {
                     <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
                   </div>
 
-                  <NavLink
-                    to="/community"
-                    onClick={() => setIsOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
-                        ? "bg-orange-50 text-[#ff8211] shadow-sm"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
-                    }
-                  >
-                    <CommunityIcon size={18} />
-                    Community
-                  </NavLink>
+                  {/* Community - Only show if logged in */}
+                  {user && (
+                    <NavLink
+                      to="/community"
+                      onClick={() => setIsOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
+                          ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
+                      }
+                    >
+                      <CommunityIcon size={18} />
+                      Community
+                    </NavLink>
+                  )}
 
-                  <NavLink
-                    to="/ai-trainer"
-                    onClick={() => setIsOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-all relative overflow-hidden group
-                      ${isActive
-                        ? "bg-[#ff8211] text-white shadow-md shadow-orange-500/20"
-                        : "text-gray-700 hover:bg-orange-50 hover:text-[#ff8211]"}`
-                    }
-                  >
-                    <MdSportsMartialArts size={20} className="relative z-20" />
-                    <span className="relative z-20">AI Trainer</span>
+                  {/* AI Trainer - Only show if logged in */}
+                  {user && (
+                    <NavLink
+                      to="/ai-trainer"
+                      onClick={() => setIsOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-all relative overflow-hidden group
+                        ${isActive
+                          ? "bg-[#ff8211] text-white shadow-md shadow-orange-500/20"
+                          : "text-gray-700 hover:bg-orange-50 hover:text-[#ff8211]"}`
+                      }
+                    >
+                      <MdSportsMartialArts size={20} className="relative z-20" />
+                      <span className="relative z-20">AI Trainer</span>
 
-                    {/* Shimmer Effect */}
-                    <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+                      {/* Shimmer Effect */}
+                      <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
 
-                    {/* Badge */}
-                    <span className="absolute top-3 right-4 flex h-2.5 w-2.5 z-20">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
-                    </span>
-                  </NavLink>
+                      {/* Badge */}
+                      <span className="absolute top-3 right-4 flex h-2.5 w-2.5 z-20">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
+                      </span>
+                    </NavLink>
+                  )}
 
                   <NavLink
                     to="/about"

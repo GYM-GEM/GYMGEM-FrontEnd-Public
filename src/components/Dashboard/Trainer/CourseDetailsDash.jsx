@@ -24,10 +24,13 @@ import {
 import NavBarDash from "./NavBarDash";
 import FooterDash from "../FooterDash";
 import axiosInstance from "../../../utils/axiosConfig";
+import UploadImage from "../../UploadImage";
+import { useToast } from "../../../context/ToastContext";
 
 const CourseDetailsDash = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToast();
   const [course, setCourse] = useState(null);
   const [expandedSections, setExpandedSections] = useState(new Set());
 
@@ -123,41 +126,72 @@ const CourseDetailsDash = () => {
     }
   };
 
-  const handlePublishToggle = () => {
+  const handlePublishToggle = async () => {
     if (!course) return;
-    const newStatus = course.status === "Published" ? "Draft" : "Published";
-    const updatedCourse = { ...course, status: newStatus };
-    updateCourseInStorage(updatedCourse);
+    if (course.status?.toLowerCase() === "pending") return; // Don't allow toggle for pending courses
+
+    try {
+      // Toggle is_deleted status
+      const newIsDeleted = !course.is_deleted;
+
+      await axiosInstance.delete(`/api/courses/courses/${id}/delete/`);
+
+      // Update local state
+      const updatedCourse = { ...course, is_deleted: newIsDeleted };
+      setCourse(updatedCourse);
+      updateCourseInStorage(updatedCourse);
+
+      const message = newIsDeleted
+        ? "Course unpublished successfully!"
+        : "Course published successfully!";
+      showToast(message, { type: "success" });
+    } catch (error) {
+      console.error("Error toggling course publish status:", error);
+      showToast("Failed to update course status. Please try again.", { type: "error" });
+    }
   };
 
   const handleDeleteCourse = () => {
-    if (!course) return;
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${course.title}"? This action cannot be undone.`
-    );
-    if (confirmed) {
-      const courses = JSON.parse(localStorage.getItem("courses")) || [];
-      const updatedCourses = courses.filter((c) => c.id !== course.id);
-      localStorage.setItem("courses", JSON.stringify(updatedCourses));
+    try {
+      const res = axiosInstance.delete(`/api/courses/courses/${id}/delete/`);
       navigate("/trainer/courses");
     }
+    catch (error) {
+      console.log(error);
+    }
+    // if (!course) return;
+    // const confirmed = window.confirm(
+    //   `Are you sure you want to delete "${course.title}"? This action cannot be undone.`
+    // );
+    // if (confirmed) {
+    //   const courses = JSON.parse(localStorage.getItem("courses")) || [];
+    //   const updatedCourses = courses.filter((c) => c.id !== course.id);
+    //   localStorage.setItem("courses", JSON.stringify(updatedCourses));
+    //   navigate("/trainer/courses");
+    // }
   };
 
   // Save Handlers
   const handleSaveInfo = () => {
-    const updatedCourse = { ...course, ...infoForm };
-    updateCourseInStorage(updatedCourse);
-    setIsEditingInfo(false);
+    try {
+      const res = axiosInstance.put(`/api/courses/courses/${id}/update/`, { ...infoForm });
+      const updatedCourse = { ...course, ...infoForm };
+      updateCourseInStorage(updatedCourse);
+      setIsEditingInfo(false);
+    }
+    catch (error) {
+      console.log(error);
+    }
   };
 
   const handleSaveDesc = async () => {
-    try{
-      const res= await axiosInstance.put(`/api/courses/courses/${id}/update/`, { description: descForm });
+    try {
+      const res = await axiosInstance.put(`/api/courses/courses/${id}/update/`, { description: descForm });
       const updatedCourse = { ...course, description: descForm };
       updateCourseInStorage(updatedCourse);
       setIsEditingDesc(false);
     }
-    catch(error){
+    catch (error) {
       console.log(error);
     }
   };
@@ -190,35 +224,33 @@ const CourseDetailsDash = () => {
     setIsEditingSection(true);
   };
 
-  const handleDeleteSection = (sectionId, lessonIndex) => {
-    setDeletingSectionData({ sectionId, lessonIndex });
-    setShowDeleteModal(true);
-  };
-
-  const confirmDeleteSection = async () => {
-    if (!deletingSectionData) return;
-
-    const { sectionId, lessonIndex } = deletingSectionData;
-
+  const handleToggleSectionVisibility = async (section, lessonIndex) => {
     try {
-      // Call backend to delete section
-      await axiosInstance.delete(`/api/courses/sections/${sectionId}/`);
+      // Toggle is_deleted status
+      const newIsDeleted = !section.is_deleted;
+
+      await axiosInstance.delete(`/api/courses/sections/${section.id}/delete/`);
 
       // Update local state
       const updatedCourse = { ...course };
       const lessons = updatedCourse.lessons_details || updatedCourse.lessons;
       if (lessons && lessons[lessonIndex]) {
-        lessons[lessonIndex].sections = lessons[lessonIndex].sections.filter(
-          (s) => s.id !== sectionId
+        const sectionIndex = lessons[lessonIndex].sections.findIndex(
+          (s) => s.id === section.id
         );
+        if (sectionIndex !== -1) {
+          lessons[lessonIndex].sections[sectionIndex].is_deleted = newIsDeleted;
+        }
       }
       setCourse(updatedCourse);
-      setShowDeleteModal(false);
-      setDeletingSectionData(null);
-      alert("Section deleted successfully!");
+
+      const message = newIsDeleted
+        ? "Section hidden successfully!"
+        : "Section published successfully!";
+      showToast(message, { type: "success" });
     } catch (error) {
-      console.error("Failed to delete section:", error);
-      alert("Failed to delete section. Please try again.");
+      console.error("Failed to toggle section visibility:", error);
+      showToast("Failed to update section visibility. Please try again.", { type: "error" });
     }
   };
 
@@ -227,8 +259,8 @@ const CourseDetailsDash = () => {
 
     try {
       // Call backend to update section
-      const response = await axiosInstance.patch(
-        `/api/courses/sections/${editingSectionData.id}/`,
+      const response = await axiosInstance.put(
+        `/api/courses/sections/${editingSectionData.id}/update/`,
         {
           title: editingSectionData.title,
           content_type: editingSectionData.content_type,
@@ -251,10 +283,10 @@ const CourseDetailsDash = () => {
       setCourse(updatedCourse);
       setIsEditingSection(false);
       setEditingSectionData(null);
-      alert("Section updated successfully!");
+      showToast("Section updated successfully!", { type: "success" });
     } catch (error) {
       console.error("Failed to update section:", error);
-      alert("Failed to update section. Please try again.");
+      showToast("Failed to update section. Please try again.", { type: "error" });
     }
   };
 
@@ -379,9 +411,10 @@ const CourseDetailsDash = () => {
                           }
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8211]"
                         >
-                          <option>Beginner</option>
-                          <option>Intermediate</option>
-                          <option>Advanced</option>
+                          <option value="">Select Level</option>
+                          <option value={1}>Beginner</option>
+                          <option value={2}>Intermediate</option>
+                          <option value={3}>Advanced</option>
                         </select>
                       </div>
                     </div>
@@ -433,9 +466,19 @@ const CourseDetailsDash = () => {
                   </div>
                 ) : (
                   <>
-                    <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-4 bebas-regular">
-                      {course.title}
-                    </h1>
+                    {/* Title and Edit Button */}
+                    <div className="flex items-start justify-between mb-4">
+                      <h1 className="text-3xl md:text-4xl font-bold text-foreground bebas-regular">
+                        {course.title}
+                      </h1>
+                      <button
+                        onClick={() => setIsEditingInfo(true)}
+                        className="px-4 py-2 border-2 border-[#FF8211] text-[#FF8211] rounded-lg hover:bg-[#FF8211]/10 transition-colors poppins-medium flex items-center gap-2 cursor-pointer flex-shrink-0"
+                      >
+                        <Edit className="w-4 h-4" />
+                        Edit
+                      </button>
+                    </div>
 
                     {/* Badges */}
                     <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -453,8 +496,8 @@ const CourseDetailsDash = () => {
                       </span>
                     </div>
 
-                    {/* Price and Status */}
-                    <div className="flex flex-wrap items-center gap-6 mb-6">
+                    {/* Price, Status, and Students Stats */}
+                    <div className="flex flex-wrap items-center gap-6">
                       <div>
                         <span className="text-sm text-muted-foreground poppins-regular block mb-1">
                           Price
@@ -614,6 +657,11 @@ const CourseDetailsDash = () => {
                                 <span className="text-sm text-foreground poppins-regular">
                                   {section.title}
                                 </span>
+                                {section.is_deleted && (
+                                  <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+                                    Hidden
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center gap-2">
                                 <button
@@ -624,11 +672,18 @@ const CourseDetailsDash = () => {
                                   <Edit className="w-4 h-4" />
                                 </button>
                                 <button
-                                  onClick={() => handleDeleteSection(section.id, lessonIndex)}
-                                  className="text-red-600 hover:text-red-700 p-1 cursor-pointer"
-                                  title="Delete section"
+                                  onClick={() => handleToggleSectionVisibility(section, lessonIndex)}
+                                  className={`p-1 cursor-pointer ${section.is_deleted
+                                    ? "text-gray-400 hover:text-gray-600"
+                                    : "text-green-600 hover:text-green-700"
+                                    }`}
+                                  title={section.is_deleted ? "Publish section" : "Hide section"}
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  {section.is_deleted ? (
+                                    <EyeOff className="w-4 h-4" />
+                                  ) : (
+                                    <Eye className="w-4 h-4" />
+                                  )}
                                 </button>
                               </div>
                             </div>
@@ -715,38 +770,33 @@ const CourseDetailsDash = () => {
 
           {/* Bottom Action Buttons */}
           <div className="flex flex-wrap gap-4 justify-end">
-            <button
-              onClick={() => setIsEditingInfo(true)}
-              className="px-6 py-3 border-2 border-[#FF8211] text-[#FF8211] rounded-lg hover:bg-[#FF8211]/10 transition-colors poppins-medium flex items-center gap-2 cursor-pointer"
-            >
-              <Edit className="w-5 h-5" />
-              Edit Course
-            </button>
+
             <button
               onClick={handlePublishToggle}
-              className={`px-6 py-3 rounded-lg transition-colors poppins-medium flex items-center gap-2 cursor-pointer ${course.status?.toLowerCase() === "published"
-                ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-                : "bg-[#86ac55] text-white hover:bg-[#86ac55]/90"
+              disabled={course.status?.toLowerCase() === "pending"}
+              className={`px-6 py-3 rounded-lg transition-colors poppins-medium flex items-center gap-2 ${course.status?.toLowerCase() === "pending"
+                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                  : course.is_deleted
+                    ? "bg-[#86ac55] text-white hover:bg-[#86ac55]/90 cursor-pointer"
+                    : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 cursor-pointer"
                 }`}
             >
-              {course.status?.toLowerCase() === "published" ? (
+              {course.status?.toLowerCase() === "pending" ? (
                 <>
-                  <EyeOff className="w-5 h-5" />
-                  Unpublish
+                  <Eye className="w-5 h-5" />
+                  Pending Approval
                 </>
-              ) : (
+              ) : course.is_deleted ? (
                 <>
                   <Eye className="w-5 h-5" />
                   Publish
                 </>
+              ) : (
+                <>
+                  <EyeOff className="w-5 h-5" />
+                  Unpublish
+                </>
               )}
-            </button>
-            <button
-              onClick={handleDeleteCourse}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors poppins-medium flex items-center gap-2 cursor-pointer"
-            >
-              <Trash2 className="w-5 h-5" />
-              Delete Course
             </button>
           </div>
         </div>
@@ -816,18 +866,20 @@ const CourseDetailsDash = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Content URL
                   </label>
-                  <input
-                    type="url"
-                    value={editingSectionData.content_url || ""}
-                    onChange={(e) =>
+                  <UploadImage
+                    onUpload={(url, fileType) =>
                       setEditingSectionData({
                         ...editingSectionData,
-                        content_url: e.target.value,
+                        content_url: url,
                       })
                     }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF8211]"
-                    placeholder="https://..."
+                    acceptTypes="image/*,video/*,.pdf,.doc,.docx"
                   />
+                  {editingSectionData.content_url && (
+                    <p className="text-xs text-gray-500 mt-2 truncate">
+                      Current: {editingSectionData.content_url}
+                    </p>
+                  )}
                 </div>
 
                 <div>

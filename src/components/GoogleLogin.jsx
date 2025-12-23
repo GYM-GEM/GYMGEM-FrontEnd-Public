@@ -51,12 +51,25 @@ export default function GoogleLogin({ signType, onStart, onComplete }) {
 				localStorage.setItem("refresh", res.data.refresh);
 				localStorage.setItem("user", JSON.stringify(res.data.account));
 
-				if (signType === 'signup') {
-					showToast("Registered Successfully", { type: "success" });
-					navigate("/role");
-				} else {
+				const user = res.data.account || {};
+				console.log("Google Login Success. User:", user);
+
+				// sensitive check: ensure profiles exists and has at least one item
+				const hasProfiles = user.profiles && Array.isArray(user.profiles) && user.profiles.length > 0;
+				console.log("Has Profiles:", hasProfiles);
+
+				if (hasProfiles) {
+					// User already has profiles -> go to home
 					showToast("Sign in successful!", { type: "success" });
 					navigate("/");
+				} else {
+					// User has no profiles/roles -> go to role selection to create one
+					if (signType === 'signup') {
+						showToast("Registered Successfully", { type: "success" });
+					} else {
+						showToast("Please create a profile", { type: "info" });
+					}
+					navigate("/role");
 				}
 			} catch (error) {
 				if (!isMounted) return;
@@ -85,7 +98,7 @@ export default function GoogleLogin({ signType, onStart, onComplete }) {
 
 		// Check if script already exists
 		let script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
-		
+
 		if (!script) {
 			script = document.createElement("script");
 			script.src = "https://accounts.google.com/gsi/client";

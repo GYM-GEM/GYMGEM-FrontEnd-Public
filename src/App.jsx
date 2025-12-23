@@ -57,6 +57,8 @@ import OrderTrackingTR from "./components/Dashboard/Trainer/OrderTrackingTR.jsx"
 import MessageTR from "./components/Dashboard/Trainer/Message.jsx";
 import WeekCalendar from "./components/Dashboard/Trainer/WeekCalendar.jsx";
 import SettingsTrainer from "./components/Dashboard/Trainer/SettingsTrainer.jsx";
+import MySessionsTR from "./components/Dashboard/Trainer/MySessions.jsx";
+
 
 // dashboard trainee
 import TraineeDash from "./components/Dashboard/Traine/TraineeDash.jsx";
@@ -167,7 +169,7 @@ function App() {
             <Route path="message" element={<ProtectedRoute requiredProfile="trainer"><MessageTR /></ProtectedRoute>} />
             <Route path="calendar" element={<ProtectedRoute requiredProfile="trainer"><WeekCalendar /></ProtectedRoute>} />
             <Route path="myorder" element={<ProtectedRoute requiredProfile="trainer"><OrderTrackingTR /></ProtectedRoute>} />
-            <Route path="sessions" element={<ProtectedRoute requiredProfile="trainer"><MySessions /></ProtectedRoute>} />
+            <Route path="sessions" element={<ProtectedRoute requiredProfile="trainer"><MySessionsTR /></ProtectedRoute>} />
           </Route>
 
           {/* -------------------- TRAINEE DASHBOARD -------------------- */}

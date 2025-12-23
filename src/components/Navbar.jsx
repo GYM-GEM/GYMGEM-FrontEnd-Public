@@ -37,17 +37,18 @@ function Navbar() {
   const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
 
-  useEffect(() => {
-    const fetchBalance = async () => {
-      if (!user) return; // Don't fetch if user is not logged in
+  const fetchBalance = async () => {
+    if (!user) return; // Don't fetch if user is not logged in
 
-      if (!localStorage.getItem("gems_balance")) {
-        setIsLoadingBalance(true);
-      }
-      const balance = await getBalance();
-      if (balance !== null) setGemsBalance(balance);
-      setIsLoadingBalance(false);
-    };
+    if (!localStorage.getItem("gems_balance")) {
+      setIsLoadingBalance(true);
+    }
+    const balance = await getBalance();
+    if (balance !== null) setGemsBalance(balance);
+    setIsLoadingBalance(false);
+  };
+
+  useEffect(() => {
 
     fetchBalance();
 
@@ -63,7 +64,7 @@ function Navbar() {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('gemsUpdated', handleStorageChange);
     };
-  }, [user]);
+  }, []);
 
   const handleAddGems = async (pkg) => {
     setIsAddGemsModalOpen(false);

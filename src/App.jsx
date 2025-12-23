@@ -43,6 +43,9 @@ import AddSection from "./components/courses/AddSection.jsx";
 import Goodbye from "./pages/Goodbye.jsx";
 import AiTrainerPage from "./pages/AiTrainer.jsx";
 import WorkoutHistory from "./components/ai/WorkoutHistory.jsx";
+import AiFoodPage from "./pages/AiFood.jsx";
+import FoodHistory from "./components/AiFood/FoodHistory.jsx";
+
 
 // dashboard trainer
 import DashboardTrainer from "./components/Dashboard/Trainer/DashboardTrainer.jsx";
@@ -126,8 +129,12 @@ function App() {
             {/* <Route path="viewprofile" element={<Viewprofile />} /> */}
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="settings" element={<Settings />} />
+            {/* ai trainer and food */}
             <Route path="ai-trainer" element={<AiTrainerPage />} />
+            <Route path="ai-food" element={<AiFoodPage />} />
+            <Route path="food-history" element={<FoodHistory />} />
             <Route path="workout-history" element={<WorkoutHistory />} />
+            {/* -------------------------------------------------- */}
             <Route path="checkout" element={<Checkout />} />
             <Route path="payment-status" element={<PaymentStatus />} />
             <Route path="store-order-success" element={<StoreOrderSuccess />} />

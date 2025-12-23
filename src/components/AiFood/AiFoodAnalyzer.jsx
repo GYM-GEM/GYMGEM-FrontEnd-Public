@@ -1,0 +1,321 @@
+import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Upload, Flame, Beef, Wheat, Droplet, Scan, X, RefreshCw } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import AiNavBarFood from './AiNavBarFood';
+import { foodHistory } from '../../utils/foodHistory';
+import FooterDash from '../../components/Dashboard/FooterDash';
+
+// Mock results generator for the "simulation"
+const generateMockResults = (imagePreview) => ({
+  dishName: "Grilled Chicken Salad",
+  calories: 450,
+  protein: 38,
+  carbs: 22,
+  fats: 18,
+  confidence: 92,
+  healthTip: "Excellent protein source - perfect for post-workout muscle recovery and maintaining lean mass.",
+  imagePreview: imagePreview // Store image too
+});
+
+const AiFoodAnalyzer = () => {
+  const [searchParams] = useSearchParams();
+  const [imagePreview, setImagePreview] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+
+  // Load from history if ID in URL
+  useEffect(() => {
+    const mealId = searchParams.get('id');
+    if (mealId) {
+      const savedMeal = foodHistory.getMealById(mealId);
+      if (savedMeal) {
+        setImagePreview(savedMeal.imagePreview);
+        setAnalysisResult(savedMeal);
+        setShowResults(true);
+      }
+    }
+  }, [searchParams]);
+
+  // Simulate file upload (UI only)
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        setShowResults(false); // Reset if new image uploaded
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Simulate analysis (UI only - now saves to history)
+  const handleAnalyze = () => {
+    setIsAnalyzing(true);
+    // Simulate loading for 1.5 seconds
+    setTimeout(() => {
+      const result = generateMockResults(imagePreview);
+      setAnalysisResult(result);
+      foodHistory.saveMeal(result); // SAVE TO PERSISTENT HISTORY
+      setIsAnalyzing(false);
+      setShowResults(true);
+    }, 1500);
+  };
+
+  // Reset to initial state
+  const handleReset = () => {
+    setImagePreview(null);
+    setShowResults(false);
+    setIsAnalyzing(false);
+  };
+
+  // Remove image
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setShowResults(false);
+  };
+
+  return (
+    <>
+      <AiNavBarFood />
+      <div className="min-h-screen bg-gradient-to-b from-orange-50/30 to-white">
+        <div className="max-w-5xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+        
+          {/* Header Section */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#FF8211] to-orange-600 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200">
+                <Scan className="w-6 h-6 text-white" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
+                AI Food Analyzer
+              </h1>
+            </div>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Analyze your meals and track nutrition effortlessly
+            </p>
+          </motion.div>
+
+        {/* Upload Card */}
+        {!imagePreview && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+          >
+            <label className="block">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <div className="border-2 border-dashed border-gray-300 rounded-3xl p-12 cursor-pointer hover:border-[#FF8211] hover:bg-orange-50/30 transition-all duration-300 group">
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-gradient-to-br from-orange-100 to-orange-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                    <Upload className="w-10 h-10 text-[#FF8211]" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    Upload a food image
+                  </h3>
+                  <p className="text-gray-500 mb-1">
+                    Drag and drop or click to browse
+                  </p>
+                  <p className="text-sm text-gray-400">
+                    JPG, PNG supported
+                  </p>
+                </div>
+              </div>
+            </label>
+          </motion.div>
+        )}
+
+        {/* Image Preview & Analyze Button */}
+        {imagePreview && !showResults && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            <div className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-100">
+              <div className="relative">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-full h-64 md:h-96 object-cover"
+                />
+                <button
+                  onClick={handleRemoveImage}
+                  className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-600" />
+                </button>
+              </div>
+              <div className="p-6">
+                <div className="flex gap-4 flex-col sm:flex-row">
+                  <button
+                    onClick={handleAnalyze}
+                    disabled={isAnalyzing}
+                    className="flex-1 bg-gradient-to-r from-[#FF8211] to-orange-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-orange-200 hover:shadow-xl hover:shadow-orange-300 transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <RefreshCw className="w-5 h-5 animate-spin" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        <Scan className="w-5 h-5" />
+                        Analyze Now
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={handleRemoveImage}
+                    className="px-8 py-4 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors"
+                  >
+                    Change Image
+                  </button>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Results Section */}
+        {showResults && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-8"
+          >
+            {/* Dish Name & Confidence */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-3xl shadow-lg p-8 border border-gray-100"
+            >
+              <div className="flex items-start justify-between flex-wrap gap-4 mb-6">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-3">
+                    {analysisResult?.dishName}
+                  </h2>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-500">Confidence:</span>
+                    <div className="flex-1 w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${analysisResult?.confidence}%` }}
+                        transition={{ duration: 1, ease: "easeOut" }}
+                        className="h-full bg-gradient-to-r from-[#FF8211] to-orange-500"
+                      />
+                    </div>
+                    <span className="text-sm font-bold text-[#FF8211]">
+                      {analysisResult?.confidence}%
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={handleReset}
+                  className="px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-colors flex items-center gap-2"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Try Again
+                </button>
+              </div>
+
+              {/* Health Tip */}
+              <div className="bg-gradient-to-r from-orange-50 to-orange-100/50 rounded-2xl p-6 border border-orange-200">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 bg-[#FF8211] rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Flame className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-sm font-bold text-[#FF8211] mb-1 uppercase tracking-wide">
+                      Health Tip for Gym-Goers
+                    </h4>
+                    <p className="text-gray-700 leading-relaxed">
+                      {analysisResult?.healthTip}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Nutrition Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <NutritionCard
+                icon={Flame}
+                label="Calories"
+                value={analysisResult?.calories}
+                unit="kcal"
+                delay={0}
+                color="from-red-500 to-orange-500"
+              />
+              <NutritionCard
+                icon={Beef}
+                label="Protein"
+                value={analysisResult?.protein}
+                unit="g"
+                delay={0.1}
+                color="from-blue-500 to-cyan-500"
+              />
+              <NutritionCard
+                icon={Wheat}
+                label="Carbs"
+                value={analysisResult?.carbs}
+                unit="g"
+                delay={0.2}
+                color="from-amber-500 to-yellow-500"
+              />
+              <NutritionCard
+                icon={Droplet}
+                label="Fats"
+                value={analysisResult?.fats}
+                unit="g"
+                delay={0.3}
+                color="from-green-500 to-emerald-500"
+              />
+            </div>
+          </motion.div>
+        )}
+        </div>
+      </div>
+      <FooterDash />
+    </>
+  );
+};
+
+//Nutrition Card Component
+const NutritionCard = ({ icon: Icon, label, value, unit, delay, color }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.4 }}
+      whileHover={{ y: -5, transition: { duration: 0.2 } }}
+      className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow cursor-pointer group"
+    >
+      <div className={`w-14 h-14 bg-gradient-to-br ${color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-md`}>
+        <Icon className="w-7 h-7 text-white" strokeWidth={2.5} />
+      </div>
+      
+      <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+        {label}
+      </p>
+      
+      <div className="flex items-baseline gap-1">
+        <span className="text-4xl font-bold text-gray-900">{value}</span>
+        <span className="text-lg font-medium text-gray-500">{unit}</span>
+      </div>
+    </motion.div>
+  );
+};
+
+export default AiFoodAnalyzer;

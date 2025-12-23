@@ -33,7 +33,7 @@ function Navbar() {
 
   const [gemsBalance, setGemsBalance] = useState(() => {
     const saved = localStorage.getItem("gems_balance");
-    return saved ? parseInt(saved, 10) : null; 
+    return saved ? parseInt(saved, 10) : null;
   });
   const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
   const [isLoadingBalance, setIsLoadingBalance] = useState(false);
@@ -57,23 +57,45 @@ function Navbar() {
 
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('gemsUpdated', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('gemsUpdated', handleStorageChange);
     };
   }, []);
 
-  const handleAddGems = (pkg) => {
+  const handleAddGems = async (pkg) => {
     setIsAddGemsModalOpen(false);
-    navigate('/checkout', { 
-      state: { 
-        type: 'gems',
-        gems: pkg.gems,
-        price: pkg.price,
-        user: user
-      } 
-    });
+
+    try {
+      // Call payment start endpoint
+      const token = localStorage.getItem('access');
+      const response = await axiosInstance.post(
+        '/api/payment/start/',
+        { amount: pkg.price },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      // Navigate to checkout with gem data and iframe URL
+      navigate('/checkout', {
+        state: {
+          type: 'gems',
+          gems: pkg.gems,
+          price: pkg.price,
+          user: user,
+          iframeUrl: response.data.iframe_url,
+          paymentId: response.data.payment_id
+        }
+      });
+    } catch (error) {
+      console.error('Error starting payment:', error);
+      showToast('Failed to start payment process. Please try again.', { type: 'error' });
+      setIsAddGemsModalOpen(true); // Reopen modal on error
+    }
   };
 
   const logout = async (e) => {
@@ -299,17 +321,17 @@ function Navbar() {
               to="/ai-trainer"
               className={({ isActive }) =>
                 `relative px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 group overflow-hidden
-                ${isActive 
-                  ? "text-white bg-[#ff8211] shadow-md shadow-orange-500/20" 
+                ${isActive
+                  ? "text-white bg-[#ff8211] shadow-md shadow-orange-500/20"
                   : "text-gray-700 hover:text-[#ff8211] hover:bg-orange-50"}`
               }
             >
               {/* Shimmer Effect */}
               <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
-              
+
               <MdSportsMartialArts size={20} className="relative z-20" />
               <span className="relative z-20">AI Trainer</span>
-              
+
               {/* Badge */}
               <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 z-20">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
@@ -336,9 +358,9 @@ function Navbar() {
             <div className="hidden md:flex md:items-center md:gap-4">
               {user ? (
                 <div className="flex items-center gap-3">
-                  <GemsBadge 
-                    balance={gemsBalance} 
-                    onAddClick={() => setIsAddGemsModalOpen(true)} 
+                  <GemsBadge
+                    balance={gemsBalance}
+                    onAddClick={() => setIsAddGemsModalOpen(true)}
                     isLoading={isLoadingBalance}
                   />
                   {/* <NotificationDropdown /> */}
@@ -506,7 +528,7 @@ function Navbar() {
                   >
                     <MdSportsMartialArts size={20} className="relative z-20" />
                     <span className="relative z-20">AI Trainer</span>
-                    
+
                     {/* Shimmer Effect */}
                     <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
 
@@ -578,7 +600,7 @@ function Navbar() {
         </AnimatePresence>
       </nav>
 
-      <AddGemsModal 
+      <AddGemsModal
         isOpen={isAddGemsModalOpen}
         onClose={() => setIsAddGemsModalOpen(false)}
         onContinue={handleAddGems}

@@ -49,21 +49,19 @@ const AddGemsModal = ({ isOpen, onClose, onContinue }) => {
           <div className="flex p-1 bg-gray-100 rounded-2xl">
             <button
               onClick={() => setActiveTab('packages')}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${
-                activeTab === 'packages'
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${activeTab === 'packages'
                   ? 'bg-white text-[#FF8211] shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
             >
               Packages
             </button>
             <button
               onClick={() => setActiveTab('money')}
-              className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${
-                activeTab === 'money'
+              className={`flex-1 py-2.5 text-sm font-semibold rounded-xl transition-all ${activeTab === 'money'
                   ? 'bg-white text-[#FF8211] shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
-              }`}
+                }`}
             >
               Custom Amount
             </button>
@@ -76,11 +74,10 @@ const AddGemsModal = ({ isOpen, onClose, onContinue }) => {
                   <button
                     key={pkg.id}
                     onClick={() => setSelectedPackage(pkg)}
-                    className={`relative flex items-center justify-between p-4 rounded-2xl border-2 transition-all group ${
-                      selectedPackage?.id === pkg.id
+                    className={`relative flex items-center justify-between p-4 rounded-2xl border-2 transition-all group ${selectedPackage?.id === pkg.id
                         ? 'border-[#FF8211] bg-orange-50'
                         : 'border-gray-100 hover:border-orange-200 hover:bg-orange-50/50'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center gap-4">
                       <span className="text-2xl">{pkg.icon}</span>
@@ -91,9 +88,8 @@ const AddGemsModal = ({ isOpen, onClose, onContinue }) => {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-lg font-bold text-gray-900">${pkg.price}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        selectedPackage?.id === pkg.id ? 'border-[#FF8211] bg-[#FF8211]' : 'border-gray-300'
-                      }`}>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${selectedPackage?.id === pkg.id ? 'border-[#FF8211] bg-[#FF8211]' : 'border-gray-300'
+                        }`}>
                         {selectedPackage?.id === pkg.id && <div className="w-2 h-2 bg-white rounded-full" />}
                       </div>
                     </div>
@@ -143,9 +139,9 @@ const AddGemsModal = ({ isOpen, onClose, onContinue }) => {
 
         {/* Footer */}
         <div className="p-6 bg-gray-50/50 border-t border-gray-100">
-        <div className="flex items-center justify-center text-center mb-2">
-          <p className="text-xs text-gray-500">GEMs are not refundable</p>
-        </div>
+          <div className="flex items-center justify-center text-center mb-2">
+            <p className="text-xs text-gray-500">GEMs are not refundable</p>
+          </div>
           <button
             onClick={() => {
               const data = activeTab === 'packages' ? selectedPackage : { gems: Math.floor(calculatedGems), price: parseFloat(amount) };

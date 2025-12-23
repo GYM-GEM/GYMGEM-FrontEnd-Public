@@ -225,7 +225,7 @@ export const processPayment = async (paymentData) => {
 const Checkout = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { course, user, iframeUrl, paymentId, type, gems, price: gemsPrice, returnUrl } = location.state || {};
+  const { course, user, iframeUrl, paymentId, type, gems, price, returnUrl } = location.state || {};
 
   const [paymentMethod, setPaymentMethod] = useState("credit_card");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -237,21 +237,25 @@ const Checkout = () => {
     cvv: "",
   });
 
-  // Redirect if no data
+  // Check if this is a gems purchase
+  const isGemsPurchase = type === 'gems';
+
+  // Redirect if no course or user data (unless it's a gems purchase)
   useEffect(() => {
-    if (!user || (!course && type !== 'gems')) {
+    if (!user || (!course && !isGemsPurchase)) {
       navigate('/courses');
     }
-  }, [course, user, type, navigate]);
+  }, [course, user, navigate, isGemsPurchase]);
 
-  if (!user || (!course && type !== 'gems')) {
+  if (!user || (!course && !isGemsPurchase)) {
     return null;
   }
 
-  const isGemsPurchase = type === 'gems';
-  const price = isGemsPurchase ? gemsPrice : (parseFloat(course?.price) || 49.99);
-  const tax = price * 0.1; // 10% tax
-  const total = isGemsPurchase ? price : (price + tax);
+  const coursePrice = course ? (parseFloat(course.price) || 49.99) : 0;
+  const gemsPrice = isGemsPurchase ? price : 0;
+  const totalPrice = isGemsPurchase ? gemsPrice : coursePrice;
+  const tax = totalPrice * 0.1; // 10% tax
+  const total = totalPrice + tax;
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -360,21 +364,21 @@ const Checkout = () => {
       <Navbar />
 
       <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${iframeUrl ? 'max-w-6xl' : 'max-w-7xl'}`}>
           {/* Header */}
           <div className="mb-8">
             <Link
-              to={isGemsPurchase ? (returnUrl || '/courses') : `/courses/${course.id}`}
+              to={isGemsPurchase ? "/" : `/courses/${course?.id || ''}`}
               className="text-[#FF8211] text-sm font-medium hover:underline poppins-regular inline-flex items-center gap-1 mb-4"
             >
               <ArrowLeft className="w-4 h-4" />
-              Back
+              {isGemsPurchase ? 'Back to Home' : 'Back to Course'}
             </Link>
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 bebas-regular">
               Checkout
             </h1>
             <p className="text-gray-600 poppins-regular mt-2">
-              {isGemsPurchase ? 'Complete your GEMs purchase' : 'Complete your purchase securely'}
+              {isGemsPurchase ? 'Complete your GEMS purchase' : 'Complete your purchase securely'}
             </p>
           </div>
 
@@ -385,7 +389,7 @@ const Checkout = () => {
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8 relative overflow-hidden group">
                   {/* Decorative Background */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-orange-50 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110 duration-700" />
-                  
+
                   <div className="relative z-10">
                     <div className="flex items-center gap-4 mb-8">
                       <div className="p-4 bg-orange-100 rounded-2xl">

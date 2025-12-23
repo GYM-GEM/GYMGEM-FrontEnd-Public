@@ -17,7 +17,7 @@ import FooterDash from "../FooterDash.jsx";
 const CoursesTrainerDash = () => {
   const [filters, setFilters] = useState({
     category: "All",
-    status: "Published",
+    status: "All",
     sort: "Newest",
   });
   const [query, setQuery] = useState("");
@@ -60,7 +60,7 @@ const CoursesTrainerDash = () => {
     if (filters.category !== "All") {
       list = list.filter((r) => (r.category || "") === filters.category);
     }
-    if (filters.status) {
+    if (filters.status && filters.status !== "All") {
       list = list.filter((r) => r.status === filters.status);
     }
     switch (filters.sort) {
@@ -373,7 +373,9 @@ const CoursesTrainerDash = () => {
                       setFilters((f) => ({ ...f, status: e.target.value }))
                     }
                   >
+                    <option>All</option>
                     <option>Published</option>
+                    <option>Pending</option>
                     <option>Draft</option>
                     <option>Archived</option>
                   </select>
@@ -517,6 +519,7 @@ const CoursesTrainerDash = () => {
                                   }
                                 >
                                   <option>Published</option>
+                                  <option>Pending</option>
                                   <option>Draft</option>
                                   <option>Archived</option>
                                 </select>
@@ -533,7 +536,15 @@ const CoursesTrainerDash = () => {
                                       type="button"
                                       className="inline-flex items-center gap-2 text-sm text-green-600 hover:underline"
                                       onClick={() => {
-                                        const payload = { ...editValues };
+                                        // Map status: if trainer selects "Published", send "Pending" for approval
+                                        const backendStatus = editValues.status === "Published"
+                                          ? "Pending"
+                                          : editValues.status;
+
+                                        const payload = {
+                                          ...editValues,
+                                          status: backendStatus
+                                        };
 
                                         const updatedRows = rows.map((r) =>
                                           r.id === row.id

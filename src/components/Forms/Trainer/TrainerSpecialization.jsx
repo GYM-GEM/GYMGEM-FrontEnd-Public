@@ -16,19 +16,23 @@ const TrainerSpecialization = () => {
 
 
   const onSubmit = async (data) => {
-
     const user = JSON.parse(localStorage.getItem("user"));
-    const payload = { ...data, account_id: user.id };
-    console.log(payload)
-    const token = localStorage.getItem('access')
+
+    const payload = {
+      specialization: data.specialization,
+      years_of_experience: data.years_of_experience,
+      service_location: data.service_location,
+      account: user.id
+    };
+
+    console.log(payload);
+
     try {
-      // Send POST request to backend
-      // Send POST request to backend
       const response = await axiosInstance.post(
         "/api/trainers/specializations",
         payload
       );
-      console.log("Response:", response.data);
+
       showToast("trainer successful!", { type: "success" });
       navigate("/trainerExperience");
     } catch (error) {
@@ -36,6 +40,7 @@ const TrainerSpecialization = () => {
       showToast("failed. Please try again.", { type: "error" });
     }
   };
+
 
 
 
@@ -54,7 +59,7 @@ const TrainerSpecialization = () => {
 
         <div className="rounded-3xl border border-border bg-card p-8 shadow-sm sm:p-10">
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
-            
+
             {/* Specialization */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
@@ -80,50 +85,26 @@ const TrainerSpecialization = () => {
               )}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* Years of Experience */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Years of Experience
-                </label>
-                <input
-                  type="number"
-                  placeholder="Enter years of experience"
-                  {...register("years_of_experience", {
-                    required: "Years of experience is required",
-                    min: { value: 0, message: "Minimum is 0" },
-                    max: { value: 50, message: "Maximum is 50" },
-                  })}
-                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
-                />
-                {errors.years_of_experience && (
-                  <p className="text-xs text-destructive">
-                    {errors.years_of_experience.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Hourly Rate */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Hourly Rate ($)
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="Enter your hourly rate"
-                  {...register("hourly_rate", {
-                    required: "Hourly rate is required",
-                    min: { value: 0, message: "Minimum rate is 0" },
-                  })}
-                  className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
-                />
-                {errors.hourly_rate && (
-                  <p className="text-xs text-destructive">
-                    {errors.hourly_rate.message}
-                  </p>
-                )}
-              </div>
+            {/* Years of Experience */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Years of Experience
+              </label>
+              <input
+                type="number"
+                placeholder="Enter years of experience"
+                {...register("years_of_experience", {
+                  required: "Years of experience is required",
+                  min: { value: 0, message: "Minimum is 0" },
+                  max: { value: 50, message: "Maximum is 50" },
+                })}
+                className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+              />
+              {errors.years_of_experience && (
+                <p className="text-xs text-destructive">
+                  {errors.years_of_experience.message}
+                </p>
+              )}
             </div>
 
             {/* Service Location */}

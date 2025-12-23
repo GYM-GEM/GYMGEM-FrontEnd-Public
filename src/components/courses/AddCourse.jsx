@@ -22,11 +22,15 @@ const AddCourse = () => {
   const onSubmit = async (data) => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
+
+      // Map status: if user selects "published", send "pending" for admin approval
+      const backendStatus = data.status === "published" ? "pending" : data.status;
+
       const payload = {
         title: data.title,
         price: data.price,
         cover: data.coverUrl || "http://example.com",
-        // status: data.status || "draft",                         
+        status: backendStatus,
         description: data.description,
         preview_video: data.previewUrl || "http://example.com",
         trainer_profile: user?.id || 0,
@@ -219,7 +223,7 @@ const AddCourse = () => {
                 >
                   <option value="">Select Status</option>
                   <option value="draft">Draft</option>
-                  <option value="published">Published</option>
+                  <option value="published">Request to publish</option>
                 </select>
                 {errors.status && (
                   <p className="text-xs text-destructive text-red-500">{errors.status.message}</p>

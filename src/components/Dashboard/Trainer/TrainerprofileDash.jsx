@@ -14,6 +14,14 @@ import { useParams } from "react-router-dom";
 import UploadImage from "../../UploadImage";
 
 const TrainerProfileDash = () => {
+  const SPECIALIZATION_MAP = {
+    5: "Lifting",
+    4: "Cardio",
+    3: "Yoga",
+    2: "Fitness",
+    1: "Boxing"
+  };
+
   const navigate = useNavigate();
   const { id } = useParams();
   const { showToast } = useToast();
@@ -53,52 +61,58 @@ const TrainerProfileDash = () => {
   const [currentEdit, setCurrentEdit] = useState(null);
   const [formData, setFormData] = useState({});
 
-  useEffect(() => {
-    const fetchTrainerProfile = async () => {
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      const profileId = user.current_profile;
+  const fetchTrainerProfile = async () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const profileId = user.current_profile;
 
-      if (!profileId) return;
+    if (!profileId) return;
 
-      setIsLoading(true);
-      try {
-        const response = await axiosInstance.get(`/api/trainers/my-records/?profile_id=${profileId}`);
-        const { trainer, specializations, experiences } = response.data;
+    setIsLoading(true);
+    try {
+      const response = await axiosInstance.get(`/api/trainers/my-records/?profile_id=${profileId}`);
+      const { trainer, specializations, experiences } = response.data;
 
-        console.log("Fetched trainer data:", response.data);
+      console.log("Fetched trainer data:", response.data);
 
-        if (trainer) {
-          const resolvedName = trainer.name || "Trainer";
+      if (trainer) {
+        const resolvedName = trainer.name || "Trainer";
 
-          setProfileData(prev => ({
-            ...prev,
-            profile: {
-              name: resolvedName,
-              avatar: trainer.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(resolvedName)}&background=FF8211&color=fff`,
-              gender: trainer.gender || "",
-              birthdate: trainer.birthdate || "",
-              country: trainer.country || "",
-              state: trainer.state || "",
-              zip: trainer.zip_code || "",
-              phone: trainer.phone_number || "",
-              bio: trainer.bio || "",
-              rate: trainer.rate || 0,
-              balance: trainer.balance || 0,
-            },
-            specializations: specializations || [],
-            experiences: experiences || []
-          }));
-
-
-        }
-      } catch (error) {
-        console.error("Error fetching trainer profile:", error);
-        showToast("Failed to load profile data", { type: "error" });
-      } finally {
-        setIsLoading(false);
+        setProfileData(prev => ({
+          ...prev,
+          profile: {
+            name: resolvedName,
+            avatar: trainer.profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(resolvedName)}&background=FF8211&color=fff`,
+            gender: trainer.gender || "",
+            birthdate: trainer.birthdate || "",
+            country: trainer.country || "",
+            state: trainer.state || "",
+            zip: trainer.zip_code || "",
+            phone: trainer.phone_number || "",
+            bio: trainer.bio || "",
+            rate: trainer.rate || 0,
+            balance: trainer.balance || 0,
+          },
+          specializations: (specializations || []).map(s => ({
+            ...s, // Keep original properties
+            id: s.id || `spec-${s.specialization}-${s.trainer}`,
+            name: SPECIALIZATION_MAP[s.specialization] || "Unknown Specialization",
+            // Ensure consistency if API uses different keys, but user wants these:
+            specialization: s.specialization,
+            years_of_experience: s.years_of_experience,
+            service_location: s.service_location
+          })),
+          experiences: experiences || []
+        }));
       }
-    };
+    } catch (error) {
+      console.error("Error fetching trainer profile:", error);
+      showToast("Failed to load profile data", { type: "error" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTrainerProfile();
   }, []);
 
@@ -107,6 +121,23 @@ const TrainerProfileDash = () => {
     setCurrentEdit(data);
     if (modalName === "editProfile") {
       setFormData({ ...profileData.profile });
+    } else if (modalName === "editSpecialization" && data) {
+      setFormData({
+        specializationId: data.specialization || data.specializationId,
+        yearsOfExperience: data.years_of_experience || data.yearsOfExperience,
+        serviceLocation: data.service_location || data.serviceLocation,
+        description: data.description,
+        ...data
+      });
+    } else if (modalName === "editExperience" && data) {
+      setFormData({
+        workplace: data.work_place || data.workplace,
+        position: data.position,
+        startDate: data.start_date || data.startDate,
+        endDate: data.end_date || data.endDate,
+        description: data.description,
+        ...data
+      });
     } else if (data) {
       setFormData({ ...data });
     } else {
@@ -174,62 +205,141 @@ const TrainerProfileDash = () => {
   };
 
   // Specialization handlers
-  const handleSaveSpecialization = () => {
-    if (currentEdit) {
-      setProfileData(prev => ({
-        ...prev,
-        specializations: prev.specializations.map(s =>
-          s.id === currentEdit.id ? { ...formData, id: s.id } : s
-        )
-      }));
-      showToast("Specialization updated!", { type: "success" });
-    } else {
-      setProfileData(prev => ({
-        ...prev,
-        specializations: [...prev.specializations, { ...formData, id: Date.now() }]
-      }));
+  // Specialization handlers
+  const handleAddSpecialization = async () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const payload = {
+      specialization: parseInt(formData.specializationId),
+      years_of_experience: parseInt(formData.yearsOfExperience),
+      service_location: formData.serviceLocation,
+      description: formData.description,
+      account: user.id
+    };
+
+    try {
+      await axiosInstance.post(`/api/trainers/specializations`, payload);
       showToast("Specialization added!", { type: "success" });
+      fetchTrainerProfile();
+      closeModal("addSpecialization");
+    } catch (error) {
+      console.error("Error adding specialization:", error);
+      showToast("Failed to add specialization", { type: "error" });
     }
-    closeModal(currentEdit ? "editSpecialization" : "addSpecialization");
   };
 
-  const handleDeleteSpecialization = (id) => {
+  const handleEditSpecialization = async () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const payload = {
+      specialization: parseInt(formData.specializationId),
+      years_of_experience: parseInt(formData.yearsOfExperience),
+      service_location: formData.serviceLocation,
+      description: formData.description,
+      account: user.id
+    };
+
+    if (typeof currentEdit.id === 'string' && currentEdit.id.startsWith('spec-')) {
+      showToast("Cannot edit this specialization (ID missing)", { type: "error" });
+      return;
+    }
+
+    try {
+      await axiosInstance.put(`/api/trainers/specializations/${currentEdit.id}`, payload);
+      showToast("Specialization updated!", { type: "success" });
+      fetchTrainerProfile();
+      closeModal("editSpecialization");
+    } catch (error) {
+      console.error("Error updating specialization:", error);
+      showToast("Failed to update specialization", { type: "error" });
+    }
+  };
+
+  const handleSaveSpecialization = () => {
+    if (currentEdit) {
+      handleEditSpecialization();
+    } else {
+      handleAddSpecialization();
+    }
+  };
+
+  const handleDeleteSpecialization = async (id) => {
+    if (typeof id === 'string' && id.startsWith('spec-')) {
+      showToast("Cannot delete this specialization (ID missing)", { type: "error" });
+      return;
+    }
     if (window.confirm("Delete this specialization?")) {
-      setProfileData(prev => ({
-        ...prev,
-        specializations: prev.specializations.filter(s => s.id !== id)
-      }));
-      showToast("Specialization deleted!", { type: "success" });
+      try {
+        await axiosInstance.delete(`/api/trainers/specializations/${id}`);
+        fetchTrainerProfile();
+        showToast("Specialization deleted!", { type: "success" });
+      } catch (error) {
+        console.error("Error deleting specialization:", error);
+        showToast("Failed to delete specialization", { type: "error" });
+      }
     }
   };
 
   // Experience handlers
-  const handleSaveExperience = () => {
-    if (currentEdit) {
-      setProfileData(prev => ({
-        ...prev,
-        experiences: prev.experiences.map(e =>
-          e.id === currentEdit.id ? { ...formData, id: e.id } : e
-        )
-      }));
-      showToast("Experience updated!", { type: "success" });
-    } else {
-      setProfileData(prev => ({
-        ...prev,
-        experiences: [...prev.experiences, { ...formData, id: Date.now() }]
-      }));
+  const handleAddExperience = async () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const payload = {
+      work_place: formData.workplace,
+      position: formData.position,
+      start_date: formData.startDate,
+      end_date: formData.endDate,
+      description: formData.description,
+      account_id: user.id
+    };
+    try {
+      await axiosInstance.post(`/api/trainers/experiences`, payload);
       showToast("Experience added!", { type: "success" });
+      fetchTrainerProfile();
+      closeModal("addExperience");
+    } catch (error) {
+      console.error("Error adding experience:", error);
+      showToast("Failed to add experience", { type: "error" });
     }
-    closeModal(currentEdit ? "editExperience" : "addExperience");
   };
 
-  const handleDeleteExperience = (id) => {
+  const handleEditExperience = async () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const payload = {
+      work_place: formData.workplace,
+      position: formData.position,
+      start_date: formData.startDate,
+      end_date: formData.endDate,
+      description: formData.description,
+      account_id: user.id
+    };
+
+    try {
+      await axiosInstance.put(`/api/trainers/experiences/${currentEdit.id}`, payload);
+      showToast("Experience updated!", { type: "success" });
+      fetchTrainerProfile();
+      closeModal("editExperience");
+    } catch (error) {
+      console.error("Error updating experience:", error);
+      showToast("Failed to update experience", { type: "error" });
+    }
+  };
+
+  const handleSaveExperience = () => {
+    if (currentEdit) {
+      handleEditExperience();
+    } else {
+      handleAddExperience();
+    }
+  };
+
+  const handleDeleteExperience = async (id) => {
     if (window.confirm("Delete this experience?")) {
-      setProfileData(prev => ({
-        ...prev,
-        experiences: prev.experiences.filter(e => e.id !== id)
-      }));
-      showToast("Experience deleted!", { type: "success" });
+      try {
+        await axiosInstance.delete(`/api/trainers/experiences/${id}`);
+        fetchTrainerProfile();
+        showToast("Experience deleted!", { type: "success" });
+      } catch (error) {
+        console.error("Error deleting experience:", error);
+        showToast("Failed to delete experience", { type: "error" });
+      }
     }
   };
 
@@ -441,7 +551,7 @@ const TrainerProfileDash = () => {
                       <div key={spec.id} className="group bg-gradient-to-br from-gray-50 to-white rounded-xl p-4 border border-gray-100 hover:border-[#86ac55]/30 hover:shadow-md transition-all">
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="font-bold text-lg text-gray-900">{spec.name}</h3>
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-2">
                             <button
                               onClick={() => openModal("editSpecialization", spec)}
                               className="p-1 hover:bg-gray-100 rounded"
@@ -456,7 +566,11 @@ const TrainerProfileDash = () => {
                             </button>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-600">{spec.description || "No description"}</p>
+                        <div className="text-sm text-gray-600 space-y-1">
+                          <p><span className="font-semibold">Specialization:</span> {spec.specialization_name}</p>
+                          <p><span className="font-semibold">Experience:</span> {spec.years_of_experience} years</p>
+                          <p><span className="font-semibold">Location:</span> <span className="capitalize">{spec.service_location || "Not specified"}</span></p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -491,16 +605,16 @@ const TrainerProfileDash = () => {
                         <div className="absolute left-0 top-0 -translate-x-[9px] w-4 h-4 rounded-full bg-blue-500 border-2 border-white ring-2 ring-gray-100"></div>
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <h3 className="font-bold text-lg text-gray-900">{exp.position || exp.title}</h3>
-                            <p className="text-sm text-[#FF8211] font-semibold">{exp.workplace || exp.company}</p>
+                            <h3 className="font-bold text-lg text-gray-900">{exp.position}</h3>
+                            <p className="text-sm text-[#FF8211] font-semibold">{exp.work_place}</p>
                             <p className="text-xs text-gray-500 mt-1">
-                              {exp.startDate} - {exp.endDate || "Present"}
+                              {exp.start_date} - {exp.end_date || "Present"}
                             </p>
                             {exp.description && (
                               <p className="text-sm text-gray-600 mt-2">{exp.description}</p>
                             )}
                           </div>
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-2">
                             <button
                               onClick={() => openModal("editExperience", exp)}
                               className="p-1 hover:bg-gray-100 rounded"
@@ -538,8 +652,8 @@ const TrainerProfileDash = () => {
                       onClick={() => profileData.record && openModal("editRecord", profileData.record)}
                       disabled={!profileData.record}
                       className={`px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2 text-sm ${profileData.record
-                          ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                          : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                        ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
                         }`}
                     >
                       <Edit className="w-4 h-4" />
@@ -840,24 +954,55 @@ const TrainerProfileDash = () => {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Name</label>
-                <input
-                  type="text"
-                  value={formData.name || ""}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
-                  placeholder="e.g., Strength Training"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <textarea
-                  value={formData.description || ""}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
-                  rows="3"
-                />
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Specialization</label>
+                  <select
+                    value={formData.specializationId || ""}
+                    onChange={(e) => setFormData({ ...formData, specializationId: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                  >
+                    <option value="">Select Specialization</option>
+                    {Object.entries(SPECIALIZATION_MAP).map(([id, name]) => (
+                      <option key={id} value={id}>{name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Years of Experience</label>
+                    <input
+                      type="number"
+                      value={formData.yearsOfExperience || ""}
+                      onChange={(e) => setFormData({ ...formData, yearsOfExperience: e.target.value })}
+                      className="w-full border rounded px-3 py-2"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Service Location</label>
+                    <select
+                      value={formData.serviceLocation || ""}
+                      onChange={(e) => setFormData({ ...formData, serviceLocation: e.target.value })}
+                      className="w-full border rounded px-3 py-2"
+                    >
+                      <option value="">Select Location</option>
+                      <option value="online">Online</option>
+                      <option value="offline">Offline</option>
+                      <option value="both">Both</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Description</label>
+                  <textarea
+                    value={formData.description || ""}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className="w-full border rounded px-3 py-2"
+                    rows="3"
+                    placeholder="Optional description"
+                  />
+                </div>
               </div>
             </div>
             <div className="border-t px-6 py-4 flex justify-end gap-3">
@@ -913,23 +1058,22 @@ const TrainerProfileDash = () => {
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Start Date</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Start Date</label>
                   <input
-                    type="month"
+                    type="date"
                     value={formData.startDate || ""}
                     onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                    className="w-full border rounded px-3 py-2"
+                    className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">End Date</label>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">End Date</label>
                   <input
-                    type="text"
+                    type="date"
                     value={formData.endDate || ""}
                     onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                    className="w-full border rounded px-3 py-2"
-                    placeholder="Present or YYYY-MM"
+                    className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   />
                 </div>
               </div>

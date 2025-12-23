@@ -48,7 +48,7 @@ const CourseDetailsDash = () => {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await axiosInstance.get(`/api/courses/courses/${id}/detail/`);
+        const response = await axiosInstance.get(`/api/courses/courses/${id}/detail-trainer/`);
         const foundCourse = response.data;
 
         // Ensure whatYouLearn exists (if backend doesn't provide it, keep default or empty)

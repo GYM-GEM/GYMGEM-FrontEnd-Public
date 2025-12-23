@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
 import UserDropdown from "../../UserDropdown";
-import { ClipboardList, Calendar, Heart, MessageSquare } from "lucide-react"; // Import new icons
+import { ClipboardList, Calendar, Heart, MessageSquare, Settings } from "lucide-react"; // Import new icons
 import NotificationDropdown from "../../NotificationDropdown";
 import GemsBadge from "../../GemsBadge";
 import AddGemsModal from "../../AddGemsModal";
@@ -27,10 +27,11 @@ const NavTraineDash = () => {
 
   // Main Navigation Links
   const mainLinks = [
-    { to: "/trainee", label: "Dashboard" },
+    { to: "/trainee", label: "Profile" },
     { to: "/trainee/courses", label: "Courses" },
     // { to: "/trainee/calendar", label: "Calendar", icon: <Calendar size={18} /> },
     { to: "/trainee/message", label: "Messages", icon: <MessageSquare size={18} /> },
+    { to: "/trainee/settings", label: "Settings", icon: <Settings size={18} /> },
   ];
 
   // Activity Dropdown Links
@@ -288,7 +289,7 @@ const NavTraineDash = () => {
                   user={user}
                   logout={logout}
                   dashboardPath="/trainee"
-                  settingsPath="/trainee/settings"
+                  settingsPath="/settings"
                 />
               </div>
 

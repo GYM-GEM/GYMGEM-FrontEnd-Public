@@ -460,7 +460,7 @@ const CourseDetails = () => {
       await fetchUserBalance();
 
       // Navigate to course learning page
-      navigate(`/courses/${course.id}/learn`);
+      navigate(`/trainee/courses/${course.id}/learn`);
     } catch (error) {
       console.error('Error enrolling in course:', error);
       const errorMessage = error.response?.data?.message || error.response?.data?.error || 'Failed to enroll in course. Please check your GEM balance and try again.';

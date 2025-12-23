@@ -11,7 +11,7 @@ import NotificationDropdown from "../../NotificationDropdown";
 import GemsBadge from "../../GemsBadge";
 import AddGemsModal from "../../AddGemsModal";
 import getBalance from "../../../utils/balance";
-import { BookOpen, Users, ClipboardList, MessageSquare, Calendar } from "lucide-react";
+import { BookOpen, Users, ClipboardList, MessageSquare, Calendar, Settings } from "lucide-react";
 
 const NavBarDash = () => {
   const navigate = useNavigate();
@@ -31,10 +31,11 @@ const NavBarDash = () => {
 
   // Main Navigation Links
   const mainLinks = [
-    { to: "/trainer", label: "Dashboard" },
+    // { to: "/trainer/", label: "Dashboard" },
     { to: `/trainer/profile/${currentProfileId}`, label: "Profile" },
     { to: "/trainer/message", label: "Messages", icon: <MessageSquare size={18} /> },
     { to: "/trainer/calendar", label: "My Calendar", icon: <Calendar size={18} /> },
+    { to: "/trainer/settings", label: "Settings", icon: <Settings size={18} /> },
   ];
 
   // Management Dropdown Links
@@ -295,8 +296,8 @@ const NavBarDash = () => {
                 <UserDropdown
                   user={user}
                   logout={logout}
-                  dashboardPath="/trainer"
-                  settingsPath="/trainer/settings"
+                  dashboardPath={`/trainer/profile/${currentProfileId}`}
+                  settingsPath="/settings"
                 />
               </div>
 

@@ -288,7 +288,7 @@ const NavBarDashStore = () => {
                   user={user}
                   logout={logout}
                   dashboardPath="/store/dashboard"
-                  settingsPath="/store/settings"
+                  settingsPath="/settings"
                 />
               </div>
 

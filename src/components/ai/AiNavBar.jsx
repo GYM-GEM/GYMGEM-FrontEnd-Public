@@ -226,7 +226,7 @@ function AiNavBar() {
                     user={user}
                     logout={logout}
                     dashboardPath="/trainee"
-                    settingsPath="/trainee/settings"
+                    settingsPath="/settings"
                   />
                 </>
               ) : (

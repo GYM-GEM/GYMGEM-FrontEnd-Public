@@ -129,7 +129,7 @@ function Navbar() {
     if (!activeProfile) return "/role";
 
     switch (activeProfile.type.toLowerCase()) {
-      case 'trainer': return '/trainer/dashboard';
+      case 'trainer': return `/trainer/profile/${currentProfileId}`;
       case 'trainee': return '/trainee/dashboard';
       case 'gym': return '/gym/dashboard';
       case 'store': return '/store/dashboard';

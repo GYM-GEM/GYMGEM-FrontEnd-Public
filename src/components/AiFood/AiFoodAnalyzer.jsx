@@ -136,27 +136,68 @@ const AiFoodAnalyzer = () => {
       }
 
       // Step 2: Call the API with the discovered model
-      setStatusMessage(`Analyzing with ${targetModel}...`);
+      // setStatusMessage(`Analyzing with ${targetModel}...`);
+      setStatusMessage(`Analyzing...`);
+
       
       const endpoint = `https://generativelanguage.googleapis.com/${apiVersion}/models/${targetModel}:generateContent?key=${apiKey}`;
       
-      const promptText = `Analyze this food image and provide nutritional information in STRICT JSON format.
-      The JSON must have this exact structure:
-      {
-        "dishName": string,
-        "calories": number,
-        "protein": number,
-        "carbs": number,
-        "fats": number,
-        "confidence": number,
-        "healthTip": string
-      }
-      Rules:
-      - Return ONLY the JSON object.
-      - Do NOT include markdown formatting, backticks, or any conversational text.
-      - If multiple items are present, estimate totals for the entire plate.
-      - Provide a specific, actionable health tip relevant to a gym-goer or fitness enthusiast for this meal.
-      - If the image does not contain food, set dishName to "Non-food detected" and all values to 0.`;
+      const promptText = `Analyze the provided food image and return the nutritional analysis in STRICT JSON FORMAT ONLY using Gemini 1.5 Flash Vision.
+The response MUST EXACTLY MATCH this structure:
+{
+"dishName": "string",
+"estimatedWeight": "string",
+"calories": number,
+"protein": number,
+"carbs": number,
+"fats": number,
+"confidence": number,
+"cookingMethod": "string",
+"healthTip": "string"
+}
+STRICT RULES (NO EXCEPTIONS):
+Output ONLY the JSON object.
+No markdown
+No backticks
+No explanations
+No extra characters
+FOOD DETECTION:
+Identify all visible food components (main dish, sides, sauces, oils).
+If the image does NOT contain food:
+"dishName": "Non-food detected"
+All numeric values MUST be 0.
+PORTION & WEIGHT ESTIMATION:
+Estimate portion size using visible references (plate size, utensils, bowl, hand).
+Explicitly count items when applicable (e.g., "8 chicken wings", "1 medium burger").
+estimatedWeight must be a readable string (e.g., "~420g", "2 pieces ~300g").
+HIDDEN CALORIES (MANDATORY):
+Always include calories from:
+Cooking oil
+Butter
+Sauces
+Marinades
+Frying or glazing
+Never assume zero oil unless the food is clearly raw.
+COOKING METHOD:
+Infer the most likely method (grilled, fried, baked, air-fried, raw, steamed).
+CONFIDENCE SCORE:
+85–100 → Clearly visible and identifiable
+70–84 → Minor ambiguity
+<70 → Blurry or uncertain
+FITNESS CONTEXT (REQUIRED):
+healthTip MUST be practical and gym-focused.
+Explicitly classify the meal as ONE:
+"Pre-workout energy"
+"Post-workout recovery"
+"Weight loss / Cutting"
+Base the decision mainly on protein and carbs ratio.
+ACCURACY PRIORITY:
+Protein and total calories accuracy is critical.
+Avoid unrealistic protein numbers.
+OUTPUT CONSTRAINTS:
+All numeric fields must be realistic integers.
+confidence must be between 0 and 100.
+No null values.`;
 
       const response = await fetch(endpoint, {
         method: 'POST',

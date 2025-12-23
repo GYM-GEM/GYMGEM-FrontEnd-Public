@@ -416,7 +416,6 @@ const CoursesTrainerDash = () => {
                         <th className="px-4 py-3 text-left">Lesson</th>
                         <th className="px-4 py-3 text-left">Client</th>
                         <th className="px-4 py-3 text-left">Status</th>
-                        <th className="px-4 py-3 text-center">Actions</th>
                       </tr>
                     </thead>
 
@@ -529,105 +528,7 @@ const CoursesTrainerDash = () => {
                             </td>
 
                             <td className="px-4 py-4 text-center">
-                              <div className="inline-flex items-center gap-4">
-                                {editingId === row.id ? (
-                                  <>
-                                    <button
-                                      type="button"
-                                      className="inline-flex items-center gap-2 text-sm text-green-600 hover:underline"
-                                      onClick={() => {
-                                        // Map status: if trainer selects "Published", send "Pending" for approval
-                                        const backendStatus = editValues.status === "Published"
-                                          ? "Pending"
-                                          : editValues.status;
-
-                                        const payload = {
-                                          ...editValues,
-                                          status: backendStatus
-                                        };
-
-                                        const updatedRows = rows.map((r) =>
-                                          r.id === row.id
-                                            ? { ...r, ...payload }
-                                            : r
-                                        );
-                                        setRows(updatedRows);
-
-                                        localStorage.setItem(
-                                          "courses",
-                                          JSON.stringify(updatedRows)
-                                        );
-
-                                        window.dispatchEvent(
-                                          new CustomEvent("courseStatusChanged", {
-                                            detail: { ...row, ...payload },
-                                          })
-                                        );
-
-                                        setEditingId(null);
-                                        setEditValues({});
-                                      }}
-                                    >
-                                      Save
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:underline"
-                                      onClick={() => {
-                                        setEditingId(null);
-                                        setEditValues({});
-                                      }}
-                                    >
-                                      Cancel
-                                    </button>
-                                  </>
-                                ) : (
-                                  <>
-                                    <button
-                                      type="button"
-                                      className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
-                                      aria-label={`Edit ${row.title}`}
-                                      onClick={() => {
-                                        setEditingId(row.id);
-                                        setEditValues({
-                                          title: row.title,
-                                          client: row.client,
-                                          status: row.status,
-                                          price: row.price || "",
-                                        });
-                                      }}
-                                    >
-                                      <MdOutlineEdit />
-                                      Edit
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="inline-flex items-center gap-2 text-sm text-red-600 hover:underline"
-                                      aria-label={`Delete ${row.title}`}
-                                      onClick={() => {
-                                        const ok = window.confirm(
-                                          `Delete course "${row.title}"?`
-                                        );
-                                        if (!ok) return;
-
-                                        setRows((rs) => {
-                                          const updated = rs.filter(
-                                            (r) => r.id !== row.id
-                                          );
-                                          localStorage.setItem(
-                                            "courses",
-                                            JSON.stringify(updated)
-                                          );
-                                          return updated;
-                                        });
-                                      }}
-                                    >
-                                      <IoIosTrash />
-                                      Delete
-                                    </button>
-                                  </>
-                                )}
-                              </div>
+                              
                             </td>
                           </tr>
 

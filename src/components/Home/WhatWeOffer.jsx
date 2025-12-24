@@ -52,10 +52,9 @@ function WhatWeOffer() {
               disableOnInteraction: false,
             }}
             speed={700}
-            freeMode
-            loop
+            freeMode={{ enabled: true, momentum: false }}
+            loop={cards.length > 3}
             grabCursor
-            freeModeMomentum={false}
             breakpoints={{
               640: { slidesPerView: 1.1 },
               768: { slidesPerView: 2 },

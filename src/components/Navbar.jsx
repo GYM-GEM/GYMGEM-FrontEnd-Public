@@ -9,7 +9,7 @@ import { useToast } from "../context/ToastContext";
 import axiosInstance from "../utils/axiosConfig";
 import UserDropdown from "./UserDropdown";
 import NotificationDropdown from "./NotificationDropdown";
-import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon, Utensils } from "lucide-react"; // Added Icons
+import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon, Utensils, Sparkles, MessageSquare, Bot } from "lucide-react"; // Added Icons
 import GemsBadge from "./GemsBadge";
 import AddGemsModal from "./AddGemsModal";
 import getBalance from "../utils/balance";
@@ -23,9 +23,11 @@ function Navbar() {
 
   // Dropdown states
   const [trainingOpen, setTrainingOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
 
   // Refs
   const trainingRef = useRef(null);
+  const aiRef = useRef(null);
 
   const user = JSON.parse(localStorage.getItem("user"));
   const { showToast } = useToast();
@@ -175,6 +177,9 @@ function Navbar() {
       if (trainingRef.current && !trainingRef.current.contains(e.target)) {
         setTrainingOpen(false);
       }
+      if (aiRef.current && !aiRef.current.contains(e.target)) {
+        setAiOpen(false);
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -189,6 +194,13 @@ function Navbar() {
     { to: "/courses", label: "Courses", icon: <BookOpen size={16} /> },
     { to: "/trainers", label: "Trainers", icon: <Users size={16} /> },
     // { to: "/trainees", label: "Trainees", icon: <Users size={16} /> }, // Commented out in original
+  ];
+
+  // AI Links
+  const aiLinks = [
+    { to: "/ai-trainer", label: "AI Personal Trainer", icon: <MdSportsMartialArts size={18} /> },
+    { to: "/ai-food", label: "AI Food Analyzer", icon: <Utensils size={18} /> },
+    { to: "/chatbot", label: "AI Chatbot", icon: <MessageSquare size={18} />, soon: true },
   ];
 
   return (
@@ -320,54 +332,65 @@ function Navbar() {
               </NavLink>
             )}
 
-            {/* AI Trainer - Only show if logged in */}
+            {/* AI Assistant Dropdown - Only show if logged in */}
             {user && (
-              <NavLink
-                to="/ai-trainer"
-                className={({ isActive }) =>
-                  `relative px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 group overflow-hidden
-                  ${isActive
-                    ? "text-white bg-[#ff8211] shadow-md shadow-orange-500/20"
-                    : "text-gray-700 hover:text-[#ff8211] hover:bg-orange-50"}`
-                }
-              >
-                {/* Shimmer Effect */}
-                <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+              <div className="relative" ref={aiRef}>
+                <button
+                  onClick={() => setAiOpen(!aiOpen)}
+                  className={`relative px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-1 group outline-none overflow-hidden
+                  ${aiOpen || aiLinks.some(l => location.pathname.startsWith(l.to))
+                      ? "text-white bg-[#ff8211] shadow-md shadow-orange-500/20"
+                      : "text-gray-700 hover:text-[#ff8211] hover:bg-orange-50"}`}
+                >
+                  {/* Shimmer Effect */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+                  
+                  <Sparkles size={18} className="relative z-20" />
+                  <span className="relative z-20">AI Assistant</span>
+                  <ChevronDown className={`h-4 w-4 relative z-20 transition-transform duration-300 ${aiOpen ? "rotate-180" : ""}`} />
 
-                <MdSportsMartialArts size={20} className="relative z-20" />
-                <span className="relative z-20">AI Trainer</span>
+                  {/* Badge */}
+                  <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 z-20">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
+                  </span>
+                </button>
 
-                {/* Badge */}
-                <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 z-20">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
-                </span>
-              </NavLink>
-            )}
-
-            {/* Food Analyzer - Only show if logged in */}
-            {user && (
-              <NavLink
-                to="/ai-food"
-                className={({ isActive }) =>
-                  `relative px-3 py-2 rounded-full text-sm font-bold transition-all duration-300 flex items-center gap-2 group overflow-hidden
-                  ${isActive
-                    ? "text-white bg-[#ff8211] shadow-md shadow-orange-500/20"
-                    : "text-gray-700 hover:text-[#ff8211] hover:bg-orange-50"}`
-                }
-              >
-                {/* Shimmer Effect */}
-                <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
-
-                <Utensils size={20} className="relative z-20" />
-                <span className="relative z-20">Food Analyzer</span>
-
-                {/* Badge */}
-                <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 z-20">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
-                </span>
-              </NavLink>
+                <AnimatePresence>
+                  {aiOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="absolute left-0 mt-2 w-56 rounded-2xl border border-gray-100 bg-white p-1 shadow-xl z-50 overflow-hidden"
+                    >
+                      {aiLinks.map((link) => (
+                        link.soon ? (
+                           <div key={link.to} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed hover:bg-gray-50 rounded-xl relative">
+                              {link.icon}
+                              {link.label}
+                               <span className="absolute right-2 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 rounded">Soon</span>
+                           </div>
+                        ) : (
+                          <NavLink
+                            key={link.to}
+                            to={link.to}
+                            onClick={() => setAiOpen(false)}
+                            className={({ isActive }) => `
+                               flex items-center gap-3 px-3 py-2 text-sm font-medium transition-colors rounded-xl
+                               ${isActive ? "text-[#ff8211] bg-orange-50" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}
+                             `}
+                          >
+                            {link.icon}
+                            {link.label}
+                          </NavLink>
+                        )
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
 
             {/* About */}
@@ -550,46 +573,70 @@ function Navbar() {
                     </NavLink>
                   )}
 
-                  {/* AI Trainer - Only show if logged in */}
+                  {/* AI Assistant - Only show if logged in */}
                   {user && (
-                    <NavLink
-                      to="/ai-trainer"
-                      onClick={() => setIsOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-all relative overflow-hidden group
-                        ${isActive
-                          ? "bg-[#ff8211] text-white shadow-md shadow-orange-500/20"
-                          : "text-gray-700 hover:bg-orange-50 hover:text-[#ff8211]"}`
-                      }
-                    >
-                      <MdSportsMartialArts size={20} className="relative z-20" />
-                      <span className="relative z-20">AI Trainer</span>
+                    <div className="space-y-1">
+                      <button
+                        onClick={() => setAiOpen(!aiOpen)}
+                        className={`flex w-full items-center justify-between px-4 py-3 rounded-xl text-base font-bold transition-all relative overflow-hidden group
+                          ${aiOpen ? "bg-[#ff8211] text-white shadow-md" : "text-gray-700 hover:bg-orange-50 hover:text-[#ff8211]"}`}
+                      >
+                         <span className="flex items-center gap-2 relative z-20">
+                            <Sparkles size={20} />
+                            AI Assistant
+                         </span>
+                         <div className="flex items-center gap-2 relative z-20">
+                            {/* Badge */}
+                            {!aiOpen && (
+                                <span className="flex h-2.5 w-2.5 relative">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
+                                </span>
+                            )}
+                            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${aiOpen ? "rotate-180" : ""}`} />
+                         </div>
+                         
+                         {/* Shimmer Effect when closed */}
+                         {!aiOpen && (
+                            <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+                         )}
+                      </button>
 
-                      {/* Shimmer Effect */}
-                      <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
-
-                      {/* Badge */}
-                      <span className="absolute top-3 right-4 flex h-2.5 w-2.5 z-20">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
-                      </span>
-                    </NavLink>
-                  )}
-
-                  {/* Food Analyzer - Only show if logged in */}
-                  {user && (
-                    <NavLink
-                      to="/ai-food"
-                      onClick={() => setIsOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
-                          ? "bg-orange-50 text-[#ff8211] shadow-sm"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
-                      }
-                    >
-                      <Utensils size={18} />
-                      Food Analyzer
-                    </NavLink>
+                      <AnimatePresence>
+                        {aiOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="overflow-hidden pl-4"
+                          >
+                             {aiLinks.map((link) => (
+                                link.soon ? (
+                                    <div key={link.to} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 cursor-not-allowed hover:bg-gray-50">
+                                        {link.icon}
+                                        {link.label}
+                                        <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 rounded">Soon</span>
+                                    </div>
+                                ) : (
+                                    <NavLink
+                                      key={link.to}
+                                      to={link.to}
+                                      onClick={() => setIsOpen(false)}
+                                      className={({ isActive }) =>
+                                        `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
+                                          ? "text-[#ff8211] bg-orange-50/50"
+                                          : "text-gray-600 hover:text-[#ff8211]"}`
+                                      }
+                                    >
+                                      {link.icon}
+                                      {link.label}
+                                    </NavLink>
+                                )
+                             ))}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
                   )}
 
                   <NavLink

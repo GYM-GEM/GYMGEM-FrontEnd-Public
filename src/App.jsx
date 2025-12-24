@@ -10,7 +10,6 @@ import Profile from "./pages/Profile";
 import Trainers from "./pages/Trainers";
 import LoginPage from "./pages/auth/LoginPage.jsx";
 import SignUpPage from "./pages/auth/Register.jsx";
-import Dashboard from "./pages/Dashboard";
 import NotFound from "./components/NotFound.jsx";
 import Community from "./pages/Community.jsx";
 import Coursedetails from "./components/courses/CourseDetails.jsx";
@@ -45,6 +44,8 @@ import AiTrainerPage from "./pages/AiTrainer.jsx";
 import WorkoutHistory from "./components/ai/WorkoutHistory.jsx";
 import AiFoodPage from "./pages/AiFood.jsx";
 import FoodHistory from "./components/AiFood/FoodHistory.jsx";
+import ChatPage from "./components/AiChatbot/ChatPage.jsx";
+import ChatWidget from "./components/AiChatbot/ChatWidget.jsx";
 
 
 // dashboard trainer
@@ -129,18 +130,18 @@ function App() {
             <Route path="community" element={<Community />} />
             <Route path="/trainer-profile/:id" element={<PublicTrainerProfile />} />
             {/* <Route path="viewprofile" element={<Viewprofile />} /> */}
-            <Route path="dashboard" element={<Dashboard />} />
             <Route path="settings" element={<Settings />} />
-            {/* ai trainer and food */}
+            {/* ai trainer and food and chat */}
             <Route path="ai-trainer" element={<AiTrainerPage />} />
             <Route path="ai-food" element={<AiFoodPage />} />
             <Route path="food-history" element={<FoodHistory />} />
             <Route path="workout-history" element={<WorkoutHistory />} />
+            <Route path="ai-chat" element={<ChatPage />} />
             {/* -------------------------------------------------- */}
             <Route path="checkout" element={<Checkout />} />
             <Route path="payment-status" element={<PaymentStatus />} />
             <Route path="store-order-success" element={<StoreOrderSuccess />} />
-            <Route path="order-success/:orderId" element={<OrderSuccess />} />AnimatedRoutes
+            <Route path="order-success/:orderId" element={<OrderSuccess />} />
 
             <Route path="*" element={<NotFound />} />
             {/* ---------------------------------------------------------------- */}
@@ -229,6 +230,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AnimatePresence>
+      <ChatWidget />
     </>
   );
 }

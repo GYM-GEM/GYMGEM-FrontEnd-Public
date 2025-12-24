@@ -200,7 +200,7 @@ function Navbar() {
   const aiLinks = [
     { to: "/ai-trainer", label: "AI Personal Trainer", icon: <MdSportsMartialArts size={18} /> },
     { to: "/ai-food", label: "AI Food Analyzer", icon: <Utensils size={18} /> },
-    { to: "/chatbot", label: "AI Chatbot", icon: <MessageSquare size={18} />, soon: true },
+    { to: "/ai-chat", label: "AI Chatbot", icon: <MessageSquare size={18} /> },
   ];
 
   return (

@@ -552,10 +552,10 @@ function Navbar() {
                     </NavLink>
                   )}
 
-                  <div className="flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-gray-400 cursor-not-allowed hover:bg-gray-50">
+                  {/* <div className="flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-gray-400 cursor-not-allowed hover:bg-gray-50">
                     <span>Gym</span>
                     <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-orange-100 text-orange-600 rounded">Soon</span>
-                  </div>
+                  </div> */}
 
                   {/* Community - Only show if logged in */}
                   {user && (

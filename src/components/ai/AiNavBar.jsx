@@ -8,8 +8,10 @@ import { useToast } from "../../context/ToastContext";
 import axiosInstance from "../../utils/axiosConfig";
 import UserDropdown from "../../components/UserDropdown";
 import NotificationDropdown from "../NotificationDropdown";
-import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon } from "lucide-react"; // Added Icons
-import { Clock } from "lucide-react";
+import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon, Clock, Sparkles } from "lucide-react"; // Added Icons
+import GemsBadge from "../GemsBadge";
+import AddGemsModal from "../AddGemsModal";
+import getBalance from "../../utils/balance";
 
 function AiNavBar() {
   const navigate = useNavigate();
@@ -33,6 +35,65 @@ function AiNavBar() {
 
   const user = JSON.parse(localStorage.getItem("user"));
   const { showToast } = useToast();
+
+  const [gemsBalance, setGemsBalance] = useState(() => {
+    const saved = localStorage.getItem("gems_balance");
+    return saved ? parseInt(saved, 10) : null;
+  });
+  const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+
+  const fetchBalance = async () => {
+    if (!user) return;
+    if (!localStorage.getItem("gems_balance")) {
+      setIsLoadingBalance(true);
+    }
+    const balance = await getBalance();
+    if (balance !== null) setGemsBalance(balance);
+    setIsLoadingBalance(false);
+  };
+
+  useEffect(() => {
+    fetchBalance();
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("gems_balance");
+      if (saved) setGemsBalance(parseInt(saved, 10));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('gemsUpdated', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('gemsUpdated', handleStorageChange);
+    };
+  }, []);
+
+  const handleAddGems = async (pkg) => {
+    setIsAddGemsModalOpen(false);
+    try {
+      const token = localStorage.getItem('access');
+      const response = await axiosInstance.post(
+        '/api/payment/start/',
+        { amount: pkg.price },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      navigate('/checkout', {
+        state: {
+          type: 'gems',
+          gems: pkg.gems,
+          price: pkg.price,
+          user: user,
+          iframeUrl: response.data.iframe_url,
+          paymentId: response.data.payment_id
+        }
+      });
+    } catch (error) {
+      console.error('Error starting payment:', error);
+      showToast('Failed to start payment process. Please try again.', { type: 'error' });
+      setIsAddGemsModalOpen(true);
+    }
+  };
 
   const logout = async (e) => {
     e.preventDefault();
@@ -198,39 +259,26 @@ function AiNavBar() {
               <Clock size={14} />
               History
             </NavLink>
+          </div>
 
-                <AnimatePresence>
-                  {trainingOpen && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
-                      className="absolute left-0 mt-2 w-48 rounded-2xl border border-gray-100 bg-white p-1 shadow-xl z-50 overflow-hidden"
-                    >
-
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-          {/* User Section (Desktop) / Mobile Toggle */}
-          <div className="flex items-center gap-3">
-            {/* Desktop User Menu */}
-            <div className="hidden md:flex md:items-center md:gap-4">
+          {/* User Section - Always visible now */}
+          <div className="flex items-center gap-2 md:gap-4">
               {user ? (
-                <>
-                  {/* User Dropdown Menu */}
-                  {/* <NotificationDropdown /> */}
+                <div className="flex items-center gap-2 md:gap-3">
+                  <GemsBadge
+                    balance={gemsBalance}
+                    onAddClick={() => setIsAddGemsModalOpen(true)}
+                    isLoading={isLoadingBalance}
+                  />
                   <UserDropdown
                     user={user}
                     logout={logout}
-                    dashboardPath="/trainee"
+                    dashboardPath={getDashboardPath()}
                     settingsPath="/settings"
                   />
-                </>
+                </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="hidden md:flex items-center gap-2">
                   <Link
                     to="/login"
                     className="px-5 py-2.5 rounded-full text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all"
@@ -247,8 +295,19 @@ function AiNavBar() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
-            <motion.button
+            {/* Mobile Menu Toggle */}
+            <div className="flex items-center md:hidden">
+              {!user && (
+                 <div className="flex items-center gap-2 mr-2">
+                   <Link
+                     to="/login"
+                     className="text-sm font-semibold text-gray-600 hover:text-gray-900"
+                   >
+                     Log in
+                   </Link>
+                 </div>
+              )}
+              <motion.button
               whileTap={{ scale: 0.9 }}
               className="md:hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
               onClick={() => setIsOpen(!isOpen)}
@@ -273,10 +332,7 @@ function AiNavBar() {
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="md:hidden overflow-hidden bg-white border-t border-gray-100 shadow-xl"
             >
-              <div className="px-4 py-6 space-y-4">
-                <div className="space-y-1">
-                  <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">AI Menu</p>
-
+              <div className="px-4 py-6 space-y-2">
                   <NavLink
                     to="/"
                     onClick={() => setIsOpen(false)}
@@ -314,46 +370,6 @@ function AiNavBar() {
                     <Clock size={18} />
                     History
                   </NavLink>
-
-                  {/* Mobile Training Dropdown (Optional but kept for consistency) */}
-                  {!isTrainer() && (
-                    <div className="space-y-1">
-                      <button
-                        onClick={() => setTrainingOpen(!trainingOpen)}
-                        className="flex w-full items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      >
-                        <span className="flex items-center gap-2">Training</span>
-                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${trainingOpen ? "rotate-180" : ""}`} />
-                      </button>
-
-                      <AnimatePresence>
-                        {trainingOpen && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="overflow-hidden pl-4"
-                          >
-                            {trainingLinks.map((link) => (
-                              <NavLink
-                                key={link.to}
-                                to={link.to}
-                                onClick={() => setIsOpen(false)}
-                                className={({ isActive }) =>
-                                  `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
-                                    ? "text-[#ff8211] bg-orange-50/50"
-                                    : "text-gray-600 hover:text-[#ff8211]"}`
-                                }
-                              >
-                                {link.icon}
-                                {link.label}
-                              </NavLink>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  )}
                 </div>
 
                 {/* Mobile Auth/User Section */}
@@ -397,11 +413,16 @@ function AiNavBar() {
                     </div>
                   )}
                 </div>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.nav>
+
+      <AddGemsModal
+        isOpen={isAddGemsModalOpen}
+        onClose={() => setIsAddGemsModalOpen(false)}
+        onContinue={handleAddGems}
+      />
 
       {/* Spacer to prevent content from going under fixed navbar */}
       <div className="h-16 md:h-20" />

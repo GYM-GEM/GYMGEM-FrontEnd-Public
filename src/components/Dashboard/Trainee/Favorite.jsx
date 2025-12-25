@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Heart, Star, Award, Globe, ShoppingBag, CheckCircle, ArrowRight, Loader2 } from "lucide-react";
-import NavTraineDash from "../../Dashboard/Traine/NavTraineDash";
+import NavTraineDash from "../../Dashboard/Trainee/NavTraineDash";
 import { isUserEnrolled } from "../../BuyNow/Checkout";
 import axiosInstance from "../../../utils/axiosConfig";
 
@@ -238,8 +238,8 @@ const Favorite = () => {
                       >
                         <Heart
                           className={`w-5 h-5 transition-colors cursor-pointer ${isRemoved
-                              ? "text-[#FF8211] fill-none group-hover:fill-[#FF8211]"
-                              : "fill-[#FF8211] text-[#FF8211] group-hover:fill-white group-hover:text-white"
+                            ? "text-[#FF8211] fill-none group-hover:fill-[#FF8211]"
+                            : "fill-[#FF8211] text-[#FF8211] group-hover:fill-white group-hover:text-white"
                             }`}
                         />
                       </button>

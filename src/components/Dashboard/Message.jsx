@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 import {
     Search,
     Send,
@@ -19,13 +20,13 @@ import {
     Image as ImageIconIcon // Renaming to avoid conflict if I use Image constructor, though not needed really.
 } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
-import NavStoreDash from "./NavBarDashStore";
-import axiosInstance from "../../../utils/axiosConfig";
-import { getUser, getCurrentProfileId } from "../../../utils/auth";
-import { useToast } from "../../../context/ToastContext"; // Assuming toast context exists based on TraineeDash
+import NavTraineeDash from "./Trainee/NavTraineDash";
+import axiosInstance from "../../utils/axiosConfig";
+import { getUser, getCurrentProfileId } from "../../utils/auth";
+import { useToast } from "../../context/ToastContext"; // Assuming toast context exists based on TraineeDash
 
 // --- Configuration ---
-const USE_MOCK_DATA = true; // Toggle this to false when backend is ready
+const USE_MOCK_DATA = false; // Toggle this to false when backend is ready
 
 // --- Mock Data ---
 
@@ -96,8 +97,23 @@ const apiService = {
             return new Promise(resolve => setTimeout(() => resolve(INITIAL_CONVERSATIONS), 500));
         }
         try {
-            const response = await axiosInstance.get('/conversations/');
-            return response.data;
+            const response = await axiosInstance.get('/api/chat/conversations/');
+
+            // Map the API response to the component structure
+            return response.data.results.map(conv => ({
+                id: conv.id,
+                participants: [{
+                    id: conv.other_participant_id,
+                    name: conv.other_participant_name,
+                    role: conv.other_participant_role, // Role from API
+                    avatar: conv.other_participant_profile_picture || `https://ui-avatars.com/api/?name=${encodeURIComponent(conv.other_participant_name)}&background=random`,
+                    status: 'offline' // Status is not returned by the API
+                }],
+                lastMessage: conv.last_message || "No messages yet",
+                timestamp: new Date(conv.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                unreadCount: conv.unread_count,
+                messages: [] // Messages will be loaded separately
+            }));
         } catch (error) {
             console.error("Failed to fetch conversations:", error);
             throw error;
@@ -115,7 +131,7 @@ const apiService = {
         }
         try {
             // Adjust endpoint as needed
-            const response = await axiosInstance.post(`/conversations/${conversationId}/messages/`, messageData);
+            const response = await axiosInstance.post(`/api/chat/conversations/${conversationId}/messages/`, messageData);
             return response.data;
         } catch (error) {
             console.error("Failed to send message:", error);
@@ -135,7 +151,7 @@ const apiService = {
             }), 500));
         }
         try {
-            const response = await axiosInstance.post(`/conversations/start/`, { target_user_id: userId });
+            const response = await axiosInstance.post(`/api/chat/conversations/start/`, { target_user_id: userId });
             return response.data;
         } catch (error) {
             console.error("Failed to start conversation:", error);
@@ -169,7 +185,7 @@ const apiService = {
             if (role) params.append("role", role);
             if (query) params.append("search", query);
 
-            const response = await axiosInstance.get(`/users/?${params.toString()}`);
+            const response = await axiosInstance.get(`/api/users/?${params.toString()}`);
             return response.data;
         } catch (error) {
             console.error("Failed to search users:", error);
@@ -182,7 +198,7 @@ const apiService = {
             return new Promise(resolve => setTimeout(resolve, 300));
         }
         try {
-            await axiosInstance.delete(`/conversations/${conversationId}/`);
+            await axiosInstance.delete(`/api/chat/conversations/${conversationId}/`);
             return true;
         } catch (error) {
             console.error("Failed to delete conversation:", error);
@@ -195,7 +211,7 @@ const apiService = {
             return new Promise(resolve => setTimeout(resolve, 300));
         }
         try {
-            await axiosInstance.post(`/users/${userId}/block/`);
+            await axiosInstance.post(`/api/users/${userId}/block/`);
             return true;
         } catch (error) {
             console.error("Failed to block user:", error);
@@ -208,7 +224,7 @@ const apiService = {
             return new Promise(resolve => setTimeout(resolve, 300));
         }
         try {
-            await axiosInstance.post(`/users/${userId}/report/`, { reason });
+            await axiosInstance.post(`/api/users/${userId}/report/`, { reason });
             return true;
         } catch (error) {
             console.error("Failed to report user:", error);
@@ -460,6 +476,7 @@ const NewConversationModal = ({ isOpen, onClose, onStartChat }) => {
 };
 
 const Message = () => {
+    const location = useLocation();
     const { showToast } = useToast(); // Uncomment when ToastContext is ready
     const [conversations, setConversations] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -487,6 +504,44 @@ const Message = () => {
         };
         loadData();
     }, []);
+
+    // Auto-open chat with trainer if coming from PublicTrainerProfile
+    useEffect(() => {
+        if (location.state?.trainerId && location.state?.trainerName && conversations.length > 0) {
+            const { trainerId, trainerName, trainerAvatar } = location.state;
+
+            // Try to find existing conversation with this trainer
+            const existingConv = conversations.find(conv =>
+                conv.participants.some(p => p.id === trainerId)
+            );
+
+            if (existingConv) {
+                // Open existing conversation
+                handleConversationClick(existingConv.id);
+            } else {
+                // Create new conversation
+                const newConv = {
+                    id: Date.now(),
+                    participants: [{
+                        id: trainerId,
+                        name: trainerName,
+                        role: "Trainer",
+                        avatar: trainerAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(trainerName)}&background=FF8211&color=fff`,
+                        status: 'online'
+                    }],
+                    lastMessage: "Start chatting with your trainer!",
+                    timestamp: "Just now",
+                    unreadCount: 0,
+                    messages: []
+                };
+                setConversations(prev => [newConv, ...prev]);
+                setActiveConversationId(newConv.id);
+            }
+
+            // Clear the location state to prevent re-opening on re-render
+            window.history.replaceState({}, document.title);
+        }
+    }, [location.state, conversations, loading]);
 
     // Dynamic Emoji & Attachment State
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -694,7 +749,7 @@ const Message = () => {
 
     return (
         <>
-            <NavStoreDash />
+            <NavTraineeDash />
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-[calc(100vh-80px)] p-4 md:p-6 lg:p-8">
                 <NewConversationModal
                     isOpen={isNewChatOpen}

@@ -21,7 +21,7 @@ import {
   Loader2,
 } from "lucide-react";
 import ReactPlayer from "react-player";
-import NavTraineeDash from "../Dashboard/Traine/NavTraineDash";
+import NavTraineeDash from "../Dashboard/Trainee/NavTraineDash";
 import Footer from "../Footer";
 import axiosInstance from "../../utils/axiosConfig";
 import VideoPlayer from "./VideoPlayer";

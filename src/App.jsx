@@ -133,7 +133,7 @@ function App() {
             <Route path="ai-food" element={<AiFoodPage />} />
             <Route path="food-history" element={<FoodHistory />} />
             <Route path="workout-history" element={<WorkoutHistory />} />
-            <Route path="ai-chat" element={<ChatPage />} />
+            <Route path="ai-chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
             {/* -------------------------------------------------- */}
             <Route path="checkout" element={<Checkout />} />
             <Route path="payment-status" element={<PaymentStatus />} />

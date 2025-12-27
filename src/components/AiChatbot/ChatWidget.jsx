@@ -8,6 +8,10 @@ const ChatWidget = () => {
   const { isOpen, toggleChat, messages, isLoading, sendMessage, hasNewMessage, clearChat } = useChat();
   const widgetRef = useRef(null);
 
+  // AUTH CHECK: Hide widget if user is not logged in
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  if (!user) return null;
+
   // Close when clicking outside
 //   useEffect(() => {
 //     const handleClickOutside = (event) => {

@@ -7,8 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../../context/ToastContext";
 import axiosInstance from "../../utils/axiosConfig";
 import UserDropdown from "../UserDropdown";
-import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon, Clock, Utensils } from "lucide-react"; // Added Icons
-import { Bot,Sparkles } from "lucide-react";
+import NotificationDropdown from "../NotificationDropdown";
+import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon, Clock, Utensils, MessageSquare } from "lucide-react"; // Added Icons
+import { Bot, Sparkles } from "lucide-react";
+import GemsBadge from "../GemsBadge";
+import AddGemsModal from "../AddGemsModal";
+import getBalance from "../../utils/balance";
 function AiNavBarChat() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,15 +26,68 @@ function AiNavBarChat() {
   // Refs
   const trainingRef = useRef(null);
 
-  const trainingLinks = [
-    { to: "/courses", label: "Courses", icon: <BookOpen size={16} /> },
-    { to: "/trainers", label: "Trainers", icon: <Users size={16} /> },
-    { to: "/ai-trainer", label: "AI Coach", icon: <FaGem size={16} /> },
-    { to: "/workout-history", label: "My Workouts", icon: <Clock size={16} /> },
-  ];
 
   const user = JSON.parse(localStorage.getItem("user"));
   const { showToast } = useToast();
+
+  const [gemsBalance, setGemsBalance] = useState(() => {
+    const saved = localStorage.getItem("gems_balance");
+    return saved ? parseInt(saved, 10) : null;
+  });
+  const [isAddGemsModalOpen, setIsAddGemsModalOpen] = useState(false);
+  const [isLoadingBalance, setIsLoadingBalance] = useState(false);
+
+  const fetchBalance = async () => {
+    if (!user) return;
+    if (!localStorage.getItem("gems_balance")) {
+      setIsLoadingBalance(true);
+    }
+    const balance = await getBalance();
+    if (balance !== null) setGemsBalance(balance);
+    setIsLoadingBalance(false);
+  };
+
+  useEffect(() => {
+    fetchBalance();
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("gems_balance");
+      if (saved) setGemsBalance(parseInt(saved, 10));
+    };
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('gemsUpdated', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('gemsUpdated', handleStorageChange);
+    };
+  }, []);
+
+  const handleAddGems = async (pkg) => {
+    setIsAddGemsModalOpen(false);
+    try {
+      const token = localStorage.getItem('access');
+      const response = await axiosInstance.post(
+        '/api/payment/start/',
+        { amount: pkg.price },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
+      navigate('/checkout', {
+        state: {
+          type: 'gems',
+          gems: pkg.gems,
+          price: pkg.price,
+          user: user,
+          iframeUrl: response.data.iframe_url,
+          paymentId: response.data.payment_id
+        }
+      });
+    } catch (error) {
+      console.error('Error starting payment:', error);
+      showToast('Failed to start payment process. Please try again.', { type: 'error' });
+      setIsAddGemsModalOpen(true);
+    }
+  };
 
   const logout = async (e) => {
     e.preventDefault();
@@ -175,47 +232,38 @@ function AiNavBarChat() {
               Home
             </NavLink>
 
-<NavLink
-  to="/ai-chat"
-  className={({ isActive }) =>
-    `relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 
-    ${isActive ? "text-[#ff8211] bg-white shadow-sm ring-1 ring-gray-100" : "text-gray-600 hover:text-[#ff8211] hover:bg-white/50"}`
-  }
->
-  <Sparkles size={14} />
-  AI Chat
-</NavLink>
-
-            {/* <NavLink
-              to="/ai-chat/food-history"
+            <NavLink
+              to="/ai-chat"
               className={({ isActive }) =>
                 `relative px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 
                 ${isActive ? "text-[#ff8211] bg-white shadow-sm ring-1 ring-gray-100" : "text-gray-600 hover:text-[#ff8211] hover:bg-white/50"}`
               }
             >
-              <Clock size={14} />
-              History
-            </NavLink> */}
-
+              <Sparkles size={14} />
+              AI Chat
+            </NavLink>
           </div>
-
           {/* User Section (Desktop) / Mobile Toggle */}
           <div className="flex items-center gap-3">
             {/* Desktop User Menu */}
-            <div className="hidden md:flex md:items-center md:gap-4">
+            {/* User Section - Always visible now */}
+            <div className="flex items-center gap-2 md:gap-4">
               {user ? (
-                <>
-                  {/* User Dropdown Menu */}
-                  {/* <NotificationDropdown /> */}
+                <div className="flex items-center gap-2 md:gap-3">
+                  <GemsBadge
+                    balance={gemsBalance}
+                    onAddClick={() => setIsAddGemsModalOpen(true)}
+                    isLoading={isLoadingBalance}
+                  />
                   <UserDropdown
                     user={user}
                     logout={logout}
-                    dashboardPath="/trainee"
+                    dashboardPath={getDashboardPath()}
                     settingsPath="/settings"
                   />
-                </>
+                </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="hidden md:flex items-center gap-2">
                   <Link
                     to="/login"
                     className="px-5 py-2.5 rounded-full text-sm font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all"
@@ -232,21 +280,35 @@ function AiNavBarChat() {
               )}
             </div>
 
-            {/* Mobile Menu Button */}
-            <motion.button
+            {/* Mobile Menu Toggle */}
+            <div className="flex items-center md:hidden">
+              {!user && (
+                 <div className="flex items-center gap-2 mr-2">
+                   <Link
+                     to="/login"
+                     className="text-sm font-semibold text-gray-600 hover:text-gray-900"
+                   >
+                     Log in
+                   </Link>
+                 </div>
+              )}
+              <motion.button
               whileTap={{ scale: 0.9 }}
               className="md:hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
             >
+              
               {isOpen ? (
                 <HiOutlineX className="h-6 w-6" />
               ) : (
                 <HiOutlineMenu className="h-6 w-6" />
               )}
+              
             </motion.button>
           </div>
         </div>
+      </div>
 
         {/* Mobile Menu */}
         <AnimatePresence>
@@ -258,10 +320,9 @@ function AiNavBarChat() {
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="md:hidden overflow-hidden bg-white border-t border-gray-100 shadow-xl"
             >
-              <div className="px-4 py-6 space-y-4">
-                <div className="space-y-1">
-                  <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">AI Menu</p>
 
+
+              <div className="px-4 py-6 space-y-2">
                   <NavLink
                     to="/"
                     onClick={() => setIsOpen(false)}
@@ -275,7 +336,7 @@ function AiNavBarChat() {
                   </NavLink>
 
                   <NavLink
-                    to="/ai-trainer"
+                    to="/ai-chat"
                     onClick={() => setIsOpen(false)}
                     className={({ isActive }) =>
                       `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-all ${isActive
@@ -283,92 +344,15 @@ function AiNavBarChat() {
                         : "text-gray-600 hover:bg-orange-50 hover:text-[#ff8211]"}`
                     }
                   >
-                    <FaGem size={18} />
-                    AI Coach
+                    <Sparkles size={18} />
+                    AI Chat
                   </NavLink>
-
-                  <NavLink
-                    to="/food-history"
-                    onClick={() => setIsOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
-                        ? "bg-orange-50 text-[#ff8211] shadow-sm"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
-                    }
-                  >
-                    <Clock size={18} />
-                    History
-                  </NavLink>
-
-                  {/* Food Analyzer */}
-                  <NavLink
-                    to="/ai-food"
-                    onClick={() => setIsOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-bold transition-all relative overflow-hidden group
-                      ${isActive
-                        ? "bg-[#ff8211] text-white shadow-md shadow-orange-500/20"
-                        : "text-gray-700 hover:bg-orange-50 hover:text-[#ff8211]"}`
-                    }
-                  >
-                    <Utensils size={20} className="relative z-20" />
-                    <span className="relative z-20">Food Analyzer</span>
-
-                    {/* Shimmer Effect */}
-                    <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
-
-                    {/* Badge */}
-                    <span className="absolute top-3 right-4 flex h-2.5 w-2.5 z-20">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
-                    </span>
-                  </NavLink>
-
-                  {/* Mobile Training Dropdown (Optional but kept for consistency) */}
-                  {!isTrainer() && (
-                    <div className="space-y-1">
-                      <button
-                        onClick={() => setTrainingOpen(!trainingOpen)}
-                        className="flex w-full items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      >
-                        <span className="flex items-center gap-2">Training</span>
-                        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${trainingOpen ? "rotate-180" : ""}`} />
-                      </button>
-
-                      <AnimatePresence>
-                        {trainingOpen && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
-                            className="overflow-hidden pl-4"
-                          >
-                            {trainingLinks.map((link) => (
-                              <NavLink
-                                key={link.to}
-                                to={link.to}
-                                onClick={() => setIsOpen(false)}
-                                className={({ isActive }) =>
-                                  `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
-                                    ? "text-[#ff8211] bg-orange-50/50"
-                                    : "text-gray-600 hover:text-[#ff8211]"}`
-                                }
-                              >
-                                {link.icon}
-                                {link.label}
-                              </NavLink>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  )}
                 </div>
 
                 {/* Mobile Auth/User Section */}
                 <div className="pt-4 border-t border-gray-100">
                   {user ? (
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                       <NavLink
                         to={getDashboardPath()}
                         onClick={() => setIsOpen(false)}
@@ -406,11 +390,16 @@ function AiNavBarChat() {
                     </div>
                   )}
                 </div>
-              </div>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.nav>
+
+      <AddGemsModal
+        isOpen={isAddGemsModalOpen}
+        onClose={() => setIsAddGemsModalOpen(false)}
+        onContinue={handleAddGems}
+      />
 
       {/* Spacer to prevent content from going under fixed navbar */}
       <div className="h-16 md:h-20" />

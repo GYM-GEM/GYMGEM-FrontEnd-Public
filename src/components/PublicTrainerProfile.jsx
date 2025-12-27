@@ -23,6 +23,7 @@ import {
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CourseCard from "./CourseCard";
+import QuickMessageModal from "./Dashboard/QuickMessageModal";
 import { useToast } from "../context/ToastContext";
 import getBalance from "../utils/balance";
 
@@ -94,12 +95,13 @@ const PublicTrainerProfile = () => {
   const [userBalance, setUserBalance] = useState(null);
   const [loadingBalance, setLoadingBalance] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
 
 
   const fetchUserBalance = async () => {
     try {
       setLoadingBalance(true);
-      
+
       const response = await axiosInstance.get('/api/profiles/balance', {
         skipGlobalLoader: true
       });
@@ -353,7 +355,7 @@ const PublicTrainerProfile = () => {
         <div className="bg-white border-b border-gray-200 pt-20">
           {/* Cover Photo Area */}
           {/* <div className="h-30 bg-gradient-to-r from-gray-100 to-gray-200 w-full relative "> */}
-            {/* <div className="absolute inset-0 opacity-10 p" style={{ backgroundImage: 'radial-gradient(#FF8211 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div> */}
+          {/* <div className="absolute inset-0 opacity-10 p" style={{ backgroundImage: 'radial-gradient(#FF8211 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div> */}
           {/* </div> */}
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 pb-6">
@@ -397,27 +399,25 @@ const PublicTrainerProfile = () => {
                   </div>
 
                   {/* Send Message Button - Desktop */}
-                  <Link
-                    to="/trainee/message"
-                    state={{ trainerId: id, trainerName: profile.name, trainerAvatar: profile.avatar }}
+                  <button
+                    onClick={() => setIsMessageModalOpen(true)}
                     className="hidden md:flex bg-white border-2 border-[#FF8211] text-[#FF8211] font-bold py-2 px-6 rounded-xl shadow-lg hover:bg-[#FF8211] hover:text-white active:scale-95 transition-all items-center justify-center gap-2 self-start"
                   >
                     <MessageCircle className="w-5 h-5" />
                     Send Message
-                  </Link>
+                  </button>
                 </div>
               </div>
 
               {/* Action Button (Mobile Only) */}
               <div className="md:hidden w-full sm:w-auto">
-                <Link
-                  to="/trainee/message"
-                  state={{ trainerId: id, trainerName: profile.name, trainerAvatar: profile.avatar }}
+                <button
+                  onClick={() => setIsMessageModalOpen(true)}
                   className="w-full bg-white border-2 border-[#FF8211] text-[#FF8211] font-bold py-3 px-6 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2"
                 >
                   <MessageCircle className="w-5 h-5" />
                   Send Message
-                </Link>
+                </button>
               </div>
             </div>
           </div>
@@ -669,6 +669,15 @@ const PublicTrainerProfile = () => {
           </div>
         </div>
       </div>
+
+      {/* Messages Modal */}
+      {profileData && (
+        <QuickMessageModal
+          isOpen={isMessageModalOpen}
+          onClose={() => setIsMessageModalOpen(false)}
+          targetUser={{ id: id, name: profileData.profile.name }}
+        />
+      )}
       {/* Payment Confirmation Modal */}
       {showPaymentModal && (() => {
         const sessionPrice = parseFloat(profile.rate || 0);

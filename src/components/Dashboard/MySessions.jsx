@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import NavBarDash from "./NavBarDash";
-import FooterDash from "../FooterDash";
+import FooterDash from "./FooterDash";
+import QuickMessageModal from "./QuickMessageModal";
 import {
     Calendar,
     Clock,
@@ -20,8 +20,8 @@ import {
     Play
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import axiosInstance from "../../../utils/axiosConfig";
-import { useToast } from "../../../context/ToastContext";
+import axiosInstance from "../../utils/axiosConfig";
+import { useToast } from "../../context/ToastContext";
 
 const MySessions = () => {
     const navigate = useNavigate();
@@ -31,6 +31,7 @@ const MySessions = () => {
     const [statusFilter, setStatusFilter] = useState("all");
     const [userRole, setUserRole] = useState(null);
     const [actionLoading, setActionLoading] = useState({});
+    const [messageModalSession, setMessageModalSession] = useState(null);
 
     // Status configuration
     const statusConfig = {
@@ -123,9 +124,7 @@ const MySessions = () => {
     };
 
     const handleSendMessage = (session) => {
-        // Navigate to messages with the other person's ID
-        const otherPersonId = userRole === 'trainer' ? session.trainee : session.trainer;
-        navigate(`/messages/${otherPersonId}`);
+        setMessageModalSession(session);
     };
 
     // Categorize sessions
@@ -312,7 +311,6 @@ const MySessions = () => {
 
     return (
         <>
-            <NavBarDash />
             <main className="min-h-screen bg-gray-50 py-8">
                 <div className="max-w-6xl mx-auto px-4">
                     {/* Header */}
@@ -413,7 +411,13 @@ const MySessions = () => {
                     )}
                 </div>
             </main>
-            <FooterDash />
+
+            <QuickMessageModal
+                isOpen={!!messageModalSession}
+                onClose={() => setMessageModalSession(null)}
+                session={messageModalSession}
+                currentUserRole={userRole}
+            />
         </>
     );
 };

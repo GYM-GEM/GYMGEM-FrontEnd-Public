@@ -147,16 +147,19 @@ const apiService = {
         }
     },
 
-    fetchMessages: async (conversationId) => {
+    fetchMessages: async (conversationId, page = 1) => {
         if (USE_MOCK_DATA) {
-            return new Promise(resolve => setTimeout(() => resolve([]), 500));
+            return new Promise(resolve => setTimeout(() => resolve({ messages: [], next: null }), 500));
         }
         try {
-            const response = await axiosInstance.get(`/api/chat/conversations/${conversationId}/messages/`, { skipGlobalLoader: true });
+            const response = await axiosInstance.get(`/api/chat/conversations/${conversationId}/messages/`, {
+                params: { page },
+                skipGlobalLoader: true
+            });
             const messagesData = response.data.results.data || [];
             const ownerId = response.data.results.owner;
 
-            return messagesData.map(msg => ({
+            const messages = messagesData.map(msg => ({
                 id: msg.id,
                 senderId: msg.sender,
                 senderName: msg.sender_name,
@@ -169,6 +172,11 @@ const apiService = {
                 editedAt: msg.edited_at,
                 isMe: msg.sender === ownerId
             }));
+
+            return {
+                messages,
+                next: response.data.next
+            };
         } catch (error) {
             console.error("Failed to fetch messages:", error);
             throw error;
@@ -330,19 +338,64 @@ const RoleBadge = ({ role }) => {
 
 // --- Main Components ---
 
-const MessageList = ({ conversation, currentUser, onRetry, onEdit, onDelete }) => {
+const MessageList = ({ conversation, currentUser, onRetry, onEdit, onDelete, onLoadMore, loadingMore }) => {
     const scrollRef = useRef(null);
+    const [prevScrollHeight, setPrevScrollHeight] = useState(0);
 
+    // Initial scroll to bottom
     useEffect(() => {
-        if (scrollRef.current) {
-            scrollRef.current.scrollIntoView({ behavior: "smooth" });
+        if (scrollRef.current && !loadingMore && conversation?.messages?.length > 0 && prevScrollHeight === 0) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [conversation?.id]);
+
+    // Maintain scroll position after loading more
+    useEffect(() => {
+        if (scrollRef.current && prevScrollHeight > 0) {
+            const newScrollHeight = scrollRef.current.scrollHeight;
+            const diff = newScrollHeight - prevScrollHeight;
+            if (diff > 0) {
+                scrollRef.current.scrollTop = diff;
+            }
+            setPrevScrollHeight(0);
+        }
+    }, [conversation?.messages?.length, prevScrollHeight]);
+
+    // Auto-scroll to bottom for new messages if already near bottom
+    useEffect(() => {
+        if (scrollRef.current && !loadingMore && prevScrollHeight === 0) {
+            // Simple check: if we are not loading more history, typically we want to scroll to bottom for new incoming messages
+            // Ideally check if user is at bottom before forcing, but for now simple behavior:
+            const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+            if (isNearBottom) {
+                scrollRef.current.scrollTop = scrollHeight;
+            }
         }
     }, [conversation?.messages]);
+
+
+    const handleScroll = (e) => {
+        const { scrollTop, scrollHeight } = e.target;
+        if (scrollTop === 0 && conversation?.next && !loadingMore) {
+            setPrevScrollHeight(scrollHeight);
+            onLoadMore();
+        }
+    };
 
     if (!conversation) return null;
 
     return (
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/50">
+        <div
+            className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-slate-50/50"
+            ref={scrollRef}
+            onScroll={handleScroll}
+        >
+            {loadingMore && (
+                <div className="flex justify-center p-2">
+                    <div className="w-6 h-6 border-2 border-[#ff8211] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+            )}
             {conversation.messages.length === 0 ? (
                 <div className="flex items-center justify-center h-full text-gray-400 text-sm">
                     No messages here yet. Say hi! 👋
@@ -427,7 +480,6 @@ const MessageList = ({ conversation, currentUser, onRetry, onEdit, onDelete }) =
                         </motion.div>
                     );
                 }))}
-            <div ref={scrollRef} />
         </div>
     );
 };
@@ -704,6 +756,8 @@ const Message = () => {
     const [isNewChatOpen, setIsNewChatOpen] = useState(false);
     const [deleteModal, setDeleteModal] = useState({ isOpen: false, messageId: null });
     const [editModal, setEditModal] = useState({ isOpen: false, messageId: null, initialText: "" });
+    const [messagesLoading, setMessagesLoading] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
 
     // Fetch conversations on mount
     useEffect(() => {
@@ -775,7 +829,10 @@ const Message = () => {
     const otherParticipant = activeConversation?.participants[0];
 
     const handleConversationClick = async (id) => {
+        if (id === activeConversationId) return;
+
         setActiveConversationId(id);
+        setMessagesLoading(true);
 
         // Optimistically clear unread
         setConversations(prev => prev.map(c =>
@@ -788,13 +845,86 @@ const Message = () => {
 
         // Fetch messages for this conversation
         try {
-            const messages = await apiService.fetchMessages(id);
+            const { messages, next } = await apiService.fetchMessages(id, 1);
+
+            // Sort by ID ascending
+            messages.sort((a, b) => a.id - b.id);
+
             setConversations(prev => prev.map(c =>
-                c.id === id ? { ...c, messages: messages } : c
+                c.id === id ? { ...c, messages: messages, next: next } : c
             ));
+
+            // Send Read Receipt
+            const lastMessage = messages[messages.length - 1];
+            if (lastMessage && !lastMessage.isMe) {
+                sendReadReceipt(lastMessage.id);
+            }
         } catch (error) {
             console.error("Failed to load conversation history", error);
             if (showToast) showToast("Failed to load history", { type: "error" });
+        } finally {
+            setMessagesLoading(false);
+        }
+    };
+
+    const handleLoadMoreMessages = async () => {
+        if (!activeConversation || !activeConversation.next || loadingMore) return;
+
+        setLoadingMore(true);
+        try {
+            // Extract page number or simply use the next URL logic if fetchMessages supported it directly. 
+            // For now, let's extract 'page' param from the URL
+            let page = null;
+            try {
+                const url = new URL(activeConversation.next);
+                page = url.searchParams.get("page");
+            } catch (e) {
+                console.error("Invalid next URL", activeConversation.next);
+                return;
+            }
+
+            if (!page) {
+                setLoadingMore(false);
+                return;
+            }
+
+            // Artificial buffer for better UX (optional, but requested "a little buffering")
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            // We are loading more, so don't set global messagesLoading to true to avoid full skeleton
+            const { messages: newMessages, next: newNext } = await apiService.fetchMessages(activeConversationId, page);
+
+            setConversations(prev => prev.map(c => {
+                if (c.id === activeConversationId) {
+                    const mergedMessages = [...newMessages, ...c.messages];
+                    // Remove duplicates based on ID (just in case) and sort
+                    const uniqueMessages = Array.from(new Map(mergedMessages.map(item => [item.id, item])).values());
+                    uniqueMessages.sort((a, b) => a.id - b.id);
+
+                    return {
+                        ...c,
+                        messages: uniqueMessages,
+                        next: newNext
+                    };
+                }
+                return c;
+            }));
+
+        } catch (error) {
+            console.error("Failed to load more messages", error);
+        } finally {
+            setLoadingMore(false);
+        }
+    };
+
+    const sendReadReceipt = (messageId, attempt = 1) => {
+        if (attempt > 10) return; // Prevention for infinite recursion
+
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify({ type: "read", message_id: messageId }));
+        } else {
+            // Retry if socket is connecting or not ready yet
+            setTimeout(() => sendReadReceipt(messageId, attempt + 1), 500);
         }
     };
 
@@ -913,23 +1043,24 @@ const Message = () => {
                                     if (optimisticMatchIndex !== -1) {
                                         // Replace the optimistic message with the real one
                                         const newMessages = [...c.messages];
-                                        newMessages[optimisticMatchIndex] = { ...incomingMessage, status: 'sent' }; // Mark as sent confirmed
+                                        newMessages[optimisticMatchIndex] = { ...incomingMessage, status: 'sent' };
+                                        newMessages.sort((a, b) => a.id - b.id); // Ensure order
                                         return {
                                             ...c,
                                             messages: newMessages
                                         };
                                     }
 
-                                    // If currentUser sent it but we don't have an optimistic match (e.g. sent from another tab/device? or just race condition where we want to suppress echo?)
-                                    // User requirement: "if the logged in user id (owner) = the sender_id, don't display it in the chat ui."
-                                    // We interpret this as: Don't add it if we didn't initiate it optimistically locally (to avoid confusion or duplication issues).
-                                    // But strictly following the user request to fix "talking to myself" (echo duplication), we will SKIP adding it if it's me and not found above.
+                                    // ...
                                     return c;
                                 }
 
+                                const updatedMessages = [...c.messages, incomingMessage];
+                                updatedMessages.sort((a, b) => a.id - b.id);
+
                                 return {
                                     ...c,
-                                    messages: [...c.messages, incomingMessage],
+                                    messages: updatedMessages,
                                     lastMessage: incomingMessage.text,
                                     timestamp: "Just now"
                                 };
@@ -1397,7 +1528,7 @@ const Message = () => {
                             </div>
 
                             {/* Messages List determined above */}
-                            {loading && (!activeConversation || activeConversation.messages.length === 0) ? (
+                            {messagesLoading ? (
                                 <MessageListSkeleton />
                             ) : (
                                 <MessageList
@@ -1406,6 +1537,8 @@ const Message = () => {
                                     onRetry={handleRetryMessage}
                                     onEdit={(msg) => setEditModal({ isOpen: true, messageId: msg.id, initialText: msg.text })}
                                     onDelete={(msg) => setDeleteModal({ isOpen: true, messageId: msg.id })}
+                                    onLoadMore={handleLoadMoreMessages}
+                                    loadingMore={loadingMore}
                                 />
                             )}
                             {isTyping && (

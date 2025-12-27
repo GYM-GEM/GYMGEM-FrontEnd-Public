@@ -57,7 +57,7 @@ import CourseDetailsDash from "./components/Dashboard/Trainer/CourseDetailsDash.
 import OrderTrackingTR from "./components/Dashboard/Trainer/OrderTrackingTR.jsx";
 import WeekCalendar from "./components/Dashboard/Trainer/WeekCalendar.jsx";
 import SettingsTrainer from "./components/Dashboard/Trainer/SettingsTrainer.jsx";
-import MySessionsTR from "./components/Dashboard/Trainer/MySessions.jsx";
+import MySessions from "./components/Dashboard/MySessions.jsx";
 
 
 // dashboard trainee
@@ -68,7 +68,6 @@ import CourseDetails from "./components/courses/CourseDetails.jsx";
 import Settings from "./components/Settings.jsx";
 import PublicTrainerProfile from "./components/PublicTrainerProfile.jsx";
 import Favorite from "./components/Dashboard/Trainee/Favorite.jsx";
-import MySessions from "./components/Dashboard/Trainee/MySessions.jsx";
 import CourseLearn from "./components/courses/CourseLearn.jsx";
 import WeekCalendarTrainee from "./components/Dashboard/Trainee/WeekCalendar.jsx";
 import Message from "./components/Dashboard/Message.jsx";
@@ -168,7 +167,7 @@ function App() {
             <Route path="message" element={<ProtectedRoute requiredProfile="trainer"><Message /></ProtectedRoute>} />
             <Route path="calendar" element={<ProtectedRoute requiredProfile="trainer"><WeekCalendar /></ProtectedRoute>} />
             <Route path="myorder" element={<ProtectedRoute requiredProfile="trainer"><OrderTrackingTR /></ProtectedRoute>} />
-            <Route path="sessions" element={<ProtectedRoute requiredProfile="trainer"><MySessionsTR /></ProtectedRoute>} />
+            <Route path="sessions" element={<ProtectedRoute requiredProfile="trainer"><MySessions /></ProtectedRoute>} />
           </Route>
 
           {/* -------------------- TRAINEE DASHBOARD -------------------- */}

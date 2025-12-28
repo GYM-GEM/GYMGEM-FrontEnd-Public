@@ -139,6 +139,7 @@ const SessionLayout = () => {
                         {/* VIDEO CALL AREA */}
                         <div className="w-full">
                             <VideoCall
+                                sessionId={id}
                                 isTrainer={userRole === "trainer"}
                                 onScreenShareChange={setIsScreenSharing}
                             />

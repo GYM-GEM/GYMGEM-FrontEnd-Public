@@ -448,80 +448,127 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
 
     // ================= Render =================
 
+    // --- Loading / Lobby State ---
+    if (["loading", "scheduled", "waiting"].includes(status)) {
+        return (
+            <div className="relative w-full h-full flex flex-col items-center justify-center bg-zinc-950 rounded-3xl overflow-hidden border border-white/10 shadow-2xl animate-in fade-in duration-700">
+                {/* Background Ambience */}
+                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-800/20 via-zinc-950 to-zinc-950 z-0"></div>
+
+                {/* Content */}
+                <div className="relative z-10 flex flex-col items-center max-w-md text-center p-8">
+                    {status === "loading" ? (
+                        <>
+                            <Loader2 className="w-16 h-16 text-green-500 animate-spin mb-6" />
+                            <h2 className="text-3xl font-black text-white tracking-tighter uppercase mb-2">Connecting to Arena</h2>
+                            <p className="text-zinc-500 font-medium">Securing your connection...</p>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-24 h-24 bg-zinc-900 rounded-full flex items-center justify-center mb-6 border-4 border-green-500/20 ring-4 ring-green-500/10 shadow-[0_0_40px_-10px_rgba(34,197,94,0.3)]">
+                                <Play className="w-10 h-10 text-green-500 ml-1" fill="currentColor" />
+                            </div>
+
+                            <h2 className="text-4xl font-black text-white tracking-tighter uppercase mb-2">
+                                {isTrainer ? "Session Ready" : "Waiting Room"}
+                            </h2>
+
+                            <p className="text-zinc-400 mb-8 font-medium leading-relaxed">
+                                {isTrainer
+                                    ? "The stage is set. Start the session when you are ready to lead."
+                                    : "Your trainer is preparing the session. Get ready to sweat!"}
+                            </p>
+
+                            {isTrainer ? (
+                                <button
+                                    onClick={handleStartSession}
+                                    className="group relative px-8 py-4 bg-green-500 hover:bg-green-400 text-black font-black text-lg uppercase tracking-wider rounded-xl transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(34,197,94,0.4)] active:scale-95"
+                                >
+                                    Start Live Session
+                                    <div className="absolute inset-0 rounded-xl ring-2 ring-white/20 group-hover:ring-white/40 transition-all"></div>
+                                </button>
+                            ) : (
+                                <div className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 rounded-full border border-white/5 mx-auto">
+                                    <span className="relative flex h-3 w-3">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                                    </span>
+                                    <span className="text-sm font-bold text-yellow-500 tracking-wide uppercase">Standing By for Host</span>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+
+                {/* Local Preview (Small) */}
+                {localStream && (
+                    <div className="absolute bottom-6 right-6 w-48 aspect-video bg-black rounded-lg overflow-hidden border border-white/10 shadow-lg opacity-50 hover:opacity-100 transition-opacity">
+                        <video
+                            ref={localVideoRef}
+                            autoPlay
+                            muted
+                            playsInline
+                            className="w-full h-full object-cover mirror-mode"
+                            style={{ transform: "scaleX(-1)" }}
+                        />
+                        <div className="absolute bottom-1 left-2 text-[10px] font-bold text-white/50 uppercase">Preview</div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // --- Ended State ---
     if (status === "completed") {
         return (
-            <div className="flex flex-col items-center justify-center h-[400px] bg-zinc-900/50 rounded-2xl border border-white/10 p-8 text-center animate-in fade-in">
-                <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
-                <h3 className="text-2xl font-bebas text-white tracking-wide">Session Completed</h3>
-                <p className="text-muted-foreground mt-2 max-w-md">
-                    Great work! The session has been successfully recorded and completed.
+            <div className="relative w-full h-full flex flex-col items-center justify-center bg-zinc-900 rounded-3xl border border-white/10 p-8 text-center animate-in fade-in zoom-in-95 duration-500">
+                <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mb-6">
+                    <CheckCircle className="w-10 h-10 text-green-500" />
+                </div>
+                <h3 className="text-4xl font-black text-white tracking-tighter uppercase mb-2">Session Complete</h3>
+                <p className="text-zinc-400 mt-2 max-w-md mb-8">
+                    Great work! The session has been successfully recorded.
                 </p>
-                <button
-                    onClick={() => window.history.back()}
-                    className="mt-6 px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all"
-                >
-                    Return to Dashboard
-                </button>
+                <div className="flex gap-4">
+                    <button
+                        onClick={() => window.history.back()}
+                        className="px-8 py-3 bg-white text-black font-bold uppercase tracking-wide rounded-full hover:bg-zinc-200 transition-colors"
+                    >
+                        Return to Dashboard
+                    </button>
+                    <button
+                        onClick={() => window.location.reload()} // Mock restart
+                        className="px-8 py-3 bg-transparent border border-white/20 text-white font-bold uppercase tracking-wide rounded-full hover:bg-white/5 transition-colors"
+                    >
+                        View Summary
+                    </button>
+                </div>
             </div>
         );
     }
 
     if (status === "aborted") {
         return (
-            <div className="flex flex-col items-center justify-center h-[400px] bg-red-900/20 rounded-2xl border border-red-500/30 p-8 text-center">
-                <AlertTriangle className="w-16 h-16 text-red-500 mb-4" />
-                <h3 className="text-2xl font-bebas text-white tracking-wide">Session Aborted</h3>
-                <p className="text-muted-foreground mt-2">
-                    Something went wrong or the session was cancelled.
-                </p>
+            <div className="relative w-full h-full flex flex-col items-center justify-center bg-red-950/20 rounded-3xl border border-red-500/20 p-8 text-center animate-in fade-in">
+                <AlertTriangle className="w-16 h-16 text-red-500 mb-6" />
+                <h3 className="text-3xl font-black text-white tracking-tighter uppercase">Session Aborted</h3>
+                <p className="text-red-200/60 mt-2 mb-8">Connection lost or session cancelled.</p>
                 <button
                     onClick={() => window.history.back()}
-                    className="mt-6 px-6 py-2 bg-red-500/20 hover:bg-red-500/40 text-red-200 rounded-full transition-all"
+                    className="px-8 py-3 bg-red-500/10 border border-red-500/50 text-red-400 hover:bg-red-500/20 font-bold uppercase tracking-wide rounded-full transition-colors"
                 >
-                    Go Back
+                    Exit Arena
                 </button>
             </div>
         );
     }
 
+    // --- Live Arena State ---
     return (
-        <div className="grid gap-4 mb-2 transition-all duration-500 ease-in-out grid-cols-1 md:grid-cols-2 h-[300px] md:h-[400px]">
+        <div className="relative w-full h-full bg-black rounded-3xl overflow-hidden border border-white/10 shadow-2xl group transition-all">
 
-            {/* Status Overlays */}
-            {status !== "live" && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl">
-                    {status === "loading" && <Loader2 className="w-10 h-10 text-primary animate-spin" />}
-
-                    {status === "scheduled" && (
-                        <div className="text-center p-6 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl max-w-sm">
-                            <h3 className="text-xl font-bold text-white mb-2">Ready to Start?</h3>
-                            <p className="text-sm text-gray-400 mb-6">
-                                {isTrainer
-                                    ? "You can start the session when you are ready. The trainee will join automatically."
-                                    : "Waiting for your trainer to start the session..."}
-                            </p>
-
-                            {isTrainer ? (
-                                <button
-                                    onClick={handleStartSession}
-                                    className="flex items-center justify-center w-full gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all transform hover:scale-105"
-                                >
-                                    <Play className="w-5 h-5" fill="currentColor" />
-                                    START LIVE SESSION
-                                </button>
-                            ) : (
-                                <div className="flex items-center justify-center gap-2 text-yellow-500">
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    <span>Waiting for Host...</span>
-                                </div>
-                            )}
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Remote Video */}
-            <div className="relative rounded-2xl overflow-hidden bg-black shadow-lg group">
+            {/* Main Remote Video (Opponent) */}
+            <div className="absolute inset-0 z-0">
                 {remoteStream ? (
                     <video
                         ref={remoteVideoRef}
@@ -530,29 +577,15 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
                         className="w-full h-full object-cover"
                     />
                 ) : (
-                    <>
-                        <img
-                            src="https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?auto=format&fit=crop&w=800"
-                            alt="Placeholder"
-                            className="w-full h-full object-cover opacity-50 grayscale"
-                        />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <p className="text-white/50 font-bebas text-lg">Waiting for connection...</p>
-                        </div>
-                    </>
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-zinc-900">
+                        <Loader2 className="w-12 h-12 text-zinc-700 animate-spin mb-4" />
+                        <p className="text-zinc-700 font-black uppercase tracking-widest text-lg">Waiting for connection</p>
+                    </div>
                 )}
-
-                <div className="absolute top-4 right-4 flex gap-2">
-                    {status === "live" && (
-                        <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-sm animate-pulse flex items-center gap-1">
-                            <span className="w-2 h-2 bg-white rounded-full"></span> LIVE
-                        </span>
-                    )}
-                </div>
             </div>
 
-            {/* Local Video */}
-            <div className={`relative rounded-2xl overflow-hidden bg-zinc-900 shadow-lg border transition-all duration-300 ${isSpeaking ? "border-green-500" : "border-white/10"}`}>
+            {/* Local Video (Floating PiP) */}
+            <div className="absolute top-6 right-6 w-48 md:w-64 aspect-[3/4] md:aspect-video bg-zinc-900 rounded-2xl overflow-hidden border-2 border-white/10 shadow-2xl z-20 group-hover:border-white/30 transition-all">
                 <video
                     ref={localVideoRef}
                     autoPlay
@@ -561,53 +594,69 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
                     className={`w-full h-full object-cover ${!isScreenSharing ? "mirror-mode" : ""}`}
                     style={{ transform: !isScreenSharing ? "scaleX(-1)" : "none" }}
                 />
+                {/* Audio Indicator */}
+                <div className={`absolute bottom-3 left-3 w-2 h-2 rounded-full ${isSpeaking ? 'bg-green-500 shadow-[0_0_10px_#22c55e]' : 'bg-white/20'} transition-all duration-200`}></div>
+            </div>
 
-                {/* Controls Bar */}
-                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-black/60 backdrop-blur-md px-6 py-3 rounded-full border border-white/10 shadow-2xl z-50">
+            {/* LIVE Badge */}
+            <div className="absolute top-6 left-6 z-20">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-red-600/90 text-white text-xs font-black uppercase tracking-wider rounded-md shadow-lg backdrop-blur-md">
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                    Live Session
+                </div>
+            </div>
+
+            {/* Controls Dock (Bottom Center) */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 px-6 py-4 bg-zinc-950/80 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl transition-transform duration-300 hover:scale-105">
+
+                {/* Audio/Video Toggles */}
+                <button
+                    onClick={toggleMute}
+                    className={`p-4 rounded-xl transition-all duration-200 ${isMuted ? "bg-red-500/20 text-red-500 hover:bg-red-500/30" : "bg-white/5 text-white hover:bg-white/10"}`}
+                    title={isMuted ? "Unmute" : "Mute"}
+                >
+                    {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
+                </button>
+
+                <button
+                    onClick={toggleVideo}
+                    className={`p-4 rounded-xl transition-all duration-200 ${isVideoOff ? "bg-red-500/20 text-red-500 hover:bg-red-500/30" : "bg-white/5 text-white hover:bg-white/10"}`}
+                    title={isVideoOff ? "Turn Video On" : "Turn Video Off"}
+                >
+                    {isVideoOff ? <VideoOff className="w-6 h-6" /> : <Video className="w-6 h-6" />}
+                </button>
+
+                <div className="w-px h-8 bg-white/10 mx-2"></div>
+
+                {/* Trainer Actions */}
+                {isTrainer && (
                     <button
-                        onClick={toggleMute}
-                        className={`p-3 rounded-full transition-all ${isMuted ? "bg-red-500 text-white" : "bg-white/10 text-white hover:bg-white/20"}`}
-                        title={isMuted ? "Unmute" : "Mute"}
+                        onClick={handleEndSession}
+                        className="px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-bold uppercase text-xs tracking-wider rounded-xl transition-all flex items-center gap-2"
+                        title="End Session"
                     >
-                        {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                        End Session
                     </button>
+                )}
 
-                    <button
-                        onClick={toggleVideo}
-                        className={`p-3 rounded-full transition-all ${isVideoOff ? "bg-red-500 text-white" : "bg-white/10 text-white hover:bg-white/20"}`}
-                        title={isVideoOff ? "Turn Video On" : "Turn Video Off"}
-                    >
-                        {isVideoOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
-                    </button>
-
+                {/* Leave Only */}
+                {!isTrainer && (
                     <button
                         onClick={toggleScreenShare}
-                        className={`p-3 rounded-full transition-all ${isScreenSharing ? "bg-blue-500 text-white" : "bg-white/10 text-white hover:bg-white/20"}`}
+                        className={`p-4 rounded-xl transition-all duration-200 ${isScreenSharing ? "bg-blue-500/20 text-blue-500 hover:bg-blue-500/30" : "bg-white/5 text-white hover:bg-white/10"}`}
                         title="Share Screen"
                     >
-                        <MonitorUp className="w-5 h-5" />
+                        <MonitorUp className="w-6 h-6" />
                     </button>
+                )}
 
-                    <div className="w-px h-8 bg-white/20 mx-1"></div>
-
-                    {isTrainer && status === "live" && (
-                        <button
-                            onClick={handleEndSession}
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-full font-bold text-sm flex items-center gap-2 transition-all"
-                        >
-                            <CheckCircle className="w-4 h-4" />
-                            Use End
-                        </button>
-                    )}
-
-                    <button
-                        onClick={handleLeave}
-                        className="bg-zinc-700 hover:bg-zinc-600 text-white p-3 rounded-full"
-                        title="Leave Call"
-                    >
-                        <PhoneOff className="w-5 h-5" />
-                    </button>
-                </div>
+                <button
+                    onClick={handleLeave}
+                    className="p-4 bg-zinc-800 hover:bg-red-900/50 text-white/50 hover:text-red-400 rounded-xl transition-all"
+                    title="Leave Call"
+                >
+                    <PhoneOff className="w-6 h-6" />
+                </button>
             </div>
         </div>
     );

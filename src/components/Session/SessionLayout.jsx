@@ -1,7 +1,6 @@
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { getCurrentProfileType } from "../../utils/auth"; // Import auth util
 import { useState } from "react";
-import SessionHeader from "./SessionHeader";
 import ChatBox from "./ChatBox";
 import TasksPanel from "./TasksPanel";
 import TrainerControls from "./TrainerControls";
@@ -105,84 +104,101 @@ const SessionLayout = () => {
 
 
 
-    return (
-        <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8 animate-fade-in">
+    // ================= Siderbar Toggle =================
+    const [sidebarTab, setSidebarTab] = useState("chat"); // 'chat' or 'tasks'
 
-            {/* Navigation & Dev Tools */}
-            <div className="mx-auto max-w-7xl mb-6 flex justify-between items-center">
+    return (
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 font-sans selection:bg-green-500/30">
+
+            {/* Navbar / Header */}
+            <div className="flex items-center justify-between mb-4 px-2">
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group"
                 >
-                    <ArrowLeft className="w-5 h-5" /> Back to Dashboard
+                    <div className="p-2 rounded-full bg-zinc-900 group-hover:bg-zinc-800 transition-colors">
+                        <ArrowLeft className="w-5 h-5" />
+                    </div>
+                    <span className="font-bold uppercase tracking-wider text-sm">Dashboard</span>
                 </button>
 
+                <div className="flex flex-col items-center">
+                    <h1 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
+                        {session.name}
+                    </h1>
+                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-green-500">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        {session.status}
+                    </div>
+                </div>
+
+                <div className="w-24"></div> {/* Spacer for center alignment */}
             </div>
 
-            <div className="mx-auto max-w-7xl space-y-6">
+            {/* Main Content Area */}
+            <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-100px)]">
 
-                {/* Header */}
-                <SessionHeader
-                    sessionId={id} // Pass ID
-                    sessionName={session.name}
-                    status={session.status}
-                    startTime={session.startTime}
-                    isTrainer={userRole === "trainer"}
-                    onEndSession={() => setSession({ ...session, status: "Ended" })}
-                />
+                {/* Left Stage (Video) */}
+                <div className={`transition-all duration-500 ease-in-out ${isScreenSharing ? 'lg:w-3/4' : 'lg:w-2/3'} w-full flex flex-col`}>
+                    <div className="flex-1 rounded-3xl overflow-hidden shadow-2xl border border-white/5 bg-zinc-900">
+                        <VideoCall
+                            sessionId={id}
+                            isTrainer={userRole === "trainer"}
+                            onScreenShareChange={setIsScreenSharing}
+                        />
+                    </div>
+                </div>
 
-                {/* Main Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[600px]">
+                {/* Right Panel (Tools) */}
+                <div className="flex-1 flex flex-col bg-zinc-900/50 rounded-3xl border border-white/5 overflow-hidden backdrop-blur-sm">
 
-                    {/* Left Panel: Video & Chat */}
-                    <div className={`flex flex-col gap-4 transition-all duration-500 ease-in-out ${isScreenSharing ? 'lg:col-span-9' : 'lg:col-span-8'}`}>
-                        {/* VIDEO CALL AREA */}
-                        <div className="w-full">
-                            <VideoCall
-                                sessionId={id}
-                                isTrainer={userRole === "trainer"}
-                                onScreenShareChange={setIsScreenSharing}
-                            />
-                        </div>
-
-                        {/* CHAT AREA */}
-                        <div className="flex-1">
-                            <ChatBox
-                                messages={messages}
-                                currentUserId={currentUserId}
-                                onSendMessage={handleSendMessage}
-                            />
-                        </div>
+                    {/* Tabs */}
+                    <div className="flex border-b border-white/5 p-2 gap-2">
+                        <button
+                            onClick={() => setSidebarTab("chat")}
+                            className={`flex-1 py-3 rounded-xl font-bold uppercase tracking-wider text-xs transition-all ${sidebarTab === "chat" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"}`}
+                        >
+                            Live Chat
+                        </button>
+                        <button
+                            onClick={() => setSidebarTab("tasks")}
+                            className={`flex-1 py-3 rounded-xl font-bold uppercase tracking-wider text-xs transition-all ${sidebarTab === "tasks" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"}`}
+                        >
+                            Session Tasks
+                        </button>
                     </div>
 
-                    {/* Right Panel: Tasks & Tools */}
-                    <div className={`flex flex-col gap-6 overflow-y-auto pb-4 h-full transition-all duration-500 ease-in-out ${isScreenSharing ? 'lg:col-span-3' : 'lg:col-span-4'}`}>
-                        {/* Tasks are visible to everyone */}
-                        <TasksPanel
-                            tasks={tasks}
-                            onToggleTask={handleToggleTask}
-                            isTrainer={userRole === "trainer"}
-                        />
-
-                        {/* Controls only for Trainer */}
-                        {userRole === "trainer" ? (
-                            <div className="animate-in slide-in-from-right-4 duration-300 delay-100">
-                                <TrainerControls
-                                    onAddTask={handleAddTask}
-                                    onBroadcast={handleBroadcast}
+                    {/* Panel Content */}
+                    <div className="flex-1 overflow-hidden relative p-4">
+                        {sidebarTab === "chat" && (
+                            <div className="h-full flex flex-col animate-in slide-in-from-right-4 fade-in duration-300">
+                                <ChatBox
+                                    messages={messages}
+                                    currentUserId={currentUserId}
+                                    onSendMessage={handleSendMessage}
                                 />
                             </div>
-                        ) : (
-                            <div className="bg-muted/30 p-6 rounded-2xl border border-border text-center">
-                                <h4 className="font-bebas text-lg text-foreground mb-2">Trainee View</h4>
-                                <p className="text-sm text-muted-foreground">
-                                    Follow the trainer's instructions and check off tasks as you complete them!
-                                </p>
+                        )}
+
+                        {sidebarTab === "tasks" && (
+                            <div className="h-full overflow-y-auto animate-in slide-in-from-right-4 fade-in duration-300">
+                                <TasksPanel
+                                    tasks={tasks}
+                                    onToggleTask={handleToggleTask}
+                                    isTrainer={userRole === "trainer"}
+                                />
+                                {userRole === "trainer" && (
+                                    <div className="mt-6 pt-6 border-t border-white/10">
+                                        <TrainerControls
+                                            onAddTask={handleAddTask}
+                                            onBroadcast={handleBroadcast}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
                 </div>
-
             </div>
         </div>
     );

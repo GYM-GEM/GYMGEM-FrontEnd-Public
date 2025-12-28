@@ -44,7 +44,6 @@ export default function WeekCalendar() {
     const [user] = useState(() => JSON.parse(localStorage.getItem("user") || "{}"));
     const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()));
     const [events, setEvents] = useState([]);
-    const [loading, setLoading] = useState(false);
 
     // Fetch slots on mount
     useEffect(() => {
@@ -124,7 +123,7 @@ export default function WeekCalendar() {
         // Use a temp loading state or just showing a spinner.
 
         // Let's prevent double clicking
-        if (loading) return;
+        // if (loading) return;
 
         try {
             // Provide visual feedback (maybe a temporary loading event or global loading)
@@ -148,7 +147,7 @@ export default function WeekCalendar() {
                 slot_start_time: start.toISOString()
             };
 
-            const response = await axiosInstance.post('/api/trainers/calendar-slots/', payload);
+            const response = await axiosInstance.post('/api/trainers/calendar-slots/', payload, { skipGlobalLoader: true });
 
             // Replace temp event with real one
             const newSlot = response.data;
@@ -175,7 +174,7 @@ export default function WeekCalendar() {
         setEvents(prev => prev.map(e => e.id === id ? { ...e, isDeleting: true } : e));
 
         try {
-            await axiosInstance.delete(`/api/trainers/calendar-slots/${id}/`);
+            await axiosInstance.delete(`/api/trainers/calendar-slots/${id}/`, { skipGlobalLoader: true });
             setEvents(prev => prev.filter(e => e.id !== id));
             showToast("Slot removed", { type: "success" });
         } catch (error) {

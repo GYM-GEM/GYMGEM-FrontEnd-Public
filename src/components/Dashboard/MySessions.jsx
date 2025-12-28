@@ -150,7 +150,8 @@ const MySessions = () => {
 
     // Check if session can be joined (5 minutes before to session time, and status is scheduled)
     const canJoinSession = (session) => {
-        if (session.status !== 'scheduled') return false;
+        console.log(session);
+        if (!['waiting', 'scheduled', 'live'].includes(session.status)) return false;
 
         const sessionTime = new Date(session.starting_time);
         const now = new Date();

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, Flame, Beef, Wheat, Droplet, Scan, X, RefreshCw, AlertCircle } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
+import OpenAI from 'openai'; // OpenAI SDK
 import AiNavBarFood from './AiNavBarFood';
 import { foodHistory } from '../../utils/foodHistory';
 import FooterDash from '../../components/Dashboard/FooterDash';
@@ -52,37 +53,18 @@ const AiFoodAnalyzer = () => {
   const fileToBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result.split(',')[1]);
+      reader.onload = () => resolve(reader.result); // OpenAI needs the full data URL (with prefix)
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
   };
 
-  // Safe JSON extraction
-  const extractJSON = (text) => {
-    try {
-      // 1. Try direct parse
-      return JSON.parse(text);
-    } catch (e) {
-      // 2. Try to find JSON object structure
-      const match = text.match(/\{[\s\S]*\}/);
-      if (match) {
-        try {
-          return JSON.parse(match[0]);
-        } catch (e2) {
-          console.error("Failed to extract JSON:", e2);
-        }
-      }
-      return null;
-    }
-  };
-
-  // Real analysis using Gemini REST API with Model Discovery
+  // Real analysis using OpenAI
   const handleAnalyze = async () => {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
     
     if (!apiKey) {
-      setError("Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your .env file.");
+      setError("OpenAI API Key is missing. Please add VITE_OPENAI_API_KEY to your .env file.");
       return;
     }
 
@@ -96,147 +78,74 @@ const AiFoodAnalyzer = () => {
     setStatusMessage("Preparing image...");
 
     try {
-      const base64Data = await fileToBase64(image);
+      const base64DataUrl = await fileToBase64(image);
 
-      // Step 1: Discover available models, prioritizing Gemini 1.5 Flash
-      setStatusMessage("Finding best AI model...");
-      console.log("🔍 Discovering available models...");
+      setStatusMessage("Analyzing with AI...");
       
-      let targetModel = 'gemini-1.5-flash'; // STRICT DEFAULT as requested
-      let apiVersion = 'v1beta'; 
-      
-      try {
-        const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-        if (listResponse.ok) {
-          const listData = await listResponse.json();
-          const models = listData.models || [];
-          
-          // Check if gemini-1.5-flash is strictly available
-          const flashModel = models.find(m => m.name.includes('gemini-1.5-flash') && m.supportedGenerationMethods?.includes('generateContent'));
-          
-          if (flashModel) {
-            targetModel = flashModel.name.replace('models/', '');
-            console.log(`✅ Gemini 1.5 Flash validated: ${targetModel}`);
-          } else {
-             console.warn("Gemini 1.5 Flash not explicitly listed in v1beta, falling back to other vision models");
-             // Fallback to other vision models only if Flash isn't there
-             const visionModel = models.find(m => 
-                (m.name.includes('flash') || m.name.includes('pro-vision') || m.name.includes('gemini-1.5')) &&
-                m.supportedGenerationMethods?.includes('generateContent')
-              );
-              if (visionModel) {
-                targetModel = visionModel.name.replace('models/', '');
-              }
-          }
-        } else {
-           console.log("v1beta list failed, defaulting to gemini-1.5-flash on v1beta blind");
-        }
-      } catch (e) {
-        console.warn("Model discovery failed, using default:", e);
-      }
-
-      // Step 2: Call the API with the discovered model
-      // setStatusMessage(`Analyzing with ${targetModel}...`);
-      setStatusMessage(`Analyzing...`);
-
-      
-      const endpoint = `https://generativelanguage.googleapis.com/${apiVersion}/models/${targetModel}:generateContent?key=${apiKey}`;
-      
-      const promptText = `Analyze the provided food image and return the nutritional analysis in STRICT JSON FORMAT ONLY using Gemini 1.5 Flash Vision.
-The response MUST EXACTLY MATCH this structure:
-{
-"dishName": "string",
-"estimatedWeight": "string",
-"calories": number,
-"protein": number,
-"carbs": number,
-"fats": number,
-"confidence": number,
-"cookingMethod": "string",
-"healthTip": "string"
-}
-STRICT RULES (NO EXCEPTIONS):
-Output ONLY the JSON object.
-No markdown
-No backticks
-No explanations
-No extra characters
-FOOD DETECTION:
-Identify all visible food components (main dish, sides, sauces, oils).
-If the image does NOT contain food:
-"dishName": "Non-food detected"
-All numeric values MUST be 0.
-PORTION & WEIGHT ESTIMATION:
-Estimate portion size using visible references (plate size, utensils, bowl, hand).
-Explicitly count items when applicable (e.g., "8 chicken wings", "1 medium burger").
-estimatedWeight must be a readable string (e.g., "~420g", "2 pieces ~300g").
-HIDDEN CALORIES (MANDATORY):
-Always include calories from:
-Cooking oil
-Butter
-Sauces
-Marinades
-Frying or glazing
-Never assume zero oil unless the food is clearly raw.
-COOKING METHOD:
-Infer the most likely method (grilled, fried, baked, air-fried, raw, steamed).
-CONFIDENCE SCORE:
-85–100 → Clearly visible and identifiable
-70–84 → Minor ambiguity
-<70 → Blurry or uncertain
-FITNESS CONTEXT (REQUIRED):
-healthTip MUST be practical and gym-focused.
-Explicitly classify the meal as ONE:
-"Pre-workout energy"
-"Post-workout recovery"
-"Weight loss / Cutting"
-Base the decision mainly on protein and carbs ratio.
-ACCURACY PRIORITY:
-Protein and total calories accuracy is critical.
-Avoid unrealistic protein numbers.
-OUTPUT CONSTRAINTS:
-All numeric fields must be realistic integers.
-confidence must be between 0 and 100.
-No null values.`;
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: promptText },
-              {
-                inline_data: {
-                  mime_type: image.type,
-                  data: base64Data
-                }
-              }
-            ]
-          }]
-        })
+      const openai = new OpenAI({
+          apiKey: apiKey,
+          dangerouslyAllowBrowser: true 
       });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error("API Error Response:", errText);
-        throw new Error(`API Error ${response.status}: ${errText}`);
-      }
+      const promptText = `Analyze the provided food image and return the nutritional analysis in STRICT JSON FORMAT.
+The response object must strictly follow this schema:
+{
+  "dishName": "string",
+  "estimatedWeight": "string",
+  "calories": number,
+  "protein": number,
+  "carbs": number,
+  "fats": number,
+  "confidence": number,
+  "cookingMethod": "string",
+  "healthTip": "string"
+}
 
-      const responseData = await response.json();
+FOOD DETECTION:
+Identify all visible food components.
+If the image does NOT contain food, return "dishName": "Non-food detected" and all zeros.
+
+PORTION & WEIGHT ESTIMATION:
+Estimate portion size using visible references.
+estimatedWeight must be a readable string (e.g., "~420g").
+
+HIDDEN CALORIES:
+Include calories from oils, sauces, etc.
+
+FITNESS CONTEXT:
+healthTip MUST be practical and gym-focused.
+Classify as "Pre-workout", "Post-workout", or "Cutting".
+
+ACCURACY:
+Protein and calories are critical.
+confidence between 0 and 100.
+`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: promptText },
+              {
+                type: "image_url",
+                image_url: {
+                  url: base64DataUrl,
+                },
+              },
+            ],
+          },
+        ],
+        response_format: { type: "json_object" }, // Enforce valid JSON
+        max_tokens: 500,
+      });
+
+      const content = response.choices[0].message.content;
+      if (!content) throw new Error("Empty response from AI");
+
+      const parsedData = JSON.parse(content);
       
-      // Step 3: Parse Result
-      const candidate = responseData.candidates?.[0];
-      if (!candidate) throw new Error("No analysis generated");
-      
-      const resultText = candidate.content?.parts?.[0]?.text;
-      if (!resultText) throw new Error("Empty response from AI");
-
-      const parsedData = extractJSON(resultText);
-      if (!parsedData) throw new Error("Failed to parse nutrition data from AI response");
-
       const finalResult = {
         ...parsedData,
         imagePreview,
@@ -250,12 +159,10 @@ No null values.`;
 
     } catch (err) {
       console.error("Analysis failed:", err);
-      if (err.message.includes("404") || err.message.includes("not found")) {
-         setError("The AI model is currently unavailable or the API key has restricted access. Please check your API key.");
-      } else if (err.message.includes("API Key")) {
-        setError("Invalid API Key configuration.");
+      if (err.message.includes("401")) {
+         setError("Invalid API Key. Please check your configuration.");
       } else {
-        setError("Failed to analyze image. Please try again or use a different image.");
+         setError("Failed to analyze image. Please try again.");
       }
     } finally {
       setIsAnalyzing(false);

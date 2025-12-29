@@ -1,7 +1,7 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from 'openai';
 
 // 1. Configuration
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 
 // 2. GYMGEM Context - The "Brain" of the Chatbot
 const SITE_STRUCTURE = `
@@ -108,108 +108,38 @@ A: "Gems are our exclusive reward currency! You earn them by being active. You c
 `;
 
 // 3. Dynamic Model Initialization
-let chatSession = null;
-let genAI = null;
-let model = null;
-let activeModelName = null;
+let openai = null;
 
-const getBestModel = async () => {
-    if (activeModelName) return activeModelName;
-
-    try {
-        console.log("🔍 Discovering Gemini models...");
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`);
-        if (!response.ok) throw new Error("Failed to list models");
-        
-        const data = await response.json();
-        const models = data.models || [];
-        
-        // Priority 1: Flash (Fast & Free)
-        // Priority 2: Pro (Reliable)
-        // Priority 3: Any legitimate gemini model
-        const bestModel = models.find(m => 
-            m.name.includes('gemini-1.5-flash') && 
-            m.supportedGenerationMethods.includes('generateContent')
-        ) || models.find(m => 
-            m.name.includes('gemini-1.5-pro') && 
-            m.supportedGenerationMethods.includes('generateContent')
-        ) || models.find(m => 
-            m.name.includes('gemini') && 
-            m.supportedGenerationMethods.includes('generateContent')
-        );
-
-        if (bestModel) {
-            // API returns "models/gemini-1.5-flash", SDK expects "gemini-1.5-flash"
-            activeModelName = bestModel.name.replace('models/', '');
-            console.log(`✅ Using Model: ${activeModelName}`);
-            return activeModelName;
-        }
-    } catch (e) {
-        console.warn("⚠️ Model discovery failed. Fallback to default.");
-    }
-    
-    return "gemini-1.5-flash"; // Ultimate fallback
-};
-
-const initializeChat = async () => {
+const initializeChat = () => {
     if (!API_KEY) {
-        console.warn("⚠️ VITE_GEMINI_API_KEY is missing. Chatbot will not work.");
+        console.warn("⚠️ VITE_OPENAI_API_KEY is missing. Chatbot will not work.");
         return null;
     }
 
-    if (!genAI) {
-        genAI = new GoogleGenerativeAI(API_KEY);
-    }
-
-    try {
-        const modelName = await getBestModel();
-        model = genAI.getGenerativeModel({ 
-            model: modelName,
-            systemInstruction: GYMGEM_CONTEXT 
+    if (!openai) {
+        openai = new OpenAI({
+            apiKey: API_KEY,
+            dangerouslyAllowBrowser: true // Required for client-side usage
         });
-        return model;
-    } catch (error) {
-        console.error("Error initializing Gemini:", error);
-        return null;
     }
+
+    return openai;
 };
 
 // 4. Service Methods
 export const aiChatService = {
   
-  // Start or Reset a Chat Session
+  // Start or Reset a Chat Session (Mock capability since OpenAI is stateless REST)
   startChat: async (history = []) => {
+    // OpenAI is stateless, so we mainly check initialization here
     try {
-        // Ensure model is ready
-        if (!model) {
-            await initializeChat();
+        if (!openai) {
+            initializeChat();
         }
-        
-        if (!model) return null;
-
-        // Convert local history format to Gemini format if needed
-        // Gemini expects: { role: "user" | "model", parts: [{ text: "..." }] }
-        const formattedHistory = history.map(msg => ({
-            role: msg.role === 'assistant' ? 'model' : 'user',
-            parts: [{ text: msg.content }]
-        }));
-
-        chatSession = model.startChat({
-            history: formattedHistory,
-            generationConfig: {
-                maxOutputTokens: 500,
-                temperature: 0.7,
-            },
-        });
-        return chatSession;
+        return openai;
     } catch (e) {
-        console.error("Failed to start chat session:", e);
-        // Retry init once if session fails immediately
-        if (activeModelName) {
-            activeModelName = null; // Force re-discovery
-            await initializeChat();
-        }
-        throw e;
+        console.error("Failed to initialize OpenAI:", e);
+        return null;
     }
   },
 
@@ -219,34 +149,44 @@ export const aiChatService = {
         return "I'm sorry, my brain (API Key) is missing. Please contact support.";
     }
     
-    // Ensure session exists
-    if (!chatSession) {
-        await aiChatService.startChat(history);
+    if (!openai) {
+        initializeChat();
     }
 
-    // Double check if startChat succeeded
-    if (!chatSession) {
+    if (!openai) {
          return "I'm having trouble connecting to the AI service. Please refresh and try again.";
     }
 
     try {
-      // Inject context if provided
-      const fullMessage = context ? `${context}\n\n[USER_MESSAGE]: ${message}` : message;
-      
-      const result = await chatSession.sendMessage(fullMessage);
-      const response = await result.response;
-      return response.text();
+      // 1. Prepare Messages
+      const messages = [
+          { role: "system", content: GYMGEM_CONTEXT },
+          // Convert history format
+          ...history.map(msg => ({
+              role: msg.role === 'model' ? 'assistant' : msg.role, 
+              content: msg.content
+          })),
+          // Add current message with context
+          { 
+              role: "user", 
+              content: context ? `${context}\n\n[USER_MESSAGE]: ${message}` : message 
+          }
+      ];
+
+      // 2. Call OpenAI API
+      const completion = await openai.chat.completions.create({
+          messages: messages,
+          model: "gpt-4o", // Or gpt-3.5-turbo if preferred for cost
+          max_tokens: 500,
+          temperature: 0.7,
+      });
+
+      return completion.choices[0].message.content;
+
     } catch (error) {
       console.error("Chat Error:", error);
-      
-      // If 404, force re-discovery for next time
-      if (error.message.includes('404') || error.message.includes('not found')) {
-           activeModelName = null;
-           model = null;
-           chatSession = null;
-      }
-
       return "I'm having trouble connecting to the gym network right now. Please try again later! 💪";
     }
   }
 };
+

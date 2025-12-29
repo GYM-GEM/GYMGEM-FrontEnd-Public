@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
 import { Store, Image, AlignLeft, Layers } from "lucide-react";
 import UploadImage from "../../UploadImage";
+import axiosInstance from "../../../utils/axiosConfig";
 
 /**
  * StoreForm Component
@@ -27,13 +28,22 @@ const StoreForm = ({ onSubmit }) => {
 
     const handleFormSubmit = async (data) => {
         try {
+            const user = JSON.parse(localStorage.getItem("user"));
+          
+            const payload = {
+                ...data,
+                profile_id: user?.id || 0,
+            };
+
+            console.log("Submitting payload:", payload);
+
             if (onSubmit) {
-                await onSubmit(data);
+                await onSubmit(payload);
             } else {
-                console.log("Form Submitted:", data);
-                // Save to localStorage for persistence
-                localStorage.setItem("storeProfile", JSON.stringify(data));
+                const response = await axiosInstance.post("/api/stores/", payload);
+                console.log("Store Created:", response.data);
                 showToast("Store profile created successfully!", { type: "success" });
+                navigate("/storebranch");
             }
 
         } catch (error) {
@@ -175,14 +185,13 @@ const StoreForm = ({ onSubmit }) => {
                         </div>
 
                         {/* Submit Button */}
-                        <Link to="/storebranch">
-                            <button
-                                type="submit"
-                                className="inline-flex h-11 items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-[#e67300] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background mt-4 shadow-lg shadow-orange-500/20"
-                            >
-                                Submit & Next
-                            </button>
-                        </Link>
+                        <button
+                            onClick={handleFormSubmit}
+                            type="submit"
+                            className="inline-flex h-11 items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-[#e67300] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background mt-4 shadow-lg shadow-orange-500/20"
+                        >
+                            Submit & Next
+                        </button>
 
                     </form>
                 </div>

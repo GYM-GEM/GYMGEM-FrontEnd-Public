@@ -79,7 +79,7 @@ const Selectrole = () => {
 
       if (selectedRole === "trainer") navigate("/trainerform");
       else if (selectedRole === "trainee") navigate("/traineeform");
-      else if (selectedRole === "store") navigate("/store/dashboard");
+      else if (selectedRole === "store") navigate("/storeform");
       else navigate("/");
     } catch (error) {
       console.error("Error during registration:", error);

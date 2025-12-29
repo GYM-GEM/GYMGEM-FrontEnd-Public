@@ -8,21 +8,28 @@ const SITE_STRUCTURE = `
 - Home: /home
 - Courses: /courses
 - All Trainers: /trainers
-- Our Stores: /stores
-- Your Profile: /profile
+- All Trainees: /trainees
 - Community: /community
-- AI Trainer (Personal Training): /ai-trainer
-- AI Food Analyzer: /ai-food
-- Workout History: /workout-history
-- Food History: /food-history
-- Chat History: /ai-chat
+- Our Stores: /stores
+- Cart: /cart
+- About Us: /about
+- Contact/Support: /contact
+- Privacy Policy: /privacy
+- Terms of Service: /terms
+- Your Profile: /profile
+- Settings: /settings
+- AI Services:
+  - AI Personal Trainer: /ai-trainer
+  - AI Food Analyzer: /ai-food
+  - AI Chatbot: /ai-chat
+  - Workout History: /workout-history
+  - Food History: /food-history
 - Dashboards:
-  - Trainee Dashboard: /trainee/dashboard (My Courses: /trainee/courses, My Sessions: /trainee/sessions)
-  - Trainer Dashboard: /trainer/dashboard (My Orders: /trainer/myorder, Clients: /trainer/clients)
-  - Gym Dashboard: /gym/dashboard
-  - Store Dashboard: /store/dashboard
-- Support/Help: /contact
-- Shopping Cart: /cart
+  - Trainee: /trainee/dashboard (My Courses: /trainee/courses, Favorites: /trainee/favorite, Calendar: /trainee/calendar)
+  - Trainer: /trainer/dashboard (My Clients: /trainer/clients, My Courses: /trainer/courses, Add Course: /trainer/addcourse)
+  - Gym: /gym/dashboard
+  - Store: /store/dashboard
+- Authentication: /login, /signup
 `;
 
 const GYMGEM_CONTEXT = `You are the GYMGEM AI Assistant, a core part of the GYMGEM fitness platform.
@@ -86,9 +93,10 @@ VOICE & TONE:
 
 **PERSONALIZATION & USER AWARENESS:**
 - You will be provided with a \`[USER_CONTEXT]\` block in every user message.
-- **Language**: Respond in the SAME language the user uses (English or Arabic). If the user speaks Arabic, use a friendly, motivational "Egyptian/Modern Standard" hybrid tone.
-- **Greeting**: ALWAYS greet the user by their Name naturally at the start of a conversation (e.g., "أهلاً يا محمود!", "Hello Sarah!").
-- **Role Awareness**: If the user is a "Trainer", focus on coaching. If "Trainee", focus on training.
+- **Language**: STRICTLY respond in the SAME language the user uses (English or Arabic). 
+    - If the user speaks English -> Respond in English.
+    - If the user speaks Arabic -> Respond in Arabic (Egyptian/Modern Standard hybrid).
+    - NEVER mix languages unless clarifying a term.
 - **Role Mention**: Mention their role ONLY once when relevant (e.g., "بصفتك متدرب...", "As a trainee..."), do not repeat it in every sentence.
 - **Level & Goal**: Tailor advice to their specific level and goal.
 - **Gems Balance**: Suggest Gems-based services if balance allows.
@@ -133,10 +141,12 @@ export const aiChatService = {
   startChat: async (history = []) => {
     // OpenAI is stateless, so we mainly check initialization here
     try {
-        if (!openai) {
-            initializeChat();
+        const instance = initializeChat();
+        if (!instance) {
+             console.error("Failed to initialize OpenAI instance.");
+             return null;
         }
-        return openai;
+        return instance;
     } catch (e) {
         console.error("Failed to initialize OpenAI:", e);
         return null;
@@ -146,15 +156,17 @@ export const aiChatService = {
   // Send a Message
   sendMessage: async (message, context = null, history = []) => {
     if (!API_KEY) {
-        return "I'm sorry, my brain (API Key) is missing. Please contact support.";
+        console.error("API Key missing during sendMessage call");
+        return "System Error: OpenAI API Key is missing. Please check your configuration.";
     }
     
+    // Ensure initialization
     if (!openai) {
         initializeChat();
     }
 
     if (!openai) {
-         return "I'm having trouble connecting to the AI service. Please refresh and try again.";
+         return "Service Unavailable: I'm having trouble connecting to the AI service. Please refresh and try again.";
     }
 
     try {
@@ -181,10 +193,24 @@ export const aiChatService = {
           temperature: 0.7,
       });
 
+      if (!completion.choices || completion.choices.length === 0) {
+          throw new Error("No response received from AI service.");
+      }
+
       return completion.choices[0].message.content;
 
     } catch (error) {
-      console.error("Chat Error:", error);
+      console.error("Detail Chat Error:", error);
+      
+      // Handle specfic OpenAI errors if needed, or generic
+      if (error.status === 401) {
+          return "Authentication Error: The API Key seems to be invalid. Please check your settings.";
+      } else if (error.status === 429) {
+          return "Rate Limit Exceeded: I'm receiving too many requests right now. Please try again in a moment.";
+      } else if (error.status >= 500) {
+          return "Server Error: OpenAI is currently experiencing issues. Please try again later.";
+      }
+
       return "I'm having trouble connecting to the gym network right now. Please try again later! 💪";
     }
   }

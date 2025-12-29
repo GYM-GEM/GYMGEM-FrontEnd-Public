@@ -21,6 +21,10 @@ export const getUserContext = () => {
 
         // Course extraction
         const courses = "Check dashboard for details"; 
+        
+        // Navigation Context
+        const currentPath = window.location.pathname;
+        const pageTitle = document.title;
 
         return {
             name,
@@ -28,7 +32,9 @@ export const getUserContext = () => {
             goal,
             level,
             gems: gemsBalance,
-            courses
+            courses,
+            currentPath,
+            pageTitle
         };
     } catch (error) {
         console.error("Error extracting user context:", error);
@@ -38,7 +44,9 @@ export const getUserContext = () => {
             goal: "General Fitness",
             level: "Beginner",
             gems: "0",
-            courses: "None"
+            courses: "None",
+            currentPath: "Unknown",
+            pageTitle: "Unknown"
         };
     }
 };
@@ -56,5 +64,6 @@ Current User:
 - Level: ${context.level}
 - Gems Balance: ${context.gems}
 - Subscribed Courses: ${context.courses}
+- Current Page: ${context.pageTitle} (${context.currentPath})
 `;
 };

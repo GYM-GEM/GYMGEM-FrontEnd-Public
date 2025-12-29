@@ -10,9 +10,9 @@ import { toast } from "sonner"; // Assuming sonner is used
  * - Events: SESSION_WAITING, SESSION_LIVE, SESSION_COMPLETED, SESSION_ABORTED
  * - Signals: OFFER (sdp), ANSWER (sdp), ICE_CANDIDATE (candidate)
  */
-const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
+const VideoCall = ({ sessionId, isTrainer, onScreenShareChange, initialStatus }) => {
     // ================= State =================
-    const [status, setStatus] = useState("loading"); // loading, scheduled, live, completed, aborted
+    const [status, setStatus] = useState(initialStatus?.toLowerCase() || "loading"); // loading, scheduled, live, completed, aborted
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
     const [isScreenSharing, setIsScreenSharing] = useState(false);
@@ -46,6 +46,13 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
 
     // ================= Effects =================
 
+    // Sync initial status if it changes (e.g. from parent fetch)
+    useEffect(() => {
+        if (initialStatus) {
+            setStatus(initialStatus.toLowerCase());
+        }
+    }, [initialStatus]);
+
     // 1. Initial Setup: Fetch Status & Connect WS
     useEffect(() => {
         if (!sessionId) return;
@@ -74,9 +81,15 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
         };
     }, [sessionId]);
 
-    // 2. Setup Local Stream
+    // 2. Setup Local Stream (only for Trainer)
     useEffect(() => {
         const startLocalStream = async () => {
+            // Only trainers need to send video/audio
+            if (!isTrainer) {
+                console.log("👁️ Trainee mode - no media needed (view-only)");
+                return;
+            }
+
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                 setLocalStream(stream);
@@ -88,6 +101,7 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream;
                 }
+                console.log("✅ Trainer media acquired");
             } catch (err) {
                 console.error("Error accessing media devices:", err);
                 toast.error("Could not access camera/microphone");
@@ -102,7 +116,7 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
         return () => {
             // We only stop tracks on full unmount (cleanupSession)
         };
-    }, [status]);
+    }, [status, isTrainer]);
 
 
     // 3. Audio Level Detection (Reusing logic)
@@ -145,6 +159,47 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
         };
     }, [localStream, isMuted]);
 
+    // 4. Ensure tracks are added to peer connection when stream becomes available
+    useEffect(() => {
+        if (localStream && peerConnection.current) {
+            const pc = peerConnection.current;
+            const senders = pc.getSenders();
+
+            // Only add tracks if they haven't been added yet
+            if (senders.length === 0) {
+                console.log("📹 Adding local tracks to existing peer connection...");
+                localStream.getTracks().forEach(track => {
+                    pc.addTrack(track, localStream);
+                });
+                console.log("✅ Tracks added:", localStream.getTracks().length);
+
+                // If trainer and no peer connection exists yet, create it now (late initiation)
+                if (isTrainer && !peerConnection.current) {
+                    console.log("🚀 Media now ready - Initiating peer connection (late)");
+                    initiatePeerConnection();
+                    return; // initiatePeerConnection will handle offer creation
+                }
+
+                // If trainer and we need to renegotiate (either have local offer or in stable but no remote stream)
+                const needsRenegotiation = isTrainer && (
+                    pc.signalingState === "have-local-offer" ||
+                    (pc.signalingState === "stable" && !remoteStream)
+                );
+
+                if (needsRenegotiation) {
+                    console.log("🔄 Renegotiating with media tracks...");
+                    pc.createOffer()
+                        .then(offer => pc.setLocalDescription(offer))
+                        .then(() => {
+                            sendSignal({ type: "OFFER", sdp: pc.localDescription });
+                            console.log("📤 Sent updated OFFER with media");
+                        })
+                        .catch(err => console.error("Renegotiation failed:", err));
+                }
+            }
+        }
+    }, [localStream, isTrainer]);
+
     // ================= Logic =================
 
     const connectWebSocket = () => {
@@ -160,11 +215,21 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
         ws.current.onopen = () => {
             console.log("WS Connected via " + wsUrl);
             sendSignal({ type: "JOIN_SESSION" });
+
+            // Safety: If we join and it's already live (and we don't get an event?), trigger check.
+            // But usually we expect an event reply.
         };
 
         ws.current.onmessage = async (event) => {
             try {
                 const data = JSON.parse(event.data);
+                console.log("[Frontend] Received WebSocket message:", {
+                    type: data.type,
+                    role: data.role,
+                    hasSD: !!data.sdp,
+                    sdpType: data.sdp?.type,
+                    hasCandidate: !!data.candidate
+                });
                 handleSignalMessage(data);
             } catch (e) {
                 console.error("Failed to parse WS message", e);
@@ -196,7 +261,11 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
                 break;
 
             case "SESSION_LIVE":
+                console.log("Session is LIVE. Initiating connection if trainer...");
                 setStatus("live");
+                if (isTrainer) {
+                    initiatePeerConnection();
+                }
                 break;
 
             case "SESSION_HALF_COMPLETED":
@@ -228,12 +297,19 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
                 break;
 
             case "USER_JOINED":
-                console.log("User joined:", data.user);
-                // "Trainer initiates offer" logic:
-                // If I am trainer, and a user joined (likely trainee), I start the call logic.
-                if (isTrainer) {
-                    initiatePeerConnection();
+                console.log("User joined:", data.role || "Unknown");
+                // Trainer initiates offer when TRAINEE joins
+                if (isTrainer && data.role === "trainee") {
+                    console.log("Trainee joined - Checking if ready to initiate peer connection...");
+                    if (localStream) {
+                        console.log("Media ready - Initiating immediately");
+                        initiatePeerConnection();
+                    } else {
+                        console.log("⏳ Media not ready yet - will initiate when acquired");
+                        // The useEffect for track addition will handle this
+                    }
                 }
+                // Trainee waits for OFFER
                 break;
 
             case "USER_LEFT":
@@ -273,24 +349,32 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
 
         const pc = new RTCPeerConnection(ICE_SERVERS);
         peerConnection.current = pc;
+        console.log("🔧 Creating Peer Connection...");
 
-        // Add local tracks
+        // Add local tracks (only for trainer)
         if (localStream) {
+            console.log("📹 Local stream available, adding tracks immediately...");
             localStream.getTracks().forEach(track => {
                 pc.addTrack(track, localStream);
             });
+            console.log("✅ Added", localStream.getTracks().length, "tracks");
+        } else {
+            console.log("👁️ No local stream (view-only mode) - will receive remote stream only");
         }
 
         // Handle ICE candidates
         pc.onicecandidate = (event) => {
             if (event.candidate) {
+                console.log("❄️ Generated ICE Candidate");
                 sendSignal({ type: "ICE_CANDIDATE", candidate: event.candidate }); // Protocol: send 'candidate'
+            } else {
+                console.log("❄️ ICE Candidate Gathering Complete (null candidate)");
             }
         };
 
         // Handle Remote Stream
         pc.ontrack = (event) => {
-            console.log("Received remote track");
+            console.log("🎥 Received remote track", event.streams[0]?.id);
             const [remoteStream] = event.streams;
             setRemoteStream(remoteStream);
             if (remoteVideoRef.current) {
@@ -300,25 +384,71 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
 
         // Handle connection state
         pc.onconnectionstatechange = () => {
-            console.log("Connection State:", pc.connectionState);
+            console.log("📉 Connection State Change:", pc.connectionState);
+            if (pc.connectionState === "connected") {
+                toast.success("Peer Connection Established!");
+            } else if (pc.connectionState === "failed") {
+                console.error("Peer Connection Failed");
+                toast.error("Connection Failed. Retrying...");
+            }
+        };
+
+        pc.onicegatheringstatechange = () => {
+            console.log("🧊 ICE Gathering State:", pc.iceGatheringState);
+        };
+
+        pc.onsignalingstatechange = () => {
+            console.log("🚦 Signaling State:", pc.signalingState);
+        };
+
+        pc.oniceconnectionstatechange = () => {
+            console.log("[ICE] Connection State:", pc.iceConnectionState);
+            // new → checking → connected/completed
+        };
+
+        pc.onconnectionstatechange = () => {
+            console.log("[Peer] Connection State:", pc.connectionState);
+            if (pc.connectionState === "connected") {
+                toast.success("Peer Connection Established!");
+            } else if (pc.connectionState === "failed") {
+                console.error("Peer Connection Failed");
+                toast.error("Connection Failed. Retrying...");
+            }
         };
     };
 
     const handleOffer = async (offerSdp) => {
+        console.log("📥 Received OFFER, creating peer connection and answer...");
         if (!peerConnection.current) createPeerConnection();
 
         const pc = peerConnection.current;
+        console.log("Setting remote description (offer)...");
         await pc.setRemoteDescription(new RTCSessionDescription(offerSdp));
 
+        console.log("Creating answer...");
         const answer = await pc.createAnswer();
+        console.log("Setting local description (answer)...");
         await pc.setLocalDescription(answer);
 
+        console.log("📤 Sending ANSWER to trainer");
         sendSignal({ type: "ANSWER", sdp: answer }); // Protocol: send 'sdp'
     };
 
     const handleAnswer = async (answerSdp) => {
-        if (!peerConnection.current) return;
+        if (!peerConnection.current) {
+            console.warn("⚠️ Received ANSWER but no peer connection exists");
+            return;
+        }
+
+        // Don't set answer if already stable (duplicate answer)
+        if (peerConnection.current.signalingState === "stable") {
+            console.warn("⚠️ Ignoring duplicate ANSWER - already in stable state");
+            return;
+        }
+
+        console.log("📥 Received ANSWER, setting as remote description...");
         await peerConnection.current.setRemoteDescription(new RTCSessionDescription(answerSdp));
+        console.log("✅ Remote description (answer) set");
     };
 
     const handleIceCandidate = async (candidate) => {
@@ -475,27 +605,17 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
 
                             <p className="text-zinc-400 mb-8 font-medium leading-relaxed">
                                 {isTrainer
-                                    ? "The stage is set. Start the session when you are ready to lead."
+                                    ? "Entering the arena... The session will go live automatically."
                                     : "Your trainer is preparing the session. Get ready to sweat!"}
                             </p>
 
-                            {isTrainer ? (
-                                <button
-                                    onClick={handleStartSession}
-                                    className="group relative px-8 py-4 bg-green-500 hover:bg-green-400 text-black font-black text-lg uppercase tracking-wider rounded-xl transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(34,197,94,0.4)] active:scale-95"
-                                >
-                                    Start Live Session
-                                    <div className="absolute inset-0 rounded-xl ring-2 ring-white/20 group-hover:ring-white/40 transition-all"></div>
-                                </button>
-                            ) : (
-                                <div className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 rounded-full border border-white/5 mx-auto">
-                                    <span className="relative flex h-3 w-3">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
-                                    </span>
-                                    <span className="text-sm font-bold text-yellow-500 tracking-wide uppercase">Standing By for Host</span>
-                                </div>
-                            )}
+                            <div className="flex items-center gap-3 px-6 py-3 bg-zinc-900/50 rounded-full border border-white/5 mx-auto">
+                                <span className="relative flex h-3 w-3">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-yellow-500"></span>
+                                </span>
+                                <span className="text-sm font-bold text-yellow-500 tracking-wide uppercase">Standing By</span>
+                            </div>
                         </>
                     )}
                 </div>
@@ -628,6 +748,14 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
 
                 <div className="w-px h-8 bg-white/10 mx-2"></div>
 
+                <button
+                    onClick={toggleScreenShare}
+                    className={`p-4 rounded-xl transition-all duration-200 ${isScreenSharing ? "bg-blue-500/20 text-blue-500 hover:bg-blue-500/30" : "bg-white/5 text-white hover:bg-white/10"}`}
+                    title="Share Screen"
+                >
+                    <MonitorUp className="w-6 h-6" />
+                </button>
+
                 {/* Trainer Actions */}
                 {isTrainer && (
                     <button
@@ -636,17 +764,6 @@ const VideoCall = ({ sessionId, isTrainer, onScreenShareChange }) => {
                         title="End Session"
                     >
                         End Session
-                    </button>
-                )}
-
-                {/* Leave Only */}
-                {!isTrainer && (
-                    <button
-                        onClick={toggleScreenShare}
-                        className={`p-4 rounded-xl transition-all duration-200 ${isScreenSharing ? "bg-blue-500/20 text-blue-500 hover:bg-blue-500/30" : "bg-white/5 text-white hover:bg-white/10"}`}
-                        title="Share Screen"
-                    >
-                        <MonitorUp className="w-6 h-6" />
                     </button>
                 )}
 

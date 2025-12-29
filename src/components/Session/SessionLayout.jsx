@@ -1,70 +1,73 @@
-import { useNavigate, useLocation, useParams } from "react-router-dom";
-import { getCurrentProfileType } from "../../utils/auth"; // Import auth util
-import { useState } from "react";
-import ChatBox from "./ChatBox";
+import { useNavigate, useParams } from "react-router-dom";
+import { getCurrentProfileId } from "../../utils/auth";
+import { useState, useEffect } from "react";
 import TasksPanel from "./TasksPanel";
 import TrainerControls from "./TrainerControls";
 import VideoCall from "./VideoCall";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
+import axiosInstance from "../../utils/axiosConfig";
+
 /**
- * SessionLayout Component (Static Version + Video & Attachments)
+ * SessionLayout Component
  * 
- * Top-level container for the Session UI.
- * Now includes Video Call layout and Attachment handling.
+ * Fetches session details and handles the main layout.
+ * removed: ChatBox
  */
 const SessionLayout = () => {
     const navigate = useNavigate();
-    const location = useLocation();
     const { id } = useParams(); // Get ID from URL
-    const passedSessionName = location.state?.sessionName;
 
-    // ==========================
-    // MOCK STATE
-    // ==========================
+    // Session State
+    const [session, setSession] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    // Role: Detect from Auth Profile (fallback to trainer)
-    const profileType = getCurrentProfileType();
-    const initialRole = profileType?.toLowerCase() === 'trainer' ? 'trainer' : 'trainee';
-
-    // Allow toggle but start with real role
-    const [userRole, setUserRole] = useState(initialRole || "trainer");
-    const currentUserId = "user_1";
-
-    const [session, setSession] = useState({
-        name: passedSessionName || "HIIT Cardio Blast (Demo)",
-        status: "Live", // Live, Ended
-        startTime: new Date(Date.now() - 1000 * 60 * 5), // Started 5 mins ago
-    });
+    // Role: Determine from session ownership (NOT profile type)
+    const [userRole, setUserRole] = useState(null);
 
     const [isScreenSharing, setIsScreenSharing] = useState(false);
 
-    const [messages, setMessages] = useState([
-        { id: 1, userId: "system", sender: "System", text: "Session started", type: "system", time: "10:00 AM" },
-        { id: 2, userId: "user_2", sender: "Sarah (Trainee)", role: "trainee", text: "Ready to sweat! 😅", time: "10:01 AM" },
-        { id: 3, userId: "user_1", sender: "You", role: "trainer", text: "Let's do this! Warmup first.", time: "10:02 AM" },
+    // Tasks State (Mock for now, or could be part of session detail)
+    const [tasks, setTasks] = useState([
+        { id: 1, text: "Wait for connection", completed: false, timestamp: "00:00" },
     ]);
 
-    const [tasks, setTasks] = useState([
-        { id: 1, text: "5 min Warmup (Jumping Jacks)", completed: true, timestamp: "10:00 AM" },
-        { id: 2, text: "3 Sets of Burpees", completed: false, timestamp: "10:05 AM" },
-    ]);
+    // Fetch Session Details
+    useEffect(() => {
+        const fetchSessionDetails = async () => {
+            try {
+                const response = await axiosInstance.get(`/api/interactive-sessions/detail/${id}`);
+                const sessionData = response.data;
+
+                console.log("📦 Full Session API Response:", sessionData);
+
+                setSession(sessionData);
+
+                // Determine role: Check if current profile is the trainer
+                const currentProfileId = getCurrentProfileId();
+                const isSessionTrainer = sessionData.trainer === currentProfileId;
+
+                const role = isSessionTrainer ? 'trainer' : 'trainee';
+                setUserRole(role);
+
+                console.log("🔍 Role Determination:", {
+                    currentProfileId,
+                    sessionTrainerId: sessionData.trainer,
+                    sessionTraineeId: sessionData.trainee,
+                    calculatedRole: role
+                });
+            } catch (error) {
+                console.error("Failed to fetch session details:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) fetchSessionDetails();
+    }, [id]);
 
     // ==========================
     // HANDLERS
     // ==========================
-
-    const handleSendMessage = (text, attachment = null) => {
-        const newMsg = {
-            id: messages.length + 1,
-            userId: currentUserId,
-            sender: "You",
-            role: userRole,
-            text: text,
-            attachment: attachment, // Pass attachment data {name, type, url}
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
-        setMessages([...messages, newMsg]);
-    };
 
     const handleAddTask = (text) => {
         const newTask = {
@@ -74,38 +77,35 @@ const SessionLayout = () => {
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         };
         setTasks([...tasks, newTask]);
-
-        // Auto-announce task
-        setMessages(prev => [...prev, {
-            id: Date.now(),
-            userId: "system",
-            sender: "System",
-            text: `New Task Added: ${text}`,
-            type: "system",
-        }]);
     };
 
     const handleToggleTask = (taskId) => {
-        // Only trainees verify tasks in this mock, but we'll allow toggling
         setTasks(tasks.map(t =>
             t.id === taskId ? { ...t, completed: !t.completed } : t
         ));
     };
 
     const handleBroadcast = (text) => {
-        setMessages(prev => [...prev, {
-            id: Date.now(),
-            userId: "system",
-            sender: "System",
-            text: `📢 ANNOUNCEMENT: ${text}`,
-            type: "system",
-        }]);
+        // Broadcast logic could go here via WS if needed
+        console.log("Broadcast:", text);
     };
 
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-green-500 animate-spin" />
+            </div>
+        );
+    }
 
-
-    // ================= Siderbar Toggle =================
-    const [sidebarTab, setSidebarTab] = useState("chat"); // 'chat' or 'tasks'
+    if (loading || !session || !userRole) {
+        return (
+            <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center text-white">
+                <h2 className="text-xl font-bold">Session Not Found</h2>
+                <button onClick={() => navigate(-1)} className="mt-4 text-green-500 hover:underline">Go Back</button>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 font-sans selection:bg-green-500/30">
@@ -124,10 +124,10 @@ const SessionLayout = () => {
 
                 <div className="flex flex-col items-center">
                     <h1 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
-                        {session.name}
+                        {session.session_title || "Interactive Session"}
                     </h1>
                     <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-green-500">
-                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        <span className={`w-2 h-2 rounded-full ${session.status === 'live' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></span>
                         {session.status}
                     </div>
                 </div>
@@ -145,56 +145,30 @@ const SessionLayout = () => {
                             sessionId={id}
                             isTrainer={userRole === "trainer"}
                             onScreenShareChange={setIsScreenSharing}
+                            initialStatus={session.status} // Pass initial status from fetch
                         />
                     </div>
                 </div>
 
-                {/* Right Panel (Tools) */}
+                {/* Right Panel (Tasks Only) */}
                 <div className="flex-1 flex flex-col bg-zinc-900/50 rounded-3xl border border-white/5 overflow-hidden backdrop-blur-sm">
-
-                    {/* Tabs */}
-                    <div className="flex border-b border-white/5 p-2 gap-2">
-                        <button
-                            onClick={() => setSidebarTab("chat")}
-                            className={`flex-1 py-3 rounded-xl font-bold uppercase tracking-wider text-xs transition-all ${sidebarTab === "chat" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"}`}
-                        >
-                            Live Chat
-                        </button>
-                        <button
-                            onClick={() => setSidebarTab("tasks")}
-                            className={`flex-1 py-3 rounded-xl font-bold uppercase tracking-wider text-xs transition-all ${sidebarTab === "tasks" ? "bg-zinc-800 text-white shadow-lg" : "text-zinc-500 hover:text-zinc-300"}`}
-                        >
-                            Session Tasks
-                        </button>
+                    <div className="p-4 border-b border-white/5">
+                        <h3 className="font-black uppercase tracking-wider text-sm text-zinc-400">Session Plan</h3>
+                        <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{session.description}</p>
                     </div>
 
-                    {/* Panel Content */}
-                    <div className="flex-1 overflow-hidden relative p-4">
-                        {sidebarTab === "chat" && (
-                            <div className="h-full flex flex-col animate-in slide-in-from-right-4 fade-in duration-300">
-                                <ChatBox
-                                    messages={messages}
-                                    currentUserId={currentUserId}
-                                    onSendMessage={handleSendMessage}
+                    <div className="flex-1 overflow-y-auto p-4 animate-in slide-in-from-right-4 fade-in duration-300">
+                        <TasksPanel
+                            tasks={tasks}
+                            onToggleTask={handleToggleTask}
+                            isTrainer={userRole === "trainer"}
+                        />
+                        {userRole === "trainer" && (
+                            <div className="mt-6 pt-6 border-t border-white/10">
+                                <TrainerControls
+                                    onAddTask={handleAddTask}
+                                    onBroadcast={handleBroadcast}
                                 />
-                            </div>
-                        )}
-
-                        {sidebarTab === "tasks" && (
-                            <div className="h-full overflow-y-auto animate-in slide-in-from-right-4 fade-in duration-300">
-                                <TasksPanel
-                                    tasks={tasks}
-                                    onToggleTask={handleToggleTask}
-                                    isTrainer={userRole === "trainer"}
-                                />
-                                {userRole === "trainer" && (
-                                    <div className="mt-6 pt-6 border-t border-white/10">
-                                        <TrainerControls
-                                            onAddTask={handleAddTask}
-                                            onBroadcast={handleBroadcast}
-                                        />
-                                    </div>
-                                )}
                             </div>
                         )}
                     </div>

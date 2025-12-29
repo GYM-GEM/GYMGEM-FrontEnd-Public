@@ -23,7 +23,7 @@ import {
     MessageSquare
 } from 'lucide-react';
 import EmojiPicker from 'emoji-picker-react';
-import NavTraineeDash from "./Trainee/NavTraineDash";
+import NavBarDash from "./Trainer/NavBarDash";
 import axiosInstance from "../../utils/axiosConfig";
 import { getUser, getCurrentProfileId } from "../../utils/auth";
 import { useToast } from "../../context/ToastContext"; // Assuming toast context exists based on TraineeDash
@@ -1362,7 +1362,7 @@ const Message = () => {
 
     return (
         <>
-            <NavTraineeDash />
+            <NavBarDash />
             <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-[calc(100vh-80px)] p-4 md:p-6 lg:p-8">
                 <NewConversationModal
                     isOpen={isNewChatOpen}

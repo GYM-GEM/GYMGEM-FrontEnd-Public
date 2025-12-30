@@ -466,7 +466,7 @@ const StoreCheckout = () => {
                 ) : (
                   <>
                     <Lock className="w-5 h-5" />
-                    Place Order - ${total.toFixed(2)}
+                    Place Order - {total.toFixed(2)} GEMs
                   </>
                 )}
               </button>
@@ -506,7 +506,7 @@ const StoreCheckout = () => {
                           Qty: {item.cartQuantity}
                         </p>
                         <p className="text-sm font-semibold text-slate-900">
-                          ${(item.price * item.cartQuantity).toFixed(2)}
+                          {(item.price * item.cartQuantity).toFixed(2)} GEMs
                         </p>
                       </div>
                     </div>
@@ -517,19 +517,19 @@ const StoreCheckout = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between text-slate-700">
                     <span>Subtotal</span>
-                    <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                    <span className="font-semibold">{subtotal.toFixed(2)} GEMs</span>
                   </div>
                   <div className="flex justify-between text-slate-700">
                     <span>Tax (10%)</span>
-                    <span className="font-semibold">${tax.toFixed(2)}</span>
+                    <span className="font-semibold">{tax.toFixed(2)} GEMs</span>
                   </div>
                   <div className="flex justify-between text-slate-700">
                     <span>Shipping</span>
-                    <span className="font-semibold">${shipping.toFixed(2)}</span>
+                    <span className="font-semibold">{shipping.toFixed(2)} GEMs</span>
                   </div>
                   <div className="border-t border-slate-200 pt-3 flex justify-between text-xl font-bold text-slate-900">
                     <span>Total</span>
-                    <span className="text-[#ff8211]">${total.toFixed(2)}</span>
+                    <span className="text-[#ff8211]">{total.toFixed(2)} GEMs</span>
                   </div>
                 </div>
               </div>

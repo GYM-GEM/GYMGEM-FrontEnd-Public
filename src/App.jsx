@@ -80,6 +80,7 @@ import PaymentStatus from "./components/BuyNow/PaymentStatus.jsx";
 import CartPage from "./components/Store/CartPage.jsx";
 import StoreCheckout from "./components/Store/StoreCheckout.jsx";
 import StoreOrderSuccess from "./components/Store/StoreOrderSuccess.jsx";
+import MessageStore from "./components/Dashboard/Store/Message.jsx";
 // import OrderTracking from "./components/Store/OrderTracking.jsx";
 // dashboard gym
 import GymDashboard from "./components/Dashboard/GYM/GymDashboard.jsx";
@@ -99,6 +100,7 @@ import { useEffect } from "react";
 import { refreshSession } from "./utils/axiosConfig.js";
 import { verifyRefreshFlow } from "./utils/testAuth.js"; // Import test function
 import GlobalLoader from "./components/GlobalLoader.jsx";
+import SettingsStore from "./components/Dashboard/Store/SettingsStore.jsx";
 
 function App() {
   const location = useLocation();
@@ -201,9 +203,9 @@ function App() {
             <Route path="dashboard" element={<ProtectedRoute requiredProfile="store"><StoreDashboard /></ProtectedRoute>} />
             <Route path="product" element={<ProtectedRoute requiredProfile="store"><StoreProduct /></ProtectedRoute>} />
             <Route path="order" element={<ProtectedRoute requiredProfile="store"><StoreOrder /></ProtectedRoute>} />
-            <Route path="profile" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
-            <Route path="settings" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
-            <Route path="message" element={<ProtectedRoute requiredProfile="store"><Message /></ProtectedRoute>} />
+            <Route path="profile/:id" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
+            <Route path="message" element={<ProtectedRoute requiredProfile="store"><MessageStore /></ProtectedRoute>} />
+            <Route path="settings" element={<ProtectedRoute requiredProfile="store"><SettingsStore /></ProtectedRoute>} />
           </Route>
 
           {/* -------------------- AUTH + FORMS -------------------- */}

@@ -1,19 +1,35 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { StoreContext } from "../context/StoreContext.jsx";
 import NavBar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
 import { ShoppingCart, Heart, Eye, ShoppingBag } from "lucide-react";
 import QuickViewModal from "../components/Store/QuickViewModal.jsx";
+import axiosInstance from "../utils/axiosConfig.js";
 
 const Store = () => {
   const navigate = useNavigate();
-  const { products, addToCart, getCartItemCount, toggleWishlist, isInWishlist } = useContext(StoreContext);
+  const { addToCart, getCartItemCount, toggleWishlist, isInWishlist } = useContext(StoreContext);
   const [selectedFilter, setSelectedFilter] = useState("All Products");
   const [addedToCart, setAddedToCart] = useState(null); // For visual feedback
   const [wishlistAnimation, setWishlistAnimation] = useState(null); // For wishlist animation
   const [quickViewProduct, setQuickViewProduct] = useState(null); // For Quick View Modal
 
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchStoreProducts = async () => {
+      try {
+        const res = await axiosInstance.get(`/api/stores/items`)
+        // Sort by ID descending to show recent products first
+        const sortedProducts = res.data.sort((a, b) => b.id - a.id);
+        setProducts(sortedProducts)
+      } catch (error) {
+        console.log(error)
+      }
+    };
+    fetchStoreProducts();
+  }, []);
   const filterOptions = [
     {
       label: "All Products",
@@ -58,8 +74,15 @@ const Store = () => {
   ];
 
   const filteredProducts = products.filter(p => {
-    const isPublished = p.status === 'Published';
-    const matchesCategory = selectedFilter === "All Products" || p.category === selectedFilter;
+    // If status is missing, assume it's visible for now, or check for 'Published' if present
+    const isPublished = !p.status || p.status === 'Published';
+
+    // Normalize category for comparison (handle case differences)
+    const normalizedCategory = p.category ? p.category.toLowerCase() : "";
+    const normalizedFilter = selectedFilter === "All Products" ? "All Products" : selectedFilter.toLowerCase();
+
+    const matchesCategory = selectedFilter === "All Products" || normalizedCategory === normalizedFilter;
+
     return isPublished && matchesCategory;
   });
 
@@ -67,7 +90,8 @@ const Store = () => {
   const handleAddToCart = (e, product) => {
     e.preventDefault();
     e.stopPropagation();
-    if (product.quantity > 0) {
+    const stock = product.total_quantity || 0;
+    if (stock > 0) {
       addToCart(product, 1);
       // Show feedback
       setAddedToCart(product.id);
@@ -95,7 +119,7 @@ const Store = () => {
       {cartItemCount > 0 && (
         <button
           onClick={() => navigate('/cart')}
-          className="fixed bottom-8 right-8 z-50 bg-[#ff8211] text-white w-16 h-16 rounded-full shadow-lg hover:bg-[#e67300] transition flex items-center justify-center group"
+          className="fixed bottom-28 right-8 z-50 bg-[#ff8211] text-white w-16 h-16 rounded-full shadow-lg hover:bg-[#e67300] transition flex items-center justify-center group"
           aria-label="View cart"
         >
           <ShoppingCart className="w-6 h-6" />
@@ -110,7 +134,7 @@ const Store = () => {
       )}
 
       <section className="w-full bg-background">
-        <div className="mx-auto flex w-[80%] flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-16 sm:px-6 lg:px-8">
 
           {/* HEADER */}
           <header className="space-y-4">
@@ -152,7 +176,7 @@ const Store = () => {
           </div>
 
           {/* PRODUCTS GRID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mt-8">
             {filteredProducts.map(p => (
               <div
                 key={p.id}
@@ -189,12 +213,12 @@ const Store = () => {
                     )}
 
                     {/* Stock Badges */}
-                    {p.quantity < 5 && p.quantity > 0 && (
+                    {(p.total_quantity || 0) < 5 && (p.total_quantity || 0) > 0 && (
                       <span className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
                         Low Stock
                       </span>
                     )}
-                    {p.quantity === 0 && (
+                    {(p.total_quantity || 0) === 0 && (
                       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center text-white font-bold tracking-wider text-lg">
                         SOLD OUT
                       </div>
@@ -240,15 +264,15 @@ const Store = () => {
                   {/* Price and Actions */}
                   <div className="space-y-3 mt-auto">
                     <div className="flex items-center justify-between">
-                      <span className="text-2xl font-bold text-slate-900">
-                        ${p.price}
-                      </span>
+                      <div className="text-2xl font-bold text-[#ff8211]">
+                        {parseFloat(p.price || 0).toFixed(2)} GEMs
+                      </div>
                     </div>
 
                     {/* Action Buttons */}
                     <div className="flex gap-2">
                       <button
-                        disabled={p.quantity === 0}
+                        disabled={(p.total_quantity || 0) === 0}
                         onClick={(e) => handleAddToCart(e, p)}
                         className={`flex-1 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${addedToCart === p.id
                           ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg shadow-green-500/30'

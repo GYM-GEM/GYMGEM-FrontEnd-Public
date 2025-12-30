@@ -112,6 +112,12 @@ axiosInstance.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
+        // If there's no config (e.g. network error created immediately), we can't retry or check tags
+        if (!originalRequest) {
+            loaderState.hideLoader(); // Just in case
+            return Promise.reject(error);
+        }
+
         if (!error.response) {
             if (!originalRequest.skipGlobalLoader) {
                 loaderState.hideLoader();

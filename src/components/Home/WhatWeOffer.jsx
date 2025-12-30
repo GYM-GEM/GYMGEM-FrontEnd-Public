@@ -20,11 +20,10 @@ function WhatWeOffer() {
 
   return (
     <section ref={sectionRef} className="w-full bg-gradient-to-br from-background via-purple-50/20 to-background py-16">
-      <div className="mx-auto w-[80%]  ">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
         <div
-          className={`text-center transition-all duration-700 ease-out ${
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-          }`}
+          className={`text-center transition-all duration-700 ease-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            }`}
         >
           <h2 className="font-bebas text-3xl tracking-tight text-foreground sm:text-4xl text-[#FF8211]">
             What we offer
@@ -36,9 +35,8 @@ function WhatWeOffer() {
         </div>
 
         <div
-          className={`mt-12 w-full transition-all duration-700 delay-200 ease-out ${
-            isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
-          }`}
+          className={`mt-12 w-full transition-all duration-700 delay-200 ease-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0"
+            }`}
         >
           <Swiper
             className="offers-swiper"

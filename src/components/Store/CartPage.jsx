@@ -39,10 +39,10 @@ const CartPage = () => {
   return (
     <div className="bg-background text-foreground min-h-screen">
       <NavBar />
-      
+
       <section className="w-full bg-background pt-24 pb-16">
         <div className="mx-auto w-[90%] max-w-7xl px-4 sm:px-6 lg:px-8">
-          
+
           {/* HEADER */}
           <div className="mb-8">
             <Link
@@ -76,7 +76,7 @@ const CartPage = () => {
           ) : (
             // CART WITH ITEMS
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              
+
               {/* CART ITEMS */}
               <div className="lg:col-span-2 space-y-4">
                 {cart.map((item) => (
@@ -139,7 +139,7 @@ const CartPage = () => {
                           {/* Price & Remove */}
                           <div className="flex items-center gap-4">
                             <span className="text-xl font-bold text-slate-900">
-                              ${(item.price * item.cartQuantity).toFixed(2)}
+                              {(item.price * item.cartQuantity).toFixed(2)} GEMs
                             </span>
                             <button
                               onClick={() => removeFromCart(item.id)}
@@ -175,19 +175,19 @@ const CartPage = () => {
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-slate-700">
                       <span>Subtotal</span>
-                      <span className="font-semibold">${subtotal.toFixed(2)}</span>
+                      <span className="font-semibold">{subtotal.toFixed(2)} GEMs</span>
                     </div>
                     <div className="flex justify-between text-slate-700">
                       <span>Tax (10%)</span>
-                      <span className="font-semibold">${tax.toFixed(2)}</span>
+                      <span className="font-semibold">{tax.toFixed(2)} GEMs</span>
                     </div>
                     <div className="flex justify-between text-slate-700">
                       <span>Shipping</span>
-                      <span className="font-semibold">${shipping.toFixed(2)}</span>
+                      <span className="font-semibold">{shipping.toFixed(2)} GEMs</span>
                     </div>
                     <div className="border-t border-slate-200 pt-3 flex justify-between text-xl font-bold text-slate-900">
                       <span>Total</span>
-                      <span className="text-[#ff8211]">${total.toFixed(2)}</span>
+                      <span className="text-[#ff8211]">{total.toFixed(2)} GEMs</span>
                     </div>
                   </div>
 
@@ -208,7 +208,7 @@ const CartPage = () => {
                   {/* Promo Info */}
                   <div className="mt-6 pt-6 border-t border-slate-200">
                     <p className="text-xs text-slate-500 text-center">
-                      Free shipping on orders over $100
+                      Free shipping on orders over 100 GEMs
                     </p>
                   </div>
                 </div>

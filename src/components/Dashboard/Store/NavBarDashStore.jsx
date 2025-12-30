@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { FaGem } from "react-icons/fa";
-import { MdOutlineNotificationsActive, MdKeyboardArrowDown } from "react-icons/md";
+import { MdOutlineNotificationsActive, MdKeyboardArrowDown, MdSportsMartialArts } from "react-icons/md";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "../../../context/ToastContext";
@@ -11,30 +11,47 @@ import NotificationDropdown from "../../NotificationDropdown";
 import GemsBadge from "../../GemsBadge";
 import AddGemsModal from "../../AddGemsModal";
 import getBalance from "../../../utils/balance";
-import { ShoppingCart, Package, MessageSquare } from "lucide-react";
+import { ShoppingCart, Package, MessageSquare, Settings, BookOpen, Users, Info, ChevronDown, Utensils, Sparkles } from "lucide-react";
 
 const NavBarDashStore = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { showToast } = useToast();
   const [open, setOpen] = useState(false);
+  const [trainingOpen, setTrainingOpen] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [managementDropdownOpen, setManagementDropdownOpen] = useState(false);
   const userRef = useRef(null);
   const managementRef = useRef(null);
   const user = JSON.parse(localStorage.getItem("user"));
 
+  const storeProfile = user.profiles?.find(profile => profile.type === "store");
+  const storeId = storeProfile?.id;
+
   // Main Navigation Links
   const mainLinks = [
     { to: "/store/dashboard", label: "Dashboard" },
-    { to: "/store/profile", label: "Profile" },
+    { to: `/store/profile/${storeId}`, label: "Profile" },
     { to: "/store/message", label: "Messages", icon: <MessageSquare size={18} /> },
+    { to: "/store/settings", label: "Settings", icon: <Settings size={18} /> },
   ];
 
   // Management Dropdown Links
   const managementLinks = [
     { to: "/store/product", label: "Products", icon: <Package size={18} /> },
     { to: "/store/order", label: "Orders", icon: <ShoppingCart size={18} /> },
+  ];
+
+  const trainingLinks = [
+    { to: "/courses", label: "Courses", icon: <BookOpen size={16} /> },
+    { to: "/trainers", label: "Trainers", icon: <Users size={16} /> },
+  ];
+
+  const aiLinks = [
+    { to: "/ai-trainer", label: "AI Personal Trainer", icon: <MdSportsMartialArts size={18} /> },
+    { to: "/ai-food", label: "AI Food Analyzer", icon: <Utensils size={18} /> },
+    { to: "/ai-chat", label: "AI Chatbot", icon: <MessageSquare size={18} /> },
   ];
 
   const [showFullName, setShowFullName] = useState(false);
@@ -209,7 +226,7 @@ const NavBarDashStore = () => {
             </Link>
 
             {/* DESKTOP LINKS */}
-            <div className="hidden md:flex flex-1 justify-center items-center gap-2">
+            <div className="hidden lg:flex flex-1 justify-center items-center gap-2">
               <div className="flex items-center space-x-1 p-1.5 bg-gray-100/50 rounded-full border border-gray-200/50">
                 <Link
                   to="/"
@@ -294,7 +311,7 @@ const NavBarDashStore = () => {
 
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                className="md:hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
+                className="lg:hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
                 onClick={() => setOpen((s) => !s)}
                 aria-label="Toggle menu"
               >
@@ -316,7 +333,7 @@ const NavBarDashStore = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden bg-white border-t border-gray-100 shadow-xl"
+              className="lg:hidden absolute top-full left-0 w-full overflow-hidden bg-white border-t border-gray-100 shadow-xl"
             >
               <div className="px-4 py-6 space-y-4">
                 <div className="space-y-1">
@@ -324,6 +341,133 @@ const NavBarDashStore = () => {
                   <Link to="/" onClick={() => setOpen(false)} className="block px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all">
                     Home
                   </Link>
+
+                  {/* Training Dropdown */}
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setTrainingOpen(!trainingOpen)}
+                      className="flex w-full items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    >
+                      <span className="flex items-center gap-2">Training</span>
+                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${trainingOpen ? "rotate-180" : ""}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {trainingOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden pl-4"
+                        >
+                          {trainingLinks.map((link) => (
+                            <NavLink
+                              key={link.to}
+                              to={link.to}
+                              onClick={() => setOpen(false)}
+                              className={({ isActive }) =>
+                                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
+                                  ? "text-[#ff8211] bg-orange-50/50"
+                                  : "text-gray-600 hover:text-[#ff8211]"}`
+                              }
+                            >
+                              {link.icon}
+                              {link.label}
+                            </NavLink>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Store Link */}
+                  <NavLink
+                    to="/stores"
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
+                        ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
+                    }
+                  >
+                    <ShoppingCart size={18} />
+                    Store
+                  </NavLink>
+
+                  {/* Community */}
+                  <NavLink
+                    to="/community"
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
+                        ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
+                    }
+                  >
+                    <Users size={18} />
+                    Community
+                  </NavLink>
+
+                  {/* AI Assistant */}
+                  <div className="space-y-1">
+                    <button
+                      onClick={() => setAiOpen(!aiOpen)}
+                      className={`flex w-full items-center justify-between px-4 py-3 rounded-xl text-base font-bold transition-all relative overflow-hidden group
+                        ${aiOpen ? "bg-[#ff8211] text-white shadow-md" : "text-gray-700 hover:bg-orange-50 hover:text-[#ff8211]"}`}
+                    >
+                      <span className="flex items-center gap-2 relative z-20">
+                        <Sparkles size={20} />
+                        AI Assistant
+                      </span>
+                      <ChevronDown className={`h-4 w-4 relative z-20 transition-transform duration-200 ${aiOpen ? "rotate-180" : ""}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {aiOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="overflow-hidden pl-4"
+                        >
+                          {aiLinks.map((link) => (
+                            <NavLink
+                              key={link.to}
+                              to={link.to}
+                              onClick={() => setOpen(false)}
+                              className={({ isActive }) =>
+                                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
+                                  ? "text-[#ff8211] bg-orange-50/50"
+                                  : "text-gray-600 hover:text-[#ff8211]"}`
+                              }
+                            >
+                              {link.icon}
+                              {link.label}
+                            </NavLink>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* About */}
+                  <NavLink
+                    to="/about"
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
+                        ? "bg-orange-50 text-[#ff8211] shadow-sm"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
+                    }
+                  >
+                    <Info size={18} />
+                    About
+                  </NavLink>
+                </div>
+
+                {/* Dashboard Specific Links */}
+                <div className="pt-4 border-t border-gray-100 space-y-1">
+                  <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Dashboard</p>
                   {[...mainLinks].map((l) => (
                     <NavLink
                       key={l.to}
@@ -340,10 +484,6 @@ const NavBarDashStore = () => {
                       {l.label}
                     </NavLink>
                   ))}
-                </div>
-
-                <div className="pt-4 border-t border-gray-100 space-y-1">
-                  <p className="px-4 text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Management</p>
                   {managementLinks.map((l) => (
                     <NavLink
                       key={l.to}

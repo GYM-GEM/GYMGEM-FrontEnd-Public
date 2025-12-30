@@ -8,11 +8,10 @@ function ForTrainers() {
 
   return (
     <section ref={sectionRef} className="w-full bg-gradient-to-r from-purple-50/40 via-background to-pink-50/40 py-20">
-      <div className="mx-auto flex w-[80%]  flex-col overflow-hidden rounded-[32px] border-2 border-purple-200 bg-gradient-to-br from-white via-purple-50/20 to-white shadow-lg lg:flex-row">
+      <div className="mx-auto flex w-full max-w-7xl px-4 sm:px-6 flex-col overflow-hidden rounded-[32px] border-2 border-purple-200 bg-gradient-to-br from-white via-purple-50/20 to-white shadow-lg lg:flex-row">
         <div
-          className={`relative h-80 w-full flex-1 transition-all duration-700 delay-300 ease-out lg:order-1 lg:h-auto ${
-            isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
-          }`}
+          className={`relative h-80 w-full flex-1 transition-all duration-700 delay-300 ease-out lg:order-1 lg:h-auto ${isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
+            }`}
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-background/30 via-transparent to-background/50" />
           <img
@@ -23,9 +22,8 @@ function ForTrainers() {
         </div>
 
         <div
-          className={`flex flex-1 flex-col justify-center gap-10 px-6 py-12 transition-all duration-700 ease-out sm:px-10 lg:order-2 lg:px-12 ${
-            isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
-          }`}
+          className={`flex flex-1 flex-col justify-center gap-10 px-6 py-12 transition-all duration-700 ease-out sm:px-10 lg:order-2 lg:px-12 ${isVisible ? "translate-x-0 opacity-100" : "translate-x-8 opacity-0"
+            }`}
         >
           <header className="space-y-3">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
@@ -42,11 +40,10 @@ function ForTrainers() {
 
           <dl className="space-y-6">
             <div
-              className={`flex gap-4 transition-all duration-500 delay-100 ease-out ${
-                isVisible
+              className={`flex gap-4 transition-all duration-500 delay-100 ease-out ${isVisible
                   ? "translate-x-0 opacity-100"
                   : "translate-x-4 opacity-0"
-              }`}
+                }`}
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-300 hover:scale-110">
                 <Check className="h-4 w-4" />
@@ -62,11 +59,10 @@ function ForTrainers() {
               </div>
             </div>
             <div
-              className={`flex gap-4 transition-all duration-500 delay-200 ease-out ${
-                isVisible
+              className={`flex gap-4 transition-all duration-500 delay-200 ease-out ${isVisible
                   ? "translate-x-0 opacity-100"
                   : "translate-x-4 opacity-0"
-              }`}
+                }`}
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/10 text-secondary transition-transform duration-300 hover:scale-110">
                 <Clock className="h-4 w-4" />
@@ -82,11 +78,10 @@ function ForTrainers() {
               </div>
             </div>
             <div
-              className={`flex gap-4 transition-all duration-500 delay-300 ease-out ${
-                isVisible
+              className={`flex gap-4 transition-all duration-500 delay-300 ease-out ${isVisible
                   ? "translate-x-0 opacity-100"
                   : "translate-x-4 opacity-0"
-              }`}
+                }`}
             >
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/40 text-foreground transition-transform duration-300 hover:scale-110">
                 <Dumbbell className="h-4 w-4" />
@@ -104,11 +99,10 @@ function ForTrainers() {
           </dl>
 
           <div
-            className={`flex justify-start transition-all duration-500 delay-400 ease-out ${
-              isVisible
+            className={`flex justify-start transition-all duration-500 delay-400 ease-out ${isVisible
                 ? "translate-x-0 opacity-100"
                 : "translate-x-4 opacity-0"
-            }`}
+              }`}
           >
             <Link
               to="/role"

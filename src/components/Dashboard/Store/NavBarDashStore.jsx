@@ -226,7 +226,7 @@ const NavBarDashStore = () => {
             </Link>
 
             {/* DESKTOP LINKS */}
-            <div className="hidden md:flex flex-1 justify-center items-center gap-2">
+            <div className="hidden lg:flex flex-1 justify-center items-center gap-2">
               <div className="flex items-center space-x-1 p-1.5 bg-gray-100/50 rounded-full border border-gray-200/50">
                 <Link
                   to="/"
@@ -311,7 +311,7 @@ const NavBarDashStore = () => {
 
               <motion.button
                 whileTap={{ scale: 0.9 }}
-                className="md:hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
+                className="lg:hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
                 onClick={() => setOpen((s) => !s)}
                 aria-label="Toggle menu"
               >
@@ -333,7 +333,7 @@ const NavBarDashStore = () => {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden absolute top-full left-0 w-full overflow-hidden bg-white border-t border-gray-100 shadow-xl"
+              className="lg:hidden absolute top-full left-0 w-full overflow-hidden bg-white border-t border-gray-100 shadow-xl"
             >
               <div className="px-4 py-6 space-y-4">
                 <div className="space-y-1">

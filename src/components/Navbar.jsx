@@ -243,7 +243,7 @@ function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:gap-2">
+          <div className="hidden lg:flex lg:items-center lg:gap-2">
 
             {/* Home */}
             <NavLink
@@ -410,7 +410,7 @@ function Navbar() {
           <div className="flex items-center gap-3">
             {/* Mobile Gems Badge */}
             {user && (
-              <div className="md:hidden">
+              <div className="lg:hidden">
                 <GemsBadge
                   balance={gemsBalance}
                   onAddClick={() => setIsAddGemsModalOpen(true)}
@@ -420,7 +420,7 @@ function Navbar() {
             )}
 
             {/* Desktop User Menu */}
-            <div className="hidden md:flex md:items-center md:gap-4">
+            <div className="hidden lg:flex lg:items-center lg:gap-4">
               {user ? (
                 <div className="flex items-center gap-3">
                   <GemsBadge
@@ -461,7 +461,7 @@ function Navbar() {
             {/* Mobile Menu Button */}
             <motion.button
               whileTap={{ scale: 0.9 }}
-              className="md:hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
+              className="lg:hidden p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
             >
@@ -482,7 +482,7 @@ function Navbar() {
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden bg-white border-t border-gray-100 shadow-xl"
+              className="lg:hidden overflow-hidden bg-white border-t border-gray-100 shadow-xl"
             >
               <div className="px-4 py-6 space-y-4">
                 <div className="space-y-1">

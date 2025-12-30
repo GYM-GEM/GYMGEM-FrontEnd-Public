@@ -11,7 +11,7 @@ import { StoreProvider } from "./context/StoreContext.jsx";
 import { ToastProvider } from "./context/ToastContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <ToastProvider>
       <StoreProvider>
         <MemberProvider>
@@ -25,5 +25,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         </MemberProvider>
       </StoreProvider>
     </ToastProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );

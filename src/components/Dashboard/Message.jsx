@@ -936,11 +936,11 @@ const Message = () => {
             socketRef.current.close();
             socketRef.current = null;
         }
-        
+
         if (activeConversationId) {
             const token = localStorage.getItem('access');
             if (token) {
-                const wsUrl = `${VITE_API_WEBSOCKET}/ws/ٍchat/${activeConversationId}/?token=${token}`;
+                const wsUrl = `${VITE_API_WEBSOCKET}/ws/chat/${activeConversationId}/?token=${token}`;
                 const socket = new WebSocket(wsUrl);
                 socketRef.current = socket;
 

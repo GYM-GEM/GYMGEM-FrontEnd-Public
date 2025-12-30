@@ -30,6 +30,7 @@ import { useToast } from "../../context/ToastContext"; // Assuming toast context
 
 // --- Configuration ---
 const USE_MOCK_DATA = false; // Toggle this to false when backend is ready
+const VITE_API_WEBSOCKET = import.meta.env.VITE_API_WEBSOCKET;
 
 // --- Mock Data ---
 
@@ -935,11 +936,11 @@ const Message = () => {
             socketRef.current.close();
             socketRef.current = null;
         }
-
+        
         if (activeConversationId) {
             const token = localStorage.getItem('access');
             if (token) {
-                const wsUrl = `ws://localhost:8000/ws/chat/${activeConversationId}/?token=${token}`;
+                const wsUrl = `${VITE_API_WEBSOCKET}/ws/ٍchat/${activeConversationId}/?token=${token}`;
                 const socket = new WebSocket(wsUrl);
                 socketRef.current = socket;
 

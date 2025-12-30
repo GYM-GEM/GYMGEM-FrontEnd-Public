@@ -307,8 +307,6 @@ const Avatar = ({ src, alt, size = "md", status }) => {
         xl: "w-24 h-24" // Profile panel
     };
 
-    const statusColor = status === "online" ? "bg-green-500" : "bg-gray-400";
-
     return (
         <div className="relative">
             <img
@@ -316,9 +314,6 @@ const Avatar = ({ src, alt, size = "md", status }) => {
                 alt={alt}
                 className={`${sizeClasses[size]} rounded-full object-cover border-2 border-white ring-2 ring-gray-100/50 shadow-sm`}
             />
-            {status && size !== 'xl' && (
-                <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 ${statusColor} border-2 border-white rounded-full`}></span>
-            )}
         </div>
     );
 };
@@ -362,18 +357,25 @@ const MessageList = ({ conversation, currentUser, onRetry, onEdit, onDelete, onL
         }
     }, [conversation?.messages?.length, prevScrollHeight]);
 
-    // Auto-scroll to bottom for new messages if already near bottom
+    // Auto-scroll to bottom for new messages
     useEffect(() => {
-        if (scrollRef.current && !loadingMore && prevScrollHeight === 0) {
-            // Simple check: if we are not loading more history, typically we want to scroll to bottom for new incoming messages
-            // Ideally check if user is at bottom before forcing, but for now simple behavior:
+        if (scrollRef.current && !loadingMore) {
             const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-            const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
-            if (isNearBottom) {
-                scrollRef.current.scrollTop = scrollHeight;
+            const isNearBottom = scrollHeight - scrollTop - clientHeight < 150; // Increased threshold
+            const lastMessage = conversation?.messages[conversation.messages.length - 1];
+            const isMe = lastMessage?.isMe;
+
+            // Always scroll if it's my message or if I was already near the bottom
+            if (isMe || isNearBottom || prevScrollHeight === 0) {
+                // Use setTimeout to ensure DOM is updated (especially for images)
+                setTimeout(() => {
+                    if (scrollRef.current) {
+                        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+                    }
+                }, 100);
             }
         }
-    }, [conversation?.messages]);
+    }, [conversation?.messages, loadingMore, prevScrollHeight]);
 
 
     const handleScroll = (e) => {
@@ -1394,7 +1396,7 @@ const Message = () => {
                     }}
                 />
 
-                <div className="max-w-7xl mx-auto h-[calc(100vh-140px)] bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden flex relative">
+                <div className="max-w-7xl mx-auto h-[calc(100dvh-100px)] md:h-[calc(100vh-140px)] bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden flex relative">
 
                     {/* --- LEFT SIDEBAR --- */}
                     <div className={`w-full md:w-80 lg:w-96 flex flex-col border-r border-gray-100 bg-white
@@ -1509,11 +1511,6 @@ const Message = () => {
                                         <h3 className="font-bold text-gray-900 text-base flex items-center gap-2">
                                             {otherParticipant.name}
                                         </h3>
-                                        <span className="text-xs text-gray-500 flex items-center gap-1 font-medium">
-                                            {otherParticipant.status === 'online' ? (
-                                                <span className="flex items-center gap-1 text-green-600"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Online</span>
-                                            ) : 'Offline'}
-                                        </span>
                                     </div>
                                 </div>
 
@@ -1528,7 +1525,6 @@ const Message = () => {
                                 </div>
                             </div>
 
-                            {/* Messages List determined above */}
                             {messagesLoading ? (
                                 <MessageListSkeleton />
                             ) : (
@@ -1727,7 +1723,7 @@ const Message = () => {
                         )}
                     </AnimatePresence>
                 </div>
-            </div>
+            </div >
         </>
     );
 };

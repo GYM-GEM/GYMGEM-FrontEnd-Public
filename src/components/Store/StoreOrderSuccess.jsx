@@ -24,10 +24,10 @@ const StoreOrderSuccess = () => {
 
       <section className="w-full bg-background pt-24 pb-16">
         <div className="mx-auto w-[90%] max-w-4xl px-4 sm:px-6 lg:px-8">
-          
+
           {/* SUCCESS CARD */}
           <div className="bg-white rounded-xl shadow-lg border border-slate-100 p-8 md:p-12 text-center">
-            
+
             {/* Success Icon */}
             <div className="mb-6 flex justify-center">
               <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
@@ -63,7 +63,7 @@ const StoreOrderSuccess = () => {
                 </div>
                 <div className="border-t border-slate-200 pt-3 flex justify-between text-xl font-bold text-slate-900">
                   <span>Total Paid:</span>
-                  <span className="text-[#ff8211]">${total.toFixed(2)}</span>
+                  <span className="text-[#ff8211]">{total.toFixed(2)} GEMs</span>
                 </div>
               </div>
 
@@ -83,7 +83,7 @@ const StoreOrderSuccess = () => {
             {/* Info Message */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
               <p className="text-sm text-blue-800">
-                <strong>What's next?</strong> You will receive a confirmation email shortly. 
+                <strong>What's next?</strong> You will receive a confirmation email shortly.
                 Your order is being processed and will be shipped within 2-3 business days.
               </p>
             </div>

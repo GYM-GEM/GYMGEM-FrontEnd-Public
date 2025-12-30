@@ -9,7 +9,7 @@ import { useToast } from "../context/ToastContext";
 import axiosInstance from "../utils/axiosConfig";
 import UserDropdown from "./UserDropdown";
 import NotificationDropdown from "./NotificationDropdown";
-import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon, Utensils, Sparkles, MessageSquare, Bot } from "lucide-react"; // Added Icons
+import { ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon, Utensils, Sparkles, MessageSquare, Bot, LayoutDashboard, Settings } from "lucide-react"; // Added Icons
 import GemsBadge from "./GemsBadge";
 import AddGemsModal from "./AddGemsModal";
 import getBalance from "../utils/balance";
@@ -344,7 +344,7 @@ function Navbar() {
                 >
                   {/* Shimmer Effect */}
                   <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
-                  
+
                   <Sparkles size={18} className="relative z-20" />
                   <span className="relative z-20">AI Assistant</span>
                   <ChevronDown className={`h-4 w-4 relative z-20 transition-transform duration-300 ${aiOpen ? "rotate-180" : ""}`} />
@@ -367,11 +367,11 @@ function Navbar() {
                     >
                       {aiLinks.map((link) => (
                         link.soon ? (
-                           <div key={link.to} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed hover:bg-gray-50 rounded-xl relative">
-                              {link.icon}
-                              {link.label}
-                               <span className="absolute right-2 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 rounded">Soon</span>
-                           </div>
+                          <div key={link.to} className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-400 cursor-not-allowed hover:bg-gray-50 rounded-xl relative">
+                            {link.icon}
+                            {link.label}
+                            <span className="absolute right-2 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 rounded">Soon</span>
+                          </div>
                         ) : (
                           <NavLink
                             key={link.to}
@@ -408,6 +408,17 @@ function Navbar() {
 
           {/* User Section (Desktop) / Mobile Toggle */}
           <div className="flex items-center gap-3">
+            {/* Mobile Gems Badge */}
+            {user && (
+              <div className="md:hidden">
+                <GemsBadge
+                  balance={gemsBalance}
+                  onAddClick={() => setIsAddGemsModalOpen(true)}
+                  isLoading={isLoadingBalance}
+                />
+              </div>
+            )}
+
             {/* Desktop User Menu */}
             <div className="hidden md:flex md:items-center md:gap-4">
               {user ? (
@@ -418,12 +429,6 @@ function Navbar() {
                     isLoading={isLoadingBalance}
                   />
                   {/* <NotificationDropdown /> */}
-                  <UserDropdown
-                    user={user}
-                    logout={logout}
-                    dashboardPath={getDashboardPath()}
-                    settingsPath="/settings"
-                  />
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -442,6 +447,16 @@ function Navbar() {
                 </div>
               )}
             </div>
+
+            {/* User Dropdown - Visible on all screens */}
+            {user && (
+              <UserDropdown
+                user={user}
+                logout={logout}
+                dashboardPath={getDashboardPath()}
+                settingsPath="/settings"
+              />
+            )}
 
             {/* Mobile Menu Button */}
             <motion.button
@@ -538,19 +553,7 @@ function Navbar() {
                     Store
                   </NavLink>
 
-                  {user && (
-                    <NavLink
-                      to="/my-orders"
-                      onClick={() => setIsOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-all ${isActive
-                          ? "bg-orange-50 text-[#ff8211] shadow-sm"
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"}`
-                      }
-                    >
-                      My Orders
-                    </NavLink>
-                  )}
+
 
                   {/* <div className="flex items-center justify-between px-4 py-3 rounded-xl text-base font-medium text-gray-400 cursor-not-allowed hover:bg-gray-50">
                     <span>Gym</span>
@@ -581,25 +584,25 @@ function Navbar() {
                         className={`flex w-full items-center justify-between px-4 py-3 rounded-xl text-base font-bold transition-all relative overflow-hidden group
                           ${aiOpen ? "bg-[#ff8211] text-white shadow-md" : "text-gray-700 hover:bg-orange-50 hover:text-[#ff8211]"}`}
                       >
-                         <span className="flex items-center gap-2 relative z-20">
-                            <Sparkles size={20} />
-                            AI Assistant
-                         </span>
-                         <div className="flex items-center gap-2 relative z-20">
-                            {/* Badge */}
-                            {!aiOpen && (
-                                <span className="flex h-2.5 w-2.5 relative">
-                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
-                                </span>
-                            )}
-                            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${aiOpen ? "rotate-180" : ""}`} />
-                         </div>
-                         
-                         {/* Shimmer Effect when closed */}
-                         {!aiOpen && (
-                            <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
-                         )}
+                        <span className="flex items-center gap-2 relative z-20">
+                          <Sparkles size={20} />
+                          AI Assistant
+                        </span>
+                        <div className="flex items-center gap-2 relative z-20">
+                          {/* Badge */}
+                          {!aiOpen && (
+                            <span className="flex h-2.5 w-2.5 relative">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500 border border-white"></span>
+                            </span>
+                          )}
+                          <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${aiOpen ? "rotate-180" : ""}`} />
+                        </div>
+
+                        {/* Shimmer Effect when closed */}
+                        {!aiOpen && (
+                          <div className="absolute inset-0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/20 to-transparent z-10" />
+                        )}
                       </button>
 
                       <AnimatePresence>
@@ -610,29 +613,29 @@ function Navbar() {
                             exit={{ opacity: 0, height: 0 }}
                             className="overflow-hidden pl-4"
                           >
-                             {aiLinks.map((link) => (
-                                link.soon ? (
-                                    <div key={link.to} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 cursor-not-allowed hover:bg-gray-50">
-                                        {link.icon}
-                                        {link.label}
-                                        <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 rounded">Soon</span>
-                                    </div>
-                                ) : (
-                                    <NavLink
-                                      key={link.to}
-                                      to={link.to}
-                                      onClick={() => setIsOpen(false)}
-                                      className={({ isActive }) =>
-                                        `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
-                                          ? "text-[#ff8211] bg-orange-50/50"
-                                          : "text-gray-600 hover:text-[#ff8211]"}`
-                                      }
-                                    >
-                                      {link.icon}
-                                      {link.label}
-                                    </NavLink>
-                                )
-                             ))}
+                            {aiLinks.map((link) => (
+                              link.soon ? (
+                                <div key={link.to} className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-400 cursor-not-allowed hover:bg-gray-50">
+                                  {link.icon}
+                                  {link.label}
+                                  <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide bg-gray-100 text-gray-500 rounded">Soon</span>
+                                </div>
+                              ) : (
+                                <NavLink
+                                  key={link.to}
+                                  to={link.to}
+                                  onClick={() => setIsOpen(false)}
+                                  className={({ isActive }) =>
+                                    `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${isActive
+                                      ? "text-[#ff8211] bg-orange-50/50"
+                                      : "text-gray-600 hover:text-[#ff8211]"}`
+                                  }
+                                >
+                                  {link.icon}
+                                  {link.label}
+                                </NavLink>
+                              )
+                            ))}
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -655,27 +658,7 @@ function Navbar() {
 
                 {/* Mobile Auth/User Section */}
                 <div className="pt-4 border-t border-gray-100">
-                  {user ? (
-                    <div className="space-y-2">
-                      <NavLink
-                        to={getDashboardPath()}
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center justify-between w-full px-4 py-3 rounded-xl text-base font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 transition-all"
-                      >
-                        <span>Dashboard</span>
-                      </NavLink>
-
-                      <button
-                        onClick={(e) => {
-                          setIsOpen(false);
-                          logout(e);
-                        }}
-                        className="flex items-center justify-center w-full px-4 py-3 rounded-xl text-base font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-all"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  ) : (
+                  {user ? null : (
                     <div className="grid grid-cols-2 gap-4 px-2">
                       <Link
                         to="/login"

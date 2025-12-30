@@ -39,7 +39,7 @@ function HeroSc() {
       ref={sectionRef}
       className="relative isolate flex min-h-[70vh] items-center justify-center overflow-hidden bg-gradient-to-br from-background via-orange-50/30 to-background text-foreground w-full"
     >
-      <div className="w-[80%] mx-auto">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6">
         <div className="absolute inset-0">
           <video
             autoPlay

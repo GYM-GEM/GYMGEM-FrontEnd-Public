@@ -1,7 +1,7 @@
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
-import { Store, Image, AlignLeft, Layers } from "lucide-react";
+import { Store, Image, AlignLeft, Layers, Phone } from "lucide-react";
 import UploadImage from "../../UploadImage";
 import axiosInstance from "../../../utils/axiosConfig";
 
@@ -20,7 +20,7 @@ const StoreForm = ({ onSubmit }) => {
     } = useForm({
         mode: "onChange",
         defaultValues: {
-            store_type: "Supplements"
+            store_type: "Select Store Type"
         }
     });
 
@@ -29,7 +29,7 @@ const StoreForm = ({ onSubmit }) => {
     const handleFormSubmit = async (data) => {
         try {
             const user = JSON.parse(localStorage.getItem("user"));
-          
+
             const payload = {
                 ...data,
                 profile_id: user?.id || 0,
@@ -135,9 +135,8 @@ const StoreForm = ({ onSubmit }) => {
                                         })}
                                         className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 pl-10 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background appearance-none cursor-pointer"
                                     >
-                                        <option value="Supplements">Supplements</option>
-                                        <option value="Clothes">Clothes</option>
-                                        <option value="Both">Both</option>
+                                        <option value="online">Online</option>
+                                        <option value="offline">Offline</option>
                                     </select>
                                     <Layers className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
@@ -150,6 +149,37 @@ const StoreForm = ({ onSubmit }) => {
                                     </p>
                                 )}
                             </div>
+                        </div>
+
+                        {/* Phone Number */}
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="phone_number"
+                                className="text-sm font-medium text-foreground"
+                            >
+                                Phone Number
+                            </label>
+                            <div className="relative">
+                                <input
+                                    id="phone_number"
+                                    type="tel"
+                                    placeholder="e.g. +1 234 567 890"
+                                    {...register("phone_number", {
+                                        required: "Phone number is required",
+                                        pattern: {
+                                            value: /^[0-9+\-\s()]*$/,
+                                            message: "Invalid phone number format",
+                                        },
+                                    })}
+                                    className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 pl-10 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                                />
+                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            </div>
+                            {errors.phone_number && (
+                                <p className="text-xs text-destructive text-red-500">
+                                    {errors.phone_number.message}
+                                </p>
+                            )}
                         </div>
 
 
@@ -186,7 +216,6 @@ const StoreForm = ({ onSubmit }) => {
 
                         {/* Submit Button */}
                         <button
-                            onClick={handleFormSubmit}
                             type="submit"
                             className="inline-flex h-11 items-center justify-center rounded-xl bg-[#ff8211] px-6 text-sm font-semibold text-white transition hover:bg-[#e67300] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background mt-4 shadow-lg shadow-orange-500/20"
                         >

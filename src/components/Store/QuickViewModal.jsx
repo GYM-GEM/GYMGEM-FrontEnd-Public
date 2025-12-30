@@ -70,7 +70,7 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
                                 </span>
                                 <h2 className="text-2xl font-bold text-slate-900 mb-2">{product.name}</h2>
                                 <div className="flex items-center gap-4">
-                                    <span className="text-3xl font-bold text-slate-900">${product.price}</span>
+                                    <span className="text-3xl font-bold text-[#ff8211]">{product.price} GEMs</span>
                                     {product.quantity > 0 ? (
                                         <span className="text-green-600 font-medium text-sm bg-green-50 px-2 py-1 rounded-full border border-green-100">
                                             In Stock
@@ -94,8 +94,8 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
                                     onClick={handleAddToCart}
                                     disabled={product.quantity === 0}
                                     className={`w-full py-3.5 rounded-xl font-semibold text-base transition-all duration-300 flex items-center justify-center gap-2 ${isAdded
-                                            ? 'bg-green-600 text-white shadow-lg shadow-green-500/30 ring-2 ring-green-600 ring-offset-2'
-                                            : 'bg-slate-900 text-white hover:bg-[#ff8211] shadow-lg hover:shadow-[#ff8211]/30'
+                                        ? 'bg-green-600 text-white shadow-lg shadow-green-500/30 ring-2 ring-green-600 ring-offset-2'
+                                        : 'bg-slate-900 text-white hover:bg-[#ff8211] shadow-lg hover:shadow-[#ff8211]/30'
                                         } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
                                     {isAdded ? (

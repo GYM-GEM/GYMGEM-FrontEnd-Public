@@ -215,7 +215,7 @@ function Courses() {
     <div className="bg-background text-foreground min-h-screen flex flex-col">
       <Navbar />
       <section className="w-full bg-background flex-1">
-        <div className="mx-auto flex w-[90%] md:w-[85%] lg:w-[80%] flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
 
           {/* Header */}
           <header className="space-y-4 text-center sm:text-left">
@@ -367,7 +367,7 @@ function Courses() {
 
       {/* Results Section */}
       <section className="w-full bg-background pb-20">
-        <div className="mx-auto grid w-[90%] md:w-[85%] lg:w-[80%] gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-4 px-4 sm:gap-6 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
           {isLoading ? (
             // Skeleton loading state
             [...Array(6)].map((_, idx) => (

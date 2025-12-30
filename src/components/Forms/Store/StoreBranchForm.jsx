@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../../context/ToastContext";
-import { Clock, MapPin, Navigation, Flag, Building2, Map } from "lucide-react";
+import { Clock, MapPin, Navigation, Flag, Building2, Map, Phone } from "lucide-react";
+import axiosInstance from "../../../utils/axiosConfig";
 
 /**
  * StoreBranchForm Component
@@ -20,21 +21,36 @@ const StoreBranchForm = ({ onSubmit }) => {
 
     const { showToast } = useToast();
 
+
+
+
+
+
     const handleFormSubmit = async (data) => {
         try {
+            // Format time to match request: "12:56:25.757Z"
+            // Input type="time" returns "HH:MM", so we append seconds and ms
+            const payload = {
+                ...data,
+                opening_time: data.opening_time ? `${data.opening_time}:00.000Z` : null,
+                closing_time: data.closing_time ? `${data.closing_time}:00.000Z` : null,
+            };
+
+            console.log("Submitting Branch Data:", payload);
+
             if (onSubmit) {
-                await onSubmit(data);
+                await onSubmit(payload);
             } else {
-                console.log("Branch Data Submitted:", data);
-                // Save to localStorage for persistence
-                localStorage.setItem("storeBranch", JSON.stringify(data));
+                const response = await axiosInstance.post("/api/stores/branches", payload);
+                console.log("Branch Created:", response.data);
                 showToast("Store branch added successfully!", { type: "success" });
-                // Navigate to dashboard or next step
+                localStorage.removeItem("storeBranch"); // Clear temp data if any
                 navigate("/store/dashboard");
             }
         } catch (error) {
             console.error("Error adding branch:", error);
-            showToast("Failed to add branch. Please try again.", { type: "error" });
+            const errorMessage = error.response?.data?.message || "Failed to add branch. Please try again.";
+            showToast(errorMessage, { type: "error" });
         }
     };
 
@@ -131,26 +147,26 @@ const StoreBranchForm = ({ onSubmit }) => {
                             </div>
                         </div>
 
-                        {/* Street & Zip Code Row */}
-                        <div className="grid gap-4 sm:grid-cols-2">
-                            {/* Street */}
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-foreground">
-                                    Street Address
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        placeholder="e.g. 123 Fitness Blvd"
-                                        {...register("street", { required: "Street address is required" })}
-                                        className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 pl-10 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
-                                    />
-                                    <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                </div>
-                                {errors.street && (
-                                    <p className="text-xs text-destructive text-red-500">{errors.street.message}</p>
-                                )}
+                        {/* Street Address - Full Width */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-foreground">
+                                Street Address
+                            </label>
+                            <div className="relative">
+                                <input
+                                    placeholder="e.g. 123 Fitness Blvd"
+                                    {...register("street", { required: "Street address is required" })}
+                                    className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 pl-10 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                                />
+                                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                             </div>
+                            {errors.street && (
+                                <p className="text-xs text-destructive text-red-500">{errors.street.message}</p>
+                            )}
+                        </div>
 
+                        {/* Zip Code & Phone Row */}
+                        <div className="grid gap-4 sm:grid-cols-2">
                             {/* Zip Code */}
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground">
@@ -172,6 +188,31 @@ const StoreBranchForm = ({ onSubmit }) => {
                                 </div>
                                 {errors.zip_code && (
                                     <p className="text-xs text-destructive text-red-500">{errors.zip_code.message}</p>
+                                )}
+                            </div>
+
+                            {/* Phone Number */}
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">
+                                    Phone Number
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="tel"
+                                        placeholder="e.g. +1 555 000 0000"
+                                        {...register("phone_number", {
+                                            required: "Phone number is required",
+                                            pattern: {
+                                                value: /^[0-9+\-\s()]*$/,
+                                                message: "Invalid phone number format"
+                                            }
+                                        })}
+                                        className="h-11 w-full rounded-xl border border-border bg-background/80 px-3 pl-10 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground"
+                                    />
+                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                </div>
+                                {errors.phone_number && (
+                                    <p className="text-xs text-destructive text-red-500">{errors.phone_number.message}</p>
                                 )}
                             </div>
                         </div>

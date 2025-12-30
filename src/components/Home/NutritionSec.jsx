@@ -7,7 +7,7 @@ function NutritionSec() {
 
   return (
     <section ref={sectionRef} className="w-full bg-gradient-to-r from-amber-50/40 via-background to-orange-50/40 py-20">
-      <div className={`mx-auto flex w-[80%] flex-col overflow-hidden rounded-[32px] border-2 border-amber-200 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-lg lg:flex-row transition-all duration-700 ease-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+      <div className={`mx-auto flex w-full max-w-7xl px-4 sm:px-6 flex-col overflow-hidden rounded-[32px] border-2 border-amber-200 bg-gradient-to-br from-white via-amber-50/20 to-white shadow-lg lg:flex-row transition-all duration-700 ease-out ${isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
         }`}>
         <div className={`flex flex-1 flex-col justify-center gap-10 px-6 py-12 transition-all duration-700 ease-out sm:px-10 lg:px-12 ${isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
           }`}>

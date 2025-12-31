@@ -1,20 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 
 /**
- * VideoCall.jsx
- * Production-ready WebRTC client with:
- * - stable reconnect (guarded)
- * - negotiation versioning (nid)
- * - ICE candidate queueing & flushing
- * - controlled renegotiation (REQUEST_RENEGOTIATION)
- * - screen share support for both sides (trainee requests renegotiation)
- * - mic/camera toggles
+ * VideoCall.jsx - Updated with presence signals:
+ * - sends JOIN_SESSION on WS open (already present)
+ * - sends LEAVE_SESSION on beforeunload, cleanup, and End Call
+ * - sends periodic PING keep-alive
  *
- * Requirements:
- * - include Material Icons in index.html for the controls:
- *   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
- *
- * Drop-in replacement.
+ * Minor UI: added End Call button (red) that will send LEAVE_SESSION then close WS.
  */
 
 const ICE_CONFIG = {
@@ -37,6 +29,9 @@ export default function VideoCall({ sessionId, isTrainer }) {
   const shouldReconnect = useRef(true);
   const reconnectAttempts = useRef(0);
 
+  // ping interval ref
+  const pingIntervalRef = useRef(null);
+
   // UI state
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
@@ -50,7 +45,7 @@ export default function VideoCall({ sessionId, isTrainer }) {
 
   // ---------- Helpers ----------
   const safeLog = (...args) => {
-    // keep logs useful
+    // uncomment to debug
     // console.log(...args);
   };
 
@@ -58,6 +53,8 @@ export default function VideoCall({ sessionId, isTrainer }) {
     try {
       if (ws.current?.readyState === WebSocket.OPEN) {
         ws.current.send(JSON.stringify(payload));
+      } else {
+        // silent fail if WS not open
       }
     } catch (err) {
       console.warn("WS send failed", err, payload);
@@ -263,7 +260,6 @@ export default function VideoCall({ sessionId, isTrainer }) {
       setSharingScreen(true);
 
       // Request renegotiation from the remote peer (trainer will handle/createOffer)
-      // Trainee (or any side) asks the remote side to renegotiate.
       send({ type: "REQUEST_RENEGOTIATION" });
 
       // when screen share stops, revert to camera
@@ -281,10 +277,63 @@ export default function VideoCall({ sessionId, isTrainer }) {
     }
   };
 
+  // ---------- Presence helpers (frontend) ----------
+  // send explicit JOIN (server expects it) - called from ws onopen already
+  const sendJoin = () => {
+    send({ type: "JOIN_SESSION" });
+  };
+
+  // send explicit LEAVE (frontend should call this when user intentionally leaves)
+  const sendLeave = () => {
+    try {
+      send({ type: "LEAVE_SESSION" });
+    } catch (err) {
+      // best-effort
+    }
+  };
+
+  // send a ping keepalive
+  const startKeepAlive = () => {
+    stopKeepAlive();
+    pingIntervalRef.current = setInterval(() => {
+      try {
+        send({ type: "PING" });
+      } catch (err) {
+        // ignore
+      }
+    }, 25000); // every 25s
+  };
+
+  const stopKeepAlive = () => {
+    if (pingIntervalRef.current) {
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
+    }
+  };
+
+  // End call handler (intentional)
+  const endCall = () => {
+    // Prevent reconnect attempts
+    shouldReconnect.current = false;
+
+    // Notify server we are leaving
+    sendLeave();
+
+    // Close WS and clean
+    try {
+      ws.current?.close();
+    } catch {}
+
+    resetPeer();
+
+    try {
+      localStreamRef.current?.getTracks().forEach(t => t.stop());
+    } catch {}
+  };
+
   // ---------- WebSocket & Signaling ----------
   const connectWS = () => {
     const token = localStorage.getItem("access") || "";
-    // build URL (careful about host in logs)
     const url = `ws://192.168.1.5:8000/ws/interactive_sessions/${sessionId}/?token=${token}`;
     safeLog("🔌 Connecting WS...", url);
     try {
@@ -299,8 +348,13 @@ export default function VideoCall({ sessionId, isTrainer }) {
       reconnectAttempts.current = 0;
       wsReady.current = true;
       safeLog("✅ WS Open");
-      send({ type: "JOIN_SESSION" });
+
+      // send JOIN and RESYNC (JOIN necessary for presence)
+      sendJoin();
       send({ type: "RESYNC" });
+
+      // start keep-alive pings
+      startKeepAlive();
 
       // If trainer, attempt to create offer if we have media
       if (isTrainer) createOffer();
@@ -446,6 +500,21 @@ export default function VideoCall({ sessionId, isTrainer }) {
           break;
         }
 
+        case "PONG": {
+          // optional server pong: can be used to show connectivity
+          break;
+        }
+
+        // session final states broadcast (listen and act accordingly)
+        case "SESSION_COMPLETED":
+        case "SESSION_ABORTED":
+        case "SESSION_NO_SHOW":
+        case "SESSION_FINISHED": {
+          // frontend can react: show modal / redirect / update UI
+          safeLog("Session final state:", msg.type);
+          break;
+        }
+
         default:
           safeLog("Unknown message", msg);
       }
@@ -454,8 +523,13 @@ export default function VideoCall({ sessionId, isTrainer }) {
     ws.current.onclose = () => {
       wsReady.current = false;
       safeLog("WS Closed");
+      stopKeepAlive();
       resetPeer();
-      scheduleReconnect();
+      // If not intentionally ended, force end the call and clean up UI
+      if (shouldReconnect.current) {
+        endCall();
+      }
+      // Do not schedule reconnect; session is over
     };
 
     ws.current.onerror = err => {
@@ -486,16 +560,42 @@ export default function VideoCall({ sessionId, isTrainer }) {
     // connect signaling
     connectWS();
 
+    // beforeunload handler: best-effort send LEAVE_SESSION (sync attempt)
+    const handleBeforeUnload = e => {
+      try {
+        // attempt WS send if open
+        if (ws.current?.readyState === WebSocket.OPEN) {
+          ws.current.send(JSON.stringify({ type: "LEAVE_SESSION" }));
+        }
+      } catch {}
+      // no need to prevent unload
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
     // cleanup
     return () => {
+      // mark as intentional end to prevent reconnect loop
       shouldReconnect.current = false;
+
+      // send LEAVE_SESSION (best-effort)
+      try {
+        if (ws.current?.readyState === WebSocket.OPEN) {
+          ws.current.send(JSON.stringify({ type: "LEAVE_SESSION" }));
+        }
+      } catch {}
+
+      // close socket
       try {
         ws.current?.close();
       } catch {}
+
+      stopKeepAlive();
       resetPeer();
       try {
         localStreamRef.current?.getTracks().forEach(t => t.stop());
       } catch {}
+
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -597,6 +697,26 @@ export default function VideoCall({ sessionId, isTrainer }) {
           }}
         >
           <span className="material-icons">{sharingScreen ? "stop_screen_share" : "screen_share"}</span>
+        </button>
+
+        {/* End Call button - intentional leave */}
+        <button
+          onClick={endCall}
+          title="End Call"
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            border: "none",
+            background: "#ea4335",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
+        >
+          <span className="material-icons">call_end</span>
         </button>
       </div>
     </div>

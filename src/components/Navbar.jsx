@@ -499,12 +499,12 @@ const Navbar = () => {
 
           {/* RIGHT ACTIONS */}
           <div className="flex items-center gap-3">
-            {/* Mobile Gems (visible if user) */}
-            {user && (
+            {/* Mobile Gems (visible if user) - Moved to Dropdown Menu */}
+            {/* {user && (
               <div className="lg:hidden">
                 <GemsBadge balance={gemsBalance} onAddClick={() => setIsAddGemsModalOpen(true)} isLoading={isLoadingBalance} />
               </div>
-            )}
+            )} */}
 
             {/* Desktop Right */}
             <div className="hidden lg:flex lg:items-center lg:gap-4">
@@ -603,6 +603,12 @@ const Navbar = () => {
                   </div>
                 )}
 
+                {/* Mobile Gems (Added here instead of top bar) */}
+                {user && (
+                  <div className="px-4 pt-4 border-t border-gray-100 flex justify-center">
+                    <GemsBadge balance={gemsBalance} onAddClick={() => setIsAddGemsModalOpen(true)} isLoading={isLoadingBalance} />
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

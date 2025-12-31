@@ -179,23 +179,38 @@ const Navbar = () => {
 
   // -- Effects --
 
-  // Balance logic with 2-minute cache
+  // Balance logic with 2-minute cache and profile check
   useEffect(() => {
     const fetchBalance = async () => {
       if (!user) return;
 
+      const currentProfileId = user.current_profile || user.id;
       const lastFetch = localStorage.getItem("gems_balance_last_fetch");
-      const now = Date.now();
-      const TWO_MINUTES = 5 * 60 * 1000;
+      const lastFetchProfile = localStorage.getItem("gems_balance_last_profile");
 
-      // Only fetch if no balance exists or if 2 minutes have passed
-      if (!localStorage.getItem("gems_balance") || !lastFetch || (now - parseInt(lastFetch)) > TWO_MINUTES) {
-        // Only show loader on initial fetch (no existing balance)
-        if (!localStorage.getItem("gems_balance")) setIsLoadingBalance(true);
+      const now = Date.now();
+      const CACHE_DURATION = 2 * 60 * 1000; // 2 Minutes
+
+      const isProfileChanged = lastFetchProfile !== String(currentProfileId);
+      const isCacheExpired = !lastFetch || (now - parseInt(lastFetch)) > CACHE_DURATION;
+      const isBalanceMissing = !localStorage.getItem("gems_balance");
+
+      // Fetch if: No balance OR Cache Expired OR Profile Changed
+      if (isBalanceMissing || isCacheExpired || isProfileChanged) {
+        // Only show loader on initial fetch or profile switch
+        if (isBalanceMissing || isProfileChanged) setIsLoadingBalance(true);
 
         const balance = await getBalance();
+
+        // Update timestamp even if failed to prevent loop (if null returned)
+        // But if successful, update balance
         if (balance !== null) {
           setGemsBalance(balance);
+          localStorage.setItem("gems_balance_last_fetch", now.toString());
+          localStorage.setItem("gems_balance_last_profile", String(currentProfileId));
+        } else {
+          // If failed, still update timestamp to prevent immediate retry loop (Too Many Requests)
+          // Retry backoff could be implemented, but simple delay is better than loop.
           localStorage.setItem("gems_balance_last_fetch", now.toString());
         }
         setIsLoadingBalance(false);
@@ -215,7 +230,7 @@ const Navbar = () => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('gemsUpdated', handleStorageChange);
     };
-  }, [user]);
+  }, [user?.current_profile]); // Only depend on current_profile to avoid loops
 
   // Logo Animation
   useEffect(() => {

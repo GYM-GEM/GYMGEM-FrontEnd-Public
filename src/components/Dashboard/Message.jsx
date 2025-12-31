@@ -414,9 +414,9 @@ const MessageList = ({ conversation, currentUser, onRetry, onEdit, onDelete, onL
                             animate={{ opacity: 1, y: 0 }}
                             className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                         >
-                            <div className={`max-w-[75%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                            <div className={`max-w-[85%] md:max-w-[65%] flex flex-col ${isMe ? 'items-end' : 'items-start'} min-w-0`}>
                                 <div
-                                    className={`px-4 py-3 rounded-2xl shadow-sm text-sm leading-relaxed relative group
+                                    className={`px-4 py-3 rounded-2xl shadow-sm text-sm leading-relaxed relative group break-all whitespace-pre-wrap
                   ${isMe
                                             ? 'bg-gradient-to-r from-[#ff8211] to-[#ff9a42] text-white rounded-br-none'
                                             : 'bg-white text-gray-800 rounded-bl-none border border-gray-100'
@@ -1396,7 +1396,7 @@ const Message = () => {
                     }}
                 />
 
-                <div className="max-w-7xl mx-auto h-[calc(100dvh-100px)] md:h-[calc(100vh-140px)] bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden flex relative">
+                <div className="max-w-7xl mx-auto h-[calc(100dvh-110px)] md:h-[calc(100vh-140px)] bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden flex relative">
 
                     {/* --- LEFT SIDEBAR --- */}
                     <div className={`w-full md:w-80 lg:w-96 flex flex-col border-r border-gray-100 bg-white
@@ -1655,7 +1655,7 @@ const Message = () => {
                                 animate={{ x: 0, opacity: 1 }}
                                 exit={{ x: "100%", opacity: 0 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                                className="absolute md:relative z-20 top-0 right-0 h-full w-full md:w-80 bg-white border-l border-gray-100 overflow-y-auto shadow-2xl md:shadow-none"
+                                className="absolute xl:relative z-20 top-0 right-0 h-full w-full md:w-80 bg-white border-l border-gray-100 overflow-y-auto shadow-2xl xl:shadow-none"
                             >
                                 <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100 bg-gray-50/30">
                                     <h3 className="font-bold text-gray-900 text-lg">Contact Info</h3>

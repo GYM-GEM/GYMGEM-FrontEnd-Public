@@ -86,13 +86,13 @@ const DashboardTrainer = () => {
     <>
       <Navbar />
       <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900">
-        <div className="max-w-6xl mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 lg:py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2">
               {/* HEADER */}
-              <section className="mb-8">
-                <h1 className="font-bebas text-4xl text-center text-[#ff8211] tracking-wide">
+              <section className="mb-6 lg:mb-8">
+                <h1 className="font-bebas text-3xl sm:text-4xl text-center text-[#ff8211] tracking-wide">
                   Dashboard
                 </h1>
                 <p className="mt-2 text-center text-sm text-slate-500">
@@ -102,7 +102,7 @@ const DashboardTrainer = () => {
 
               {/* STATS CARDS */}
               <section className="mb-8">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   <div className="bg-white border border-orange-100 rounded-2xl p-6 shadow-sm text-center">
                     <p className="text-xs font-semibold text-[#ff8211] uppercase">Total Subs</p>
                     <p className="mt-2 font-bebas text-3xl text-slate-900">250</p>
@@ -132,12 +132,13 @@ const DashboardTrainer = () => {
                     <div className="text-center py-4 text-slate-500">Loading courses...</div>
                   ) : topCourses.length > 0 ? (
                     topCourses.map((c, index) => (
-                      <div key={index} className="flex items-center justify-between bg-white border border-slate-100 p-4 rounded-xl shadow-sm">
-                        <div className="flex-1">
-                          <p className="font-semibold text-slate-800">{c.title}</p>
+                      <div key={index} className="flex flex-col sm:flex-row sm:items-center justify-between bg-white border border-slate-100 p-4 rounded-xl shadow-sm gap-2 sm:gap-0">
+                        <div className="flex-1 min-w-0 pr-2">
+                          <p className="font-semibold text-slate-800 truncate">{c.title}</p>
                           <p className="text-xs text-slate-500 mt-1">{c.level} clients</p>
                         </div>
-                        <div className="text-right">
+                        <div className="text-right sm:text-right flex justify-between sm:block items-center border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-50 w-full sm:w-auto">
+                          <span className="sm:hidden text-xs text-slate-400 font-medium">Revenue</span>
                           <p className="font-bebas text-xl text-green-600">${c.revenue.toFixed(2)}</p>
                         </div>
                       </div>
@@ -156,7 +157,7 @@ const DashboardTrainer = () => {
                   <h2 className="font-bebas text-xl text-slate-900">Recent Courses</h2>
                   <span className="flex-1 h-px bg-slate-200" />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                   {isLoading ? (
                     <div className="col-span-full text-center py-4 text-slate-500">Loading...</div>
                   ) : recentCourses.length > 0 ? (

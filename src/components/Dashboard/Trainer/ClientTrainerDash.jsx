@@ -161,15 +161,15 @@ const ClientTrainerDash = () => {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900 py-12">
+      <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900 py-6 sm:py-8 lg:py-12">
         <section>
           <div className="max-w-6xl mx-auto px-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
 
-              <div className="flex items-center flex-1">
+              <div className="flex items-center w-full sm:w-auto flex-1">
                 <span className="flex-1 h-px bg-slate-200" />
                 <div className="px-4">
-                  <h2 className="font-bebas text-4xl text-center text-slate-900">Overview</h2>
+                  <h2 className="font-bebas text-3xl sm:text-4xl text-center text-slate-900">Overview</h2>
                 </div>
                 <span className="flex-1 h-px bg-slate-200" />
               </div>

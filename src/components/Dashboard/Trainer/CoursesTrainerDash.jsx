@@ -309,8 +309,8 @@ const CoursesTrainerDash = () => {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900 pt-24">
-        <div className="max-w-6xl mx-auto px-4 py-8">
+      <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900 pt-20 sm:pt-24">
+        <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
           <section className="mb-6">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="w-full sm:w-[60%] relative">

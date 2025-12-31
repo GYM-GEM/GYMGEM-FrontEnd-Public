@@ -713,7 +713,7 @@ function Community() {
                           </div>
                         ) : (
                           <>
-                            <h2 className="font-bold text-xl text-gray-900 mb-2">{post.title}</h2>
+                            <h2 className="font-bold text-xl text-gray-900 mb-2 break-words">{post.title}</h2>
                             <p className="text-gray-700 text-base leading-relaxed whitespace-pre-wrap">
                               {renderContentWithHashtags(post.content)}
                             </p>

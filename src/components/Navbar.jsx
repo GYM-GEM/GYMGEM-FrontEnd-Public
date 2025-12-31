@@ -582,6 +582,17 @@ const Navbar = () => {
                 {showPublicDropdowns && (
                   <div className="pt-4 border-t border-gray-100 space-y-1">
                     <NavLink to="/stores" onClick={() => setIsOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-gray-600"><ShoppingBag size={18} /> Store</NavLink>
+
+                    {/* Trainee Training Dropdown Mobie */}
+                    {isTrainee && !isInDashboard && (
+                      <div className="space-y-1">
+                        <div className="px-4 py-3 text-base font-bold flex items-center gap-2 text-gray-700">Training</div>
+                        {trainingLinks.map(link => (
+                          <NavLink key={link.to} to={link.to} onClick={() => setIsOpen(false)} className="flex items-center gap-2 px-8 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-[#ff8211]">{link.icon} {link.label}</NavLink>
+                        ))}
+                      </div>
+                    )}
+
                     {user && <NavLink to="/community" onClick={() => setIsOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-xl font-medium text-gray-600"><CommunityIcon size={18} /> Community</NavLink>}
                     {user && (
                       <div className="space-y-1">

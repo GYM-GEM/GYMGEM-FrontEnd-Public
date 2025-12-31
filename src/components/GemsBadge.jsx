@@ -24,7 +24,10 @@ const GemsBadge = ({ balance = 0, onAddClick, isLoading = false }) => {
   };
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-full border border-orange-100 shadow-sm transition-all hover:shadow-md group">
+    <div
+      className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-full border border-orange-100 shadow-sm transition-all hover:shadow-md group"
+      title={`${balance !== null ? balance.toLocaleString() : '0'} GEMS`}
+    >
       <div className="flex items-center gap-1.5">
         <Sparkles className="w-4 h-4 text-[#FF8211] animate-pulse" />
         <span className="text-sm font-bold text-gray-800 poppins-semibold">

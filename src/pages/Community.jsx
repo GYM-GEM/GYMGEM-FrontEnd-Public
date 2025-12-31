@@ -38,6 +38,8 @@ function Community() {
   const [commentLikes, setCommentLikes] = useState({});
   const [trendingHashtags, setTrendingHashtags] = useState([]);
   const [topProfiles, setTopProfiles] = useState([]);
+  const [likingPostId, setLikingPostId] = useState(null);
+  const [likingCommentId, setLikingCommentId] = useState(null);
 
   // Fetch all posts with optional search
   const fetchPosts = async (search = "") => {
@@ -56,7 +58,7 @@ function Community() {
   // Fetch comments for a specific post
   const fetchComments = async (postId) => {
     try {
-      const response = await axiosInstance.get(`/api/community/posts/${postId}/comments/`);
+      const response = await axiosInstance.get(`/api/community/posts/${postId}/comments/`, { skipGlobalLoader: true });
       setComments(prev => ({ ...prev, [postId]: response.data }));
     } catch (error) {
       console.error("Error fetching comments:", error);
@@ -164,7 +166,7 @@ function Community() {
     if (!window.confirm("Are you sure you want to delete this post?")) return;
 
     try {
-      await axiosInstance.delete(`/api/community/posts/${postId}/delete/`);
+      await axiosInstance.delete(`/api/community/posts/${postId}/delete/`, { skipGlobalLoader: true });
       showToast("Post deleted successfully!", { type: "success" });
       fetchPosts(searchQuery);
     } catch (error) {
@@ -175,11 +177,15 @@ function Community() {
 
   // Like/Unlike post
   const handleToggleLike = async (postId) => {
+    if (likingPostId === postId) return; // Prevent double-click
+    setLikingPostId(postId);
     try {
-      await axiosInstance.post(`/api/community/posts/${postId}/like/`);
+      await axiosInstance.post(`/api/community/posts/${postId}/like/`, {}, { skipGlobalLoader: true });
       fetchPosts(searchQuery);
     } catch (error) {
       console.error("Error toggling like:", error);
+    } finally {
+      setLikingPostId(null);
     }
   };
 
@@ -189,7 +195,7 @@ function Community() {
     if (!content) return;
 
     try {
-      await axiosInstance.post(`/api/community/posts/${postId}/comments/`, { content });
+      await axiosInstance.post(`/api/community/posts/${postId}/comments/`, { content }, { skipGlobalLoader: true });
       setCommentTexts(prev => ({ ...prev, [postId]: "" }));
       fetchComments(postId);
       fetchPosts(searchQuery);
@@ -205,7 +211,7 @@ function Community() {
     if (!window.confirm("Delete this comment?")) return;
 
     try {
-      await axiosInstance.delete(`/api/community/comments/${commentId}/delete/`);
+      await axiosInstance.delete(`/api/community/comments/${commentId}/delete/`, { skipGlobalLoader: true });
       fetchComments(postId);
       fetchPosts(searchQuery);
       showToast("Comment deleted!", { type: "success" });
@@ -258,7 +264,7 @@ function Community() {
     try {
       await axiosInstance.put(`/api/community/comments/${commentId}/update/`, {
         content: editCommentText
-      });
+      }, { skipGlobalLoader: true });
 
       showToast("Comment updated!", { type: "success" });
       setEditingCommentId(null);
@@ -272,18 +278,22 @@ function Community() {
 
   // Toggle comment like
   const handleToggleCommentLike = async (commentId, postId) => {
+    if (likingCommentId === commentId) return; // Prevent double-click
+    setLikingCommentId(commentId);
     try {
-      await axiosInstance.post(`/api/community/comments/${commentId}/like/`);
+      await axiosInstance.post(`/api/community/comments/${commentId}/like/`, {}, { skipGlobalLoader: true });
       fetchComments(postId);
     } catch (error) {
       console.error("Error toggling comment like:", error);
+    } finally {
+      setLikingCommentId(null);
     }
   };
 
   // Fetch post likes
   const fetchPostLikes = async (postId) => {
     try {
-      const response = await axiosInstance.get(`/api/community/posts/${postId}/likes/`);
+      const response = await axiosInstance.get(`/api/community/posts/${postId}/likes/`, { skipGlobalLoader: true });
       setPostLikes(prev => ({ ...prev, [postId]: response.data }));
     } catch (error) {
       console.error("Error fetching post likes:", error);
@@ -293,7 +303,7 @@ function Community() {
   // Fetch comment likes
   const fetchCommentLikes = async (commentId) => {
     try {
-      const response = await axiosInstance.get(`/api/community/comments/${commentId}/likes/`);
+      const response = await axiosInstance.get(`/api/community/comments/${commentId}/likes/`, { skipGlobalLoader: true });
       setCommentLikes(prev => ({ ...prev, [commentId]: response.data }));
     } catch (error) {
       console.error("Error fetching comment likes:", error);
@@ -330,7 +340,21 @@ function Community() {
     fetchTrendingData();
   }, []);
 
-  // Parse content and make hashtags clickable
+  // Format relative time (e.g., "2 hours ago")
+  const formatRelativeTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return 'Just now';
+    if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+    if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+    if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)}d ago`;
+    if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 604800)}w ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+
+  // Parse content and make hashtags clickable (preserve newlines)
   const renderContentWithHashtags = (content) => {
     const parts = content.split(/(#\w+)/g);
     return parts.map((part, index) => {
@@ -381,12 +405,12 @@ function Community() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100" style={{ fontFamily: 'Inter, Cairo, -apple-system, system-ui, sans-serif' }}>
         {/* Hero Header */}
         <div className="bg-gradient-to-r from-orange-600 to-orange-500 text-white py-12">
           <div className="max-w-7xl mx-auto px-4">
             <h1 className="font-bebas text-6xl tracking-wide mb-2">COMMUNITY</h1>
-            <p className="text-orange-100 text-lg">Connect, Share, Inspire</p>
+            <p className="text-orange-100 text-lg font-medium">Connect, Share, Inspire</p>
           </div>
         </div>
 
@@ -400,7 +424,7 @@ function Community() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search posts or hashtags..."
-                className="w-full pl-12 pr-4 py-4 rounded-full border-2 border-gray-200 focus:border-orange-500 focus:outline-none text-lg shadow-sm"
+                className="w-full pl-12 pr-4 py-4 rounded-full border-2 border-gray-200 focus:border-orange-500 focus:outline-none text-base shadow-sm font-medium"
               />
             </div>
           </form>
@@ -560,11 +584,7 @@ function Community() {
                             <div>
                               <h3 className="font-bold text-gray-900">{post.author_name}</h3>
                               <p className="text-xs text-gray-500">
-                                {new Date(post.created_at).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric"
-                                })}
+                                {formatRelativeTime(post.created_at)}
                               </p>
                             </div>
                           </div>
@@ -693,15 +713,15 @@ function Community() {
                           </div>
                         ) : (
                           <>
-                            <h2 className="font-bebas text-2xl text-gray-900 mb-2">{post.title}</h2>
-                            <p className="text-gray-700 text-sm leading-relaxed">
+                            <h2 className="font-bold text-xl text-gray-900 mb-2">{post.title}</h2>
+                            <p className="text-gray-700 text-base leading-relaxed whitespace-pre-wrap">
                               {renderContentWithHashtags(post.content)}
                             </p>
 
                             {post.attachment && (
-                              <div className="mt-4 rounded-lg overflow-hidden border border-gray-200">
+                              <div className="mt-4 rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
                                 {post.attachment_type === 'image' && (
-                                  <img src={post.attachment} alt="Post attachment" className="w-full max-h-96 object-cover" />
+                                  <img src={post.attachment} alt="Post attachment" className="w-full max-h-96 object-contain" />
                                 )}
                                 {post.attachment_type === 'video' && (
                                   <video src={post.attachment} controls className="w-full max-h-96" />
@@ -725,9 +745,17 @@ function Community() {
                         <div className="flex items-center gap-6 pt-3 border-t border-gray-100">
                           <button
                             onClick={() => handleToggleLike(post.id)}
-                            className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors group"
+                            disabled={likingPostId === post.id}
+                            className="flex items-center gap-2 text-gray-500 hover:text-red-500 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <Heart className="h-5 w-5 group-hover:fill-current" />
+                            {likingPostId === post.id ? (
+                              <svg className="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                            ) : (
+                              <Heart className={`h-5 w-5 group-hover:fill-current transition-all ${post.user_has_liked ? 'fill-red-500 text-red-500' : ''}`} />
+                            )}
                             <span
                               className="text-sm font-semibold cursor-pointer hover:underline"
                               onClick={(e) => {
@@ -854,14 +882,22 @@ function Community() {
                                         </div>
                                       ) : (
                                         <>
-                                          <p className="text-sm text-gray-700 mb-1">{comment.content}</p>
+                                          <p className="text-sm text-gray-700 mb-1 whitespace-pre-wrap leading-relaxed">{comment.content}</p>
                                           <div className="flex items-center gap-3 text-xs text-gray-400">
-                                            <span>{new Date(comment.created_at).toLocaleDateString()}</span>
+                                            <span>{formatRelativeTime(comment.created_at)}</span>
                                             <button
                                               onClick={() => handleToggleCommentLike(comment.id, post.id)}
-                                              className="flex items-center gap-1 hover:text-red-500"
+                                              disabled={likingCommentId === comment.id}
+                                              className="flex items-center gap-1 hover:text-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                             >
-                                              <Heart className="h-3 w-3" />
+                                              {likingCommentId === comment.id ? (
+                                                <svg className="animate-spin h-3 w-3 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                              ) : (
+                                                <Heart className="h-3 w-3" />
+                                              )}
                                               <span
                                                 className="cursor-pointer hover:underline"
                                                 onClick={(e) => {

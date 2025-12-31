@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { StoreContext } from "../../context/StoreContext.jsx";
 import NavBar from "../Navbar.jsx";
 import Footer from "../Footer.jsx";
+import axiosInstance from "../../utils/axiosConfig";
 import { Lock, ShieldCheck, CreditCard, ArrowLeft, Package } from "lucide-react";
 
 /**
@@ -31,6 +32,7 @@ const StoreCheckout = () => {
     state: "",
     zipCode: "",
     country: "",
+    customerNotes: "",
     // Payment Information
     paymentMethod: "credit_card",
     cardNumber: "",
@@ -46,9 +48,7 @@ const StoreCheckout = () => {
   }
 
   const subtotal = getCartTotal();
-  const tax = subtotal * 0.1; // 10% tax
-  const shipping = 10.00; // Flat rate shipping
-  const total = subtotal + tax + shipping;
+  const total = subtotal; // No tax or shipping
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -86,25 +86,25 @@ const StoreCheckout = () => {
       return false;
     }
 
-    // Payment validation (if credit card)
-    if (formData.paymentMethod === "credit_card") {
-      if (!formData.cardNumber || formData.cardNumber.length < 16) {
-        setError("Please enter a valid 16-digit card number");
-        return false;
-      }
-      if (!formData.cardName) {
-        setError("Please enter cardholder name");
-        return false;
-      }
-      if (!formData.expiryDate) {
-        setError("Please enter expiry date");
-        return false;
-      }
-      if (!formData.cvv || formData.cvv.length < 3) {
-        setError("Please enter a valid CVV");
-        return false;
-      }
-    }
+    // Payment validation not needed as fields are hidden
+    // if (formData.paymentMethod === "credit_card") {
+    //   if (!formData.cardNumber || formData.cardNumber.length < 16) {
+    //     setError("Please enter a valid 16-digit card number");
+    //     return false;
+    //   }
+    //   if (!formData.cardName) {
+    //     setError("Please enter cardholder name");
+    //     return false;
+    //   }
+    //   if (!formData.expiryDate) {
+    //     setError("Please enter expiry date");
+    //     return false;
+    //   }
+    //   if (!formData.cvv || formData.cvv.length < 3) {
+    //     setError("Please enter a valid CVV");
+    //     return false;
+    //   }
+    // }
 
     return true;
   };
@@ -120,17 +120,37 @@ const StoreCheckout = () => {
     setIsProcessing(true);
 
     try {
-      // Simulate payment processing
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Process orders for each item in the cart via API
+      const orderPromises = cart.map(async (item) => {
+        // Create concise notes to fit 255 char limit
+        const userNote = formData.customerNotes ? `Note: ${formData.customerNotes}` : '';
+        const rawNotes = `To: ${formData.fullName}, ${formData.phone}. Addr: ${formData.address}, ${formData.city}. Item: ${item.name} (x${item.cartQuantity}). ${userNote}`;
 
-      // Create orders for each cart item (to match StoreOrder.jsx structure)
-      const createdOrders = cart.map((item) => {
+        // Truncate to 254 chars to be safe
+        const notes = rawNotes.length > 254 ? rawNotes.substring(0, 251) + "..." : rawNotes;
+
+        // 1. Send to Backend API
+        const storeId = item.store_id || item.store;
+        if (!storeId) {
+          throw new Error(`Invalid Store ID for product: ${item.name}`);
+        }
+
+        const payload = {
+          store_id: parseInt(storeId),
+          status: "pending",
+          notes: notes,
+          total_price: item.price * item.cartQuantity,
+        };
+
+        await axiosInstance.post('/api/stores/orders', payload);
+
+        // 2. Add to Local Context (for UI consistency if needed)
         return addOrder({
           productId: item.id,
           productName: item.name,
           quantity: item.cartQuantity,
-          price: item.price, // Saving price at time of purchase
-          totalPrice: item.price * item.cartQuantity, // Saving calculated total for convenience
+          price: item.price,
+          totalPrice: item.price * item.cartQuantity,
           customerName: formData.fullName,
           customerEmail: formData.email,
           customerPhone: formData.phone,
@@ -141,10 +161,13 @@ const StoreCheckout = () => {
             zipCode: formData.zipCode,
             country: formData.country,
           },
-          paymentMethod: formData.paymentMethod,
+
           status: "Pending",
         });
       });
+
+      // Wait for all API calls to complete
+      const createdOrders = await Promise.all(orderPromises);
 
       // Clear the cart
       clearCart();
@@ -159,6 +182,7 @@ const StoreCheckout = () => {
       });
 
     } catch (err) {
+      console.error("Order submission failed:", err);
       setError(err.message || "Order failed. Please try again.");
       setIsProcessing(false);
     }
@@ -316,18 +340,30 @@ const StoreCheckout = () => {
                       placeholder="United States"
                     />
                   </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Order Notes (Optional)
+                    </label>
+                    <textarea
+                      name="customerNotes"
+                      value={formData.customerNotes}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-[#ff8211] outline-none min-h-[100px]"
+                      placeholder="Notes about your order, e.g. special notes for delivery."
+                    />
+                  </div>
                 </form>
               </div>
 
               {/* PAYMENT INFORMATION */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
+              {/* <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
                 <h2 className="font-bebas text-2xl text-slate-900 mb-6 flex items-center gap-2">
                   <CreditCard className="w-6 h-6 text-[#ff8211]" />
                   Payment Information
                 </h2>
 
                 {/* Payment Method Selection */}
-                <div className="mb-6">
+              {/* <div className="mb-6">
                   <label className="block text-sm font-medium text-slate-700 mb-3">
                     Payment Method
                   </label>
@@ -366,10 +402,10 @@ const StoreCheckout = () => {
                       <span className="text-sm font-medium">Bank</span>
                     </button>
                   </div>
-                </div>
+                </div> */}
 
-                {/* Credit Card Form */}
-                {formData.paymentMethod === "credit_card" && (
+              {/* Credit Card Form */}
+              {/* {formData.paymentMethod === "credit_card" && (
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
@@ -434,7 +470,7 @@ const StoreCheckout = () => {
                 )}
 
                 {/* Other Payment Methods Message */}
-                {formData.paymentMethod !== "credit_card" && (
+              {/* {formData.paymentMethod !== "credit_card" && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p className="text-sm text-blue-800">
                       You will be redirected to complete your payment securely with{" "}
@@ -442,14 +478,14 @@ const StoreCheckout = () => {
                     </p>
                   </div>
                 )}
-              </div>
+              </div>  */}
 
               {/* Error Message */}
-              {error && (
+              {/* {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <p className="text-sm text-red-800">{error}</p>
                 </div>
-              )}
+              )} */}
 
               {/* Submit Button */}
               <button
@@ -519,17 +555,9 @@ const StoreCheckout = () => {
                     <span>Subtotal</span>
                     <span className="font-semibold">{subtotal.toFixed(2)} GEMs</span>
                   </div>
-                  <div className="flex justify-between text-slate-700">
-                    <span>Tax (10%)</span>
-                    <span className="font-semibold">{tax.toFixed(2)} GEMs</span>
-                  </div>
-                  <div className="flex justify-between text-slate-700">
-                    <span>Shipping</span>
-                    <span className="font-semibold">{shipping.toFixed(2)} GEMs</span>
-                  </div>
                   <div className="border-t border-slate-200 pt-3 flex justify-between text-xl font-bold text-slate-900">
                     <span>Total</span>
-                    <span className="text-[#ff8211]">{total.toFixed(2)} GEMs</span>
+                    <span className="text-[#ff8211]">{subtotal.toFixed(2)} GEMs</span>
                   </div>
                 </div>
               </div>

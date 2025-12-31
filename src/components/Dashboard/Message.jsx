@@ -1673,7 +1673,7 @@ const Message = () => {
                                 </div>
 
                                 <div className="p-6 space-y-8">
-                                    <div>
+                                    {/* <div>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Shared Media</h4>
                                         <div className="grid grid-cols-3 gap-3">
                                             {[1, 2, 3].map(i => (
@@ -1682,13 +1682,13 @@ const Message = () => {
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     <div>
                                         <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Privacy & Support</h4>
                                         <div className="space-y-2">
-                                            <button
-                                                // onClick={handleMuteNotifications}
+                                            {/* <button
+                                                onClick={handleMuteNotifications}
                                                 onClick={() => showToast && showToast("Mute feature coming soon", { type: "info" })}
                                                 className="w-full p-4 flex items-center gap-3 hover:bg-gray-50 rounded-xl transition-colors text-left text-gray-700 font-medium"
                                             >
@@ -1699,7 +1699,7 @@ const Message = () => {
                                                 onClick={handleBlockUser}
                                                 className="w-full p-4 flex items-center gap-3 hover:bg-gray-50 rounded-xl transition-colors text-left text-gray-700 font-medium"
                                             >
-                                                <div className="text-gray-400"><MoreVertical size={20} /></div> {/* Using MoreVertical as placeholder icon or replace with Block icon */}
+                                                <div className="text-gray-400"><MoreVertical size={20} /></div> {/* Using MoreVertical as placeholder icon or replace with Block icon 
                                                 Block User
                                             </button>
                                             <button
@@ -1708,7 +1708,7 @@ const Message = () => {
                                             >
                                                 <div className="text-gray-400"><Info size={20} /></div>
                                                 Report Issue
-                                            </button>
+                                            </button> */}
                                             <button
                                                 onClick={handleDeleteConversation}
                                                 className="w-full p-4 flex items-center gap-3 hover:bg-red-50 rounded-xl transition-colors text-left text-red-600 font-medium"

@@ -3,7 +3,10 @@ import axiosInstance from "./axiosConfig";
 
 const getBalance = async () => {
   try {
-    const response = await axiosInstance.get("/api/profiles/balance");
+    // Skip global loader for balance updates (background request)
+    const response = await axiosInstance.get("/api/profiles/balance", {
+      skipGlobalLoader: true
+    });
     localStorage.setItem("gems_balance", response.data.balance);
     return response.data.balance;
   } catch (error) {

@@ -67,6 +67,7 @@ const Navbar = () => {
   const isInDashboard = location.pathname.startsWith('/trainer/') ||
     location.pathname.startsWith('/trainee/') ||
     location.pathname.startsWith('/store/') ||
+    location.pathname.startsWith('/settings/') ||
     location.pathname.startsWith('/gym/');
 
   // Get Profile IDs
@@ -173,7 +174,7 @@ const Navbar = () => {
   const aiLinks = [
     { to: "/ai-trainer", label: "AI Personal Trainer", icon: <MdSportsMartialArts size={18} /> },
     { to: "/ai-food", label: "AI Food Analyzer", icon: <Utensils size={18} /> },
-    { to: "/ai-chat", label: "AI Chatbot", icon: <Bot size={18} /> },
+    { to: "/ai-chat", label: "Chatbot", icon: <Bot size={18} /> },
   ];
 
   // -- Effects --
@@ -185,7 +186,7 @@ const Navbar = () => {
 
       const lastFetch = localStorage.getItem("gems_balance_last_fetch");
       const now = Date.now();
-      const TWO_MINUTES = 2 * 60 * 1000;
+      const TWO_MINUTES = 5 * 60 * 1000;
 
       // Only fetch if no balance exists or if 2 minutes have passed
       if (!localStorage.getItem("gems_balance") || !lastFetch || (now - parseInt(lastFetch)) > TWO_MINUTES) {

@@ -367,7 +367,7 @@ function Courses() {
 
       {/* Results Section */}
       <section className="w-full bg-background pb-20">
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-4 px-4 sm:gap-6 sm:grid-cols-2 sm:px-6 lg:grid-cols-3 lg:px-8">
+        <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-4 px-4 sm:gap-6 lg:grid-cols-3 lg:px-8">
           {isLoading ? (
             // Skeleton loading state
             [...Array(6)].map((_, idx) => (

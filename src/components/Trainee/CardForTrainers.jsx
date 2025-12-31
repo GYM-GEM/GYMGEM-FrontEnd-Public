@@ -4,7 +4,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 function CardForTrainers({ trainers }) {
   return (
     <section className="w-full pb-20">
-      <div className="mx-auto grid grid-cols-2 gap-4 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="mx-auto grid grid-cols-1 gap-4 sm:gap-8 lg:grid-cols-3 xl:grid-cols-4">
         {trainers && trainers.length > 0 ? (
           trainers.map((item) => {
             // Get price from first specialization or default

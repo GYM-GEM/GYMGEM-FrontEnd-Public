@@ -27,19 +27,19 @@ const StatusOverlay = ({ stats, feedback, status, countdown, exerciseType }) => 
   }
 
   return (
-    <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
+    <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none gap-2">
       {/* Stats Counter (Reps or Time) */}
-      <div className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-xl p-4 shadow-lg text-center min-w-[100px]">
-        <div className="text-gray-500 text-xs uppercase tracking-wider font-bold">
+      <div className="bg-white/90 backdrop-blur-md border border-gray-200 rounded-xl p-3 sm:p-4 shadow-lg text-center min-w-[80px] sm:min-w-[100px]">
+        <div className="text-gray-500 text-[10px] sm:text-xs uppercase tracking-wider font-bold">
           {exerciseType === 'hold' ? 'Time' : 'Reps'}
         </div>
-        <div className="text-4xl font-black text-gray-900">
+        <div className="text-2xl sm:text-4xl font-black text-gray-900">
           {exerciseType === 'hold' ? formatTime(stats.holdTime) : stats.reps}
         </div>
       </div>
 
       {/* Feedback Badge */}
-      <div className={`px-6 py-3 rounded-full font-bold border backdrop-blur-md shadow-lg transition-colors duration-300 max-w-xs text-center ${getStatusColor()}`}>
+      <div className={`px-4 py-2 sm:px-6 sm:py-3 rounded-full font-bold border backdrop-blur-md shadow-lg transition-colors duration-300 max-w-[60%] sm:max-w-xs text-center text-sm sm:text-base ${getStatusColor()}`}>
         {feedback}
       </div>
     </div>

@@ -108,39 +108,39 @@ const SessionLayout = () => {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950 text-zinc-100 p-4 font-sans selection:bg-green-500/30">
+        <div className="h-screen bg-zinc-950 text-zinc-100 p-0 lg:p-4 font-sans selection:bg-green-500/30 flex flex-col">
 
             {/* Navbar / Header */}
-            <div className="flex items-center justify-between mb-4 px-2">
+            <div className="flex items-center justify-between py-2 px-4 lg:mb-4 bg-zinc-950 lg:bg-transparent shrink-0">
                 <button
                     onClick={() => navigate(-1)}
                     className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors group"
                 >
-                    <div className="p-2 rounded-full bg-zinc-900 group-hover:bg-zinc-800 transition-colors">
-                        <ArrowLeft className="w-5 h-5" />
+                    <div className="p-1.5 sm:p-2 rounded-full bg-zinc-900 group-hover:bg-zinc-800 transition-colors">
+                        <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                     </div>
-                    <span className="font-bold uppercase tracking-wider text-sm">Dashboard</span>
+                    <span className="font-bold uppercase tracking-wider text-xs sm:text-sm hidden sm:inline">Dashboard</span>
                 </button>
 
                 <div className="flex flex-col items-center">
-                    <h1 className="text-xl md:text-2xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500">
+                    <h1 className="text-lg md:text-2xl font-black uppercase tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-zinc-500 text-center line-clamp-1">
                         {session.session_title || "Interactive Session"}
                     </h1>
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-green-500">
-                        <span className={`w-2 h-2 rounded-full ${session.status === 'live' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></span>
+                    <div className="flex items-center gap-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-green-500">
+                        <span className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${session.status === 'live' ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></span>
                         {session.status}
                     </div>
                 </div>
 
-                <div className="w-24"></div> {/* Spacer for center alignment */}
+                <div className="w-8 sm:w-24"></div> {/* Spacer for center alignment */}
             </div>
 
             {/* Main Content Area */}
-            <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-100px)]">
+            <div className="flex flex-col lg:flex-row gap-0 lg:gap-4 flex-1 lg:h-[calc(100vh-100px)] overflow-hidden">
 
                 {/* Left Stage (Video) */}
-                <div className={`transition-all duration-500 ease-in-out ${isScreenSharing ? 'lg:w-3/4' : 'lg:w-2/3'} w-full flex flex-col`}>
-                    <div className="flex-1 rounded-3xl overflow-hidden shadow-2xl border border-white/5 bg-zinc-900">
+                <div className={`transition-all duration-500 ease-in-out ${isScreenSharing ? 'lg:w-3/4' : 'lg:w-2/3'} w-full flex flex-col flex-1 min-h-0`}>
+                    <div className="flex-1 rounded-none lg:rounded-3xl overflow-hidden shadow-2xl border-none lg:border lg:border-white/5 bg-zinc-900">
                         <VideoCall
                             sessionId={id}
                             isTrainer={userRole === "trainer"}
@@ -151,7 +151,7 @@ const SessionLayout = () => {
                 </div>
 
                 {/* Right Panel (Tasks Only) */}
-                <div className="flex-1 flex flex-col bg-zinc-900/50 rounded-3xl border border-white/5 overflow-hidden backdrop-blur-sm">
+                {/* <div className="flex-1 flex flex-col bg-zinc-900/50 rounded-3xl border border-white/5 overflow-hidden backdrop-blur-sm">
                     <div className="p-4 border-b border-white/5">
                         <h3 className="font-black uppercase tracking-wider text-sm text-zinc-400">Session Plan</h3>
                         <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{session.description}</p>
@@ -172,7 +172,7 @@ const SessionLayout = () => {
                             </div>
                         )}
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     );

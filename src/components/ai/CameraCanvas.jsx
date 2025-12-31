@@ -10,15 +10,15 @@ const CameraCanvas = forwardRef(({ videoRef }, canvasRef) => {
         playsInline
         muted
       />
-      
+
       {/* Visible Canvas Overlay */}
       <canvas
         ref={canvasRef}
         width={1280}
         height={720}
-        className="absolute top-0 left-0 w-full h-full object-contain bg-white"
+        className="absolute top-0 left-0 w-full h-full object-contain bg-black"
       />
-      
+
       {/* Placeholder when camera is off */}
       <div className="absolute inset-0 flex items-center justify-center text-gray-500 pointer-events-none -z-10">
         <span className="text-lg">Camera Inactive</span>

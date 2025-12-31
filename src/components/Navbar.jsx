@@ -173,7 +173,7 @@ const Navbar = () => {
   const aiLinks = [
     { to: "/ai-trainer", label: "AI Personal Trainer", icon: <MdSportsMartialArts size={18} /> },
     { to: "/ai-food", label: "AI Food Analyzer", icon: <Utensils size={18} /> },
-    { to: "/ai-chat", label: "AI Chatbot", icon: <MessageSquare size={18} /> },
+    { to: "/ai-chat", label: "AI Chatbot", icon: <Bot size={18} /> },
   ];
 
   // -- Effects --
@@ -351,7 +351,7 @@ const Navbar = () => {
 
             {/* 1. Public Base Links */}
             {/* Always show Home */}
-            <NavItem to="/" label="Home" end />
+            <NavItem to="/" label="Home" icon={<Home size={18} />} end />
 
             {/* 2. Context Specific Links (Dashboard Only) */}
             {isInDashboard && contextLinks.map(link => (

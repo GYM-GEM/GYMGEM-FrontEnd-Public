@@ -1,4 +1,4 @@
-import NavBarDash from "./NavBarDash";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import testimg from "../../../assets/cardCo1.png";
@@ -160,7 +160,7 @@ const ClientTrainerDash = () => {
 
   return (
     <>
-      <NavBarDash />
+      <Navbar />
       <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900 py-12">
         <section>
           <div className="max-w-6xl mx-auto px-4">

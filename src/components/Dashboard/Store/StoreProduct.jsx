@@ -1,5 +1,5 @@
 import { useContext, useState, useMemo, useEffect } from "react";
-import NavBarDashStore from "./NavBarDashStore.jsx";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash.jsx";
 import { StoreContext } from "../../../context/StoreContext.jsx";
 import { IoIosTrash } from "react-icons/io";
@@ -137,7 +137,7 @@ const StoreProdact = () => {
 
   return (
     <>
-      <NavBarDashStore />
+      <Navbar />
       <main className="min-h-screen bg-slate-50 text-slate-900 pt-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
 

@@ -1,5 +1,5 @@
 import FooterDash from "../FooterDash";
-import NavBarDashStore from "./NavBarDashStore";
+import Navbar from "../../Navbar.jsx";
 import { X, Clock, MapPin, Globe, Map as MapIcon, Mail, Phone, ShoppingBag, LayoutGrid, Loader2, Store, Layers, AlignLeft, Plus, Trash2, Edit, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -175,7 +175,7 @@ const Storeprofile = () => {
 
   return (
     <>
-      <NavBarDashStore />
+      <Navbar />
 
       <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl space-y-8">

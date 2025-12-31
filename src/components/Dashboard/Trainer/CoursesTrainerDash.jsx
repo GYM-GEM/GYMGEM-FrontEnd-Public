@@ -11,7 +11,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { getCategoryName } from "../../../utils/categoryMapping";
 import axiosInstance from "../../../utils/axiosConfig";
-import NavBarDash from "./NavBarDash.jsx";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash.jsx";
 
 const CoursesTrainerDash = () => {
@@ -308,7 +308,7 @@ const CoursesTrainerDash = () => {
 
   return (
     <>
-      <NavBarDash />
+      <Navbar />
       <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900 pt-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <section className="mb-6">
@@ -528,7 +528,7 @@ const CoursesTrainerDash = () => {
                             </td>
 
                             <td className="px-4 py-4 text-center">
-                              
+
                             </td>
                           </tr>
 

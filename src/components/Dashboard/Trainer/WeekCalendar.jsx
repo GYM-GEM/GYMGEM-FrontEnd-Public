@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Calculator, Calendar as CalendarIcon, Clock, X, Trash2, Edit2, Plus, Loader2 } from "lucide-react";
 import axiosInstance from "../../../utils/axiosConfig";
 import { useToast } from "../../../context/ToastContext";
-import NavBarDash from "./NavBarDash";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash";
 
 export default function WeekCalendar() {
@@ -197,7 +197,7 @@ export default function WeekCalendar() {
 
     return (
         <>
-            <NavBarDash />
+            <Navbar />
             <div className="w-full max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
 
                 {/* Header Section */}

@@ -1,4 +1,4 @@
-import NavBarDash from "./NavBarDash.jsx";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash.jsx";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
@@ -84,7 +84,7 @@ const DashboardTrainer = () => {
 
   return (
     <>
-      <NavBarDash />
+      <Navbar />
       <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900">
         <div className="max-w-6xl mx-auto px-4 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

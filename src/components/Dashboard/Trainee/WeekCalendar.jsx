@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import NavTraineDash from "./NavTraineDash";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash";
 import { Calendar as CalendarIcon, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -116,7 +116,7 @@ const WeekCalendar = () => {
 
     return (
         <>
-            <NavTraineDash />
+            <Navbar />
             <main className="min-h-screen bg-slate-50 py-8">
                 <div className="max-w-7xl mx-auto px-4 space-y-6">
 

@@ -1,4 +1,4 @@
-import NavBarDash from "./NavBarDash";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash";
 import { Link, NavLink } from "react-router-dom";
 import testimg from "../../../assets/cardCo1.png";
@@ -132,7 +132,7 @@ const GymClient = () => {
 
   return (
     <>
-      <NavBarDash />
+      <Navbar />
       <main className="bg-background text-foreground min-h-screen py-12">
         <section>
           <div className="max-w-6xl mx-auto px-4">

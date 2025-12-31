@@ -1,4 +1,4 @@
-import NavBarDashGym from "./NavBarDashGym";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash";
 import { Lock, CreditCard, LogOut, X } from "lucide-react";
 import { useState } from "react";
@@ -173,7 +173,7 @@ const Gymprofile = () => {
 
   return (
     <>
-      <NavBarDashGym />
+      <Navbar />
 
       <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900 py-12">
         <div className="max-w-6xl mx-auto px-4">

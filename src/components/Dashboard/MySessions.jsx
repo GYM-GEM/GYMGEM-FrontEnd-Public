@@ -22,8 +22,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosConfig";
 import { useToast } from "../../context/ToastContext";
-import NavBarDash from "./Trainer/NavBarDash";
-import NavTraineDash from "./Trainee/NavTraineDash";
+import Navbar from "../Navbar.jsx";
 
 const MySessions = () => {
     const navigate = useNavigate();
@@ -314,8 +313,8 @@ const MySessions = () => {
 
     return (
         <>
-        {/* EL NAVBAR BTA3T EL TRAINER W EL TRAINEE 3LA 7SAB EL ROLE  */}
-        {userRole === 'trainer' ? <NavBarDash /> : <NavTraineDash />}
+            {/* EL NAVBAR BTA3T EL TRAINER W EL TRAINEE 3LA 7SAB EL ROLE  */}
+            <Navbar />
             <main className="min-h-screen bg-gray-50 py-8">
                 <div className="max-w-6xl mx-auto px-4">
                     {/* Header */}

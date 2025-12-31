@@ -1,6 +1,6 @@
 import { useState, useMemo, useContext } from "react";
 import { MemberContext } from "../../../context/MemberContext";
-import NavBarDashGym from "./NavBarDashGym.jsx";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash.jsx";
 import { IoIosTrash } from "react-icons/io";
 import { MdOutlineEdit } from "react-icons/md";
@@ -130,7 +130,7 @@ const GymMember = () => {
 
   return (
     <>
-      <NavBarDashGym />
+      <Navbar />
       <main className="bg-background text-foreground min-h-screen pt-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
           {/* Header & Search */}
@@ -415,13 +415,12 @@ const GymMember = () => {
                             </select>
                           ) : (
                             <span
-                              className={`px-2 py-1 rounded text-xs font-semibold ${
-                                row.membershipType === "VIP"
-                                  ? "bg-purple-100 text-purple-700"
-                                  : row.membershipType === "Premium"
+                              className={`px-2 py-1 rounded text-xs font-semibold ${row.membershipType === "VIP"
+                                ? "bg-purple-100 text-purple-700"
+                                : row.membershipType === "Premium"
                                   ? "bg-blue-100 text-blue-700"
                                   : "bg-gray-100 text-gray-700"
-                              }`}
+                                }`}
                             >
                               {row.membershipType}
                             </span>
@@ -445,13 +444,12 @@ const GymMember = () => {
                             </select>
                           ) : (
                             <span
-                              className={`px-2 py-1 rounded text-xs font-semibold ${
-                                row.status === "Active"
-                                  ? "bg-green-100 text-green-700"
-                                  : row.status === "Inactive"
+                              className={`px-2 py-1 rounded text-xs font-semibold ${row.status === "Active"
+                                ? "bg-green-100 text-green-700"
+                                : row.status === "Inactive"
                                   ? "bg-red-100 text-red-700"
                                   : "bg-yellow-100 text-yellow-700"
-                              }`}
+                                }`}
                             >
                               {row.status}
                             </span>

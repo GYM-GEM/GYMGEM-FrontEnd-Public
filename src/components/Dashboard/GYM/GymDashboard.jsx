@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import NavBarDashGym from "./NavBarDashGym.jsx";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash.jsx";
 import { MemberContext } from "../../../context/MemberContext";
 import { SessionContext } from "../../../context/SessionContext";
@@ -10,7 +10,7 @@ const DashboardTrainer = () => {
   const { members } = useContext(MemberContext);
   const { sessions } = useContext(SessionContext);
   const { classes } = useContext(ClassContext);
-  
+
   // Calculate stats
   const totalMembers = members.length;
   const activeMembers = members.filter(m => m.status === 'Active').length;
@@ -52,13 +52,13 @@ const DashboardTrainer = () => {
   }).length;
 
   const newMembersToday = members.filter(m => {
-      if (!m.joinDate) return false;
-      return new Date(m.joinDate).toDateString() === now.toDateString();
+    if (!m.joinDate) return false;
+    return new Date(m.joinDate).toDateString() === now.toDateString();
   }).length;
 
   return (
     <>
-      <NavBarDashGym />
+      <Navbar />
       <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900">
         <div className="max-w-6xl mx-auto px-4 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -186,11 +186,10 @@ const DashboardTrainer = () => {
                               {member.membershipType}
                             </td>
                             <td className="px-4 py-3 text-sm font-semibold">
-                              <span className={`px-2 py-1 rounded-full text-xs ${
-                                member.status === 'Active' ? 'bg-green-100 text-green-700' :
+                              <span className={`px-2 py-1 rounded-full text-xs ${member.status === 'Active' ? 'bg-green-100 text-green-700' :
                                 member.status === 'Inactive' ? 'bg-red-100 text-red-700' :
-                                'bg-yellow-100 text-yellow-700'
-                              }`}>
+                                  'bg-yellow-100 text-yellow-700'
+                                }`}>
                                 {member.status}
                               </span>
                             </td>

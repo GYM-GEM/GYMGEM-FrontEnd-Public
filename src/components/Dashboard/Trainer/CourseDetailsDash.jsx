@@ -21,7 +21,7 @@ import {
   Save,
   X,
 } from "lucide-react";
-import NavBarDash from "./NavBarDash";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash";
 import axiosInstance from "../../../utils/axiosConfig";
 import UploadImage from "../../UploadImage";
@@ -293,7 +293,7 @@ const CourseDetailsDash = () => {
   if (!course) {
     return (
       <>
-        <NavBarDash />
+        <Navbar />
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
@@ -343,7 +343,7 @@ const CourseDetailsDash = () => {
 
   return (
     <>
-      <NavBarDash />
+      <Navbar />
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
           {/* Back Button */}
@@ -775,10 +775,10 @@ const CourseDetailsDash = () => {
               onClick={handlePublishToggle}
               disabled={course.status?.toLowerCase() === "pending"}
               className={`px-6 py-3 rounded-lg transition-colors poppins-medium flex items-center gap-2 ${course.status?.toLowerCase() === "pending"
-                  ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  : course.is_deleted
-                    ? "bg-[#86ac55] text-white hover:bg-[#86ac55]/90 cursor-pointer"
-                    : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 cursor-pointer"
+                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                : course.is_deleted
+                  ? "bg-[#86ac55] text-white hover:bg-[#86ac55]/90 cursor-pointer"
+                  : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 cursor-pointer"
                 }`}
             >
               {course.status?.toLowerCase() === "pending" ? (

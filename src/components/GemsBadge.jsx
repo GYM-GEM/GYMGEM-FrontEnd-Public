@@ -17,12 +17,18 @@ const GemsBadge = ({ balance = 0, onAddClick, isLoading = false }) => {
     );
   }
 
+  const formatBalance = (num) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'm';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toLocaleString();
+  };
+
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 bg-orange-50 rounded-full border border-orange-100 shadow-sm transition-all hover:shadow-md group">
       <div className="flex items-center gap-1.5">
         <Sparkles className="w-4 h-4 text-[#FF8211] animate-pulse" />
         <span className="text-sm font-bold text-gray-800 poppins-semibold">
-          {balance !== null ? balance.toLocaleString() : '0'}
+          {balance !== null ? formatBalance(balance) : '0'}
         </span>
       </div>
       {isTrainee && (

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Star, Clock, Award, BookOpen, ArrowRight } from "lucide-react";
-import NavTraineDash from "./NavTraineDash";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "./../FooterDash";
 import { getUserEnrolledCourses } from "../../BuyNow/Checkout";
 import axiosInstance from "../../../utils/axiosConfig";
@@ -79,7 +79,7 @@ const CoursesTraineDash = () => {
 
   return (
     <>
-      <NavTraineDash />
+      <Navbar />
       <main>
         <div className="bg-gray-50 text-foreground min-h-screen">
           <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">

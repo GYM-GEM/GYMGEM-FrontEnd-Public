@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Trash2, LogOut } from "lucide-react";
-import NavBarDash from "./NavBarDash";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash";
 import { useToast } from "../../../context/ToastContext";
 import axiosInstance from "../../../utils/axiosConfig";
@@ -138,7 +138,7 @@ const SettingsTrainee = () => {
 
   return (
     <>
-      <NavBarDash />
+      <Navbar />
       <main className="bg-gray-50 min-h-screen py-12">
         <div className="max-w-4xl mx-auto px-4">
           <div className="mb-8">

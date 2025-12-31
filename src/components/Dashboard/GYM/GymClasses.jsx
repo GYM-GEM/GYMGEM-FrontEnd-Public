@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { ClassContext } from "../../../context/ClassContext";
-import NavBarDashGym from "./NavBarDashGym.jsx";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash.jsx";
 import { IoIosTrash } from "react-icons/io";
 import { MdOutlineEdit } from "react-icons/md";
@@ -29,7 +29,7 @@ const GymClasses = () => {
 
   return (
     <>
-      <NavBarDashGym />
+      <Navbar />
       <main className="bg-background text-foreground min-h-screen pt-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <section className="mb-6 flex justify-between items-center">
@@ -127,9 +127,8 @@ const GymClasses = () => {
                           )}
                         </td>
                         <td className="px-4 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            gymClass.status === 'Scheduled' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                          }`}>
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${gymClass.status === 'Scheduled' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                            }`}>
                             {gymClass.status}
                           </span>
                         </td>

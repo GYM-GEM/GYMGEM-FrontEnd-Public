@@ -21,8 +21,8 @@ import {
   Loader2,
 } from "lucide-react";
 import ReactPlayer from "react-player";
-import NavTraineeDash from "../Dashboard/Trainee/NavTraineDash";
-import Footer from "../Footer";
+import Navbar from "../Navbar.jsx";
+import Footer from "../Footer.jsx";
 import axiosInstance from "../../utils/axiosConfig";
 import VideoPlayer from "./VideoPlayer";
 import axios from "axios";
@@ -347,7 +347,7 @@ const CourseLearn = () => {
   if (!course) {
     return (
       <>
-        <NavTraineeDash />
+        <Navbar />
         <div className="min-h-screen flex items-center justify-center bg-gray-50"></div>
         <Footer />
       </>

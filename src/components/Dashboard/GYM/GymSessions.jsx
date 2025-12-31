@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { SessionContext } from "../../../context/SessionContext";
-import NavBarDashGym from "./NavBarDashGym.jsx";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash.jsx";
 import { IoIosCheckmarkCircle, IoIosCloseCircle } from "react-icons/io";
 
@@ -24,7 +24,7 @@ const GymSessions = () => {
 
   return (
     <>
-      <NavBarDashGym />
+      <Navbar />
       <main className="bg-background text-foreground min-h-screen pt-24">
         <div className="max-w-6xl mx-auto px-4 py-8">
           <section className="mb-6 flex justify-between items-center">
@@ -91,11 +91,10 @@ const GymSessions = () => {
                         <td className="px-4 py-4">{session.member}</td>
                         <td className="px-4 py-4">{new Date(session.dateTime).toLocaleString()}</td>
                         <td className="px-4 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            session.status === 'Completed' ? 'bg-green-100 text-green-700' :
+                          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${session.status === 'Completed' ? 'bg-green-100 text-green-700' :
                             session.status === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                            'bg-blue-100 text-blue-700'
-                          }`}>
+                              'bg-blue-100 text-blue-700'
+                            }`}>
                             {session.status}
                           </span>
                         </td>

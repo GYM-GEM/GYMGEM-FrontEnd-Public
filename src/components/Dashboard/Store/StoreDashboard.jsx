@@ -1,6 +1,6 @@
 import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
-import NavBarDashStore from "./NavBarDashStore.jsx";
+import Navbar from "../../Navbar.jsx";
 import FooterDash from "../FooterDash.jsx";
 import { StoreContext } from "../../../context/StoreContext.jsx";
 
@@ -15,7 +15,7 @@ const StoreDashboard = () => {
   // Stats Calculations
   const totalProducts = products.length;
   const activeOrders = orders.filter(o => o.status === 'Pending' || o.status === 'Processing').length;
-  
+
   // Sales Today (Mock calculation based on orders with today's date)
   const today = new Date().toDateString();
   const salesToday = orders
@@ -47,7 +47,7 @@ const StoreDashboard = () => {
 
   return (
     <>
-      <NavBarDashStore />
+      <Navbar />
       <main className="min-h-screen bg-gradient-to-b from-orange-50 via-white to-slate-50 text-slate-900">
         <div className="max-w-6xl mx-auto px-4 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -110,11 +110,10 @@ const StoreDashboard = () => {
                         <p className="text-sm font-semibold text-slate-800">Order #{o.id.slice(0, 8)}</p>
                         <p className="text-xs text-slate-500">{o.productName}</p>
                       </div>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        o.status === 'Completed' ? 'bg-green-100 text-green-700' :
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${o.status === 'Completed' ? 'bg-green-100 text-green-700' :
                         o.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                        o.status === 'Processing' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
-                      }`}>
+                          o.status === 'Processing' ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'
+                        }`}>
                         {o.status}
                       </span>
                     </div>
@@ -143,9 +142,9 @@ const StoreDashboard = () => {
                       ➕ Add Product
                     </button>
                     <Link to="/store/order" className="text-left text-slate-700 hover:text-[#ff8211] hover:underline">
-                    <button className="text-left text-slate-700 hover:text-[#ff8211] hover:underline">
-                      📦 View Recent Orders
-                    </button>
+                      <button className="text-left text-slate-700 hover:text-[#ff8211] hover:underline">
+                        📦 View Recent Orders
+                      </button>
                     </Link>
                   </div>
                 </div>
@@ -166,7 +165,7 @@ const StoreDashboard = () => {
                     required
                     className="w-full border rounded p-2"
                     value={productForm.name}
-                    onChange={e => setProductForm({...productForm, name: e.target.value})}
+                    onChange={e => setProductForm({ ...productForm, name: e.target.value })}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
@@ -177,7 +176,7 @@ const StoreDashboard = () => {
                       type="number"
                       className="w-full border rounded p-2"
                       value={productForm.quantity}
-                      onChange={e => setProductForm({...productForm, quantity: e.target.value})}
+                      onChange={e => setProductForm({ ...productForm, quantity: e.target.value })}
                     />
                   </div>
                   <div>
@@ -188,7 +187,7 @@ const StoreDashboard = () => {
                       step="0.01"
                       className="w-full border rounded p-2"
                       value={productForm.price}
-                      onChange={e => setProductForm({...productForm, price: e.target.value})}
+                      onChange={e => setProductForm({ ...productForm, price: e.target.value })}
                     />
                   </div>
                 </div>
@@ -197,7 +196,7 @@ const StoreDashboard = () => {
                   <select
                     className="w-full border rounded p-2"
                     value={productForm.category}
-                    onChange={e => setProductForm({...productForm, category: e.target.value})}
+                    onChange={e => setProductForm({ ...productForm, category: e.target.value })}
                   >
                     <option value="">Select Category</option>
                     <option value="Supplements">Supplements</option>

@@ -140,6 +140,13 @@ const StoreCheckout = () => {
           status: "pending",
           notes: notes,
           total_price: item.price * item.cartQuantity,
+          order_items: [
+            {
+              store_item_id: item.id,
+              quantity: item.cartQuantity,
+              price: item.price
+            }
+          ]
         };
 
         await axiosInstance.post('/api/stores/orders', payload);

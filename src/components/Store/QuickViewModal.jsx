@@ -12,7 +12,7 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
     if (!isOpen || !product) return null;
 
     const handleAddToCart = () => {
-        if (product.quantity > 0) {
+        if (product.total_quantity > 0) {
             addToCart(product, 1);
             setIsAdded(true);
             setTimeout(() => setIsAdded(false), 2000);
@@ -55,7 +55,7 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
                         {/* Image Column */}
                         <div className="w-full md:w-1/2 bg-slate-100 relative h-64 md:h-auto">
                             <img
-                                src={product.image}
+                                src={product.item_image}
                                 alt={product.name}
                                 className="w-full h-full object-cover"
                             />
@@ -71,7 +71,7 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
                                 <h2 className="text-2xl font-bold text-slate-900 mb-2">{product.name}</h2>
                                 <div className="flex items-center gap-4">
                                     <span className="text-3xl font-bold text-[#ff8211]">{product.price} GEMs</span>
-                                    {product.quantity > 0 ? (
+                                    {product.total_quantity > 0 ? (
                                         <span className="text-green-600 font-medium text-sm bg-green-50 px-2 py-1 rounded-full border border-green-100">
                                             In Stock
                                         </span>
@@ -92,7 +92,7 @@ const QuickViewModal = ({ product, isOpen, onClose }) => {
                             <div className="mt-auto space-y-3">
                                 <button
                                     onClick={handleAddToCart}
-                                    disabled={product.quantity === 0}
+                                    disabled={product.total_quantity === 0}
                                     className={`w-full py-3.5 rounded-xl font-semibold text-base transition-all duration-300 flex items-center justify-center gap-2 ${isAdded
                                         ? 'bg-green-600 text-white shadow-lg shadow-green-500/30 ring-2 ring-green-600 ring-offset-2'
                                         : 'bg-slate-900 text-white hover:bg-[#ff8211] shadow-lg hover:shadow-[#ff8211]/30'

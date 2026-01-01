@@ -3,17 +3,18 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { StoreContext } from "../context/StoreContext.jsx";
 import NavBar from "../components/Navbar.jsx";
 import Footer from "../components/Footer.jsx";
-import { 
-  ArrowLeft, 
-  ShoppingCart, 
-  Package, 
-  AlertCircle, 
-  Heart, 
+import {
+  ArrowLeft,
+  ShoppingCart,
+  Package,
+  AlertCircle,
+  Heart,
   Star,
   Minus,
   Plus,
   TrendingUp
 } from "lucide-react";
+import axiosInstance from "../utils/axiosConfig.js";
 
 /**
  * ProductDetails Component
@@ -32,35 +33,19 @@ const ProductDetails = () => {
   const [activeTab, setActiveTab] = useState("description");
   const [isFavorite, setIsFavorite] = useState(false);
 
-  // Fetch product details from localStorage (temporary - will use API later)
+  // Fetch product details from API
   useEffect(() => {
     const fetchProduct = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        // Simulate API delay for realistic UX
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        // Get products from localStorage
-        const savedProducts = localStorage.getItem('products');
-        
-        if (!savedProducts) {
-          throw new Error('No products found in storage');
-        }
-
-        const productsArray = JSON.parse(savedProducts);
-        const foundProduct = productsArray.find(p => p.id === id);
-
-        if (!foundProduct) {
-          throw new Error('Product not found');
-        }
-
-        setProduct(foundProduct);
+        const response = await axiosInstance.get(`/api/stores/items/${id}`);
+        setProduct(response.data);
       } catch (err) {
         console.error("Error fetching product:", err);
         setError(
-          err.message || "Failed to load product details. Please try again."
+          err.response?.data?.message || err.message || "Failed to load product details. Please try again."
         );
       } finally {
         setLoading(false);
@@ -72,7 +57,7 @@ const ProductDetails = () => {
 
   // Handle Add to Cart with Quantity
   const handleAddToCart = () => {
-    if (product && product.quantity >= quantity) {
+    if (product && product.total_quantity >= quantity) {
       addToCart(product, quantity);
       setAddedToCart(true);
       // Button will permanently change to "View Cart & Checkout"
@@ -155,7 +140,7 @@ const ProductDetails = () => {
 
       <section className="w-full bg-background pt-24 pb-16">
         <div className="mx-auto w-[90%] max-w-7xl px-4 sm:px-6 lg:px-8">
-          
+
           {/* Breadcrumb / Back Button */}
           <div className="flex items-center gap-2 text-sm mb-8">
             <Link to="/stores" className="text-slate-600 hover:text-[#ff8211] transition">Store</Link>
@@ -167,27 +152,27 @@ const ProductDetails = () => {
 
           {/* Main Product Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
-            
+
             {/* Product Image */}
             <div className="space-y-4">
               <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden aspect-square">
                 <div className="w-full h-full bg-slate-100 flex items-center justify-center relative">
-                  {product.image ? (
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                  {product.item_image ? (
+                    <img src={product.item_image} alt={product.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="text-slate-400 text-center p-8">
                       <Package className="w-24 h-24 mx-auto mb-4" />
                       <p>No Image Available</p>
                     </div>
                   )}
-                  
+
                   {/* Stock Badge */}
-                  {product.quantity < 5 && product.quantity > 0 && (
+                  {product.total_quantity < 5 && product.total_quantity > 0 && (
                     <span className="absolute top-4 right-4 bg-red-500 text-white text-sm px-3 py-1.5 rounded-lg font-semibold">
-                      Only {product.quantity} left!
+                      Only {product.total_quantity} left!
                     </span>
                   )}
-                  {product.quantity === 0 && (
+                  {product.total_quantity === 0 && (
                     <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                       <span className="text-white text-2xl font-bold tracking-wider">SOLD OUT</span>
                     </div>
@@ -247,14 +232,14 @@ const ProductDetails = () => {
               <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-600">Availability:</span>
-                  <span className={`font-semibold ${product.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {product.quantity > 0 ? `${product.quantity} in stock` : 'Out of stock'}
+                  <span className={`font-semibold ${product.total_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {product.total_quantity > 0 ? `${product.total_quantity} in stock` : 'Out of stock'}
                   </span>
                 </div>
               </div>
 
               {/* Quantity Selector */}
-              {product.quantity > 0 && (
+              {product.total_quantity > 0 && (
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-slate-700 mb-2">Quantity</label>
                   <div className="flex items-center gap-3">
@@ -268,8 +253,8 @@ const ProductDetails = () => {
                       {quantity}
                     </span>
                     <button
-                      onClick={() => setQuantity(Math.min(product.quantity, quantity + 1))}
-                      disabled={quantity >= product.quantity}
+                      onClick={() => setQuantity(Math.min(product.total_quantity, quantity + 1))}
+                      disabled={quantity >= product.total_quantity}
                       className="w-10 h-10 rounded-lg border border-slate-300 flex items-center justify-center hover:bg-slate-100 transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Plus className="w-4 h-4 text-slate-700" />
@@ -290,7 +275,7 @@ const ProductDetails = () => {
               ) : (
                 <button
                   onClick={handleAddToCart}
-                  disabled={product.quantity === 0 || quantity > product.quantity}
+                  disabled={product.total_quantity === 0 || quantity > product.total_quantity}
                   className={`w-full py-4 rounded-lg font-semibold text-lg transition shadow-md flex items-center justify-center gap-2 mb-4 bg-[#ff8211] text-white hover:bg-[#e67300] disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
                   <ShoppingCart className="w-5 h-5" />
@@ -334,31 +319,28 @@ const ProductDetails = () => {
             <div className="flex border-b border-slate-200">
               <button
                 onClick={() => setActiveTab("description")}
-                className={`px-6 py-4 font-semibold transition border-b-2 ${
-                  activeTab === "description"
+                className={`px-6 py-4 font-semibold transition border-b-2 ${activeTab === "description"
                     ? "border-[#ff8211] text-[#ff8211]"
                     : "border-transparent text-slate-600 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 Description
               </button>
               <button
                 onClick={() => setActiveTab("specifications")}
-                className={`px-6 py-4 font-semibold transition border-b-2 ${
-                  activeTab === "specifications"
+                className={`px-6 py-4 font-semibold transition border-b-2 ${activeTab === "specifications"
                     ? "border-[#ff8211] text-[#ff8211]"
                     : "border-transparent text-slate-600 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 Specifications
               </button>
               <button
                 onClick={() => setActiveTab("reviews")}
-                className={`px-6 py-4 font-semibold transition border-b-2 ${
-                  activeTab === "reviews"
+                className={`px-6 py-4 font-semibold transition border-b-2 ${activeTab === "reviews"
                     ? "border-[#ff8211] text-[#ff8211]"
                     : "border-transparent text-slate-600 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 Reviews ({reviews.length})
               </button>
@@ -373,7 +355,7 @@ const ProductDetails = () => {
                     {product.description || "No detailed description available."}
                   </p>
                   <p className="text-slate-600 leading-relaxed">
-                    This premium {product.category.toLowerCase()} product is designed to help you achieve your fitness goals. 
+                    This premium {product.category.toLowerCase()} product is designed to help you achieve your fitness goals.
                     Made with high-quality materials and backed by our satisfaction guarantee.
                   </p>
                 </div>
@@ -393,8 +375,8 @@ const ProductDetails = () => {
                     </div>
                     <div className="flex justify-between py-2 border-b border-slate-100">
                       <span className="text-slate-600">Stock Status:</span>
-                      <span className={`font-semibold ${product.quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {product.quantity > 0 ? 'In Stock' : 'Out of Stock'}
+                      <span className={`font-semibold ${product.total_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {product.total_quantity > 0 ? 'In Stock' : 'Out of Stock'}
                       </span>
                     </div>
                     <div className="flex justify-between py-2 border-b border-slate-100">
@@ -462,9 +444,9 @@ const ProductDetails = () => {
                     className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition border border-slate-100 group"
                   >
                     <div className="h-48 bg-slate-200 overflow-hidden relative">
-                      {relatedProduct.image ? (
+                      {relatedProduct.item_image ? (
                         <img
-                          src={relatedProduct.image}
+                          src={relatedProduct.item_image}
                           alt={relatedProduct.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
                         />

@@ -16,6 +16,24 @@ const StoreProdact = () => {
     fetchProducts();
   }, []);
 
+  const [branches, setBranches] = useState([]);
+
+  // Fetch branches for dropdown
+  useEffect(() => {
+    const fetchBranches = async () => {
+      try {
+        const response = await axiosInstance.get(`/api/stores/branches`);
+        // Handle both direct array and paginated responses
+        const data = Array.isArray(response.data) ? response.data : (response.data?.results || []);
+        console.log('Fetched branches:', data); // Debug log
+        setBranches(data);
+      } catch (error) {
+        console.error('Error fetching branches:', error);
+      }
+    };
+    fetchBranches();
+  }, []);
+
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -26,7 +44,8 @@ const StoreProdact = () => {
     image: "",
     status: "Draft",
     brand: "",
-    expiration_date: ""
+    expiration_date: "",
+    branch_id: ""
   });
   const [editingId, setEditingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +62,8 @@ const StoreProdact = () => {
       image: "",
       status: "Draft",
       brand: "",
-      expiration_date: ""
+      expiration_date: "",
+      branch_id: ""
     });
     setEditingId(null);
     setShowAddForm(false);
@@ -63,10 +83,13 @@ const StoreProdact = () => {
     const productData = {
       name: formData.name,
       description: formData.description,
-      price: formData.price.toString(),
+      price: Number(formData.price),
       category: formData.category.toLowerCase(),
+      status: formData.status.toLowerCase(),
       brand: formData.brand,
-      expiration_date: formData.expiration_date,
+      expiration_date: formData.expiration_date || null,
+      item_image: formData.image,
+      branch_id: formData.branch_id ? Number(formData.branch_id) : null,
       inventory: [
         {
           quantity: parseInt(formData.quantity)
@@ -96,10 +119,11 @@ const StoreProdact = () => {
       quantity: product.inventory?.[0]?.quantity || "",
       price: product.price || "",
       description: product.description || "",
-      image: product.image || "",
+      image: product.item_image || "",
       status: product.status || "Draft",
       brand: product.brand || "",
-      expiration_date: product.expiration_date || ""
+      expiration_date: product.expiration_date || "",
+      branch_id: product.branch_id || ""
     });
     setShowAddForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -271,9 +295,8 @@ const StoreProdact = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1 text-slate-700">Expiration Date *</label>
+                      <label className="block text-sm font-medium mb-1 text-slate-700">Expiration Date</label>
                       <input
-                        required
                         type="date"
                         name="expiration_date"
                         value={formData.expiration_date}
@@ -281,6 +304,22 @@ const StoreProdact = () => {
                         className="w-full border border-slate-200 rounded-lg p-2.5 focus:border-[#ff8211] outline-none transition"
                       />
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-slate-700">Branch (Optional)</label>
+                    <select
+                      name="branch_id"
+                      value={formData.branch_id}
+                      onChange={handleChange}
+                      className="w-full border border-slate-200 rounded-lg p-2.5 focus:border-[#ff8211] outline-none transition bg-white"
+                    >
+                      <option value="">All Branches</option>
+                      {branches.map((branch) => (
+                        <option key={branch.id} value={branch.id}>
+                          {branch.state} - {branch.street}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
@@ -346,8 +385,8 @@ const StoreProdact = () => {
                         <td className="px-6 py-4 max-w-[250px]">
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0 border border-slate-200">
-                              {p.image ? (
-                                <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                              {p.item_image ? (
+                                <img src={p.item_image} alt={p.name} className="w-full h-full object-cover" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-slate-300 text-xs">No Img</div>
                               )}

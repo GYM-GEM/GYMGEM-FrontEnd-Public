@@ -6,6 +6,7 @@ import Footer from "../../Footer.jsx";
 import { Package, Clock, CheckCircle, XCircle, Truck, ArrowLeft, Eye, Search, Filter, DollarSign, ShoppingBag, TrendingUp, Calendar, MapPin, CreditCard } from "lucide-react";
 import { useToast } from "../../../context/ToastContext.jsx";
 import { motion, AnimatePresence } from "framer-motion";
+import axiosInstance from "../../../utils/axiosConfig";
 
 /**
  * OrderTracking Component
@@ -90,7 +91,8 @@ const OrderTracking = () => {
   };
 
   // Handle order cancellation
-  const handleCancelOrder = (e, orderId, currentStatus) => {
+  // Handle order cancellation
+  const handleCancelOrder = async (e, orderId, currentStatus) => {
     e.stopPropagation();
     if (currentStatus === "Completed" || currentStatus === "Cancelled") {
       showToast("This order cannot be cancelled.", { type: "error" });
@@ -98,8 +100,18 @@ const OrderTracking = () => {
     }
 
     if (confirm("Are you sure you want to cancel this order?")) {
-      updateOrderStatus(orderId, "Cancelled");
-      showToast("Order cancelled successfully", { type: "success" });
+      try {
+        await axiosInstance.put(`/api/stores/orders/${orderId}`, {
+          status: 'cancelled'
+        });
+
+        // Update local context to reflect change immediately in UI
+        updateOrderStatus(orderId, "cancelled");
+        showToast("Order cancelled successfully", { type: "success" });
+      } catch (error) {
+        console.error("Error cancelling order:", error);
+        showToast("Failed to cancel order", { type: "error" });
+      }
     }
   };
 

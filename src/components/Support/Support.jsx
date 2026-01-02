@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
 import { Mail, Phone, Clock, Send, CheckCircle } from "lucide-react";
+import axiosInstance from "../../utils/axiosConfig";
+import { useToast } from "../../context/ToastContext";
 
 const Support = () => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -36,7 +39,7 @@ const Support = () => {
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
@@ -45,13 +48,32 @@ const Support = () => {
     }
 
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+
+    try {
+      // API expects 'details' and 'target_complaint'
+      // We combine form data into the 'details' field since the API only accepts that text field.
+      // We send target_complaint as null since this is a general support message.
+      const detailsContent = {
+        subject: formData.subject,
+        name: formData.fullName,
+        email: formData.email,
+        message: formData.message
+      };
+
+      await axiosInstance.post("/api/utils/complaints/", {
+        target_complaint: null,
+        details: detailsContent
+      });
+
       setIsSubmitting(false);
       setSubmitted(true);
       setFormData({ fullName: "", email: "", subject: "", message: "" });
-    }, 1500);
+      showToast("Message sent successfully!", { type: "success" });
+    } catch (error) {
+      console.error("Error sending complaint:", error);
+      setIsSubmitting(false);
+      showToast("Failed to send message. Please try again.", { type: "error" });
+    }
   };
 
   if (submitted) {

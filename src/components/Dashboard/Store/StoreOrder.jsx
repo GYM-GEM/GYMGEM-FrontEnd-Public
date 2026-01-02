@@ -13,12 +13,14 @@ const StoreOrder = () => {
 
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
-    status: ""
+    status: "",
+    notes: ""
   });
 
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [sortOption, setSortOption] = useState("Date");
+  const [showEditModal, setShowEditModal] = useState(false);
 
   // Fetch Orders
   const fetchOrders = async () => {
@@ -42,8 +44,10 @@ const StoreOrder = () => {
   const handleEdit = (order) => {
     setEditingId(order.id);
     setFormData({
-      status: order.status
+      status: order.status,
+      notes: order.notes || ""
     });
+    setShowEditModal(true);
   };
 
   // Handle Update Submit
@@ -51,14 +55,16 @@ const StoreOrder = () => {
     e.preventDefault();
     try {
       await axiosInstance.put(`/api/stores/orders/${editingId}`, {
-        status: formData.status
+        status: formData.status,
+        notes: formData.notes
       });
-      showToast("Order status updated successfully", { type: "success" });
+      showToast("Order updated successfully", { type: "success" });
       setEditingId(null);
+      setShowEditModal(false);
       fetchOrders();
     } catch (error) {
       console.error("Error updating order:", error);
-      showToast("Failed to update status", { type: "error" });
+      showToast("Failed to update order", { type: "error" });
     }
   };
 
@@ -135,8 +141,9 @@ const StoreOrder = () => {
               >
                 <option value="All">All Status</option>
                 <option value="pending">Pending</option>
-                <option value="processing">Processing</option>
-                <option value="completed">Completed</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="shipped">Shipped</option>
+                <option value="delivered">Delivered</option>
                 <option value="cancelled">Cancelled</option>
               </select>
 
@@ -195,62 +202,31 @@ const StoreOrder = () => {
                           {parseFloat(order.total_price || 0).toFixed(2)} GEMs
                         </td>
                         <td className="px-6 py-4">
-                          {editingId === order.id ? (
-                            <select
-                              value={formData.status}
-                              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                              className="border rounded px-2 py-1 text-sm bg-white"
-                            >
-                              <option value="pending">Pending</option>
-                              <option value="processing">Processing</option>
-                              <option value="completed">Completed</option>
-                              <option value="cancelled">Cancelled</option>
-                            </select>
-                          ) : (
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                              order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                order.status === 'processing' ? 'bg-blue-100 text-blue-700' :
-                                  'bg-red-100 text-red-700'
-                              }`}>
-                              {order.status}
-                            </span>
-                          )}
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                            order.status === 'shipped' ? 'bg-indigo-100 text-indigo-700' :
+                              order.status === 'confirmed' ? 'bg-blue-100 text-blue-700' :
+                                order.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                  'bg-red-100 text-red-700' // Cancelled or unknown
+                            }`}>
+                            {order.status}
+                          </span>
                         </td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center gap-3">
-                            {editingId === order.id ? (
-                              <>
-                                <button
-                                  onClick={handleUpdate}
-                                  className="text-green-600 hover:text-green-800 font-medium text-sm"
-                                >
-                                  Save
-                                </button>
-                                <button
-                                  onClick={() => setEditingId(null)}
-                                  className="text-slate-500 hover:text-slate-700 font-medium text-sm"
-                                >
-                                  Cancel
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <button
-                                  onClick={() => handleEdit(order)}
-                                  className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition"
-                                  title="Edit Status"
-                                >
-                                  <MdOutlineEdit size={20} />
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(order.id)}
-                                  className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition"
-                                  title="Delete"
-                                >
-                                  <IoIosTrash size={20} />
-                                </button>
-                              </>
-                            )}
+                            <button
+                              onClick={() => handleEdit(order)}
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded hover:bg-blue-50 transition"
+                              title="Edit Order"
+                            >
+                              <MdOutlineEdit size={20} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(order.id)}
+                              className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition"
+                              title="Delete"
+                            >
+                              <IoIosTrash size={20} />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -269,6 +245,73 @@ const StoreOrder = () => {
 
         </div>
       </main>
+
+      {/* EDIT ORDER MODAL */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-200">
+              <h2 className="font-bebas text-2xl text-[#ff8211]">Edit Order #{editingId}</h2>
+              <p className="text-sm text-slate-500">Update order status and notes</p>
+            </div>
+
+            <form onSubmit={handleUpdate} className="p-6 space-y-4">
+              {/* Status Field */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Order Status *
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-[#ff8211] outline-none"
+                  required
+                >
+                  <option value="pending">Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="shipped">Shipped</option>
+                  <option value="delivered">Delivered</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+              </div>
+
+              {/* Notes Field */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Order Notes
+                </label>
+                <textarea
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-[#ff8211] outline-none min-h-[120px]"
+                  placeholder="Add any notes about this order..."
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="submit"
+                  className="flex-1 bg-[#ff8211] text-white py-3 rounded-lg font-semibold hover:bg-[#e67300] transition shadow-md"
+                >
+                  Save Changes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditingId(null);
+                  }}
+                  className="flex-1 border border-slate-300 text-slate-700 py-3 rounded-lg font-semibold hover:bg-slate-50 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <FooterDash />
     </>
   );

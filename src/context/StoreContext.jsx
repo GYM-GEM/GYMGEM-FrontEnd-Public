@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+
 import axiosInstance from '../utils/axiosConfig';
 import { useToast } from './ToastContext';
 
@@ -15,9 +15,9 @@ export const StoreProvider = ({ children }) => {
   const [orders, setOrders] = useState(() => {
     const savedOrders = localStorage.getItem('orders');
     return savedOrders ? JSON.parse(savedOrders) : [
-      { id: uuidv4(), productId: "1", productName: "Whey Protein Isolate", quantity: 1, customerName: "John Doe", status: "Completed", date: new Date().toISOString(), price: 89.99, totalPrice: 89.99 },
-      { id: uuidv4(), productId: "2", productName: "Yoga Mat Premium", quantity: 2, customerName: "Jane Smith", status: "Pending", date: new Date(Date.now() - 3600000).toISOString(), price: 29.99, totalPrice: 59.98 },
-      { id: uuidv4(), productId: "3", productName: "Dumbbell Set (20kg)", quantity: 1, customerName: "Mike Johnson", status: "Processing", date: new Date(Date.now() - 7200000).toISOString(), price: 149.99, totalPrice: 149.99 },
+      { id: "1", productId: "1", productName: "Whey Protein Isolate", quantity: 1, customerName: "John Doe", status: "Completed", date: new Date().toISOString(), price: 89.99, totalPrice: 89.99 },
+      { id: "2", productId: "2", productName: "Yoga Mat Premium", quantity: 2, customerName: "Jane Smith", status: "Pending", date: new Date(Date.now() - 3600000).toISOString(), price: 29.99, totalPrice: 59.98 },
+      { id: "3", productId: "3", productName: "Dumbbell Set (20kg)", quantity: 1, customerName: "Mike Johnson", status: "Processing", date: new Date(Date.now() - 7200000).toISOString(), price: 149.99, totalPrice: 149.99 },
     ];
   });
 
@@ -107,7 +107,10 @@ export const StoreProvider = ({ children }) => {
   // ============================================================================
 
   const addOrder = (newOrder) => {
-    setOrders([...orders, { ...newOrder, id: uuidv4(), date: new Date().toISOString() }]);
+    // Generate sequential ID based on current max ID
+    const maxId = orders.reduce((max, o) => Math.max(max, parseInt(o.id) || 0), 0);
+    const newId = (maxId + 1).toString();
+    setOrders([...orders, { ...newOrder, id: newId, date: new Date().toISOString() }]);
   };
 
   const updateOrder = (id, updatedOrder) => {

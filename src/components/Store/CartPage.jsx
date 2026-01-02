@@ -32,9 +32,7 @@ const CartPage = () => {
   };
 
   const subtotal = getCartTotal();
-  const tax = subtotal * 0.1; // 10% tax
-  const shipping = cart.length > 0 ? 10.00 : 0; // Flat rate shipping
-  const total = subtotal + tax + shipping;
+  const total = subtotal;
 
   return (
     <div className="bg-background text-foreground min-h-screen">
@@ -87,9 +85,9 @@ const CartPage = () => {
                     <div className="flex flex-col sm:flex-row gap-4">
                       {/* Product Image */}
                       <div className="w-full sm:w-32 h-32 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-                        {item.image ? (
+                        {item.item_image ? (
                           <img
-                            src={item.image}
+                            src={item.item_image}
                             alt={item.name}
                             className="w-full h-full object-cover"
                           />
@@ -177,14 +175,7 @@ const CartPage = () => {
                       <span>Subtotal</span>
                       <span className="font-semibold">{subtotal.toFixed(2)} GEMs</span>
                     </div>
-                    <div className="flex justify-between text-slate-700">
-                      <span>Tax (10%)</span>
-                      <span className="font-semibold">{tax.toFixed(2)} GEMs</span>
-                    </div>
-                    <div className="flex justify-between text-slate-700">
-                      <span>Shipping</span>
-                      <span className="font-semibold">{shipping.toFixed(2)} GEMs</span>
-                    </div>
+
                     <div className="border-t border-slate-200 pt-3 flex justify-between text-xl font-bold text-slate-900">
                       <span>Total</span>
                       <span className="text-[#ff8211]">{total.toFixed(2)} GEMs</span>

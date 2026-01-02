@@ -103,7 +103,7 @@ const Navbar = () => {
         ];
       case 'store':
         return [
-          { to: "/store/dashboard", label: "Dashboard", icon: <LayoutDashboard size={18} /> },
+          { to: `/store/dashboard/${storeId}`, label: "Dashboard", icon: <LayoutDashboard size={18} /> },
           { to: `/store/profile/${storeId}`, label: "Profile", icon: <Store size={18} /> },
           { to: "/store/message", label: "Messages", icon: <MessageSquare size={18} /> },
           { to: "/store/settings", label: "Settings", icon: <Settings size={18} /> },
@@ -311,7 +311,7 @@ const Navbar = () => {
       case 'trainer': return `/trainer/profile/${currentProfileId}`;
       case 'trainee': return '/trainee/dashboard';
       case 'gym': return '/gym/dashboard';
-      case 'store': return '/store/dashboard';
+      case 'store': return `/store/dashboard/${currentProfileId}`;
       default: return '/role';
     }
   };

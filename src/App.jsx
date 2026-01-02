@@ -200,7 +200,7 @@ function App() {
           {/* --------------------Store DASHBOARD -------------------- */}
           <Route path="store">
             <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<ProtectedRoute requiredProfile="store"><StoreDashboard /></ProtectedRoute>} />
+            <Route path="dashboard/:id" element={<ProtectedRoute requiredProfile="store"><StoreDashboard /></ProtectedRoute>} />
             <Route path="product" element={<ProtectedRoute requiredProfile="store"><StoreProduct /></ProtectedRoute>} />
             <Route path="order" element={<ProtectedRoute requiredProfile="store"><StoreOrder /></ProtectedRoute>} />
             <Route path="profile/:id" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />

@@ -120,44 +120,76 @@ const StoreCheckout = () => {
     setIsProcessing(true);
 
     try {
-      // Process orders for each item in the cart via API
-      const orderPromises = cart.map(async (item) => {
-        // Create concise notes to fit 255 char limit
-        const userNote = formData.customerNotes ? `Note: ${formData.customerNotes}` : '';
-        const rawNotes = `To: ${formData.fullName}, ${formData.phone}. Addr: ${formData.address}, ${formData.city}. Item: ${item.name} (x${item.cartQuantity}). ${userNote}`;
+      // DEBUG: Log cart to see what we are working with
+      console.log("Current Cart:", cart);
 
-        // Truncate to 254 chars to be safe
-        const notes = rawNotes.length > 254 ? rawNotes.substring(0, 251) + "..." : rawNotes;
+      // Group items by profile_id (Store) to create one order per store
+      const ordersByStore = cart.reduce((acc, item) => {
+        // Use profile_id as the primary key for grouping
+        // Fallback to store_id if profile_id is somehow missing
+        const storeKey = item.profile_id || item.store_id || "unknown";
 
-        // 1. Send to Backend API
-        const storeId = item.store_id || item.store;
-        if (!storeId) {
-          throw new Error(`Invalid Store ID for product: ${item.name}`);
+        if (!acc[storeKey]) {
+          acc[storeKey] = {
+            profile_id: item.profile_id || item.store_id, // Ensure we have an ID
+            store_name: item.store_name || "Store",
+            items: []
+          };
         }
+        acc[storeKey].items.push(item);
+        return acc;
+      }, {});
+
+      const orderPromises = Object.values(ordersByStore).map(async (group) => {
+        // Calculate total carefully
+        const storeTotal = group.items.reduce((sum, item) => {
+          const price = parseFloat(item.price) || 0;
+          const qty = parseInt(item.cartQuantity) || 0;
+          return sum + (price * qty);
+        }, 0);
+
+        // Construct notes
+        const userNote = formData.customerNotes ? `Note: ${formData.customerNotes}` : '';
+        const shippingInfo = `Ship to: ${formData.fullName}, ${formData.phone}, ${formData.address}, ${formData.city}, ${formData.zipCode}, ${formData.country}`;
+        const finalNotes = `${shippingInfo}. ${userNote}`;
+
+        // Robust Buyer ID
+        let buyerId = user?.user_id || user?.id || user?.pk || 0;
 
         const payload = {
-          store_id: parseInt(storeId),
+          profile_id: String(group.profile_id),
+          store_name: group.store_name,
+
+          buyer_name: user?.username || formData.fullName,
+          total_price: String(storeTotal.toFixed(2)),
           status: "pending",
-          notes: notes,
-          total_price: item.price * item.cartQuantity,
-          order_items: [
-            {
-              store_item_id: item.id,
-              quantity: item.cartQuantity,
-              price: item.price
-            }
-          ]
+          notes: finalNotes,
+          order_items: group.items.map(item => {
+            const price = parseFloat(item.price) || 0;
+            const quantity = parseInt(item.cartQuantity) || 1;
+            const sizeId = item.selectedSizeId ? parseInt(item.selectedSizeId) : null;
+
+            return {
+              store_item_id: parseInt(item.id),
+              size_id: sizeId, // null if no size selected, integer if selected
+              quantity: quantity,
+              price_at_order: String(price.toFixed(2))
+            };
+          })
         };
 
-        await axiosInstance.post('/api/stores/orders', payload);
+        console.log("Submitting Order Payload:", JSON.stringify(payload, null, 2));
 
-        // 2. Add to Local Context (for UI consistency if needed)
-        return addOrder({
-          productId: item.id,
-          productName: item.name,
-          quantity: item.cartQuantity,
-          price: item.price,
-          totalPrice: item.price * item.cartQuantity,
+        const response = await axiosInstance.post('/api/stores/orders', payload);
+        console.log("Order Response:", response.data);
+
+        // Add to Local Context
+        addOrder({
+          productId: group.items[0].id,
+          productName: group.items.length > 1 ? `${group.items[0].name} + ${group.items.length - 1} more` : group.items[0].name,
+          quantity: group.items.length,
+          price: storeTotal,
+          totalPrice: storeTotal,
           customerName: formData.fullName,
           customerEmail: formData.email,
           customerPhone: formData.phone,
@@ -168,12 +200,12 @@ const StoreCheckout = () => {
             zipCode: formData.zipCode,
             country: formData.country,
           },
-
           status: "Pending",
         });
+
+        return response.data;
       });
 
-      // Wait for all API calls to complete
       const createdOrders = await Promise.all(orderPromises);
 
       // Clear the cart
@@ -190,7 +222,11 @@ const StoreCheckout = () => {
 
     } catch (err) {
       console.error("Order submission failed:", err);
-      setError(err.message || "Order failed. Please try again.");
+      // Log full error details for debugging
+      if (err.response) {
+        console.error("Backend Error Data:", err.response.data);
+      }
+      setError(err.response?.data?.message || err.message || "Order failed. Please try again.");
       setIsProcessing(false);
     }
   };
@@ -362,137 +398,7 @@ const StoreCheckout = () => {
                 </form>
               </div>
 
-              {/* PAYMENT INFORMATION */}
-              {/* <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">
-                <h2 className="font-bebas text-2xl text-slate-900 mb-6 flex items-center gap-2">
-                  <CreditCard className="w-6 h-6 text-[#ff8211]" />
-                  Payment Information
-                </h2>
 
-                {/* Payment Method Selection */}
-              {/* <div className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 mb-3">
-                    Payment Method
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, paymentMethod: "credit_card" })}
-                      className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${formData.paymentMethod === "credit_card"
-                        ? "border-[#ff8211] bg-[#ff8211]/5"
-                        : "border-slate-200 hover:border-slate-300"
-                        }`}
-                    >
-                      <CreditCard className={`w-6 h-6 ${formData.paymentMethod === "credit_card" ? "text-[#ff8211]" : "text-slate-600"}`} />
-                      <span className="text-sm font-medium">Credit Card</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, paymentMethod: "paypal" })}
-                      className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${formData.paymentMethod === "paypal"
-                        ? "border-[#ff8211] bg-[#ff8211]/5"
-                        : "border-slate-200 hover:border-slate-300"
-                        }`}
-                    >
-                      <span className="text-xl">💳</span>
-                      <span className="text-sm font-medium">PayPal</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, paymentMethod: "bank" })}
-                      className={`p-4 border-2 rounded-lg transition-all flex flex-col items-center gap-2 ${formData.paymentMethod === "bank"
-                        ? "border-[#ff8211] bg-[#ff8211]/5"
-                        : "border-slate-200 hover:border-slate-300"
-                        }`}
-                    >
-                      <span className="text-xl">🏦</span>
-                      <span className="text-sm font-medium">Bank</span>
-                    </button>
-                  </div>
-                </div> */}
-
-              {/* Credit Card Form */}
-              {/* {formData.paymentMethod === "credit_card" && (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Card Number *
-                      </label>
-                      <input
-                        type="text"
-                        name="cardNumber"
-                        value={formData.cardNumber}
-                        onChange={handleInputChange}
-                        placeholder="1234 5678 9012 3456"
-                        maxLength="16"
-                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-[#ff8211] outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Cardholder Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="cardName"
-                        value={formData.cardName}
-                        onChange={handleInputChange}
-                        placeholder="John Doe"
-                        className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-[#ff8211] outline-none"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Expiry Date *
-                        </label>
-                        <input
-                          type="text"
-                          name="expiryDate"
-                          value={formData.expiryDate}
-                          onChange={handleInputChange}
-                          placeholder="MM/YY"
-                          maxLength="5"
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-[#ff8211] outline-none"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          CVV *
-                        </label>
-                        <input
-                          type="text"
-                          name="cvv"
-                          value={formData.cvv}
-                          onChange={handleInputChange}
-                          placeholder="123"
-                          maxLength="4"
-                          className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#ff8211] focus:border-[#ff8211] outline-none"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Other Payment Methods Message */}
-              {/* {formData.paymentMethod !== "credit_card" && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <p className="text-sm text-blue-800">
-                      You will be redirected to complete your payment securely with{" "}
-                      {formData.paymentMethod === "paypal" ? "PayPal" : "your bank"}.
-                    </p>
-                  </div>
-                )}
-              </div>  */}
-
-              {/* Error Message */}
-              {/* {error && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <p className="text-sm text-red-800">{error}</p>
-                </div>
-              )} */}
 
               {/* Submit Button */}
               <button
@@ -533,8 +439,8 @@ const StoreCheckout = () => {
                   {cart.map((item) => (
                     <div key={item.id} className="flex gap-3 pb-3 border-b border-slate-100 last:border-0">
                       <div className="w-16 h-16 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-                        {item.image ? (
-                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        {item.item_image ? (
+                          <img src={item.item_image} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
                             No Img

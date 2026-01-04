@@ -32,7 +32,7 @@ const ReportModal = ({ isOpen, onClose, targetId, targetName }) => {
                 details: details.trim()
             };
 
-            await axiosInstance.post('/api/complaints/', payload);
+            await axiosInstance.post('/api/utils/complaints/', payload);
 
             showToast('Complaint sent successfully.', { type: 'success' });
             onClose();

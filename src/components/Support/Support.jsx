@@ -29,12 +29,7 @@ const Support = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!formData.fullName.trim()) newErrors.fullName = "Full Name is required";
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email format is invalid";
-    }
+    // Only validate message since other fields are commented out
     if (!formData.message.trim()) newErrors.message = "Message is required";
     return newErrors;
   };
@@ -54,9 +49,6 @@ const Support = () => {
       // We combine form data into the 'details' field since the API only accepts that text field.
       // We send target_complaint as null since this is a general support message.
       const detailsContent = {
-        subject: formData.subject,
-        name: formData.fullName,
-        email: formData.email,
         message: formData.message
       };
 
@@ -176,7 +168,7 @@ const Support = () => {
             <div className="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-100 p-8 md:p-10">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700 ml-1">Full Name *</label>
                     <input
                       type="text"
@@ -199,10 +191,10 @@ const Support = () => {
                       className={`w-full px-5 py-4 bg-gray-50 border ${errors.email ? 'border-red-500' : 'border-gray-200'} rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#FF8211]/20 focus:border-[#FF8211] transition-all poppins-regular`}
                     />
                     {errors.email && <p className="text-red-500 text-xs ml-1">{errors.email}</p>}
-                  </div>
+                  </div>*/}
                 </div>
 
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700 ml-1">Subject</label>
                   <input
                     type="text"
@@ -212,7 +204,7 @@ const Support = () => {
                     placeholder="How can we help?"
                     className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#FF8211]/20 focus:border-[#FF8211] transition-all poppins-regular"
                   />
-                </div>
+                </div> */}
 
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700 ml-1">Message *</label>

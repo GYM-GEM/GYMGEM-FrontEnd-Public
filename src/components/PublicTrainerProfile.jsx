@@ -19,11 +19,13 @@ import {
   Sparkles,
   CheckCircle2,
   MessageCircle,
+  Flag,
 } from "lucide-react";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import CourseCard from "./CourseCard";
 import QuickMessageModal from "./Dashboard/QuickMessageModal";
+import ReportModal from "./ReportModal";
 import { useToast } from "../context/ToastContext";
 import getBalance from "../utils/balance";
 
@@ -96,6 +98,7 @@ const PublicTrainerProfile = () => {
   const [loadingBalance, setLoadingBalance] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
 
   const fetchUserBalance = async () => {
@@ -653,12 +656,23 @@ const PublicTrainerProfile = () => {
                     )}
 
                     {/* Socials */}
-                    <div className="pt-4 mt-2 border-t border-gray-100 flex gap-2">
-                      {profile.linkedin && (
-                        <a href={`https://${profile.linkedin}`} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-lg bg-[#0077b5] text-white flex items-center justify-center hover:opacity-90 transition-opacity">
-                          <Linkedin className="w-5 h-5" />
-                        </a>
-                      )}
+                    <div className="pt-4 mt-2 border-t border-gray-100 flex items-center justify-between gap-2">
+                      <div className="flex gap-2">
+                        {profile.linkedin && (
+                          <a href={`https://${profile.linkedin}`} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-lg bg-[#0077b5] text-white flex items-center justify-center hover:opacity-90 transition-opacity">
+                            <Linkedin className="w-5 h-5" />
+                          </a>
+                        )}
+                      </div>
+
+                      <button
+                        onClick={() => setIsReportModalOpen(true)}
+                        className="text-gray-400 hover:text-red-500 hover:bg-red-50 p-2 rounded-lg transition-all flex items-center gap-1 text-xs font-medium"
+                        title="Report this trainer"
+                      >
+                        <Flag className="w-4 h-4" />
+                        <span className="hidden sm:inline">Report</span>
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -676,6 +690,16 @@ const PublicTrainerProfile = () => {
           isOpen={isMessageModalOpen}
           onClose={() => setIsMessageModalOpen(false)}
           targetUser={{ id: id, name: profileData.profile.name }}
+        />
+      )}
+
+      {/* Report Modal */}
+      {profileData && (
+        <ReportModal
+          isOpen={isReportModalOpen}
+          onClose={() => setIsReportModalOpen(false)}
+          targetId={id}
+          targetName={profileData.profile.name}
         />
       )}
       {/* Payment Confirmation Modal */}

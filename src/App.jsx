@@ -94,6 +94,7 @@ import StoreDashboard from "./components/Dashboard/Store/StoreDashboard.jsx";
 import Storeprofile from "./components/Dashboard/Store/Storeprofile.jsx";
 import StoreProduct from "./components/Dashboard/Store/StoreProduct.jsx";
 import StoreOrder from "./components/Dashboard/Store/StoreOrder.jsx";
+import Report from "./components/Dashboard/Report.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import useAuthCheck from "./hooks/useAuthCheck.js";
 import { useEffect } from "react";
@@ -167,6 +168,7 @@ function App() {
             <Route path="addcourse" element={<ProtectedRoute requiredProfile="trainer"><AddCourse /></ProtectedRoute>} />
             <Route path="settings" element={<ProtectedRoute requiredProfile="trainer"><SettingsTrainer /></ProtectedRoute>} />
             <Route path="message" element={<ProtectedRoute requiredProfile="trainer"><Message /></ProtectedRoute>} />
+            <Route path="report" element={<ProtectedRoute requiredProfile="trainer"><Report /></ProtectedRoute>} />
             <Route path="calendar" element={<ProtectedRoute requiredProfile="trainer"><WeekCalendar /></ProtectedRoute>} />
             <Route path="myorder" element={<ProtectedRoute requiredProfile="trainer"><OrderTrackingTR /></ProtectedRoute>} />
             <Route path="sessions" element={<ProtectedRoute requiredProfile="trainer"><MySessions /></ProtectedRoute>} />
@@ -184,6 +186,7 @@ function App() {
             <Route path="settings" element={<ProtectedRoute requiredProfile="trainee"><SettingsTrainee /></ProtectedRoute>} />
             <Route path="calendar" element={<ProtectedRoute requiredProfile="trainee"><WeekCalendarTrainee /></ProtectedRoute>} />
             <Route path="message" element={<ProtectedRoute requiredProfile="trainee"><Message /></ProtectedRoute>} />
+            <Route path="report" element={<ProtectedRoute requiredProfile="trainee"><Report /></ProtectedRoute>} />
             <Route path="myorder" element={<ProtectedRoute requiredProfile="trainee"><OrderTrackingTE /></ProtectedRoute>} />
           </Route>
           {/* -------------------- GYM DASHBOARD -------------------- */}
@@ -205,6 +208,7 @@ function App() {
             <Route path="order" element={<ProtectedRoute requiredProfile="store"><StoreOrder /></ProtectedRoute>} />
             <Route path="profile/:id" element={<ProtectedRoute requiredProfile="store"><Storeprofile /></ProtectedRoute>} />
             <Route path="message" element={<ProtectedRoute requiredProfile="store"><MessageStore /></ProtectedRoute>} />
+            <Route path="report" element={<ProtectedRoute requiredProfile="store"><Report /></ProtectedRoute>} />
             <Route path="settings" element={<ProtectedRoute requiredProfile="store"><SettingsStore /></ProtectedRoute>} />
           </Route>
 

@@ -14,7 +14,7 @@ import {
   ChevronDown, BookOpen, Users, ShoppingBag, Info, Users as CommunityIcon,
   Utensils, Sparkles, MessageSquare, Bot, LayoutDashboard, Settings,
   ClipboardList, Calendar, Heart, Package, ShoppingCart, User, Home,
-  Store, Dumbbell, UserCircle
+  Store, Dumbbell, UserCircle, Flag
 } from "lucide-react";
 
 const Navbar = () => {
@@ -93,12 +93,14 @@ const Navbar = () => {
           { to: `/trainer/profile/${currentProfileId}`, label: "Profile", icon: <UserCircle size={18} /> },
           { to: "/trainer/message", label: "Messages", icon: <MessageSquare size={18} /> },
           { to: "/trainer/calendar", label: "My Calendar", icon: <Calendar size={18} /> },
+          { to: "/trainer/report", label: "Reports", icon: <Flag size={18} /> },
           { to: "/trainer/settings", label: "Settings", icon: <Settings size={18} /> },
         ];
       case 'trainee':
         return [
           { to: "/trainee", label: "Profile", icon: <UserCircle size={18} /> },
           { to: "/trainee/message", label: "Messages", icon: <MessageSquare size={18} /> },
+          { to: "/trainee/report", label: "Reports", icon: <Flag size={18} /> },
           { to: "/trainee/settings", label: "Settings", icon: <Settings size={18} /> },
         ];
       case 'store':
@@ -106,6 +108,7 @@ const Navbar = () => {
           { to: `/store/dashboard/${storeId}`, label: "Dashboard", icon: <LayoutDashboard size={18} /> },
           { to: `/store/profile/${storeId}`, label: "Profile", icon: <Store size={18} /> },
           { to: "/store/message", label: "Messages", icon: <MessageSquare size={18} /> },
+          { to: "/store/report", label: "Reports", icon: <Flag size={18} /> },
           { to: "/store/settings", label: "Settings", icon: <Settings size={18} /> },
         ];
       case 'gym':

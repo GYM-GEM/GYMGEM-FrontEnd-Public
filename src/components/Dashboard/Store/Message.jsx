@@ -958,7 +958,8 @@ const Message = () => {
                             return;
                         }
 
-                        if (msgType === "read" || msgType === "read_receipt") {
+                        if (msgType === "read" || msgType === "read_receipt" || data.reader_id !== undefined) {
+                            // Handle read receipt - has reader_id and message_id instead of senderId and text
                             setConversations(prev => prev.map(c => {
                                 if (c.id === activeConversationId) {
                                     return {
@@ -1000,8 +1001,14 @@ const Message = () => {
                         // Handle standard chat message
                         // Handle new format: message_id, sender_id, content
                         const msgId = data.message_id || data.id || Date.now();
-                        const senderId = data.sender_id
+                        const senderId = data.sender_id;
                         const content = data.content || data.message;
+
+                        // Skip if this doesn't look like a valid chat message (missing required fields)
+                        if (senderId === undefined || content === undefined) {
+                            console.log("Skipping non-message WebSocket data:", data);
+                            return;
+                        }
                         const timestamp = data.timestamp || Date.now();
                         const senderName = data.sender_name || "User";
 

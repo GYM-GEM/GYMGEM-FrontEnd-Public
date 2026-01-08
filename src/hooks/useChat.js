@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { aiChatService } from '../services/aiChatService';
+import { aiContextBuilder } from '../services/aiContextBuilder';
 import { getUserContext, formatUserContextForPrompt } from '../utils/userContext';
+
 
 
 const STORAGE_KEY = 'gymgem_chat_sessions_v1';
@@ -126,15 +128,20 @@ export const useChat = () => {
 
     try {
       const userContext = getUserContext();
-      const contextPrompt = formatUserContextForPrompt(userContext);
+      const uiContextPrompt = formatUserContextForPrompt(userContext);
       
+      // Fetch platform-wide data context
+      const platformData = await aiContextBuilder.getFullContext();
+      const platformPrompt = aiContextBuilder.formatForPrompt(platformData);
+
       const sessionHistory = sessions[targetId]?.messages || [];
       const historyForService = sessionHistory.map(m => ({
           role: m.role,
           content: m.content
       }));
 
-      const responseText = await aiChatService.sendMessage(content, contextPrompt, historyForService);
+      const responseText = await aiChatService.sendMessage(content, uiContextPrompt, platformPrompt, historyForService);
+
 
       const aiMsg = {
         id: (Date.now() + 1).toString(),

@@ -61,16 +61,7 @@ function HeroSc() {
           >
             Your fitness network starts here
           </h1>
-          <p
-            className={`max-w-2xl text-base text-muted-foreground transition-all duration-1000 delay-200 ease-out sm:text-lg ${isVisible
-              ? "translate-y-0 opacity-100"
-              : "-translate-y-8 opacity-0"
-              }`}
-          >
-            Find certified personal trainers, book classes, and stay accountable
-            to your goals with a calm all-in-one experience designed for
-            trainers, gyms, stores, and trainees.
-          </p>
+       
 
           <div
             className={`flex flex-col items-center gap-3 transition-all duration-1000 delay-300 ease-out sm:flex-row ${isVisible

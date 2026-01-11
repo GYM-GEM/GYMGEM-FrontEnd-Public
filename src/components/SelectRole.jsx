@@ -34,12 +34,14 @@ const roles = [
 ];
 
 // const userProfileTypes = JSON.parse(localStorage.getItem("user"))?.profiles.map(profile => profile.type) || [];
-const userProfileTypes = JSON.parse(localStorage.getItem("user"))?.profiles?.map(profile => profile.type) || [];
-
 const Selectrole = () => {
   const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState("");
   const { showToast } = useToast();
+
+  // Calculate profile types inside component to get fresh data on every mount/render
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userProfileTypes = user?.profiles?.map(profile => profile.type) || [];
 
   const onSubmit = async () => {
     if (!selectedRole) {

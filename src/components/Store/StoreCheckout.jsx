@@ -224,12 +224,24 @@ const StoreCheckout = () => {
     } catch (err) {
       console.error("Order submission failed:", err);
       // Log full error details for debugging
-      if (err.response) {
-        console.error("Backend Error Data:", err.response.data);
+      let errorMessage = "Order failed. Please try again.";
+      if (err.response && err.response.data) {
+        const data = err.response.data;
+        if (Array.isArray(data) && data.length > 0) {
+          errorMessage = data[0];
+        } else if (typeof data === 'string') {
+          errorMessage = data;
+        } else if (data.message) {
+          errorMessage = data.message;
+        } else if (data.error) {
+          errorMessage = data.error;
+        }
       }
-      setError(err.response?.data?.message || err.message || "Order failed. Please try again.");
+
+      console.error("Parsed Error Message:", errorMessage);
+      setError(errorMessage);
       setIsProcessing(false);
-      showToast("Order failed. Please try again.", { type: "error" });
+      showToast(errorMessage, { type: "error" });
     }
   };
 
@@ -261,6 +273,15 @@ const StoreCheckout = () => {
 
             {/* CHECKOUT FORM */}
             <div className="lg:col-span-2 space-y-6">
+
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg flex items-center gap-2">
+                  <div className="w-5 h-5 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="font-bold">!</span>
+                  </div>
+                  <span className="text-sm font-medium">{error}</span>
+                </div>
+              )}
 
               {/* SHIPPING INFORMATION */}
               <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-6">

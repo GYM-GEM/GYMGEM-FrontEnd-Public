@@ -123,7 +123,7 @@ const Storeprofile = () => {
         await axiosInstance.put(`/api/stores/branches/${selectedBranch.id}/`, payload);
         showToast("Branch updated successfully!", { type: "success" });
       } else {
-        await axiosInstance.post(`/api/stores/branches`, payload);
+        await axiosInstance.post(`/api/stores/branches/`, payload);
         showToast("Branch added successfully!", { type: "success" });
       }
 

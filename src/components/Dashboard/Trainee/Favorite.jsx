@@ -314,7 +314,7 @@ const Favorite = () => {
                               </span>
                             </div>
                             <Link
-                              to={`/courses/${course.id}`}
+                              to={`/trainee/courses/${course.id}`}
                               className="px-4 py-2 bg-[#FF8211] text-white rounded-lg font-medium poppins-regular text-sm hover:bg-[#ff7906] transition-colors shadow-sm cursor-pointer"
                             >
                               View Details

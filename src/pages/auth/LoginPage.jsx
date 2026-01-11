@@ -32,7 +32,7 @@ const LoginPage = () => {
   const onSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       const IsEmail = isValidEmail(emailOrUsername);
       const payload = { password };
@@ -54,8 +54,17 @@ const LoginPage = () => {
       localStorage.setItem("user", JSON.stringify(response.data.account));
 
       console.log("Response:", response.data);
-      showToast("Sign in successful!", { type: "success" });
-      navigate("/");
+
+      const user = response.data.account || {};
+      const hasProfiles = user.profiles && Array.isArray(user.profiles) && user.profiles.length > 0;
+
+      if (hasProfiles) {
+        showToast("Sign in successful!", { type: "success" });
+        navigate("/");
+      } else {
+        showToast("Please create a profile", { type: "info" });
+        navigate("/role");
+      }
     } catch (error) {
       console.error("Error during login:", error);
       showToast("Login failed. Please try again.", { type: "error" });

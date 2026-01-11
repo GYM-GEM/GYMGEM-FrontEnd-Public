@@ -198,10 +198,15 @@ const Navbar = () => {
       const isCacheExpired = !lastFetch || (now - parseInt(lastFetch)) > CACHE_DURATION;
       const isBalanceMissing = !localStorage.getItem("gems_balance");
 
-      // Fetch if: No balance OR Cache Expired OR Profile Changed
-      if (isBalanceMissing || isCacheExpired || isProfileChanged) {
-        // Only show loader on initial fetch or profile switch
-        if (isBalanceMissing || isProfileChanged) setIsLoadingBalance(true);
+      // Fix for "why api not call on reload":
+      // Check if the last fetch was before the current page session started (i.e. before reload)
+      // performance.timeOrigin gives the timestamp of when this page context was created.
+      const isFromPreviousSession = lastFetch && (parseInt(lastFetch) < performance.timeOrigin);
+
+      // Fetch if: No balance OR Cache Expired OR Profile Changed OR fetched in previous session (reload)
+      if (isBalanceMissing || isCacheExpired || isProfileChanged || isFromPreviousSession) {
+        // Only show loader on initial fetch or profile switch or reload
+        if (isBalanceMissing || isProfileChanged || isFromPreviousSession) setIsLoadingBalance(true);
 
         const balance = await getBalance();
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosConfig";
 import {
   MapPin,
@@ -26,11 +26,13 @@ import Footer from "./Footer";
 import CourseCard from "./CourseCard";
 import QuickMessageModal from "./Dashboard/QuickMessageModal";
 import ReportModal from "./ReportModal";
+import AddGemsModal from "./AddGemsModal";
 import { useToast } from "../context/ToastContext";
 import getBalance from "../utils/balance";
 
 const PublicTrainerProfile = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -99,6 +101,7 @@ const PublicTrainerProfile = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [showAddGemsModal, setShowAddGemsModal] = useState(false);
 
 
   const fetchUserBalance = async () => {
@@ -175,6 +178,27 @@ const PublicTrainerProfile = () => {
       showToast(errorMessage, { type: 'error' });
     } finally {
       setIsSubmittingBooking(false);
+    }
+  };
+
+  const handleAddGems = async (pkg) => {
+    setShowAddGemsModal(false);
+    try {
+      const token = localStorage.getItem('access');
+      const response = await axiosInstance.post('/api/payment/start/',
+        { amount: pkg.price },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      navigate('/checkout', {
+        state: {
+          type: 'gems', gems: pkg.gems, price: pkg.price, user: user,
+          iframeUrl: response.data.iframe_url, paymentId: response.data.payment_id
+        }
+      });
+    } catch (error) {
+      console.error('Error starting payment:', error);
+      showToast('Failed to start payment process.', { type: 'error' });
+      setShowAddGemsModal(true);
     }
   };
 
@@ -702,6 +726,13 @@ const PublicTrainerProfile = () => {
           targetName={profileData.profile.name}
         />
       )}
+
+      <AddGemsModal
+        isOpen={showAddGemsModal}
+        onClose={() => setShowAddGemsModal(false)}
+        onContinue={handleAddGems}
+      />
+
       {/* Payment Confirmation Modal */}
       {showPaymentModal && (() => {
         const sessionPrice = parseFloat(profile.rate || 0);
@@ -872,7 +903,7 @@ const PublicTrainerProfile = () => {
                   <button
                     onClick={() => {
                       setShowPaymentModal(false);
-                      window.location.href = '/buy-gems';
+                      setShowAddGemsModal(true);
                     }}
                     disabled={loadingBalance}
                     className="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold bebas-regular text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"

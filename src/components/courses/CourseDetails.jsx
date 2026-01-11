@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Navbar from "../Navbar";
 import Footer from "../Footer";
+import AddGemsModal from "../AddGemsModal";
 import axiosInstance from "../../utils/axiosConfig";
 import { useToast } from "../../context/ToastContext";
 import getBalance from "../../utils/balance";
@@ -51,6 +52,7 @@ const CourseDetails = () => {
   const [activeContent, setActiveContent] = useState(null);
   const [isEnrolling, setIsEnrolling] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showAddGemsModal, setShowAddGemsModal] = useState(false);
   const [userBalance, setUserBalance] = useState(null);
   const [loadingBalance, setLoadingBalance] = useState(false);
 
@@ -58,6 +60,30 @@ const CourseDetails = () => {
     setActiveContent(section);
     // Scroll to top to see content
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleAddGems = async (pkg) => {
+    setShowAddGemsModal(false);
+    try {
+      const token = localStorage.getItem('access');
+      const response = await axiosInstance.post('/api/payment/start/',
+        { amount: pkg.price },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+      navigate('/checkout', {
+        state: {
+          type: 'gems', gems: pkg.gems, price: pkg.price, user: currentUser,
+          iframeUrl: response.data.iframe_url, paymentId: response.data.payment_id
+        }
+      });
+    } catch (error) {
+      console.error('Error starting payment:', error);
+      showToast('Failed to start payment process.', { type: 'error' });
+      setShowAddGemsModal(true);
+    }
   };
 
   const getCourseById = async (id) => {
@@ -238,18 +264,15 @@ const CourseDetails = () => {
   }
 
   const handleToggleFavorite = async () => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    setIsWishlistLoading(true);
     try {
       await axiosInstance.post(
         `/api/courses/enrollments/${course.id}/add-to-wishlist/`,
         {}
       );
 
-      // Update local state based on successful toggle (assuming backend toggles)
-      // Since we don't get the new state back explicitly in the prompt description, we toggle locally
-      // Ideally backend returns { status: 'added' | 'removed' } or similar
-      setIsFavoriteCourse(prev => !prev);
-
+      // Re-fetch course data to update enrollment status properly
+      await getCourseById(id);
 
     } catch (error) {
       console.error("Failed to update wishlist:", error);
@@ -444,9 +467,9 @@ const CourseDetails = () => {
       const response = await axiosInstance.post(
         `/api/courses/enrollments/${course.id}/enroll/`
       );
-      if(response.status === 200){
+      if (response.status === 200) {
         getBalance()
-        
+
       }
 
       // Close modal
@@ -1203,7 +1226,7 @@ const CourseDetails = () => {
                 <button
                   onClick={() => {
                     setShowPaymentModal(false);
-                    navigate('/buy-gems');
+                    setShowAddGemsModal(true);
                   }}
                   disabled={loadingBalance}
                   className="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold bebas-regular text-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
@@ -1224,6 +1247,12 @@ const CourseDetails = () => {
           </div>
         </div >
       )}
+
+      <AddGemsModal
+        isOpen={showAddGemsModal}
+        onClose={() => setShowAddGemsModal(false)}
+        onContinue={handleAddGems}
+      />
 
       {/* Share Modal */}
       {

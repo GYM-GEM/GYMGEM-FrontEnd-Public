@@ -5,6 +5,7 @@ import NavBar from "../Navbar.jsx";
 import Footer from "../Footer.jsx";
 import axiosInstance from "../../utils/axiosConfig";
 import { Lock, ShieldCheck, CreditCard, ArrowLeft, Package } from "lucide-react";
+import { useToast } from "../../context/ToastContext";
 
 /**
  * StoreCheckout Component
@@ -14,7 +15,7 @@ import { Lock, ShieldCheck, CreditCard, ArrowLeft, Package } from "lucide-react"
 const StoreCheckout = () => {
   const navigate = useNavigate();
   const { cart, getCartTotal, addOrder, clearCart } = useContext(StoreContext);
-
+  const { showToast } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState("");
 
@@ -210,7 +211,7 @@ const StoreCheckout = () => {
 
       // Clear the cart
       clearCart();
-
+      showToast("Order placed successfully!", { type: "success" });
       // Navigate to success page
       navigate('/store-order-success', {
         state: {
@@ -228,6 +229,7 @@ const StoreCheckout = () => {
       }
       setError(err.response?.data?.message || err.message || "Order failed. Please try again.");
       setIsProcessing(false);
+      showToast("Order failed. Please try again.", { type: "error" });
     }
   };
 

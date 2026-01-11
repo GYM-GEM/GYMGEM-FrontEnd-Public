@@ -18,6 +18,7 @@ const SignUpPage = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const navigate = useNavigate();
 
+  const { showToast } = useToast();
   const {
     register,
     handleSubmit,
@@ -42,27 +43,28 @@ const SignUpPage = () => {
   // };
 
   const onSubmit = async (data) => {
-  try {
-    const payload = {
-      username: data.username,
-      email: data.email,
-      password: data.password,
-      first_name: data.firstName,
-      last_name: data.lastName,
-    };
+    try {
+      const payload = {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        firstName: data.firstName,
+        lastName: data.lastName,
+      };
 
-    const response = await axios.post(
-      `${VITE_API_URL}/api/accounts/create`,
-      payload
-    );
+      const response = await axios.post(
+        `${VITE_API_URL}/api/accounts/create`,
+        payload
+      );
 
-    showToast("Sign up successful!", { type: "success" });
-    navigate("/role");
-  } catch (error) {
-    console.error("Error during registration:", error.response?.data);
-    showToast("Registration failed. Please try again.", { type: "error" });
-  }
-};
+      showToast("Sign up successful!", { type: "success" });
+      navigate("/role");
+    } catch (error) {
+      console.error("Error during registration:", error.response?.data);
+      showToast("Registration failed. Please try again.", { type: "error" });
+    }
+  };
 
   return (
     <motion.div

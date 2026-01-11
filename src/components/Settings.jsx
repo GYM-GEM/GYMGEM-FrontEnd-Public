@@ -182,30 +182,7 @@ const Settings = () => {
               </div>
             </div>
 
-            {/* Billing Section */}
-            <div className="p-6 border-b border-gray-100">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-[#ff8211]" />
-                Billing & Payment
-              </h2>
-              <div className="space-y-2">
-                <button
-                  onClick={() => openModal("paymentInfo")}
-                  className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-gray-50 transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                      <CreditCard className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div className="text-left">
-                      <p className="font-medium text-gray-900">Payment Method</p>
-                      <p className="text-sm text-gray-500">Manage your saved cards and billing info</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600" />
-                </button>
-              </div>
-            </div>
+    
 
             {/* Account Management Section */}
             <div className="p-6 border-b border-gray-100">

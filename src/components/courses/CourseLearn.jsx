@@ -381,7 +381,6 @@ const CourseLearn = () => {
 
   return (
     <>
-      <NavTraineeDash />
 
       {/* Compact Hero Header with Course Info */}
       <div className="w-full bg-gradient-to-br from-[#FF8211]/5 via-[#86ac55]/5 to-gray-50 border-b border-gray-200">

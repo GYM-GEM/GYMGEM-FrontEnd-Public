@@ -294,7 +294,7 @@ export default function VideoCall({ sessionId, isTrainer }) {
   // ---------------- WebSocket & Signaling ----------------
   const connectWS = () => {
     const token = localStorage.getItem("access") || "";
-    const url = `ws://192.168.1.5:8000/ws/interactive_sessions/${sessionId}/?token=${token}`;
+    const url = `ws://localhost:8000/ws/interactive_sessions/${sessionId}/?token=${token}`;
     safeLog("🔌 Connecting WS...", url);
 
     try {

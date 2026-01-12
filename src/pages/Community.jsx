@@ -114,7 +114,10 @@ function Community() {
         postData.attachment_type = newAttachmentType;
       }
 
-      await axiosInstance.post("/api/community/posts/", postData);
+      const response = await axiosInstance.post("/api/community/posts/", postData);
+
+      // Optimistically add the new post to the top of the list
+      setPosts(prevPosts => [response.data, ...prevPosts]);
 
       setNewPostTitle("");
       setNewPostContent("");
@@ -122,7 +125,6 @@ function Community() {
       setNewAttachmentType(null);
       setShowUpload(false);
       showToast("Post created successfully!", { type: "success" });
-      fetchPosts(searchQuery); // Refresh without loading state
     } catch (error) {
       console.error("Error creating post:", error);
       showToast("Failed to create post", { type: "error" });

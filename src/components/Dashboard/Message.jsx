@@ -1587,13 +1587,6 @@ const Message = () => {
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => fileInputRef.current?.click()}
-                                        className="p-2.5 text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-200/50"
-                                    >
-                                        <Paperclip size={20} />
-                                    </button>
-                                    <button
-                                        type="button"
                                         onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                                         className={`p-2.5 transition-colors rounded-full hover:bg-gray-200/50 hidden sm:block ${showEmojiPicker ? 'text-[#ff8211] bg-orange-50' : 'text-gray-400 hover:text-yellow-500'}`}
                                     >

@@ -311,36 +311,6 @@ const CourseDetailsDash = () => {
     );
   }
 
-  const clientReviews = [
-    {
-      id: 1,
-      name: "Michael Turner",
-      avatar: "MT",
-      rating: 5,
-      date: "2 weeks ago",
-      comment:
-        "Excellent course! The techniques are easy to follow and very effective. I've seen great results in just a few weeks.",
-    },
-    {
-      id: 2,
-      name: "Emma Rodriguez",
-      avatar: "ER",
-      rating: 5,
-      date: "1 month ago",
-      comment:
-        "This transformed my approach to fitness. The trainer is knowledgeable and explains everything clearly.",
-    },
-    {
-      id: 3,
-      name: "David Chen",
-      avatar: "DC",
-      rating: 4,
-      date: "1 month ago",
-      comment:
-        "Great content and clear instruction. The workout plans are practical and effective.",
-    },
-  ];
-
   return (
     <>
       <Navbar />
@@ -730,42 +700,50 @@ const CourseDetailsDash = () => {
             <h2 className="text-2xl font-bold text-foreground bebas-regular mb-6">
               Client Reviews
             </h2>
-            <div className="space-y-6">
-              {clientReviews.map((review) => (
-                <div
-                  key={review.id}
-                  className="border-b border-border pb-6 last:border-0 last:pb-0"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-full bg-[#FF8211] flex items-center justify-center text-white font-semibold flex-shrink-0">
-                      {review.avatar}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-foreground poppins-medium">
-                          {review.name}
-                        </h4>
-                        <span className="text-xs text-muted-foreground poppins-regular">
-                          {review.date}
-                        </span>
+            {course.reviews && course.reviews.length > 0 ? (
+              <div className="space-y-6">
+                {course.reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className="border-b border-border pb-6 last:border-0 last:pb-0"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#FF8211] flex items-center justify-center text-white font-semibold flex-shrink-0">
+                        {review.user?.name?.charAt(0) || review.name?.charAt(0) || "U"}
                       </div>
-                      <div className="flex text-[#FF8211] mb-2">
-                        {[...Array(review.rating)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className="w-4 h-4 fill-current"
-                            strokeWidth={0}
-                          />
-                        ))}
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-foreground poppins-medium">
+                            {review.user?.name || review.name || "Anonymous"}
+                          </h4>
+                          <span className="text-xs text-muted-foreground poppins-regular">
+                            {review.created_at ? new Date(review.created_at).toLocaleDateString() : review.date}
+                          </span>
+                        </div>
+                        <div className="flex text-[#FF8211] mb-2">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`w-4 h-4 ${i < (review.rating || 0) ? 'fill-current' : ''}`}
+                              strokeWidth={0}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-muted-foreground poppins-regular text-sm">
+                          {review.comment || review.review || "No comment provided"}
+                        </p>
                       </div>
-                      <p className="text-muted-foreground poppins-regular text-sm">
-                        {review.comment}
-                      </p>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground poppins-regular">
+                  No reviews yet. Students will be able to leave reviews after enrolling in the course.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Bottom Action Buttons */}

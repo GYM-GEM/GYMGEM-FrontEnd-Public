@@ -238,8 +238,7 @@ const StoreProdact = () => {
                       >
                         <option value="">Select...</option>
                         <option value="supplements">Supplements</option>
-                        <option value="equipment">Equipment</option>
-                        <option value="apparel">Apparel</option>
+                        <option value="clothes">Clothes</option>
                         <option value="accessories">Accessories</option>
                       </select>
                     </div>

@@ -202,12 +202,12 @@ const ProductDetails = () => {
               </h1>
 
               {/* Rating */}
-    
+
 
               {/* Price */}
               <div className="mb-6">
                 <span className="text-4xl font-bold text-[#ff8211]">
-                  ${parseFloat(product.price).toFixed(2)}
+                  {parseFloat(product.price).toFixed(0)} GEMs
                 </span>
               </div>
 
@@ -286,7 +286,7 @@ const ProductDetails = () => {
                 <ul className="space-y-2 text-sm text-slate-600">
                   <li className="flex items-start gap-2">
                     <span className="text-green-600">✓</span>
-                    <span>Free shipping on orders over $100</span>
+                    <span>Free shipping on orders over 100 GEMs</span>
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-green-600">✓</span>
@@ -314,8 +314,8 @@ const ProductDetails = () => {
               >
                 Description
               </button>
-    
-         
+
+
             </div>
 
             {/* Tab Content */}
@@ -333,9 +333,9 @@ const ProductDetails = () => {
                 </div>
               )}
 
-           
 
-         
+
+
             </div>
           </div>
 
@@ -369,7 +369,7 @@ const ProductDetails = () => {
                       <h3 className="font-bold text-slate-900 mb-1 truncate group-hover:text-[#ff8211] transition">
                         {relatedProduct.name}
                       </h3>
-                      <p className="text-lg font-bold text-slate-900">${relatedProduct.price}</p>
+                      <p className="text-lg font-bold text-slate-900">{parseFloat(relatedProduct.price).toFixed(0)} GEMs</p>
                     </div>
                   </Link>
                 ))}

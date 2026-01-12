@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import Cover_img from "../../assets/fitCartoon3.png";
 import axios from "axios";
 import GoogleLogin from "../../components/GoogleLogin.jsx";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { useToast } from "../../context/ToastContext";
 
 const VITE_API_URL = import.meta.env.VITE_API_URL;
@@ -23,6 +23,9 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [isForgotLoading, setIsForgotLoading] = useState(false);
 
   useEffect(() => {
     // Google sign-in handled by `GoogleLogin` component.
@@ -80,7 +83,7 @@ const LoginPage = () => {
 
           } catch (switchError) {
             console.error("Auto-switch failed during login:", switchError);
-            
+
           }
         }
 
@@ -97,144 +100,224 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    if (!forgotEmail) {
+      showToast("Please enter your email address.", { type: "error" });
+      return;
+    }
+
+    setIsForgotLoading(true);
+    try {
+      await axios.post(`${VITE_API_URL}/api/accounts/reset-password-request`, {
+        email: forgotEmail
+      });
+      showToast("Password reset link sent to your email.", { type: "success" });
+      setShowForgotModal(false);
+      setForgotEmail("");
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      showToast(error.response?.data?.message || "Failed to send reset link. Please try again.", { type: "error" });
+    } finally {
+      setIsForgotLoading(false);
+    }
+  };
 
   return (
-    <motion.div
-      className="min-h-screen bg-background text-foreground"
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -40 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-    >
-      <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-4 py-12 sm:px-8 lg:px-12">
-        <div className="grid overflow-hidden rounded-[24px] border border-border bg-card shadow-sm lg:min-h-[640px] lg:grid-cols-2">
-          {/* ========== Form ========== */}
-          <div className="order-2 flex flex-col justify-center px-6 py-10 sm:px-10 lg:order-1 lg:px-12">
-            <div className="mx-auto w-full max-w-sm space-y-8">
-              <header className="space-y-3 text-center lg:text-left">
-                <h1 className="font-bebas text-3xl tracking-tight sm:text-4xl">
-                  Welcome back
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  Sign in to pick up your training plan where you left off.
-                </p>
-              </header>
+    <>
+      <motion.div
+        className="min-h-screen bg-background text-foreground"
+        initial={{ opacity: 0, x: 40 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -40 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+      >
+        <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col justify-center px-4 py-12 sm:px-8 lg:px-12">
+          <div className="grid overflow-hidden rounded-[24px] border border-border bg-card shadow-sm lg:min-h-[640px] lg:grid-cols-2">
+            {/* ========== Form ========== */}
+            <div className="order-2 flex flex-col justify-center px-6 py-10 sm:px-10 lg:order-1 lg:px-12">
+              <div className="mx-auto w-full max-w-sm space-y-8">
+                <header className="space-y-3 text-center lg:text-left">
+                  <h1 className="font-bebas text-3xl tracking-tight sm:text-4xl">
+                    Welcome back
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    Sign in to pick up your training plan where you left off.
+                  </p>
+                </header>
 
-              <form onSubmit={onSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <label
-                    htmlFor="emailOrUsername"
-                    className="text-sm font-medium text-foreground"
-                  >
-                    Email or username
-                  </label>
-                  <input
-                    id="emailOrUsername"
-                    type="text"
-                    placeholder="Enter your email or username"
-                    value={emailOrUsername}
-                    onChange={(e) => setEmailOrUsername(e.target.value)}
-                    required
-                    disabled={isLoading}
-                    className={`h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm font-medium text-foreground">
-                    <label htmlFor="password">Password</label>
-                    <a
-                      href="#"
-                      className="text-xs font-semibold text-primary transition hover:text-primary/80"
+                <form onSubmit={onSubmit} className="space-y-6">
+                  <div className="space-y-2">
+                    <label
+                      htmlFor="emailOrUsername"
+                      className="text-sm font-medium text-foreground"
                     >
-                      Forgot password?
-                    </a>
-                  </div>
-                  <div className="relative">
+                      Email or username
+                    </label>
                     <input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter your password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      id="emailOrUsername"
+                      type="text"
+                      placeholder="Enter your email or username"
+                      value={emailOrUsername}
+                      onChange={(e) => setEmailOrUsername(e.target.value)}
                       required
                       disabled={isLoading}
                       className={`h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      disabled={isLoading}
-                      className={`absolute inset-y-0 right-3 flex items-center text-muted-foreground transition ${isLoading ? 'pointer-events-none' : 'hover:text-foreground'}`}
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
                   </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className={`inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8211] px-4 text-sm font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-primary/90'}`}
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Signing in...
-                    </>
-                  ) : (
-                    'Sign in'
-                  )}
-                </button>
-              </form>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm font-medium text-foreground">
+                      <label htmlFor="password">Password</label>
+                      <button
+                        type="button"
+                        onClick={() => setShowForgotModal(true)}
+                        className="text-xs font-semibold text-primary transition hover:text-primary/80"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        id="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        className={`h-11 w-full rounded-xl border border-border bg-background/90 px-4 text-sm text-foreground shadow-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background placeholder:text-muted-foreground ${isLoading ? 'opacity-60 cursor-not-allowed' : ''}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
+                        className={`absolute inset-y-0 right-3 flex items-center text-muted-foreground transition ${isLoading ? 'pointer-events-none' : 'hover:text-foreground'}`}
+                      >
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      </button>
+                    </div>
+                  </div>
 
-              <div className="space-y-4">
-                <p className="text-center text-sm text-muted-foreground">
-                  Don’t have an account?{" "}
-                  <Link
-                    to="/signup"
-                    className="font-semibold text-primary hover:text-primary/80"
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className={`inline-flex h-11 w-full items-center justify-center rounded-xl bg-[#ff8211] px-4 text-sm font-semibold text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-primary/90'}`}
                   >
-                    Join GymGem
-                  </Link>
-                </p>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Signing in...
+                      </>
+                    ) : (
+                      'Sign in'
+                    )}
+                  </button>
+                </form>
 
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                  <div className="h-px flex-1 bg-border" />
-                  or
-                  <div className="h-px flex-1 bg-border" />
-                </div>
+                <div className="space-y-4">
+                  <p className="text-center text-sm text-muted-foreground">
+                    Don’t have an account?{" "}
+                    <Link
+                      to="/signup"
+                      className="font-semibold text-primary hover:text-primary/80"
+                    >
+                      Join GymGem
+                    </Link>
+                  </p>
 
-                <div className={`${isLoading ? 'pointer-events-none opacity-60' : ''}`}>
-                  <GoogleLogin onStart={() => setIsLoading(true)} onComplete={() => setIsLoading(false)} />
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="h-px flex-1 bg-border" />
+                    or
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <div className={`${isLoading ? 'pointer-events-none opacity-60' : ''}`}>
+                    <GoogleLogin onStart={() => setIsLoading(true)} onComplete={() => setIsLoading(false)} />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* ========== Visual Panel ========== */}
-          <div className="relative hidden bg-muted lg:block">
-            <img
-              src={Cover_img}
-              alt="GymGem login"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background/20 to-transparent" />
-            <div className="relative flex h-full items-end justify-start p-10">
-              <div className="max-w-xs space-y-2 rounded-2xl bg-background/80 p-4 text-sm text-muted-foreground shadow-lg backdrop-blur">
-                <p className="font-semibold text-foreground">
-                  Stay consistent.
-                </p>
-                <p>
-                  Your sessions, nutrition, and progress are all in one calm
-                  workspace designed to keep you moving forward.
-                </p>
+            {/* ========== Visual Panel ========== */}
+            <div className="relative hidden bg-muted lg:block">
+              <img
+                src={Cover_img}
+                alt="GymGem login"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background/20 to-transparent" />
+              <div className="relative flex h-full items-end justify-start p-10">
+                <div className="max-w-xs space-y-2 rounded-2xl bg-background/80 p-4 text-sm text-muted-foreground shadow-lg backdrop-blur">
+                  <p className="font-semibold text-foreground">
+                    Stay consistent.
+                  </p>
+                  <p>
+                    Your sessions, nutrition, and progress are all in one calm
+                    workspace designed to keep you moving forward.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+
+      {/* Forgot Password Modal */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden p-6 relative">
+            <button
+              onClick={() => setShowForgotModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full hover:bg-slate-100 transition-colors"
+            >
+              <X className="w-5 h-5 text-slate-500" />
+            </button>
+
+            <div className="mb-6">
+              <h2 className="font-bebas text-2xl text-slate-900 mb-2">Reset Password</h2>
+              <p className="text-sm text-slate-500">
+                Enter your email address and we'll send you a link to reset your password.
+              </p>
+            </div>
+
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="forgotEmail" className="text-sm font-medium text-slate-700">Email Address</label>
+                <input
+                  id="forgotEmail"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  required
+                  className="h-11 w-full rounded-xl border border-slate-200 px-4 text-sm focus:ring-2 focus:ring-[#ff8211] outline-none transition"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(false)}
+                  className="flex-1 h-11 rounded-xl border border-slate-200 font-semibold text-slate-600 hover:bg-slate-50 transition"
+                  disabled={isForgotLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isForgotLoading}
+                  className="flex-1 h-11 rounded-xl bg-[#ff8211] text-white font-semibold hover:bg-[#e67300] transition flex items-center justify-center gap-2"
+                >
+                  {isForgotLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Send Link"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )
+      }
+    </>
   );
 };
 

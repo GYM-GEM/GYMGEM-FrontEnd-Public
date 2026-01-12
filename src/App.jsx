@@ -11,6 +11,7 @@ import Trainers from "./pages/Trainers";
 import LoginPage from "./pages/auth/LoginPage.jsx";
 import SignUpPage from "./pages/auth/Register.jsx";
 import VerifyPage from "./pages/auth/Verify.jsx";
+import ResetPasswordPage from "./pages/auth/ResetPasswordPage.jsx";
 import NotFound from "./components/NotFound.jsx";
 import Community from "./pages/Community.jsx";
 import Coursedetails from "./components/courses/CourseDetails.jsx";
@@ -217,6 +218,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/verify" element={<VerifyPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/role" element={<Selectrole />} />
           <Route path="/goodbye" element={<Goodbye />} />
           {/* -------------------- Trainer Form -------------------- */}

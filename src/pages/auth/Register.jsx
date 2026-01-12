@@ -315,7 +315,7 @@ const SignUpPage = () => {
                   <div className="h-px flex-1 bg-border" />
                 </div>
 
-                <GoogleLogin signType={'signup'} />
+                <GoogleLogin signType={'signup'} redirectToLogin={true} />
               </div>
             </div>
           </div>

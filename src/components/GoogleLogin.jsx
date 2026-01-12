@@ -5,7 +5,7 @@ import { useToast } from "../context/ToastContext";
 
 const VITE_API_URL = import.meta.env.VITE_API_URL;
 
-export default function GoogleLogin({ signType, onStart, onComplete }) {
+export default function GoogleLogin({ signType, onStart, onComplete, redirectToLogin }) {
 	const navigate = useNavigate();
 	const { showToast } = useToast();
 	const buttonRef = useRef(null);
@@ -57,6 +57,17 @@ export default function GoogleLogin({ signType, onStart, onComplete }) {
 				// sensitive check: ensure profiles exists and has at least one item
 				const hasProfiles = user.profiles && Array.isArray(user.profiles) && user.profiles.length > 0;
 				console.log("Has Profiles:", hasProfiles);
+
+				// If signup and redirectToLogin is true, redirect to login page
+				if (signType === 'signup' && redirectToLogin) {
+					showToast("Account created successfully! Please sign in.", { type: "success" });
+					// Clear the stored credentials since we want them to login manually
+					localStorage.removeItem("access");
+					localStorage.removeItem("refresh");
+					localStorage.removeItem("user");
+					navigate("/login");
+					return;
+				}
 
 				if (hasProfiles) {
 					// User already has profiles -> go to home

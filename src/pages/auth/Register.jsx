@@ -58,11 +58,12 @@ const SignUpPage = () => {
         payload
       );
 
-      showToast("Sign up successful!", { type: "success" });
-      navigate("/role");
+      showToast("Account created! Please check your email to verify your account.", { type: "success" });
+      navigate("/check-email");
     } catch (error) {
       console.error("Error during registration:", error.response?.data);
-      showToast("Registration failed. Please try again.", { type: "error" });
+      const errorMessage = error.response?.data?.message || error.response?.data?.detail || "Registration failed. Please try again.";
+      showToast(errorMessage, { type: "error" });
     }
   };
 

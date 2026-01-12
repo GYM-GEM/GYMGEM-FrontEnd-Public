@@ -41,11 +41,11 @@ const StoreBranchForm = ({ onSubmit }) => {
             if (onSubmit) {
                 await onSubmit(payload);
             } else {
-                const response = await axiosInstance.post("/api/stores/branches", payload);
+                const response = await axiosInstance.post("/api/stores/branches/", payload);
                 console.log("Branch Created:", response.data);
                 showToast("Store branch added successfully!", { type: "success" });
                 localStorage.removeItem("storeBranch"); // Clear temp data if any
-                navigate("/store/dashboard");
+                navigate(`/store/dashboard/${response.data.id}`);
             }
         } catch (error) {
             console.error("Error adding branch:", error);

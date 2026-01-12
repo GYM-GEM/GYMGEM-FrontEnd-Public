@@ -1410,12 +1410,7 @@ const Message = () => {
                         <div className="p-5 border-b border-gray-100">
                             <div className="flex items-center justify-between mb-5">
                                 <h2 className="text-2xl font-bold text-gray-900 tracking-tight font-poppins">Messages</h2>
-                                <button
-                                    onClick={() => setIsNewChatOpen(true)}
-                                    className="p-2.5 bg-gradient-to-r from-[#ff8211] to-[#ff9a42] hover:shadow-lg text-white rounded-xl transition-all hover:scale-105"
-                                >
-                                    <UserPlus size={20} />
-                                </button>
+                            
                             </div>
 
                             <div className="relative mb-4">
@@ -1648,12 +1643,7 @@ const Message = () => {
                             <p className="text-gray-500 max-w-sm font-medium">
                                 Select a conversation from the sidebar to start chatting or send a new message to a trainer.
                             </p>
-                            <button
-                                onClick={() => setIsNewChatOpen(true)}
-                                className="mt-8 px-8 py-3 bg-gradient-to-r from-[#ff8211] to-[#ff9a42] hover:shadow-lg text-white rounded-xl font-bold transition-all hover:scale-105"
-                            >
-                                Start New Conversation
-                            </button>
+                        
                         </div>
                     )}
 

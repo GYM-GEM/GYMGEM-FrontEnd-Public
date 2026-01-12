@@ -202,19 +202,7 @@ const ProductDetails = () => {
               </h1>
 
               {/* Rating */}
-              <div className="flex items-center gap-2 mb-6">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${i < Math.floor(averageRating) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'}`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-slate-600">
-                  {averageRating.toFixed(1)} ({reviews.length} reviews)
-                </span>
-              </div>
+    
 
               {/* Price */}
               <div className="mb-6">
@@ -320,30 +308,14 @@ const ProductDetails = () => {
               <button
                 onClick={() => setActiveTab("description")}
                 className={`px-6 py-4 font-semibold transition border-b-2 ${activeTab === "description"
-                    ? "border-[#ff8211] text-[#ff8211]"
-                    : "border-transparent text-slate-600 hover:text-slate-900"
+                  ? "border-[#ff8211] text-[#ff8211]"
+                  : "border-transparent text-slate-600 hover:text-slate-900"
                   }`}
               >
                 Description
               </button>
-              <button
-                onClick={() => setActiveTab("specifications")}
-                className={`px-6 py-4 font-semibold transition border-b-2 ${activeTab === "specifications"
-                    ? "border-[#ff8211] text-[#ff8211]"
-                    : "border-transparent text-slate-600 hover:text-slate-900"
-                  }`}
-              >
-                Specifications
-              </button>
-              <button
-                onClick={() => setActiveTab("reviews")}
-                className={`px-6 py-4 font-semibold transition border-b-2 ${activeTab === "reviews"
-                    ? "border-[#ff8211] text-[#ff8211]"
-                    : "border-transparent text-slate-600 hover:text-slate-900"
-                  }`}
-              >
-                Reviews ({reviews.length})
-              </button>
+    
+         
             </div>
 
             {/* Tab Content */}
@@ -361,71 +333,9 @@ const ProductDetails = () => {
                 </div>
               )}
 
-              {activeTab === "specifications" && (
-                <div>
-                  <h3 className="font-bebas text-2xl text-slate-900 mb-4">Technical Specifications</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex justify-between py-2 border-b border-slate-100">
-                      <span className="text-slate-600">Category:</span>
-                      <span className="font-semibold text-slate-900">{product.category}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-slate-100">
-                      <span className="text-slate-600">SKU:</span>
-                      <span className="font-semibold text-slate-900">{product.id.slice(0, 8)}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-slate-100">
-                      <span className="text-slate-600">Stock Status:</span>
-                      <span className={`font-semibold ${product.total_quantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {product.total_quantity > 0 ? 'In Stock' : 'Out of Stock'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b border-slate-100">
-                      <span className="text-slate-600">Weight:</span>
-                      <span className="font-semibold text-slate-900">-</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+           
 
-              {activeTab === "reviews" && (
-                <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="font-bebas text-2xl text-slate-900">Customer Reviews</h3>
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`w-5 h-5 ${i < Math.floor(averageRating) ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'}`} />
-                        ))}
-                      </div>
-                      <span className="text-sm text-slate-600">{averageRating.toFixed(1)} out of 5</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-6">
-                    {reviews.map((review) => (
-                      <div key={review.id} className="pb-6 border-b border-slate-100 last:border-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-[#ff8211] flex items-center justify-center text-white font-semibold">
-                              {review.name.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="font-semibold text-slate-900">{review.name}</p>
-                              <p className="text-xs text-slate-500">{review.date}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-slate-300'}`} />
-                            ))}
-                          </div>
-                        </div>
-                        <p className="text-slate-600">{review.comment}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+         
             </div>
           </div>
 

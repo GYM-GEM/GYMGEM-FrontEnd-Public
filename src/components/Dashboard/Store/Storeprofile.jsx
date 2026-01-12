@@ -9,7 +9,7 @@ import UploadImage from "../../UploadImage";
 
 const Storeprofile = () => {
   const navigate = useNavigate();
-  const { id: storeId } = useParams();
+  const { id } = useParams();
   const { showToast } = useToast();
 
   const [loading, setLoading] = useState(true);
@@ -18,10 +18,12 @@ const Storeprofile = () => {
   const [modals, setModals] = useState({
     editProfile: false,
     addBranch: false,
-    editBranch: false
+    editBranch: false,
+    deleteBranch: false
   });
 
   const [selectedBranch, setSelectedBranch] = useState(null);
+  const [branchToDelete, setBranchToDelete] = useState(null);
 
   const [formData, setFormData] = useState({
     editProfile: {},
@@ -32,12 +34,29 @@ const Storeprofile = () => {
   const fetchProfileData = async () => {
     try {
       setLoading(true);
-      if (!storeId) return;
+      // Fetch by profile_id from local storage as requested
+      const user = JSON.parse(localStorage.getItem("user"));
+      const profileId = user?.current_profile;
 
-      const storeRes = await axiosInstance.get(`/api/stores/${storeId}`);
-      setStoreData(storeRes.data);
+      if (!profileId) {
+        showToast("User profile not found.", { type: "error" });
+        return;
+      }
+
+      const storeRes = await axiosInstance.get(`/api/stores/?profile_id=${profileId}`);
+
+      // Handle array/pagination response
+      const data = storeRes.data.results ? storeRes.data.results : storeRes.data;
+
+      if (Array.isArray(data) && data.length > 0) {
+        setStoreData(data[0]);
+      } else {
+        // If empty list, treat as not found
+        showToast("Store not found for this profile.", { type: "error" });
+      }
     } catch (error) {
       console.error("Error fetching profile:", error);
+      showToast("Failed to load store data.", { type: "error" });
     } finally {
       setLoading(false);
     }
@@ -45,7 +64,8 @@ const Storeprofile = () => {
 
   useEffect(() => {
     fetchProfileData();
-  }, [storeId]);
+    fetchProfileData();
+  }, []);
 
 
   // Modal handlers
@@ -98,7 +118,11 @@ const Storeprofile = () => {
       const { name, profile_picture, description, store_type, phone_number } = formData.editProfile;
       const payload = { name, profile_picture, description, store_type, phone_number };
 
-      const response = await axiosInstance.put(`/api/stores/${storeId}`, payload);
+      const user = JSON.parse(localStorage.getItem("user"));
+      const profileId = user?.current_profile;
+
+      // User updated API requirement: PUT /api/stores/{profile_id}
+      const response = await axiosInstance.put(`/api/stores/${profileId}`, payload);
       setStoreData(prev => ({ ...prev, ...response.data }));
 
       closeModal("editProfile");
@@ -112,8 +136,10 @@ const Storeprofile = () => {
   const handleSaveBranch = async (isEdit) => {
     try {
       const { country, state, street, zip_code, phone_number, opening_time, closing_time } = formData.branchForm;
+      const user = JSON.parse(localStorage.getItem("user"));
+
       const payload = {
-        store_id: parseInt(storeId),
+        store_id: storeData?.id, // Use actual store ID for branch creation linkage
         country, state, street, zip_code, phone_number,
         opening_time: opening_time ? `${opening_time}:00` : null,
         closing_time: closing_time ? `${closing_time}:00` : null,
@@ -135,15 +161,23 @@ const Storeprofile = () => {
     }
   };
 
-  const handleDeleteBranch = async (branchId) => {
-    if (!window.confirm("Are you sure you want to delete this branch?")) return;
+  const handleDeleteBranch = (branchId) => {
+    setBranchToDelete(branchId);
+    setModals(prev => ({ ...prev, deleteBranch: true }));
+  };
+
+  const confirmDeleteBranch = async () => {
+    if (!branchToDelete) return;
     try {
-      await axiosInstance.delete(`/api/stores/branches/${branchId}`);
+      await axiosInstance.delete(`/api/stores/branches/${branchToDelete}/`);
       showToast("Branch deleted.", { type: "success" });
       fetchProfileData();
     } catch (error) {
       console.error("Error deleting branch:", error);
       showToast("Failed to delete branch.", { type: "error" });
+    } finally {
+      setModals(prev => ({ ...prev, deleteBranch: false }));
+      setBranchToDelete(null);
     }
   };
 
@@ -408,6 +442,36 @@ const Storeprofile = () => {
             <div className="p-4 border-t bg-slate-50 flex gap-3">
               <button onClick={() => closeModal(modals.editBranch ? "editBranch" : "addBranch")} className="flex-1 py-2.5 rounded-xl border font-semibold hover:bg-slate-100">Cancel</button>
               <button onClick={() => handleSaveBranch(modals.editBranch)} className="flex-1 py-2.5 rounded-xl bg-[#ff8211] text-white font-semibold hover:bg-[#e67300]">{modals.editBranch ? "Update Branch" : "Add Branch"}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE CONFIRMATION MODAL */}
+      {modals.deleteBranch && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white shadow-2xl rounded-3xl overflow-hidden p-6 text-center">
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Trash2 className="w-8 h-8" />
+            </div>
+            <h2 className="font-bebas text-2xl text-slate-800 mb-2">Delete Branch?</h2>
+            <p className="text-slate-500 mb-6 font-medium">
+              Are you sure you want to delete this branch? <br />
+              <span className="text-xs text-red-400">This action cannot be undone.</span>
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setModals(prev => ({ ...prev, deleteBranch: false }))}
+                className="flex-1 py-3.5 rounded-xl border-2 border-slate-100 font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmDeleteBranch}
+                className="flex-1 py-3.5 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 shadow-lg shadow-red-200 transition-all hover:-translate-y-0.5"
+              >
+                Yes, Delete
+              </button>
             </div>
           </div>
         </div>

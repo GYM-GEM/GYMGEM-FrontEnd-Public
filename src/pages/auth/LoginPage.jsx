@@ -59,6 +59,31 @@ const LoginPage = () => {
       const hasProfiles = user.profiles && Array.isArray(user.profiles) && user.profiles.length > 0;
 
       if (hasProfiles) {
+        if (!user.current_profile) {
+          try {
+            // Auto-switch to the first profile if none is active
+            const firstProfileId = user.profiles[0].id;
+            console.log("Auto-switching to first profile:", firstProfileId);
+
+            const switchResponse = await axios.post(
+              `${VITE_API_URL}/api/auth/switch-profile`,
+              { profile_id: firstProfileId },
+              { headers: { Authorization: `Bearer ${response.data.access}` } }
+            );
+
+            localStorage.setItem("access", switchResponse.data.access);
+            localStorage.setItem("refresh", switchResponse.data.refresh);
+
+            // Update user object
+            user.current_profile = firstProfileId;
+            localStorage.setItem("user", JSON.stringify(user));
+
+          } catch (switchError) {
+            console.error("Auto-switch failed during login:", switchError);
+            
+          }
+        }
+
         showToast("Sign in successful!", { type: "success" });
         navigate("/");
       } else {

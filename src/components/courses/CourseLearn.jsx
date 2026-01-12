@@ -216,10 +216,11 @@ const CourseLearn = () => {
       setShowReviewModal(false);
       setRating(0);
       setReviewText("");
-      alert("Thank you for your review!");
+      setReviewText("");
+      showToast("Thank you for your review!", { type: "success" });
     } catch (error) {
       console.error("Failed to submit review:", error);
-      alert("Failed to submit review. Please try again.");
+      showToast("Failed to submit review. Please try again.", { type: "error" });
     }
   }
   //   if (rating === 0) {

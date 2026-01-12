@@ -418,10 +418,13 @@ const PublicTrainerProfile = () => {
                           {profile.country}, {profile.state}
                         </span>
                       )}
-                      <span className="flex items-center gap-1 text-yellow-500 font-medium">
-                        <Star className="w-4 h-4 fill-current" />
-                        {profile.rating || "4.9"} (120 reviews)
+                      <span className="flex items-center gap-1 text-yellow-500 font-medium text-[16px]">
+                        
+                          
+                          {profile.rate} GEMs/session
+                        
                       </span>
+                  
                     </div>
                   </div>
 
@@ -493,10 +496,7 @@ const PublicTrainerProfile = () => {
                               <span className="text-gray-500">Experience</span>
                               <span className="font-medium text-gray-900">{spec.yearsExperience} years</span>
                             </div>
-                            <div className="flex justify-between border-b border-dashed border-gray-100 pb-2">
-                              <span className="text-gray-500">Rate</span>
-                              <span className="font-medium text-gray-900">${profile.rate}/session</span>
-                            </div>
+             
                             <div className="flex justify-between">
                               <span className="text-gray-500">Location</span>
                               <span className="font-medium text-gray-900 capitalize">{spec.location}</span>

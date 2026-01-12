@@ -75,6 +75,7 @@ const Selectrole = () => {
       localStorage.setItem('refresh', refreshResp.data.refresh)
       const updatedUser = JSON.parse(localStorage.getItem("user"));
       updatedUser.profiles.push({ type: response.data.profile_type, id: response.data.id });
+      updatedUser.current_profile = response.data.id; // Set as current profile
       localStorage.setItem("user", JSON.stringify(updatedUser));
 
       showToast(`${selectedRole} profile created successfully!`, { type: "success" });

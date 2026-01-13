@@ -8,6 +8,8 @@ import React, { useEffect, useRef, useState } from "react";
 // - Remote video play() call to avoid black screen in some browsers
 // - Explicit JOIN / LEAVE presence signals and keep-alive
 
+const VITE_API_WEBSOCKET = import.meta.env.VITE_API_WEBSOCKET;
+
 const ICE_CONFIG = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
@@ -294,7 +296,7 @@ export default function VideoCall({ sessionId, isTrainer }) {
   // ---------------- WebSocket & Signaling ----------------
   const connectWS = () => {
     const token = localStorage.getItem("access") || "";
-    const url = `ws://localhost:8000/ws/interactive_sessions/${sessionId}/?token=${token}`;
+    const url = `${VITE_API_WEBSOCKET}/ws/interactive_sessions/${sessionId}/?token=${token}`;
     safeLog("🔌 Connecting WS...", url);
 
     try {

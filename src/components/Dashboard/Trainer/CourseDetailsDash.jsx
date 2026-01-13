@@ -702,22 +702,31 @@ const CourseDetailsDash = () => {
             </h2>
             {course.reviews && course.reviews.length > 0 ? (
               <div className="space-y-6">
-                {course.reviews.map((review) => (
+                {course.reviews.map((review, index) => (
                   <div
-                    key={review.id}
+                    key={index}
                     className="border-b border-border pb-6 last:border-0 last:pb-0"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-full bg-[#FF8211] flex items-center justify-center text-white font-semibold flex-shrink-0">
-                        {review.user?.name?.charAt(0) || review.name?.charAt(0) || "U"}
-                      </div>
+                      {/* Profile Picture */}
+                      {review.profile_picture ? (
+                        <img
+                          src={review.profile_picture}
+                          alt={review.username || "User"}
+                          className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-[#FF8211] flex items-center justify-center text-white font-semibold flex-shrink-0">
+                          {review.username?.charAt(0)?.toUpperCase() || "U"}
+                        </div>
+                      )}
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
                           <h4 className="font-semibold text-foreground poppins-medium">
-                            {review.user?.name || review.name || "Anonymous"}
+                            {review.username || "Anonymous"}
                           </h4>
                           <span className="text-xs text-muted-foreground poppins-regular">
-                            {review.created_at ? new Date(review.created_at).toLocaleDateString() : review.date}
+                            {review.review_date ? new Date(review.review_date).toLocaleDateString() : ""}
                           </span>
                         </div>
                         <div className="flex text-[#FF8211] mb-2">
@@ -730,7 +739,7 @@ const CourseDetailsDash = () => {
                           ))}
                         </div>
                         <p className="text-muted-foreground poppins-regular text-sm">
-                          {review.comment || review.review || "No comment provided"}
+                          {review.review || "No comment provided"}
                         </p>
                       </div>
                     </div>

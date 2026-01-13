@@ -7,9 +7,7 @@ import React, { useEffect, useRef, useState } from "react";
 // - Forced renegotiation triggers after track attach / replace
 // - Remote video play() call to avoid black screen in some browsers
 // - Explicit JOIN / LEAVE presence signals and keep-alive
-
-const VITE_API_WEBSOCKET = import.meta.env.VITE_API_WEBSOCKET;
-
+const VITE_API_WEBSOCKET = import.meta.env.VITE_API_WEBSOCKET || "ws://192.168.1.235:8000";
 const ICE_CONFIG = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
